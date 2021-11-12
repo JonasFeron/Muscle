@@ -9,3 +9,14 @@ C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\M
 C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\Muscles\obj\Debug\Muscles.dll
 C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\Muscles\obj\Debug\Muscles.pdb
 C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\Muscles\obj\Debug\Muscles.csprojAssemblyReference.cache
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\Muscles.dll
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\Muscles.pdb
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\log4net.dll
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\Newtonsoft.Json.dll
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\log4net.xml
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\Newtonsoft.Json.xml
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Debug\Muscles.csprojAssemblyReference.cache
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Debug\Muscles.csproj.CoreCompileInputs.cache
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Debug\Muscles.csproj.CopyComplete
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Debug\Muscles.dll
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Debug\Muscles.pdb
