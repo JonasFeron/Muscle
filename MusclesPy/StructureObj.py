@@ -256,14 +256,14 @@ class StructureObj():
         #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.Elements_A, S0.Elements_E)
         #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.Elements_A, S0.Elements_E)
 
-    def Connectivity_Matrix(S0,NodesCount,ElementsCount,Elements_ExtremitiesIndex):
+    def Connectivity_Matrix(S0, NodesCount, ElementsCount, Elements_EndNodes):
         """
         :return: créée la matrice de connectivité C de taille (nbr lines, nbr nodes)
         """
 
         #Calculation
         C = np.zeros((ElementsCount, NodesCount), dtype=int)  # matrice de connectivité C
-        for line_ind, line_extremities in enumerate(Elements_ExtremitiesIndex):
+        for line_ind, line_extremities in enumerate(Elements_EndNodes):
             n0 = line_extremities[0]
             n1 = line_extremities[1]
             C[line_ind, n0] = 1
