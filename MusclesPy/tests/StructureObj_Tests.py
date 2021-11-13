@@ -55,7 +55,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree)
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount,S0.ElementsCount,S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
 
         (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
 
@@ -83,7 +83,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount,S0.ElementsCount,S0.Elements_ExtremitiesIndex)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (l,Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord,C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C,IsDOFfree)
 
@@ -99,7 +99,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_ExtremitiesIndex)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (l, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
         SVD = S0.SVD_Equilibrium_Matrix(A_free)
@@ -128,7 +128,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_ExtremitiesIndex)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
 
@@ -255,7 +255,7 @@ class StructureObj_Tests(unittest.TestCase):
     #     # cos = l/l1
     #     # sin = H/l1
     #     NodesCoord = np.array([[0.0,0.0,0.0],[L/2,0.0,0.0],[L,0.0,0.0]])
-    #     Elements_ExtremitiesIndex = np.array([[0,1],[1,2]])
+    #     Elements_EndNodes = np.array([[0,1],[1,2]])
     #     IsDOFfree = np.array([False,False,False,True,False,True,False,False,False])
     #
     #     # note that results are independant from EA since statically determinate
@@ -272,7 +272,7 @@ class StructureObj_Tests(unittest.TestCase):
     #     Loads_To_Apply = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,0.0]])
     #     Elongations_To_Apply = np.array([0,0])
     #
-    #     S0.test_Main_LinearSolve_Force_Method(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E,
+    #     S0.test_Main_LinearSolve_Force_Method(NodesCoord, Elements_EndNodes, IsDOFfree, Elements_A, Elements_E,
     #                                        AxialForces_Already_Applied, Loads_To_Apply, Loads_Already_Applied,
     #                                        Elongations_To_Apply)
     #
@@ -333,7 +333,7 @@ class StructureObj_Tests(unittest.TestCase):
         Elements_E = np.array([10000000000.0, 10000000000.0])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_ExtremitiesIndex)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
 
         #1) Compute Elements Geometry
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, C)
@@ -575,7 +575,7 @@ class StructureObj_Tests(unittest.TestCase):
         Elements_E = np.array([E,E,E])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         # (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
@@ -616,7 +616,7 @@ class StructureObj_Tests(unittest.TestCase):
         NodesCoord1.reshape(-1, 3)[IsZfree, 2] = Z_free
 
         S1.RegisterData(NodesCoord1,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
-        S1.C = S0.C.copy()#S1.Connectivity_Matrix(S1.NodesCount, S1.ElementsCount, S1.Elements_ExtremitiesIndex)
+        S1.C = S0.C.copy()#S1.Connectivity_Matrix(S1.NodesCount, S1.ElementsCount, S1.Elements_EndNodes)
         (S1.Elements_L0, S1.Elements_Cos0) = S1.Compute_Elements_Geometry(S1.NodesCoord, S1.C)
         t1 = q0 * S1.Elements_L0
 

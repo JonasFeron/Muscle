@@ -53,7 +53,7 @@ class StructureObj():
         ##### Structure informations #####
 
         S0.NodesCoord = np.zeros((3*S0.NodesCount,1))
-        S0.Elements_ExtremitiesIndex = np.zeros((S0.ElementsCount, 2), dtype=int)
+        S0.Elements_EndNodes = np.zeros((S0.ElementsCount, 2), dtype=int)
         S0.Elements_A = np.zeros((S0.ElementsCount,1))
         S0.Elements_E = np.zeros((S0.ElementsCount,1))
         S0.IsDOFfree = np.zeros((3 * S0.NodesCount,), dtype=bool)
@@ -117,7 +117,7 @@ class StructureObj():
         ##### Structure informations #####
 
         cur.NodesCoord = NewNodesCoord.reshape((-1,1))
-        cur.Elements_ExtremitiesIndex = S0.Elements_ExtremitiesIndex
+        cur.Elements_EndNodes = S0.Elements_EndNodes
         cur.Elements_L0 = S0.Elements_L0
         cur.Elements_Cos0 = S0.Elements_Cos0
         cur.Elements_A = S0.Elements_A
@@ -191,10 +191,10 @@ class StructureObj():
             S0.NodesCount = -1
 
         if isinstance(Elements_ExtremitiesIndex, np.ndarray):
-            S0.Elements_ExtremitiesIndex = Elements_ExtremitiesIndex.reshape(-1, 2).astype(int)
-            S0.ElementsCount = S0.Elements_ExtremitiesIndex.shape[0]
+            S0.Elements_EndNodes = Elements_ExtremitiesIndex.reshape(-1, 2).astype(int)
+            S0.ElementsCount = S0.Elements_EndNodes.shape[0]
         else:
-            S0.Elements_ExtremitiesIndex = None
+            S0.Elements_EndNodes = None
             S0.ElementsCount = -1
 
         if isinstance(IsDOFfree, np.ndarray):
@@ -249,7 +249,7 @@ class StructureObj():
         Assemble the equilibrim Matrix and the material stiffness matrix. N.B. Do not perfom the SVD -> do it separately
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount,S0.ElementsCount,S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos,S0.C,S0.IsDOFfree)
         # if S0.Elements_A.sum()!=0 and S0.Elements_E.sum()!=0:
@@ -416,7 +416,7 @@ class StructureObj():
 
     def Core_LinearSolve_Displ_Method(S0):
 
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount,S0.ElementsCount,S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
 
         perturb = 1e-6  # [m], à appliquer si matrice singulière uniquement
@@ -516,7 +516,7 @@ class StructureObj():
         b = cur.ElementsCount
         c = cur.FixationsCount
         IsDOFfree = cur.IsDOFfree
-        Elements_ExtremitiesIndex=cur.Elements_ExtremitiesIndex
+        Elements_ExtremitiesIndex=cur.Elements_EndNodes
 
         Km = np.zeros((3*n, 3*n))
         Kg = np.zeros((3*n, 3*n))
@@ -549,7 +549,7 @@ class StructureObj():
         return K_constrained
 
     def Post_Process_Displ_Method(cur, d, List_km_loc, List_kg_loc, Elements_Cos):
-        Elements_ExtremitiesIndex = cur.Elements_ExtremitiesIndex
+        Elements_ExtremitiesIndex = cur.Elements_EndNodes
         b = cur.ElementsCount
         AxialForces = np.zeros((b,1))
         for i in np.arange(b):
@@ -585,7 +585,7 @@ class StructureObj():
     # region Private Methods : Non Linear Solver based on displacement methods
     def Core_NonLinearSolve_Displ_Method(S0):
 
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount,S0.ElementsCount,S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
 
         (Stages,StagesLoad,StagesDispl,StagesN,StagesR) = S0.NonLinearSolve_Displ_Method(S0.n_steps,S0.NodesCoord,S0.AxialForces_Already_Applied,S0.Loads_To_Apply)
@@ -790,7 +790,7 @@ class StructureObj():
 
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount,S0.ElementsCount,S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0,S0.C,S0.IsDOFfree)
 
@@ -971,7 +971,7 @@ class StructureObj():
         """
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_ExtremitiesIndex)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
         (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
         S0.F = S0.Flexibility_Matrix(S0.Elements_E, S0.Elements_A, S0.Elements_L0)
