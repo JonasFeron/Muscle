@@ -28,7 +28,7 @@ class StructureObj_Tests(unittest.TestCase):
         self.assertEqual(S0.FixationsCount, 6)
         self.assertEqual(S0.DOFfreeCount, 3)
 
-    def test_Connectivity_Matrix_2cables(self):
+    def test_Simple_Connectivity_Matrix(self):
         """
         test to see if the computation of the connectivity_matrix of 2 cables (*--c1--*--c2--*) works
         """
@@ -37,60 +37,17 @@ class StructureObj_Tests(unittest.TestCase):
         #required input for the method
         ElementsCount = 2
         NodesCount = 3
-        Elements_ExtremitiesIndex = np.array([[0,1],[1,2]])
+        ElementsEndNodes = np.array([[0,1],[1,2]])
 
-        C = S0.Connectivity_Matrix(NodesCount,ElementsCount,Elements_ExtremitiesIndex) #test the method
+        C = S0.Connectivity_Matrix(NodesCount,ElementsCount,ElementsEndNodes) #test the method
 
         #check the results
         success = (C == np.array([[-1,  1,  0],[ 0, -1, 1]])).all()
         self.assertEqual(success, True)
 
-    def test_Compute_Elements_Geometry_2cables(self):
-        """
-        test to check that Compute_Elements_Geometry calculates correctly the lengths of the elements and their cos directors compareed to Grasshopper results. Test for 2 cables (*--c1--*--c2--*)
-        """
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [2.0, 1.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
-        IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
-        S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree)
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
 
-        (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
 
-        #check the results
-        # test of comparison with Grasshopper
-        Elements_L0_GH = np.array([1.0,1.0])
-        Cos_X_GH = np.array([1.0, 1.0])
-        Cos_Y_GH = np.array([0.0, 0.0])
-        Cos_Z_GH = np.array([0.0, 0.0])
-
-        successL = (S0.Elements_L == Elements_L0_GH).all()
-        successCosX = (S0.Elements_Cos[:,0] == Cos_X_GH).all()
-        successCosY = (S0.Elements_Cos[:,1] == Cos_Y_GH).all()
-        successCosZ = (S0.Elements_Cos[:,2] == Cos_Z_GH).all()
-
-        self.assertEqual(successL, True)
-        self.assertEqual(successCosX, True)
-        self.assertEqual(successCosY, True)
-        self.assertEqual(successCosZ, True)
-
-    def test_Compute_Equilibrium_Matrix_2cables(self):
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [2.0, 1.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
-        IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
-
-        S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (l,Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord,C)
-        (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C,IsDOFfree)
-
-        A_free_answer = np.array([[1.0, -1.0], [0.0, 0.0], [0.0, 0.0]])
-        success  = (A_free == A_free_answer).all()
-
-        self.assertEqual(success,True)
 
     def test_SVD_Equilibrium_Matrix_2cables(self):
         S0 = StructureObj()
@@ -673,9 +630,9 @@ class StructureObj_Tests(unittest.TestCase):
         S1.Elongations_To_Apply = S0.Elongations_To_Apply.copy()
 
         # Compute Equilibrium matrix
-        (S1.Elements_L, S1.Elements_Cos) = S1.ComputeElementsLengthsAndCos(S1.NodesCoord,
-                                                                           S1.C)  # cos = (X2_def - X1_def)/L_def
-        (S1.A, S1.A_free, S1.A_fixed) = S1.Compute_Equilibrium_Matrix(S1.Elements_Cos, S1.C, S1.IsDOFfree)
+        (S1.ElementsL, S1.ElementsCos) = S1.ComputeElementsLengthsAndCos(S1.NodesCoord,
+                                                                         S1.C)  # cos = (X2_def - X1_def)/L_def
+        (S1.A, S1.A_free, S1.A_fixed) = S1.ComputeEquilibriumMatrix(S1.C, S1.IsDOFfree, S1.ElementsCos)
 
         # find e_elastic = B1@U0
         e_elastic = S1.A_free.transpose() @ Displacements_Results_free  # A_free contient les cos dans la position déformée avec les longueurs déformées
@@ -699,9 +656,9 @@ class StructureObj_Tests(unittest.TestCase):
         S2 = S1.NewStructureObj(NodesCoord2, np.zeros((S0.ElementsCount, 1)), np.zeros((3 * S0.NodesCount, 1)))
 
         # Compute Equilibrium matrix
-        (S2.Elements_L, S2.Elements_Cos) = S2.ComputeElementsLengthsAndCos(S2.NodesCoord,
-                                                                           S2.C)  # cos = (X2_def - X1_def)/L_def
-        (S2.A, S2.A_free, S2.A_fixed) = S2.Compute_Equilibrium_Matrix(S2.Elements_Cos, S2.C, S2.IsDOFfree)
+        (S2.ElementsL, S2.ElementsCos) = S2.ComputeElementsLengthsAndCos(S2.NodesCoord,
+                                                                         S2.C)  # cos = (X2_def - X1_def)/L_def
+        (S2.A, S2.A_free, S2.A_fixed) = S2.ComputeEquilibriumMatrix(S2.C, S2.IsDOFfree, S2.ElementsCos)
 
         # find e_elastic = B1@U0
         e2_elastic = S2.A_free.transpose() @ Displacements1_Results_free  # A_free contient les cos dans la position déformée avec les longueurs déformées

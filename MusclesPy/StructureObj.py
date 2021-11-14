@@ -38,7 +38,7 @@ class ResultsSVD():
         SVD.Um_free_row = Um_free_row
 
 class State():
-    def __init__(Cur, S, NodesCoord, LoadsApplied, TensionApplied, ReactionsApplied, LoadsToApply, LengtheningsToApply):
+    def __init__(Cur, S, nodesCoord, loadsApplied=np.zeros((0,)), tensionApplied=np.zeros((0,)), reactionsApplied=np.zeros((0,)), loadsToApply=np.zeros((0,)), lengtheningsToApply=np.zeros((0,))):
         """
         The Current State of a Structure Object S is defined by
         :param NodesCoord: The current nodes coordinates of the structure
@@ -51,12 +51,12 @@ class State():
         """
         ##### State inputs #####
         Cur.S = S # the structure object in the current state
-        Cur.NodesCoord = NodesCoord.reshape((-1,))
-        Cur.LoadsApplied = LoadsApplied.reshape((-1,))
-        Cur.TensionApplied = TensionApplied.reshape((-1,))
-        Cur.ReactionsApplied = ReactionsApplied.reshape((-1,))
-        Cur.LoadsToApply = LoadsToApply.reshape((-1,))
-        Cur.LengtheningsToApply = LengtheningsToApply.reshape((-1,))
+        Cur.NodesCoord = nodesCoord.reshape((-1,))
+        Cur.LoadsApplied = loadsApplied.reshape((-1,))
+        Cur.TensionApplied = tensionApplied.reshape((-1,))
+        Cur.ReactionsApplied = reactionsApplied.reshape((-1,))
+        Cur.LoadsToApply = loadsToApply.reshape((-1,))
+        Cur.LengtheningsToApply = lengtheningsToApply.reshape((-1,))
 
         ##### Initialize the State properties #####
         Cur.ElementsL = np.zeros((S.ElementsCount,)) #Elements lengths
@@ -68,14 +68,12 @@ class State():
         Cur.Residual = np.ones((3 * S.NodesCount,)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
 
-    def ComputeElementsLengthsAndCos(Cur, C):
+    def ComputeElementsLengthsAndCos(Cur, NodesCoord, C):
         """
         Calculates the Lines properties (Lengths, Cos) based on the given NodesCoord and Connectivity Matrix C
         """
         
-        ### input ### 
-        NodesCoord = Cur.NodesCoord
-
+        # Check inputs
         assert C.shape == (Cur.S.ElementsCount, Cur.S.NodesCount), "Please check the shape of the connectivity matrix C"
 
         # Get the current X, Y or Z coordinates of all nodes
@@ -101,6 +99,36 @@ class State():
         ElementsCos = np.hstack((CosX.reshape((-1,1)),CosY.reshape((-1,1)),CosZ.reshape((-1,1)))) # shape (ElementsCount,3)
 
         return (ElementsL,ElementsCos)
+
+    def ComputeEquilibriumMatrix(Cur, C, IsDOFfree, ElementsCos):
+        """
+        :return: Compute the equilibrium matrix of the structure in its current state based on the current cosinus director of the elements and on the supports conidtions.
+        """
+
+        (ElementsCount,NodesCount) = C.shape
+
+        CosX = ElementsCos[:, 0]
+        CosY = ElementsCos[:, 1]
+        CosZ = ElementsCos[:, 2]
+
+        # 2) calculate equilibrium matrix
+        # for each node (corresponding to one row), if the line (corresponding to a column) is connected to the node, then the entry of A contains the cos director, else 0.
+        Ax = C.T @ np.diag(CosX)  # (NodesCount, ElementsCount)  =  (NodesCount, ElementsCount) @ (ElementsCount, ElementsCount)
+        Ay = C.T @ np.diag(CosY)
+        Az = C.T @ np.diag(CosZ)
+
+        A = np.zeros((3 * NodesCount, ElementsCount)) # (3*nbr nodes, nbr lines)
+
+        # the Degrees Of Freedom are sorted like this [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
+        for i in range(NodesCount):
+            A[3 * i, :] = Ax[i, :]
+            A[3 * i + 1, :] = Ay[i, :]
+            A[3 * i + 2, :] = Az[i, :]
+
+        A_free = A[IsDOFfree]  # (nbr free dof, ElementsCount)
+        A_fixed = A[~IsDOFfree] # (nbr fixed dof, ElementsCount)
+
+        return (A,A_free,A_fixed)
 
 
 class StructureObj():
@@ -290,8 +318,8 @@ class StructureObj():
         (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos,S0.C,S0.IsDOFfree)
         # if S0.ElementsA.sum()!=0 and S0.ElementsE.sum()!=0:
-        #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.ElementsA, S0.ElementsE)
-        #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.ElementsA, S0.ElementsE)
+        #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.ElementsL, S0.ElementsA, S0.ElementsE)
+        #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.ElementsL, S0.ElementsA, S0.ElementsE)
 
     def Connectivity_Matrix(S0, NodesCount, ElementsCount, ElementsEndNodes):
         """
@@ -315,36 +343,7 @@ class StructureObj():
 
 
 
-    def Compute_Equilibrium_Matrix(S0,Elements_Cos,C,IsDOFfree):
-        """
-        :return: Calculate the equilibrium matrix based on the current cos director
-        """
 
-        (b,n) = C.shape #(nbr lines, nbr nodes)
-        C_t = C.transpose()
-
-        Cos_X = Elements_Cos[:,0]
-        Cos_Y = Elements_Cos[:,1]
-        Cos_Z = Elements_Cos[:,2]
-
-        # 2) calculate equilibrium matrix
-        # for each node (corresponding to one row), if the line (corresponding to a column) is connected to the node, then the entry of A contains the cos director, else 0.
-        Ax = C_t @ np.diag(Cos_X)  # (nbr nodes, nbr lines)  =  (nbr nodes, nbr lines) @ (nbr lines, nbr lines)
-        Ay = C_t @ np.diag(Cos_Y)
-        Az = C_t @ np.diag(Cos_Z)
-
-        A = np.zeros((3 * n, b)) # (3*nbr nodes, nbr lines)
-
-        # the dof are sorted like this [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
-        for i in range(n):
-            A[3 * i, :] = Ax[i, :]
-            A[3 * i + 1, :] = Ay[i, :]
-            A[3 * i + 2, :] = Az[i, :]
-
-        A_free = A[IsDOFfree]  # (nbr free dof, nbr lines)
-        A_fixed = A[~IsDOFfree] # (nbr fixed dof, nbr lines)
-
-        return (A,A_free,A_fixed)
 
 
     def SVD_Equilibrium_Matrix(S0, A_free):
@@ -661,8 +660,8 @@ class StructureObj():
                 cur.Reactions_Results = R
 
                 if k==0: # Initial Structure = current at first step
-                    S0.Elements_L = cur.Elements_L
-                    S0.Elements_Cos = cur.Elements_Cos
+                    S0.Elements_L = cur.ElementsL
+                    S0.Elements_Cos = cur.ElementsCos
                     S0.K_constrained = cur.K_constrained
 
                 if l0 == 1:  # if incremental length = 1
@@ -754,8 +753,8 @@ class StructureObj():
                 cur.Reactions_Results = R
 
                 if k==0: # Initial Structure = current at first step
-                    S0.Elements_L = cur.Elements_L
-                    S0.Elements_Cos = cur.Elements_Cos
+                    S0.Elements_L = cur.ElementsL
+                    S0.Elements_Cos = cur.ElementsCos
                     S0.K_constrained = cur.K_constrained
 
                 if l0 == 1:  # if incremental length = 1
