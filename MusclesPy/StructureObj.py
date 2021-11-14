@@ -58,14 +58,16 @@ class State():
         Cur.LoadsToApply = LoadsToApply.reshape((-1, 1))
         Cur.LengtheningsToApply = LengtheningsToApply.reshape((-1, 1))
 
-        ##### State properties #####
+        ##### Initialize the State properties #####
         Cur.ElementsL = np.zeros((S.ElementsCount, 1)) #Elements lengths
         Cur.ElementsCos = np.zeros((S.ElementsCount, 3)) #The cosinus directors of the elements
         Cur.A = np.zeros((3 * S.NodesCount, S.ElementsCount)) #The equilibrium matrix of the structure in the current state
         Cur.A_free = np.zeros((S.DOFfreeCount, S.ElementsCount))  # Equilibrium matrix of the free degrees of freedom only
         Cur.A_fixed = np.zeros((S.FixationsCount,S.ElementsCount))  # Equilibrium matrix of the fixed degrees of freedom only. Allows to find reactions from tension forces. A_fixed @ Tension = Reaction
 
-
+        Cur.Residual = np.ones((3 * S.NodesCount, 1)) # the unbalanced loads = All external Loads - A @ Tension
+        Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
+        
 class StructureObj():
 
 
