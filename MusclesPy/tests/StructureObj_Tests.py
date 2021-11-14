@@ -55,7 +55,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree)
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
 
         (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord,S0.C)
 
@@ -83,7 +83,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (l,Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord,C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C,IsDOFfree)
 
@@ -99,7 +99,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (l, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
         SVD = S0.SVD_Equilibrium_Matrix(A_free)
@@ -128,7 +128,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
 
@@ -255,14 +255,14 @@ class StructureObj_Tests(unittest.TestCase):
     #     # cos = l/l1
     #     # sin = H/l1
     #     NodesCoord = np.array([[0.0,0.0,0.0],[L/2,0.0,0.0],[L,0.0,0.0]])
-    #     Elements_EndNodes = np.array([[0,1],[1,2]])
+    #     ElementsEndNodes = np.array([[0,1],[1,2]])
     #     IsDOFfree = np.array([False,False,False,True,False,True,False,False,False])
     #
     #     # note that results are independant from EA since statically determinate
     #     A = 1 # mm²
     #     E = 564.92 # MPa
-    #     Elements_A = np.array([A,A])
-    #     Elements_E = np.array([E,E])
+    #     ElementsA = np.array([A,A])
+    #     ElementsE = np.array([E,E])
     #
     #     # initial forces. note that results are independant from W since ?
     #     W = 311.38 #N
@@ -272,7 +272,7 @@ class StructureObj_Tests(unittest.TestCase):
     #     Loads_To_Apply = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,0.0]])
     #     Elongations_To_Apply = np.array([0,0])
     #
-    #     S0.test_Main_LinearSolve_Force_Method(NodesCoord, Elements_EndNodes, IsDOFfree, Elements_A, Elements_E,
+    #     S0.test_Main_LinearSolve_Force_Method(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE,
     #                                        AxialForces_Already_Applied, Loads_To_Apply, Loads_Already_Applied,
     #                                        Elongations_To_Apply)
     #
@@ -333,13 +333,13 @@ class StructureObj_Tests(unittest.TestCase):
         Elements_E = np.array([10000000000.0, 10000000000.0])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
+        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
 
         #1) Compute Elements Geometry
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, C)
 
         # 2) Compute stiffness matrices
-        (List_km_loc, List_kg_loc) = S0.Compute_StiffnessMatGeo_LocalMatrices(Elements_L, Elements_Cos,S0.Elements_A, S0.Elements_E,S0.AxialForces_Already_Applied)
+        (List_km_loc, List_kg_loc) = S0.Compute_StiffnessMatGeo_LocalMatrices(Elements_L, Elements_Cos, S0.ElementsA, S0.ElementsE, S0.AxialForces_Already_Applied)
         K = S0.Compute_StiffnessMatGeo_Matrix(List_km_loc,List_kg_loc) # (3n+c,3n+c) mat+geo (but here Geo is null)
 
         # 3) Cross checks
@@ -362,7 +362,7 @@ class StructureObj_Tests(unittest.TestCase):
 
         # b) cross check with the material matrix computed from force Method
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, S0.IsDOFfree)
-        Km  = S0.Compute_StiffnessMat_Matrix(A,Elements_L,S0.Elements_A,S0.Elements_E) # (3n,3n) mat only
+        Km  = S0.Compute_StiffnessMat_Matrix(A, Elements_L, S0.ElementsA, S0.ElementsE) # (3n,3n) mat only
 
         n = NodesCoord.shape[0]
         successK = np.allclose(K[:3*n,:3*n], Km)
@@ -430,8 +430,8 @@ class StructureObj_Tests(unittest.TestCase):
 
         minN = S0.AxialForces_Results.min() #Solution with snapthrough
         L0 = S0.Elements_L[0]
-        E = S0.Elements_E[0]
-        A = S0.Elements_A[0]
+        E = S0.ElementsE[0]
+        A = S0.ElementsA[0]
         Nsol = E*A*(1-L0)/L0
         err = 2 / 100  # admissible error
         minN_adm = [Nsol * (1 + err), Nsol * (1 - err)]  # admissible interval
@@ -575,7 +575,7 @@ class StructureObj_Tests(unittest.TestCase):
         Elements_E = np.array([E,E,E])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         # (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
@@ -616,7 +616,7 @@ class StructureObj_Tests(unittest.TestCase):
         NodesCoord1.reshape(-1, 3)[IsZfree, 2] = Z_free
 
         S1.RegisterData(NodesCoord1,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
-        S1.C = S0.C.copy()#S1.Connectivity_Matrix(S1.NodesCount, S1.ElementsCount, S1.Elements_EndNodes)
+        S1.C = S0.C.copy()#S1.Connectivity_Matrix(S1.NodesCount, S1.ElementsCount, S1.ElementsEndNodes)
         (S1.Elements_L0, S1.Elements_Cos0) = S1.Compute_Elements_Geometry(S1.NodesCoord, S1.C)
         t1 = q0 * S1.Elements_L0
 
@@ -649,9 +649,9 @@ class StructureObj_Tests(unittest.TestCase):
         S0.Core_Assemble()
         S0.Elements_L0 = S0.Elements_L.copy()
         S0.Elements_Cos0 = S0.Elements_Cos.copy()
-        S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.Elements_A, S0.Elements_E)
-        S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.Elements_A, S0.Elements_E)
-        S0.F = S0.Flexibility_Matrix(S0.Elements_E, S0.Elements_A, S0.Elements_L0)
+        S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.ElementsA, S0.ElementsE)
+        S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.ElementsA, S0.ElementsE)
+        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.Elements_L0)
         # S0.SVD = S0.SVD_Equilibrium_Matrix(S0.A_free)
 
         # Solve B0.U0 = e_inelastic
@@ -683,7 +683,7 @@ class StructureObj_Tests(unittest.TestCase):
 
         # find total forces
         L_def_approx = S0.Elements_L0.reshape(-1, 1) + S0.Elongations_To_Apply
-        S1.F = S1.Flexibility_Matrix(S1.Elements_E, S1.Elements_A, L_def_approx.reshape(-1, ))
+        S1.F = S1.Flexibility_Matrix(S1.ElementsE, S1.ElementsA, L_def_approx.reshape(-1, ))
         k1_bsc = np.linalg.inv(S1.F)
         t_tot = k1_bsc @ e_tot
 
@@ -709,7 +709,7 @@ class StructureObj_Tests(unittest.TestCase):
 
         # find total forces
         # L_def_approx = S0.Elements_L0.reshape(-1,1)+S0.Elongations_To_Apply
-        # S2.F = S2.Flexibility_Matrix(S2.Elements_E, S2.Elements_A, L_def_approx.reshape(-1,))
+        # S2.F = S2.Flexibility_Matrix(S2.ElementsE, S2.ElementsA, L_def_approx.reshape(-1,))
         # k2_bsc = np.linalg.inv(S2.F)
         t2_tot = k1_bsc @ e2_tot
 

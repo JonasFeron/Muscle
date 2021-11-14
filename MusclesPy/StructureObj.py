@@ -38,38 +38,32 @@ class ResultsSVD():
         SVD.Um_free_row = Um_free_row
 
 class State():
-    def __init__(Cur, Nodes_coord, Tension_applied, Loads_applied, Loads_to_apply):
+    def __init__(Cur, S, NodesCoord, LoadsApplied, TensionApplied, ReactionsApplied, LoadsToApply, LengtheningsToApply):
         """
-        The Current State of a Structure Object is defined by
-        :param Nodes_coord: The current nodes coordinates of the structure
-        :param Loads_applied:
-        :param Tension_applied:
-        :param Reactions_applied:
-        :param Loads_to_apply:
+        The Current State of a Structure Object S is defined by
+        :param NodesCoord: The current nodes coordinates of the structure
+        :param LoadsApplied: The loads already applied on the structure
+        :param TensionApplied: The internal tension forces already existing in the structure due to LoadsApplied or to prestress forces
+        :param ReactionsApplied: The reactions forces already applied on the structure by the structure fixations
+        :param LoadsToApply: The additionnal external loads to apply on the structure
+        :param LengtheningsToApply: The additionnal lengthenings to impose on the elements free lengths of the structure
+
         """
+        ##### State inputs #####
+        Cur.S = S # the structure object in the current state
+        Cur.NodesCoord = NodesCoord.reshape((-1, 1))
+        Cur.LoadsApplied = LoadsApplied.reshape((-1, 1))
+        Cur.TensionApplied = TensionApplied.reshape((-1, 1))
+        Cur.ReactionsApplied = ReactionsApplied.reshape((-1, 1))
+        Cur.LoadsToApply = LoadsToApply.reshape((-1, 1))
+        Cur.LengtheningsToApply = LengtheningsToApply.reshape((-1, 1))
 
-        ##### Structure informations #####
-
-        cur.Nodes_coord = Nodes_coord.reshape((-1, 1))
-        cur.Elements_EndNodes = S0.Elements_EndNodes
-        cur.Elements_L0 = S0.Elements_L0
-        cur.Elements_Cos0 = S0.Elements_Cos0
-        cur.Elements_A = S0.Elements_A
-        cur.Elements_E = S0.Elements_E
-        cur.IsDOFfree = S0.IsDOFfree
-        # Elements info
-        cur.C = S0.C
-
-        # S0.Loads_Already_Applied = np.zeros((S0.NodesCount, 3))
-        cur.Loads_To_Apply = Loads_To_Apply.reshape((-1, 1))
-        cur.AxialForces_Already_Applied = AxialForces_Already_Applied.reshape((-1, 1))
-
-        # S0.Displacements_Already_Applied = np.zeros((S0.NodesCount,3))  # this is such that this.Nodes_coord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
-        # S0.Displacements_Results = np.zeros((S0.NodesCount, 3))  # results from Loads_To_Apply
-
-        # S0.Reactions_Already_Applied = np.zeros((S0.FixationsCount,))
-        # S0.Reactions_Results = np.zeros((S0.FixationsCount,))  # results from Loads_To_Apply
-        return cur
+        ##### State properties #####
+        Cur.ElementsL = np.zeros((S.ElementsCount, 1)) #Elements lengths
+        Cur.ElementsCos = np.zeros((S.ElementsCount, 3)) #The cosinus directors of the elements
+        Cur.A = np.zeros((3 * S.NodesCount, S.ElementsCount)) #The equilibrium matrix of the structure in the current state
+        Cur.A_free = np.zeros((S.DOFfreeCount, S.ElementsCount))  # Equilibrium matrix of the free degrees of freedom only
+        Cur.A_fixed = np.zeros((S.FixationsCount,S.ElementsCount))  # Equilibrium matrix of the fixed degrees of freedom only. Allows to find reactions from tension forces. A_fixed @ Tension = Reaction
 
 
 class StructureObj():
@@ -87,10 +81,10 @@ class StructureObj():
 
         ##### Structure informations #####
 
-        S0.Nodes_coord = np.zeros((3 * S0.NodesCount, 1))
-        S0.Elements_EndNodes = np.zeros((S0.ElementsCount, 2), dtype=int)
-        S0.Elements_A = np.zeros((S0.ElementsCount,1))
-        S0.Elements_E = np.zeros((S0.ElementsCount,1))
+        S0.NodesCoord = np.zeros((3 * S0.NodesCount, 1))
+        S0.ElementsEndNodes = np.zeros((S0.ElementsCount, 2), dtype=int)
+        S0.ElementsA = np.zeros((S0.ElementsCount, 1))
+        S0.ElementsE = np.zeros((S0.ElementsCount, 1))
         S0.IsDOFfree = np.zeros((3 * S0.NodesCount,), dtype=bool)
 
         #Elements info
@@ -130,7 +124,7 @@ class StructureObj():
         # S0.AxialForces_Total = np.zeros((S0.ElementsCount,)) # Results + Already_Applied
         S0.Elongations_To_Apply = np.zeros((S0.ElementsCount,1))
 
-        # S0.Displacements_Already_Applied = np.zeros((S0.NodesCount,3)) # this is such that this.Nodes_coord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
+        # S0.Displacements_Already_Applied = np.zeros((S0.NodesCount,3)) # this is such that this.NodesCoord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
         S0.Displacements_Results = np.zeros((3*S0.NodesCount,1)) #results from Loads_To_Apply
         # S0.Displacements_Total = np.zeros((S0.NodesCount, 3)) # Results + Already_Applied
 
@@ -151,12 +145,12 @@ class StructureObj():
 
         ##### Structure informations #####
 
-        cur.Nodes_coord = NewNodesCoord.reshape((-1, 1))
-        cur.Elements_EndNodes = S0.Elements_EndNodes
+        cur.NodesCoord = NewNodesCoord.reshape((-1, 1))
+        cur.ElementsEndNodes = S0.ElementsEndNodes
         cur.Elements_L0 = S0.Elements_L0
         cur.Elements_Cos0 = S0.Elements_Cos0
-        cur.Elements_A = S0.Elements_A
-        cur.Elements_E = S0.Elements_E
+        cur.ElementsA = S0.ElementsA
+        cur.ElementsE = S0.ElementsE
         cur.IsDOFfree = S0.IsDOFfree
         # Elements info
         cur.C = S0.C
@@ -165,7 +159,7 @@ class StructureObj():
         cur.Loads_To_Apply = Loads_To_Apply.reshape((-1,1))
         cur.AxialForces_Already_Applied = AxialForces_Already_Applied.reshape((-1,1))
 
-        # S0.Displacements_Already_Applied = np.zeros((S0.NodesCount,3))  # this is such that this.Nodes_coord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
+        # S0.Displacements_Already_Applied = np.zeros((S0.NodesCount,3))  # this is such that this.NodesCoord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
         # S0.Displacements_Results = np.zeros((S0.NodesCount, 3))  # results from Loads_To_Apply
 
         # S0.Reactions_Already_Applied = np.zeros((S0.FixationsCount,))
@@ -220,16 +214,16 @@ class StructureObj():
 
         if isinstance(NodesCoord, np.ndarray):
             S0.NodesCount = NodesCoord.reshape(-1, 3).shape[0]
-            S0.Nodes_coord = NodesCoord.reshape(-1, 1)
+            S0.NodesCoord = NodesCoord.reshape(-1, 1)
         else:
-            S0.Nodes_coord = None
+            S0.NodesCoord = None
             S0.NodesCount = -1
 
         if isinstance(Elements_ExtremitiesIndex, np.ndarray):
-            S0.Elements_EndNodes = Elements_ExtremitiesIndex.reshape(-1, 2).astype(int)
-            S0.ElementsCount = S0.Elements_EndNodes.shape[0]
+            S0.ElementsEndNodes = Elements_ExtremitiesIndex.reshape(-1, 2).astype(int)
+            S0.ElementsCount = S0.ElementsEndNodes.shape[0]
         else:
-            S0.Elements_EndNodes = None
+            S0.ElementsEndNodes = None
             S0.ElementsCount = -1
 
         if isinstance(IsDOFfree, np.ndarray):
@@ -242,14 +236,14 @@ class StructureObj():
             S0.DOFfreeCount = -1
 
         if isinstance(Elements_A, np.ndarray) and Elements_A.size == S0.ElementsCount:
-            S0.Elements_A = Elements_A.reshape((-1,1))
+            S0.ElementsA = Elements_A.reshape((-1, 1))
         else:
-            S0.Elements_A = np.zeros((S0.ElementsCount,1))
+            S0.ElementsA = np.zeros((S0.ElementsCount, 1))
 
         if isinstance(Elements_E, np.ndarray) and Elements_E.size == S0.ElementsCount:
-            S0.Elements_E = Elements_E.reshape((-1,1))
+            S0.ElementsE = Elements_E.reshape((-1, 1))
         else:
-            S0.Elements_E = np.zeros((S0.ElementsCount,1))
+            S0.ElementsE = np.zeros((S0.ElementsCount, 1))
 
         if isinstance(AxialForces_Already_Applied, np.ndarray) and AxialForces_Already_Applied.size == S0.ElementsCount:
             S0.AxialForces_Already_Applied = AxialForces_Already_Applied.reshape((-1,1))
@@ -284,12 +278,12 @@ class StructureObj():
         Assemble the equilibrim Matrix and the material stiffness matrix. N.B. Do not perfom the SVD -> do it separately
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
-        (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.Nodes_coord, S0.C)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos,S0.C,S0.IsDOFfree)
-        # if S0.Elements_A.sum()!=0 and S0.Elements_E.sum()!=0:
-        #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.Elements_A, S0.Elements_E)
-        #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.Elements_A, S0.Elements_E)
+        # if S0.ElementsA.sum()!=0 and S0.ElementsE.sum()!=0:
+        #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.ElementsA, S0.ElementsE)
+        #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.ElementsA, S0.ElementsE)
 
     def Connectivity_Matrix(S0, NodesCount, ElementsCount, Elements_EndNodes):
         """
@@ -310,7 +304,7 @@ class StructureObj():
 
     def Compute_Elements_Geometry(S0,NodesCoord,C):
         """
-        Calculates the Lines properties (Lengths, CosDir) based on the given Nodes_coord and Connectivity Matrix C, and store it in S0
+        Calculates the Lines properties (Lengths, CosDir) based on the given NodesCoord and Connectivity Matrix C, and store it in S0
         """
         assert C.shape==(S0.ElementsCount,S0.NodesCount),"check that shape of connectivity matrix C = (nbr lines, nbr nodes)"
 
@@ -451,8 +445,8 @@ class StructureObj():
 
     def Core_LinearSolve_Displ_Method(S0):
 
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
-        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.Nodes_coord, S0.C)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         perturb = 1e-6  # [m], à appliquer si matrice singulière uniquement
 
@@ -461,11 +455,11 @@ class StructureObj():
         Reactions = np.zeros((S0.FixationsCount,1))
 
         try:
-            (d, AxialForces, Reactions) = S0.LinearSolve_Displ_Method(S0.Nodes_coord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
+            (d, AxialForces, Reactions) = S0.LinearSolve_Displ_Method(S0.NodesCoord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
 
         except np.linalg.linalg.LinAlgError:
             # print("la matrice est singulière")
-            NodesCoord_perturbed = S0.Perturbation(S0.Nodes_coord, S0.IsDOFfree, perturb)
+            NodesCoord_perturbed = S0.Perturbation(S0.NodesCoord, S0.IsDOFfree, perturb)
             (d, AxialForces, Reactions) = S0.LinearSolve_Displ_Method(NodesCoord_perturbed, S0.AxialForces_Already_Applied,S0.Loads_To_Apply)
         finally:
             S0.Displacements_Results = d
@@ -479,8 +473,8 @@ class StructureObj():
         c = cur.FixationsCount
 
         Elements_L0 = cur.Elements_L0 #  = S0.Elements_L0 : Initial Lengths
-        Elements_A = cur.Elements_A
-        Elements_E = cur.Elements_E
+        Elements_A = cur.ElementsA
+        Elements_E = cur.ElementsE
         C = cur.C
 
         Loads = Loads_To_Apply.reshape((-1, 1))
@@ -551,7 +545,7 @@ class StructureObj():
         b = cur.ElementsCount
         c = cur.FixationsCount
         IsDOFfree = cur.IsDOFfree
-        Elements_ExtremitiesIndex=cur.Elements_EndNodes
+        Elements_ExtremitiesIndex=cur.ElementsEndNodes
 
         Km = np.zeros((3*n, 3*n))
         Kg = np.zeros((3*n, 3*n))
@@ -584,7 +578,7 @@ class StructureObj():
         return K_constrained
 
     def Post_Process_Displ_Method(cur, d, List_km_loc, List_kg_loc, Elements_Cos):
-        Elements_ExtremitiesIndex = cur.Elements_EndNodes
+        Elements_ExtremitiesIndex = cur.ElementsEndNodes
         b = cur.ElementsCount
         AxialForces = np.zeros((b,1))
         for i in np.arange(b):
@@ -620,10 +614,10 @@ class StructureObj():
     # region Private Methods : Non Linear Solver based on displacement methods
     def Core_NonLinearSolve_Displ_Method(S0):
 
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
-        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.Nodes_coord, S0.C)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
-        (Stages,StagesLoad,StagesDispl,StagesN,StagesR) = S0.NonLinearSolve_Displ_Method(S0.n_steps, S0.Nodes_coord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
+        (Stages,StagesLoad,StagesDispl,StagesN,StagesR) = S0.NonLinearSolve_Displ_Method(S0.n_steps, S0.NodesCoord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
         S0.Stages = Stages
         S0.Loads_Applied = StagesLoad
         S0.Displacements_Results = StagesDispl
@@ -674,10 +668,10 @@ class StructureObj():
             cur = S0.NewStructureObj(CurNodesCoord, CurAxialForces, p)
 
             try:
-                (v, N, R) = cur.LinearSolve_Displ_Method(cur.Nodes_coord, cur.AxialForces_Already_Applied, cur.Loads_To_Apply)
+                (v, N, R) = cur.LinearSolve_Displ_Method(cur.NodesCoord, cur.AxialForces_Already_Applied, cur.Loads_To_Apply)
             except np.linalg.LinAlgError:
                 # print("la matrice est singulière")
-                NodesCoord_perturbed = cur.Perturbation(cur.Nodes_coord, cur.IsDOFfree, perturb)
+                NodesCoord_perturbed = cur.Perturbation(cur.NodesCoord, cur.IsDOFfree, perturb)
                 (v, N, R) = cur.LinearSolve_Displ_Method(NodesCoord_perturbed,cur.AxialForces_Already_Applied,cur.Loads_To_Apply)
             finally:
                 cur.Displacements_Results = v #Linear results
@@ -767,10 +761,10 @@ class StructureObj():
             cur = S0.NewStructureObj(CurNodesCoord, CurAxialForces, p)
 
             try:
-                (v, N, R) = cur.LinearSolve_Displ_Method(cur.Nodes_coord, cur.AxialForces_Already_Applied, cur.Loads_To_Apply)
+                (v, N, R) = cur.LinearSolve_Displ_Method(cur.NodesCoord, cur.AxialForces_Already_Applied, cur.Loads_To_Apply)
             except np.linalg.LinAlgError:
                 # print("la matrice est singulière")
-                NodesCoord_perturbed = cur.Perturbation(cur.Nodes_coord, cur.IsDOFfree, perturb)
+                NodesCoord_perturbed = cur.Perturbation(cur.NodesCoord, cur.IsDOFfree, perturb)
                 (v, N, R) = cur.LinearSolve_Displ_Method(NodesCoord_perturbed,cur.AxialForces_Already_Applied,cur.Loads_To_Apply)
             finally:
                 cur.Displacements_Results = v #Linear results
@@ -825,8 +819,8 @@ class StructureObj():
 
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
-        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.Nodes_coord, S0.C)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0,S0.C,S0.IsDOFfree)
 
         d0 = np.zeros((3*S0.NodesCount,1)) #initial displacements
@@ -842,7 +836,7 @@ class StructureObj():
         SVD = S0.SVD_Equilibrium_Matrix(S0.A_free)
 
         ## 1) Solve Equilibrium A @ dt = dp   to find the increment of tensions dt due to unbalanced load and external elongations
-        S0.F = S0.Flexibility_Matrix(S0.Elements_E,S0.Elements_A,S0.Elements_L0)
+        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.Elements_L0)
         (dt, de) = S0.Equilibrium_Analysis(SVD,S0.F,dp_free,e_ToApply)
 
         ## 2) Solve Compatibility Bt @ dd = de to find the increment of displacements dd due to unbalanced loads and external elongations
@@ -887,7 +881,7 @@ class StructureObj():
 
     def Compute_Elements_Reorientation(S0,Displacements,C,Elements_L0):
         """
-        Calculates the Lines properties (Lengths, CosDir) based on the given Nodes_coord and Connectivity Matrix C, and store it in S0
+        Calculates the Lines properties (Lengths, CosDir) based on the given NodesCoord and Connectivity Matrix C, and store it in S0
         """
         assert C.shape==(S0.ElementsCount,S0.NodesCount),"check that shape of connectivity matrix C = (nbr lines, nbr nodes)"
 
@@ -1006,10 +1000,10 @@ class StructureObj():
         """
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.Elements_EndNodes)
-        (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.Nodes_coord, S0.C)
+        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
-        S0.F = S0.Flexibility_Matrix(S0.Elements_E, S0.Elements_A, S0.Elements_L0)
+        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.Elements_L0)
 
         (t,d) = S0.NonLinearSolve_Force_Method(S0.n_steps, S0.Loads_Already_Applied, S0.AxialForces_Already_Applied, S0.Loads_To_Apply, S0.Elongations_To_Apply)
 
