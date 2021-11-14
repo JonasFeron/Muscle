@@ -67,9 +67,9 @@ class State():
 
         Cur.Residual = np.ones((3 * S.NodesCount, 1)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
-        
-class StructureObj():
 
+
+class StructureObj():
 
     # region Constructors
     def __init__(S0, NodesCount = 0, ElementsCount = 0, FixationsCount = 0):
@@ -138,35 +138,7 @@ class StructureObj():
         #
         # ##### Calculation Results #####
 
-    def NewStructureObj(S0, NewNodesCoord, AxialForces_Already_Applied, Loads_To_Apply):
-        """
-        Initialize a new current structure object based on a initial structure.
-        """
-        cur = StructureObj(S0.NodesCount, S0.ElementsCount,
-                           S0.FixationsCount)  # Each Current structure Obj is considered as an Initial Structure Object. The only difference is that their nodes coordinates have changed compared to Initial.
 
-        ##### Structure informations #####
-
-        cur.NodesCoord = NewNodesCoord.reshape((-1, 1))
-        cur.ElementsEndNodes = S0.ElementsEndNodes
-        cur.Elements_L0 = S0.Elements_L0
-        cur.Elements_Cos0 = S0.Elements_Cos0
-        cur.ElementsA = S0.ElementsA
-        cur.ElementsE = S0.ElementsE
-        cur.IsDOFfree = S0.IsDOFfree
-        # Elements info
-        cur.C = S0.C
-
-        # S0.Loads_Already_Applied = np.zeros((S0.NodesCount, 3))
-        cur.Loads_To_Apply = Loads_To_Apply.reshape((-1,1))
-        cur.AxialForces_Already_Applied = AxialForces_Already_Applied.reshape((-1,1))
-
-        # S0.Displacements_Already_Applied = np.zeros((S0.NodesCount,3))  # this is such that this.NodesCoord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
-        # S0.Displacements_Results = np.zeros((S0.NodesCount, 3))  # results from Loads_To_Apply
-
-        # S0.Reactions_Already_Applied = np.zeros((S0.FixationsCount,))
-        # S0.Reactions_Results = np.zeros((S0.FixationsCount,))  # results from Loads_To_Apply
-        return cur
     # endregion
 
     # region Public Methods : Main
@@ -287,21 +259,23 @@ class StructureObj():
         #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.ElementsA, S0.ElementsE)
         #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.ElementsA, S0.ElementsE)
 
-    def Connectivity_Matrix(S0, NodesCount, ElementsCount, Elements_EndNodes):
+    def Connectivity_Matrix(S0, NodesCount, ElementsCount, ElementsEndNodes):
         """
-        :return: créée la matrice de connectivité C de taille (nbr lines, nbr nodes)
+        :return: the connectivity matrix C of size (ElementsCount, NodesCount). C contains the same info than ElementsEndNodes but presented under a matrix form.
         """
 
-        #Calculation
-        C = np.zeros((ElementsCount, NodesCount), dtype=int)  # matrice de connectivité C
-        for line_ind, line_extremities in enumerate(Elements_EndNodes):
+        #Calculation according to references
+        # Vassart, Motro, 1999, Multiparametered Formfinding Method: Application to Tensegrity Systems
+        # Sheck, 1974, The force density method for formfinding and computation of networks
+
+        C = np.zeros((ElementsCount, NodesCount), dtype=int)  # connectivity matrix C
+        for line_ind, line_extremities in enumerate(ElementsEndNodes):
             n0 = line_extremities[0]
             n1 = line_extremities[1]
             C[line_ind, n0] = 1
             C[line_ind, n1] = -1
 
-        # 3)Output
-        return -C  # lets store the results. - signe because it makes more sense to do n1-n0 (than n0-n1).
+        return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually do not change the equilibrum matrix.
         # print(C)
 
     def Compute_Elements_Geometry(S0,NodesCoord,C):
