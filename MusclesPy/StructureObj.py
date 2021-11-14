@@ -51,22 +51,56 @@ class State():
         """
         ##### State inputs #####
         Cur.S = S # the structure object in the current state
-        Cur.NodesCoord = NodesCoord.reshape((-1, 1))
-        Cur.LoadsApplied = LoadsApplied.reshape((-1, 1))
-        Cur.TensionApplied = TensionApplied.reshape((-1, 1))
-        Cur.ReactionsApplied = ReactionsApplied.reshape((-1, 1))
-        Cur.LoadsToApply = LoadsToApply.reshape((-1, 1))
-        Cur.LengtheningsToApply = LengtheningsToApply.reshape((-1, 1))
+        Cur.NodesCoord = NodesCoord.reshape((-1,))
+        Cur.LoadsApplied = LoadsApplied.reshape((-1,))
+        Cur.TensionApplied = TensionApplied.reshape((-1,))
+        Cur.ReactionsApplied = ReactionsApplied.reshape((-1,))
+        Cur.LoadsToApply = LoadsToApply.reshape((-1,))
+        Cur.LengtheningsToApply = LengtheningsToApply.reshape((-1,))
 
         ##### Initialize the State properties #####
-        Cur.ElementsL = np.zeros((S.ElementsCount, 1)) #Elements lengths
+        Cur.ElementsL = np.zeros((S.ElementsCount,)) #Elements lengths
         Cur.ElementsCos = np.zeros((S.ElementsCount, 3)) #The cosinus directors of the elements
         Cur.A = np.zeros((3 * S.NodesCount, S.ElementsCount)) #The equilibrium matrix of the structure in the current state
         Cur.A_free = np.zeros((S.DOFfreeCount, S.ElementsCount))  # Equilibrium matrix of the free degrees of freedom only
         Cur.A_fixed = np.zeros((S.FixationsCount,S.ElementsCount))  # Equilibrium matrix of the fixed degrees of freedom only. Allows to find reactions from tension forces. A_fixed @ Tension = Reaction
 
-        Cur.Residual = np.ones((3 * S.NodesCount, 1)) # the unbalanced loads = All external Loads - A @ Tension
+        Cur.Residual = np.ones((3 * S.NodesCount,)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
+
+    def ComputeElementsLengthsAndCos(Cur, C):
+        """
+        Calculates the Lines properties (Lengths, Cos) based on the given NodesCoord and Connectivity Matrix C
+        """
+        
+        ### input ### 
+        NodesCoord = Cur.NodesCoord
+
+        assert C.shape == (Cur.S.ElementsCount, Cur.S.NodesCount), "Please check the shape of the connectivity matrix C"
+
+        # Get the current X, Y or Z coordinates of all nodes
+        NodesCoordXYZ = NodesCoord.reshape((-1,3)) # shape (NodesCount,3) instead of (3*NodesCount,)
+        X = NodesCoordXYZ[:, 0] # shape (NodesCount,)
+        Y = NodesCoordXYZ[:, 1]
+        Z = NodesCoordXYZ[:, 2]
+
+        # Compute the différence of coordinates between both ends of each line
+        DX = C @ X  # return X1-X0 for each line
+        DY = C @ Y  # shape (ElementsCount,) = (ElementsCount, NodesCount) @ (NodesCount,)
+        DZ = C @ Z
+
+        # Compute the current lengths of each line
+        ElementsL = np.sqrt(DX ** 2 + DY ** 2 + DZ ** 2)  # (ElementsCount,)
+        Diag1overL = np.diag(1 / ElementsL)  # shape (ElementsCount, ElementsCount) where only the diagonal is non nul
+
+        # Compute the current cosinus directors of each line
+        CosX = Diag1overL @ DX  # shape (ElementsCount,)  = (ElementsCount, ElementsCount) @ (ElementsCount,)
+        CosY = Diag1overL @ DY
+        CosZ = Diag1overL @ DZ
+
+        ElementsCos = np.hstack((CosX.reshape((-1,1)),CosY.reshape((-1,1)),CosZ.reshape((-1,1)))) # shape (ElementsCount,3)
+
+        return (ElementsL,ElementsCos)
 
 
 class StructureObj():
@@ -278,35 +312,7 @@ class StructureObj():
         return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually do not change the equilibrum matrix.
         # print(C)
 
-    def Compute_Elements_Geometry(S0,NodesCoord,C):
-        """
-        Calculates the Lines properties (Lengths, CosDir) based on the given NodesCoord and Connectivity Matrix C, and store it in S0
-        """
-        assert C.shape==(S0.ElementsCount,S0.NodesCount),"check that shape of connectivity matrix C = (nbr lines, nbr nodes)"
 
-        # get the current X, Y or Z coordinates of all nodes
-        Coord_n_3 = NodesCoord.reshape((-1,3))
-        X = Coord_n_3[:, 0]  # (nbr nodes,)
-        Y = Coord_n_3[:, 1]
-        Z = Coord_n_3[:, 2]
-
-        # calculate the différence of coordinates between both extremities of each line
-        D_X = C @ X  # gives X1-X0 for each line
-        D_Y = C @ Y  # (nbr lines,) = (nbr lines, nbr nodes) @ (nbr nodes,)
-        D_Z = C @ Z
-
-        # calculate the initial length of each line
-        Elements_L = np.sqrt(D_X ** 2 + D_Y ** 2 + D_Z ** 2)  # (nbr lines,)
-        Diag_L_inv = np.diag(1 / Elements_L)  # (nbr lines, nbr lines) where only the diagonal is non nul
-
-        # calculate the initial cos directors of each line
-        Cos_X = Diag_L_inv @ D_X  # (nbr lines,)  = (nbr lines, nbr lines) @ (nbr lines,)
-        Cos_Y = Diag_L_inv @ D_Y
-        Cos_Z = Diag_L_inv @ D_Z
-
-        Elements_Cos = np.hstack((Cos_X.reshape((-1,1)),Cos_Y.reshape((-1,1)),Cos_Z.reshape((-1,1))))
-
-        return (Elements_L,Elements_Cos)
 
 
     def Compute_Equilibrium_Matrix(S0,Elements_Cos,C,IsDOFfree):

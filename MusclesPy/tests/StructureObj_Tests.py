@@ -673,8 +673,8 @@ class StructureObj_Tests(unittest.TestCase):
         S1.Elongations_To_Apply = S0.Elongations_To_Apply.copy()
 
         # Compute Equilibrium matrix
-        (S1.Elements_L, S1.Elements_Cos) = S1.Compute_Elements_Geometry(S1.NodesCoord,
-                                                                        S1.C)  # cos = (X2_def - X1_def)/L_def
+        (S1.Elements_L, S1.Elements_Cos) = S1.ComputeElementsLengthsAndCos(S1.NodesCoord,
+                                                                           S1.C)  # cos = (X2_def - X1_def)/L_def
         (S1.A, S1.A_free, S1.A_fixed) = S1.Compute_Equilibrium_Matrix(S1.Elements_Cos, S1.C, S1.IsDOFfree)
 
         # find e_elastic = B1@U0
@@ -699,8 +699,8 @@ class StructureObj_Tests(unittest.TestCase):
         S2 = S1.NewStructureObj(NodesCoord2, np.zeros((S0.ElementsCount, 1)), np.zeros((3 * S0.NodesCount, 1)))
 
         # Compute Equilibrium matrix
-        (S2.Elements_L, S2.Elements_Cos) = S2.Compute_Elements_Geometry(S2.NodesCoord,
-                                                                        S2.C)  # cos = (X2_def - X1_def)/L_def
+        (S2.Elements_L, S2.Elements_Cos) = S2.ComputeElementsLengthsAndCos(S2.NodesCoord,
+                                                                           S2.C)  # cos = (X2_def - X1_def)/L_def
         (S2.A, S2.A_free, S2.A_fixed) = S2.Compute_Equilibrium_Matrix(S2.Elements_Cos, S2.C, S2.IsDOFfree)
 
         # find e_elastic = B1@U0
