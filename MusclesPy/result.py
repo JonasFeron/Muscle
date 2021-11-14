@@ -53,7 +53,7 @@ class SharedAssemblyResult():
                 Answ.Km = S0.Km.round(4).tolist()
                 Answ.Km_free = S0.Km_free.round(4).tolist()
                 Answ.A = S0.A.round(4).tolist()
-                Answ.A_free = S0.A_free.round(4).tolist()
+                Answ.A_free = S0.AFree.round(4).tolist()
 
                 Answ.S = S0.SVD.S.round(4).tolist()
                 Answ.r = int(S0.SVD.r)

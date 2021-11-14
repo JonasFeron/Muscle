@@ -65,5 +65,40 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(success,True)
 
+    def test_Simple_ComputeSVD(self):
+        S = StructureObj()
+        NodesCoord = np.array([[0.0, 1.0, 0.0],
+                               [1.0, 1.0, 0.0],
+                               [2.0, 1.0, 0.0]])
+        Elements_ExtremitiesIndex = np.array([[0, 1],
+                                              [1, 2]])
+        IsDOFfree = np.array([False, False, False,
+                              True, True, True,
+                              False, False, False])
+
+        S.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
+        C = S.Connectivity_Matrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+        Initial = State(S,NodesCoord)
+        (l, ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord,C)
+        (A, A_free, A_fixed) = Initial.ComputeEquilibriumMatrix(C,IsDOFfree,ElementsCos)
+        SVD = Initial.ComputeSVD(A_free)
+
+        r_answer = 1
+        self.assertEqual(SVD.r, r_answer)
+
+        s_answer = 1
+        self.assertEqual(SVD.s, s_answer)
+
+        SS_answer = np.array([[-1.0, -1.0]])
+        successSS = np.allclose(SVD.SS,SS_answer)
+        self.assertEqual(successSS, True)
+
+        m_answer = 2
+        self.assertEqual(SVD.m, m_answer)
+
+        Um_answer= np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        successUm = np.allclose(SVD.Um_free_row,Um_answer)
+        self.assertEqual(successUm, True)
+
 if __name__ == '__main__':
     unittest.main()

@@ -49,34 +49,7 @@ class StructureObj_Tests(unittest.TestCase):
 
 
 
-    def test_SVD_Equilibrium_Matrix_2cables(self):
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [2.0, 1.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
-        IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
-        S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (l, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
-        (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
-        SVD = S0.SVD_Equilibrium_Matrix(A_free)
-
-        r_answer = 1
-        self.assertEqual(SVD.r, r_answer)
-
-        s_answer = 1
-        self.assertEqual(SVD.s, s_answer)
-
-        SS_answer = np.array([[-1.0, -1.0]])
-        successSS = np.allclose(SVD.SS,SS_answer)
-        self.assertEqual(successSS, True)
-
-        m_answer = 2
-        self.assertEqual(SVD.m, m_answer)
-
-        Um_answer= np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        successUm = np.allclose(SVD.Um_free_row,Um_answer)
-        self.assertEqual(successUm, True)
 
     def test_Compute_StiffnessMat_Matrix_2cables(self):
         S0 = StructureObj()
@@ -533,11 +506,11 @@ class StructureObj_Tests(unittest.TestCase):
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
+        (S0.ElementsLengthsFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
-        # (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
+        # (S0.A, S0.AFree, S0.AFixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
         t0 = np.array([1, 10, 10])*1000
-        q0 = t0/S0.Elements_L0.reshape(-1,)
+        q0 = t0/S0.ElementsLengthsFree.reshape(-1, )
         Q = np.diag(q0)
 
         IsXfree = IsDOFfree[0::3]
@@ -574,8 +547,8 @@ class StructureObj_Tests(unittest.TestCase):
 
         S1.RegisterData(NodesCoord1,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
         S1.C = S0.C.copy()#S1.Connectivity_Matrix(S1.NodesCount, S1.ElementsCount, S1.ElementsEndNodes)
-        (S1.Elements_L0, S1.Elements_Cos0) = S1.Compute_Elements_Geometry(S1.NodesCoord, S1.C)
-        t1 = q0 * S1.Elements_L0
+        (S1.ElementsLengthsFree, S1.Elements_Cos0) = S1.Compute_Elements_Geometry(S1.NodesCoord, S1.C)
+        t1 = q0 * S1.ElementsLengthsFree
 
         # Loads_Already_Applied = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,-W],[0.0,0.0,0.0]])
         # AxialForces_Already_Applied = np.array([t1,t2,t1])
@@ -604,21 +577,21 @@ class StructureObj_Tests(unittest.TestCase):
 
         # ITERATION 0 : application of the entire elongation in one step
         S0.Core_Assemble()
-        S0.Elements_L0 = S0.Elements_L.copy()
+        S0.ElementsLengthsFree = S0.Elements_L.copy()
         S0.Elements_Cos0 = S0.Elements_Cos.copy()
         S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.ElementsA, S0.ElementsE)
-        S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.Elements_L, S0.ElementsA, S0.ElementsE)
-        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.Elements_L0)
-        # S0.SVD = S0.SVD_Equilibrium_Matrix(S0.A_free)
+        S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.AFree, S0.Elements_L, S0.ElementsA, S0.ElementsE)
+        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.ElementsLengthsFree)
+        # S0.SVD = S0.SVD_Equilibrium_Matrix(S0.AFree)
 
         # Solve B0.U0 = e_inelastic
-        # S0.Displacements_Results = np.linalg.solve(S0.A_free.transpose(),S0.Elongations_To_Apply) # try to solve 3 eq with 2 unknowns raise a LinAlgError because A_free is not square
+        # S0.Displacements_Results = np.linalg.solve(S0.AFree.transpose(),S0.Elongations_To_Apply) # try to solve 3 eq with 2 unknowns raise a LinAlgError because AFree is not square
         S0.Displacements_Results = \
-        np.linalg.lstsq(S0.A_free.transpose(), S0.Elongations_To_Apply.reshape(-1), rcond=0.001)[0]
+        np.linalg.lstsq(S0.AFree.transpose(), S0.Elongations_To_Apply.reshape(-1), rcond=0.001)[0]
 
         # Or Solve K.U = f = At = Ake
         t_inelastic = np.linalg.inv(S0.F) @ S0.Elongations_To_Apply
-        f_inelastic = S0.A_free @ t_inelastic
+        f_inelastic = S0.AFree @ t_inelastic
         Displacements_Results_free = np.linalg.solve(S0.Km_free, f_inelastic)
 
         ## ITERATION 1
@@ -632,20 +605,20 @@ class StructureObj_Tests(unittest.TestCase):
         # Compute Equilibrium matrix
         (S1.ElementsL, S1.ElementsCos) = S1.ComputeElementsLengthsAndCos(S1.NodesCoord,
                                                                          S1.C)  # cos = (X2_def - X1_def)/L_def
-        (S1.A, S1.A_free, S1.A_fixed) = S1.ComputeEquilibriumMatrix(S1.C, S1.IsDOFfree, S1.ElementsCos)
+        (S1.A, S1.AFree, S1.AFixed) = S1.ComputeEquilibriumMatrix(S1.C, S1.IsDOFfree, S1.ElementsCos)
 
         # find e_elastic = B1@U0
-        e_elastic = S1.A_free.transpose() @ Displacements_Results_free  # A_free contient les cos dans la position déformée avec les longueurs déformées
+        e_elastic = S1.AFree.transpose() @ Displacements_Results_free  # AFree contient les cos dans la position déformée avec les longueurs déformées
         e_tot = e_elastic - S1.Elongations_To_Apply
 
         # find total forces
-        L_def_approx = S0.Elements_L0.reshape(-1, 1) + S0.Elongations_To_Apply
+        L_def_approx = S0.ElementsLengthsFree.reshape(-1, 1) + S0.Elongations_To_Apply
         S1.F = S1.Flexibility_Matrix(S1.ElementsE, S1.ElementsA, L_def_approx.reshape(-1, ))
         k1_bsc = np.linalg.inv(S1.F)
         t_tot = k1_bsc @ e_tot
 
-        f_unbalanced = -(S1.A_free @ t_tot)  # unbalanced = external load - resisting forces (external load = 0)
-        S1.Km_free = S1.A_free @ k1_bsc @ (S1.A_free.transpose())
+        f_unbalanced = -(S1.AFree @ t_tot)  # unbalanced = external load - resisting forces (external load = 0)
+        S1.Km_free = S1.AFree @ k1_bsc @ (S1.AFree.transpose())
         Displacements1_Results_free = np.linalg.solve(S1.Km_free, f_unbalanced)
 
         ## ITERATION 2
@@ -658,20 +631,20 @@ class StructureObj_Tests(unittest.TestCase):
         # Compute Equilibrium matrix
         (S2.ElementsL, S2.ElementsCos) = S2.ComputeElementsLengthsAndCos(S2.NodesCoord,
                                                                          S2.C)  # cos = (X2_def - X1_def)/L_def
-        (S2.A, S2.A_free, S2.A_fixed) = S2.ComputeEquilibriumMatrix(S2.C, S2.IsDOFfree, S2.ElementsCos)
+        (S2.A, S2.AFree, S2.AFixed) = S2.ComputeEquilibriumMatrix(S2.C, S2.IsDOFfree, S2.ElementsCos)
 
         # find e_elastic = B1@U0
-        e2_elastic = S2.A_free.transpose() @ Displacements1_Results_free  # A_free contient les cos dans la position déformée avec les longueurs déformées
+        e2_elastic = S2.AFree.transpose() @ Displacements1_Results_free  # AFree contient les cos dans la position déformée avec les longueurs déformées
         e2_tot = e2_elastic
 
         # find total forces
-        # L_def_approx = S0.Elements_L0.reshape(-1,1)+S0.Elongations_To_Apply
+        # L_def_approx = S0.ElementsLengthsFree.reshape(-1,1)+S0.Elongations_To_Apply
         # S2.F = S2.Flexibility_Matrix(S2.ElementsE, S2.ElementsA, L_def_approx.reshape(-1,))
         # k2_bsc = np.linalg.inv(S2.F)
         t2_tot = k1_bsc @ e2_tot
 
-        f2_unbalanced = -(S2.A_free @ t2_tot)  # unbalanced = external load - resisting forces (external load = 0)
-        S2.Km_free = S2.A_free @ k1_bsc @ (S2.A_free.transpose())
+        f2_unbalanced = -(S2.AFree @ t2_tot)  # unbalanced = external load - resisting forces (external load = 0)
+        S2.Km_free = S2.AFree @ k1_bsc @ (S2.AFree.transpose())
         Displacements2_Results_free = np.linalg.solve(S2.Km_free, f2_unbalanced)
     # endregion
 

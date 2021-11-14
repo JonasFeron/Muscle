@@ -2,13 +2,23 @@ import numpy as np
 from data import SharedData
 
 class ResultsSVD():
+    """
+    This class stores the results into a ResultsSVD object of the Singular Value Decomposition of the Equilibrium Matrix of the structure in the current state.
+    Ref: Pellegrino, 1993, Structural computations with the singular value decomposition of the equilibrium matrix
+    """
 
     def __init__(SVD,NodesCount = 0,ElementsCount = 0,FixationsCount = 0):
+        """
+        Initialize an empty ResultsSVD object ready to store the results
+        :param NodesCount: number of nodes
+        :param ElementsCount: number of elements
+        :param FixationsCount: number of fixed degrees of freedom
+        """
         DOFfreeCount = 3*NodesCount - FixationsCount
 
-        SVD.S = np.zeros((DOFfreeCount,)) #eigen values of A_free
-        SVD.r = 0  # number of non null eigen value. rank of A_free
-        SVD.Sr = np.zeros((SVD.r,)) #non null eigen values of A_free
+        SVD.S = np.zeros((DOFfreeCount,)) #eigen values of AFree
+        SVD.r = 0  # number of non null eigen value. rank of AFree
+        SVD.Sr = np.zeros((SVD.r,)) #non null eigen values of AFree
 
         SVD.s = ElementsCount - SVD.r #degree of static indeterminacy = nbr of self-stress modes
         SVD.Vr_row = np.zeros((SVD.r, ElementsCount)) # r row eigen vectors. Interpretation: Bar tensions in equilibrium with the Diag(S)* Loads of Ur OR Bar elongations compatible with Diag(1/S) * Extensional displacements of Ur
@@ -22,6 +32,21 @@ class ResultsSVD():
         SVD.Um_free_row = np.zeros((SVD.m, DOFfreeCount)) # m row eigenvectors. Interpretation: Loads which can not be equilibrated in the current struct OR Inextensional displacements (sol of B@d = 0)
 
     def PopulateWith(SVD,S,r,Sr,s,Vr_row,Vs_row,SS,m,Ur_row,Ur_free_row,Um_row,Um_free_row):
+        """
+        Fill in the ResultsSVD object with the obtained results
+        :param S:
+        :param r:
+        :param Sr:
+        :param s:
+        :param Vr_row:
+        :param Vs_row:
+        :param SS:
+        :param m:
+        :param Ur_row:
+        :param Ur_free_row:
+        :param Um_row:
+        :param Um_free_row:
+        """
         SVD.S = S
         SVD.r = r
         SVD.Sr = Sr
@@ -36,6 +61,70 @@ class ResultsSVD():
         SVD.Ur_free_row = Ur_free_row
         SVD.Um_row = Um_row
         SVD.Um_free_row = Um_free_row
+
+    def SVDEquilibriumMatrix(SVD, S, AFree):
+        """
+        Compute the Singular Value Decomposition of the Equilibrium Matrix of the structure
+        :param S: The structure object
+        :param AFree: The Equilibrium Matrix. shape (DOFfreeCount, ElementsCount)
+        :return: The resulting (eigen) vectors of the Equilibrium Matrix decomposition
+        """
+        # 1) retrieve and check inputs
+        ElementsCount = S.ElementsCount
+        NodesCount = S.NodesCount
+        DOFfreeCount = S.DOFfreeCount
+        IsDOFfree = S.IsDOFfree
+
+        assert AFree.shape == (DOFfreeCount, ElementsCount), "Please check the equilibrium matrix (AFree) shape"
+        assert np.abs(AFree).sum() != 0, "Please check that the equilibrium matrix (AFree) has been computed"
+
+        #Note the following notation:
+        #Free if the dimension(s) of the vector/matrix correspond to the number of free degrees of freedom (DOFfreeCount)
+        #Row if the eigen vectors are horizontal
+        #Col if the eigen vectors are vertical
+        #We only store the Row eigenvectors. Please transpose the matrice to obtain the Col eigenvectors.
+
+        # 2) calculate the eigenvalues and vectors
+        U_free_col, S, V_row = np.linalg.svd(AFree)  # S contains the eigen values of AFree in decreasing order. U_col is a matrix (nbr free DOF,nbr free DOF) containing the column eigen vectors. V_row is a matrix (nbr lines,nbr lines) containing the row eigen vectors.
+
+        Lambda_1 = S.max()
+        Tol = Lambda_1 * 10 ** -3  # Tol is the limit below which an eigen value is considered as null.
+        Sr = S[S >= Tol]  # non null eigen values
+        r = Sr.size  #number of non null eigen value. rank of AFree
+        m = DOFfreeCount - r  #degree of kinematic indeterminacy = nbr of mechanisms
+        s = ElementsCount - r  #degree of static indeterminacy = nbr of self-stress modes
+
+        # 3a) Interprete the eigenVectors in the elements space
+        Vr_row = V_row[:r,:]  # r row eigen vectors (,nbr lines). Interpretation: Bar tensions in equilibrium with the Diag(S)* Loads of Ur OR Bar elongations compatible with Diag(1/S) * Extensional displacements of Ur
+        Vs_row = np.zeros((s, ElementsCount)) # s row eigen vectors. Interpretation: Self-stress modes (sol of A@t=0) (=Bar tensions in equilibrium without external loads) OR incompatible Bar elongations (=bar elongations which can't be obtained in this geometry)
+        SS = np.zeros((s, ElementsCount)) # s row eigen vectors. =Vs_row but rescaled to have the biggest force = -1 (compression) in each vector. Interpretation: rescaled Self-stress modes
+
+        if s != 0: #rescale the eigen vectors Vs_row such that the highest value = -1 (compression) and store the results in the Self-Stress mode matrix SS.
+            Vs_row = V_row[-s:,:]  # s Vecteurs (lignes) propres (associés aux VaP nulles) de longueur ElementsCount. Interprétations : Self-stress modes (sol of A@t=0) (=Bar tensions in equilibrium without external loads) OR incompatible Bar elongations (=bar elongations which can't be obtained in this geometry)
+            bool = -Vs_row.min(axis=1) > Vs_row.max(axis=1)  # true if |compression max| > tension max
+            max = np.where(bool, Vs_row.min(axis=1), Vs_row.max(axis=1))
+            SS = (Vs_row.transpose() / -max).transpose()  # self-stress modes Matrix. we made sure the max value is always equal to 1 in compression whatever the modes
+
+        # NB : Vr_t est orthogonal à Vs_t.  check : print(Vr_row.transpose()@Vs_row) return matrix zeros
+
+        # 3b) Interprete the eigenVectors in the nodes space
+
+        Ur_free_col = U_free_col[:,:r]  # r col eigenvectors (nbr free DOF,). Interpretation: Loads which can be equilibrated in the current struct OR Extensional displacements
+        Ur_free_row = Ur_free_col.transpose()
+        Ur_row = np.zeros((r, 3 * NodesCount)) # r row eigenvectors (,3 nbr nodes).
+        Ur_row[:, IsDOFfree] = Ur_free_row
+
+        Um_free_col = np.zeros((DOFfreeCount, m))
+        Um_free_row = np.zeros((m, DOFfreeCount))
+        Um_row = np.zeros((m, 3 * NodesCount))
+        if m != 0:
+            Um_free_col = U_free_col[:,r:] # m col eigenvectors (nbr free DOF,). Interpretation: Loads which can not be equilibrated in the current struct OR Inextensional displacements (sol of B@d = 0)
+            Um_free_row = Um_free_col.transpose() # m row eigenvectors (,nbr free DOF)
+            Um_row[:, IsDOFfree] = Um_free_row # m row eigenvectors (,3 nbr nodes)
+
+        # NB : Ur est orthogonal à Um.  check : print(Ur.transpose()@Um) return matrix zeros
+
+        SVD.PopulateWith(S, r, Sr, s, Vr_row, Vs_row, SS, m, Ur_row, Ur_free_row, Um_row, Um_free_row)
 
 class State():
     def __init__(Cur, S, nodesCoord, loadsApplied=np.zeros((0,)), tensionApplied=np.zeros((0,)), reactionsApplied=np.zeros((0,)), loadsToApply=np.zeros((0,)), lengtheningsToApply=np.zeros((0,))):
@@ -62,8 +151,8 @@ class State():
         Cur.ElementsL = np.zeros((S.ElementsCount,)) #Elements lengths
         Cur.ElementsCos = np.zeros((S.ElementsCount, 3)) #The cosinus directors of the elements
         Cur.A = np.zeros((3 * S.NodesCount, S.ElementsCount)) #The equilibrium matrix of the structure in the current state
-        Cur.A_free = np.zeros((S.DOFfreeCount, S.ElementsCount))  # Equilibrium matrix of the free degrees of freedom only
-        Cur.A_fixed = np.zeros((S.FixationsCount,S.ElementsCount))  # Equilibrium matrix of the fixed degrees of freedom only. Allows to find reactions from tension forces. A_fixed @ Tension = Reaction
+        Cur.AFree = np.zeros((S.DOFfreeCount, S.ElementsCount))  # Equilibrium matrix of the free degrees of freedom only
+        Cur.AFixed = np.zeros((S.FixationsCount, S.ElementsCount))  # Equilibrium matrix of the fixed degrees of freedom only. Allows to find reactions from tension forces. AFixed @ Tension = Reaction
 
         Cur.Residual = np.ones((3 * S.NodesCount,)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
@@ -130,6 +219,15 @@ class State():
 
         return (A,A_free,A_fixed)
 
+    def ComputeSVD(Cur, AFree):
+        """
+        :param AFree: The Equilibrium Matrix with shape (DOFfreeCount, ElementsCount)
+        :return: a new ResultsSVD object filled with the results of the singular value decomposition of AFree
+        """
+        SVD = ResultsSVD()
+        SVD.SVDEquilibriumMatrix(Cur.S, AFree)
+        return SVD
+
 
 class StructureObj():
 
@@ -153,17 +251,17 @@ class StructureObj():
 
         #Elements info
         S0.C = np.zeros((S0.ElementsCount, S0.NodesCount), dtype=int) #matrice de connectivité C # (nbr lines, nbr nodes)
-        S0.Elements_L0 = np.zeros((S0.ElementsCount,1)) # Lengths of the elements in the initial structure # (nbr lines,)
+        S0.ElementsLengthsFree = np.zeros((S0.ElementsCount, 1)) # Lengths of the elements in the initial structure # (nbr lines,)
         S0.Elements_Cos0 = np.zeros((S0.ElementsCount, 3)) # Cos directors of the elements in the initial structure #(nbr lines,3)
-        S0.F = np.eye(S0.ElementsCount, S0.ElementsCount) # Flexibility matrix containing L0/EA of each element in the diagonal
+        S0.F = np.eye(S0.ElementsCount, S0.ElementsCount) # Flexibility matrix containing Lfree/EA of each element in the diagonal
 
         S0.Elements_L = np.zeros((S0.ElementsCount,1))  # Lengths of the elements in the current structure. (Initial = Current at the first step of NL Solve)
         S0.Elements_Cos = np.zeros((S0.ElementsCount, 3)) # (nbr lines,3)
 
         ##### Assembly informations #####
         S0.A = np.zeros((3 * S0.NodesCount, S0.ElementsCount)) #Equilibrium matrix
-        S0.A_free = np.zeros((S0.DOFfreeCount, S0.ElementsCount)) #Equilibrium matrix of the free dof only
-        S0.A_fixed = np.zeros((S0.FixationsCount, S0.ElementsCount))  # Equilibrium matrix of the fixed dof only. Allows to find reactions from axial forces. A_fixed@t=r
+        S0.AFree = np.zeros((S0.DOFfreeCount, S0.ElementsCount)) #Equilibrium matrix of the free dof only
+        S0.AFixed = np.zeros((S0.FixationsCount, S0.ElementsCount))  # Equilibrium matrix of the fixed dof only. Allows to find reactions from axial forces. AFixed@t=r
 
         S0.SVD = ResultsSVD() #object containing all the results of the Singular Value Decomposition of the Equilibrium matrix
 
@@ -207,12 +305,12 @@ class StructureObj():
     def Main_Assemble(S0,Data):
         S0.PopulateWith(Data)
         S0.Core_Assemble()
-        S0.SVD = S0.SVD_Equilibrium_Matrix(S0.A_free)
+        S0.SVD = S0.SVD_Equilibrium_Matrix(S0.AFree)
 
     def test_Main_Assemble(S0, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A=None, Elements_E=None):
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
         S0.Core_Assemble()
-        S0.SVD = S0.SVD_Equilibrium_Matrix(S0.A_free)
+        S0.SVD = S0.SVD_Equilibrium_Matrix(S0.AFree)
 
     def Main_LinearSolve_Displ_Method(S0,Data):
         S0.PopulateWith(Data)
@@ -316,10 +414,10 @@ class StructureObj():
         """
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.Elements_L,S0.Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
-        (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos,S0.C,S0.IsDOFfree)
+        (S0.A, S0.AFree, S0.AFixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos, S0.C, S0.IsDOFfree)
         # if S0.ElementsA.sum()!=0 and S0.ElementsE.sum()!=0:
         #     S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.ElementsL, S0.ElementsA, S0.ElementsE)
-        #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.A_free, S0.ElementsL, S0.ElementsA, S0.ElementsE)
+        #     S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.AFree, S0.ElementsL, S0.ElementsA, S0.ElementsE)
 
     def Connectivity_Matrix(S0, NodesCount, ElementsCount, ElementsEndNodes):
         """
@@ -346,65 +444,7 @@ class StructureObj():
 
 
 
-    def SVD_Equilibrium_Matrix(S0, A_free):
-        """
-        Singular Value Decomposition
-        :param A: la matrice d'équilibre de taille DOFfreeCount x ElementsCount
-        :return: modifie la configuration pour stocker les données relatives à la SVD
-        """
-        # 1) retrieve data
-        ElementsCount = S0.ElementsCount
-        NodesCount = S0.NodesCount
-        DOFfreeCount = S0.DOFfreeCount
-        IsDOFfree = S0.IsDOFfree
 
-        assert A_free.shape == (DOFfreeCount,ElementsCount), "check that shape of Equilibrium matrix Afree = (nbr free dof, nbr lines)"
-        assert np.abs(A_free).sum() != 0, "check that Equilibrium Matrix A_free has been computed"
-
-        # 2) calculate the eigenvalues and vectors
-        U_free_col, S, V_row = np.linalg.svd(A_free)  # S contains the eigen values of A_free in decreasing order. U_col is a matrix (nbr free DOF,nbr free DOF) containing the column eigen vectors. V_row is a matrix (nbr lines,nbr lines) containing the row eigen vectors.
-
-        Lambda_1 = S.max()
-        Tol = Lambda_1 * 10 ** -3  # Tol is the limit below which an eigen value is considered as null.
-        Sr = S[S >= Tol]  # non null eigen values
-        r = Sr.size  #number of non null eigen value. rank of A_free
-        m = DOFfreeCount - r  #degree of kinematic indeterminacy = nbr of mechanisms
-        s = ElementsCount - r  #degree of static indeterminacy = nbr of self-stress modes
-
-        # 3a) Interprete the eigenVectors in the elements space
-        Vr_row = V_row[:r,:]  # r row eigen vectors (,nbr lines). Interpretation: Bar tensions in equilibrium with the Diag(S)* Loads of Ur OR Bar elongations compatible with Diag(1/S) * Extensional displacements of Ur
-        Vs_row = np.zeros((s, ElementsCount)) # s row eigen vectors. Interpretation: Self-stress modes (sol of A@t=0) (=Bar tensions in equilibrium without external loads) OR incompatible Bar elongations (=bar elongations which can't be obtained in this geometry)
-        SS = np.zeros((s, ElementsCount)) # s row eigen vectors. =Vs_row but rescaled to have the biggest force = -1 (compression) in each vector. Interpretation: rescaled Self-stress modes
-
-        if s != 0:
-            Vs_row = V_row[-s:,:]  # s Vecteurs (lignes) propres (associés aux VaP nulles) de longueur ElementsCount. Interprétations : Self-stress modes (sol of A@t=0) (=Bar tensions in equilibrium without external loads) OR incompatible Bar elongations (=bar elongations which can't be obtained in this geometry)
-            bool = -Vs_row.min(axis=1) > Vs_row.max(axis=1)  # true if |compression max| > tension max
-            max = np.where(bool, Vs_row.min(axis=1), Vs_row.max(axis=1))
-            SS = (Vs_row.transpose() / -max).transpose()  # self-stress modes Matrix. we made sure the max value is always equal to 1 in compression whatever the modes
-
-        # NB : Vr_t est orthogonal à Vs_t.  check : print(Vr_row.transpose()@Vs_row) return matrix zeros
-
-        # 3b) Interprete the eigenVectors in the nodes space
-
-        Ur_free_col = U_free_col[:,:r]  # r col eigenvectors (nbr free DOF,). Interpretation: Loads which can be equilibrated in the current struct OR Extensional displacements
-        Ur_free_row = Ur_free_col.transpose()
-        Ur_row = np.zeros((r, 3 * NodesCount)) # r row eigenvectors (,3 nbr nodes).
-        Ur_row[:, IsDOFfree] = Ur_free_row
-
-        Um_free_col = np.zeros((DOFfreeCount, m))
-        Um_free_row = np.zeros((m, DOFfreeCount))
-        Um_row = np.zeros((m, 3 * NodesCount))
-        if m != 0:
-            Um_free_col = U_free_col[:,r:] # m col eigenvectors (nbr free DOF,). Interpretation: Loads which can not be equilibrated in the current struct OR Inextensional displacements (sol of B@d = 0)
-            Um_free_row = Um_free_col.transpose() # m row eigenvectors (,nbr free DOF)
-            Um_row[:, IsDOFfree] = Um_free_row # m row eigenvectors (,3 nbr nodes)
-
-        # NB : Ur est orthogonal à Um.  check : print(Ur.transpose()@Um) return matrix zeros
-
-        # 4) Send Results
-        SVD = ResultsSVD()
-        SVD.PopulateWith(S,r,Sr,s,Vr_row,Vs_row,SS,m,Ur_row,Ur_free_row,Um_row,Um_free_row)
-        return SVD
 
     def Compute_StiffnessMat_Matrix(S0,A,Elements_L,Elements_A,Elements_E):
 
@@ -414,8 +454,8 @@ class StructureObj():
 
         Diag_EAsL = Diag_A @ Diag_E @ Diag_L_inv #(nbr lines, nbr lines)
 
-        A = A  # (3*nbr nodes, nbr lines) Or if input A=A_free (nbr free dof, nbr lines)
-        B = A.transpose() # (nbr lines, 3*nbr nodes)  Or if input A=A_free (nbr lines, nbr free dof)
+        A = A  # (3*nbr nodes, nbr lines) Or if input A=AFree (nbr free dof, nbr lines)
+        B = A.transpose() # (nbr lines, 3*nbr nodes)  Or if input A=AFree (nbr lines, nbr free dof)
         Km = A @ Diag_EAsL @ B # (3*nbr nodes, 3*nbr nodes) OR (nbr free dof, nbr free dof)
 
         return Km
@@ -427,7 +467,7 @@ class StructureObj():
     def Core_LinearSolve_Displ_Method(S0):
 
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
+        (S0.ElementsLengthsFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         perturb = 1e-6  # [m], à appliquer si matrice singulière uniquement
 
@@ -453,7 +493,7 @@ class StructureObj():
         n = cur.NodesCount
         c = cur.FixationsCount
 
-        Elements_L0 = cur.Elements_L0 #  = S0.Elements_L0 : Initial Lengths
+        Elements_L0 = cur.ElementsLengthsFree #  = S0.ElementsLengthsFree : Initial Lengths
         Elements_A = cur.ElementsA
         Elements_E = cur.ElementsE
         C = cur.C
@@ -596,7 +636,7 @@ class StructureObj():
     def Core_NonLinearSolve_Displ_Method(S0):
 
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
+        (S0.ElementsLengthsFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         (Stages,StagesLoad,StagesDispl,StagesN,StagesR) = S0.NonLinearSolve_Displ_Method(S0.n_steps, S0.NodesCoord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
         S0.Stages = Stages
@@ -801,8 +841,8 @@ class StructureObj():
         :return:
         """
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.Elements_L0,S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
-        (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0,S0.C,S0.IsDOFfree)
+        (S0.ElementsLengthsFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
+        (S0.A, S0.AFree, S0.AFixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
 
         d0 = np.zeros((3*S0.NodesCount,1)) #initial displacements
         t0 = S0.AxialForces_Already_Applied #initial forces at first step
@@ -811,13 +851,13 @@ class StructureObj():
         p_ToApply = S0.Loads_To_Apply[S0.IsDOFfree] #external point loads to apply on the free dofs
         e_ToApply = S0.Elongations_To_Apply  #elongations to apply
 
-        dp_free = p_ToApply + p0 - S0.A_free @ t0 #unbalanced loads. A_free @ t0 should be equal to p0 if the initial structure is in equilibrium.
+        dp_free = p_ToApply + p0 - S0.AFree @ t0 #unbalanced loads. AFree @ t0 should be equal to p0 if the initial structure is in equilibrium.
 
         ## 0) Compute the SVD of At
-        SVD = S0.SVD_Equilibrium_Matrix(S0.A_free)
+        SVD = S0.SVD_Equilibrium_Matrix(S0.AFree)
 
         ## 1) Solve Equilibrium A @ dt = dp   to find the increment of tensions dt due to unbalanced load and external elongations
-        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.Elements_L0)
+        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.ElementsLengthsFree)
         (dt, de) = S0.Equilibrium_Analysis(SVD,S0.F,dp_free,e_ToApply)
 
         ## 2) Solve Compatibility Bt @ dd = de to find the increment of displacements dd due to unbalanced loads and external elongations
@@ -850,7 +890,7 @@ class StructureObj():
         for i in np.arange(SVD.m):
 
             Um_i = (SVD.Um_row[i, :]).transpose() #(3nodes,1)  Mechanism i is actionned by a unit displacement
-            Elements_Cos_Displ = S0.Compute_Elements_Reorientation(Um_i, S0.C, S0.Elements_L0)
+            Elements_Cos_Displ = S0.Compute_Elements_Reorientation(Um_i, S0.C, S0.ElementsLengthsFree)
             (A_nl, A_nl_free, A_nl_fixed) = S0.Compute_NL_Equilibrium_Matrix(Elements_Cos_Displ, S0.C, S0.IsDOFfree)
             G_i = A_nl_free @ t0
             G[:,i] = G_i
@@ -982,9 +1022,9 @@ class StructureObj():
         :return:
         """
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.Elements_L0, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
-        (S0.A, S0.A_free, S0.A_fixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
-        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.Elements_L0)
+        (S0.ElementsLengthsFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
+        (S0.A, S0.AFree, S0.AFixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
+        S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.ElementsLengthsFree)
 
         (t,d) = S0.NonLinearSolve_Force_Method(S0.n_steps, S0.Loads_Already_Applied, S0.AxialForces_Already_Applied, S0.Loads_To_Apply, S0.Elongations_To_Apply)
 
@@ -1026,12 +1066,12 @@ class StructureObj():
             Prev_d = d[:, k-1].reshape((-1, 1))
             Prev_t = t[:,k-1].reshape((-1,1))
 
-            Elements_Cos_Displ = S0.Compute_Elements_Reorientation(Prev_d, S0.C, S0.Elements_L0)
+            Elements_Cos_Displ = S0.Compute_Elements_Reorientation(Prev_d, S0.C, S0.ElementsLengthsFree)
             (A_nl, A_nl_free, A_nl_fixed) = S0.Compute_NL_Equilibrium_Matrix(Elements_Cos_Displ, S0.C, S0.IsDOFfree)
             A_t = S0.A+A_nl
-            A_t_free = S0.A_free + A_nl_free
+            A_t_free = S0.AFree + A_nl_free
 
-            dp_free = p_ToApply + p0 - A_t_free @ Prev_t  # unbalanced loads. A_free @ t0 should be equal to p0 if the initial structure is in equilibrium.
+            dp_free = p_ToApply + p0 - A_t_free @ Prev_t  # unbalanced loads. AFree @ t0 should be equal to p0 if the initial structure is in equilibrium.
 
             ## 0) Compute the SVD of At
             SVD = S0.SVD_Equilibrium_Matrix(A_t_free)
