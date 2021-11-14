@@ -153,6 +153,7 @@ class State():
         Cur.A = np.zeros((3 * S.NodesCount, S.ElementsCount)) #The equilibrium matrix of the structure in the current state
         Cur.AFree = np.zeros((S.DOFfreeCount, S.ElementsCount))  # Equilibrium matrix of the free degrees of freedom only
         Cur.AFixed = np.zeros((S.FixationsCount, S.ElementsCount))  # Equilibrium matrix of the fixed degrees of freedom only. Allows to find reactions from tension forces. AFixed @ Tension = Reaction
+        Cur.SVD = ResultsSVD() #An empty results SVD object
 
         Cur.Residual = np.ones((3 * S.NodesCount,)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
@@ -222,11 +223,10 @@ class State():
     def ComputeSVD(Cur, AFree):
         """
         :param AFree: The Equilibrium Matrix with shape (DOFfreeCount, ElementsCount)
-        :return: a new ResultsSVD object filled with the results of the singular value decomposition of AFree
+        :return: the ResultsSVD object in the current state is filled with the results of the singular value decomposition of AFree
         """
-        SVD = ResultsSVD()
-        SVD.SVDEquilibriumMatrix(Cur.S, AFree)
-        return SVD
+        Cur.SVD.SVDEquilibriumMatrix(Cur.S, AFree) #Compute and store the results of the singular value decompositon of AFree in the current state
+        return Cur.SVD
 
 
 class StructureObj():
