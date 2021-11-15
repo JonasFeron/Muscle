@@ -19,10 +19,10 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False,False,False,True,True,True,False,False,False])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        # print(Self.NodesCount)
-        # print(Self.ElementsCount)
-        # print(Self.FixationsCount)
-        # print(Self.DOFfreeCount)
+        # print(Cur.NodesCount)
+        # print(Cur.ElementsCount)
+        # print(Cur.FixationsCount)
+        # print(Cur.DOFfreeCount)
         self.assertEqual(S0.NodesCount, 3)
         self.assertEqual(S0.ElementsCount, 2)
         self.assertEqual(S0.FixationsCount, 6)
@@ -46,16 +46,7 @@ class StructureObj_Tests(unittest.TestCase):
         self.assertEqual(success, True)
 
 
-    def test_FlexibilityMatrix(self):
 
-        ElementsA = np.array([1e4,1e4]) #mm²
-        ElementsE = np.array([100e3,0]) #MPa
-        ElementsL = np.array([2,2]) #m
-
-        S = StructureObj(0,2)
-        F = S.Flexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
-        self.assertEqual(F[0], 2/(100e7))
-        self.assertEqual(F[1], 1e6)
 
 
 
@@ -118,7 +109,7 @@ class StructureObj_Tests(unittest.TestCase):
         self.assertEqual(successN, True)
 
         # Reactions_answer = np.array([50000, 0, 50000, 0, -50000, 0, 50000])  # analytique solution
-        # self.assertEqual(np.allclose(Self.Reactions_Results, Reactions_answer), True)
+        # self.assertEqual(np.allclose(Cur.Reactions_Results, Reactions_answer), True)
 
     def test_Main_NonLinearSolve_Disp_Meth_2cables_3LoadStages(self):
         #cfr solution in excel files attached
@@ -187,7 +178,7 @@ class StructureObj_Tests(unittest.TestCase):
     #     """
     #     test to check that RegisterData calculates correctly the number of nodes, elements, and supports. Test for 3 cables
     #     """
-    #     Self = StructureObj()
+    #     Cur = StructureObj()
     #     L = 2*5.08
     #     # l = L/3 # length of the middle cable
     #     # l1 = np.sqrt(H**2 + l**2) # length of the extreme cables
@@ -211,14 +202,14 @@ class StructureObj_Tests(unittest.TestCase):
     #     Loads_To_Apply = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,0.0]])
     #     Elongations_To_Apply = np.array([0,0])
     #
-    #     Self.test_Main_LinearSolve_Force_Method(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE,
+    #     Cur.test_Main_LinearSolve_Force_Method(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE,
     #                                        AxialForces_Already_Applied, Loads_To_Apply, Loads_Already_Applied,
     #                                        Elongations_To_Apply)
     #
     #     Displacements_answer_free = np.array([0,166.54])*1e-3 #analytique solution
     #     Displacements_answer = np.zeros((9, 1))
     #     Displacements_answer[IsDOFfree] = Displacements_answer_free.reshape(-1,1)
-    #     self.assertEqual(np.allclose(Self.Displacements_Results,Displacements_answer,atol=1e-5),True)
+    #     self.assertEqual(np.allclose(Cur.Displacements_Results,Displacements_answer,atol=1e-5),True)
 
     def test_Main_NonLinearSolve_Disp_Meth_3cables_NLprestress(self):
         #cfr master thesis Jferon
@@ -245,7 +236,7 @@ class StructureObj_Tests(unittest.TestCase):
 
 
 
-        # N_obtained = Self.AxialForces_Results[:,last_step]
+        # N_obtained = Cur.AxialForces_Results[:,last_step]
         # N_sol = np.array([7037.17,7037.17,888.81]) #analytique solution
         # err = 2/100 # admissible error
         # N_adm = [N_sol*(1-err),N_sol*(1+err)] # admissible interval
@@ -253,7 +244,7 @@ class StructureObj_Tests(unittest.TestCase):
         # self.assertEqual(False, True)
 
         # Reactions_answer = np.array([50000, 0, 50000, 0, -50000, 0, 50000])  # analytique solution
-        # self.assertEqual(np.allclose(Self.Reactions_Results, Reactions_answer), True)
+        # self.assertEqual(np.allclose(Cur.Reactions_Results, Reactions_answer), True)
 
 
     # endregion
@@ -378,7 +369,7 @@ class StructureObj_Tests(unittest.TestCase):
         self.assertEqual(successN, True)
 
         # Reactions_answer = np.array([50000, 0, 50000, 0, -50000, 0, 50000])  # analytique solution
-        # self.assertEqual(np.allclose(Self.Reactions_Results, Reactions_answer), True)
+        # self.assertEqual(np.allclose(Cur.Reactions_Results, Reactions_answer), True)
 
 
     # endregion
@@ -517,7 +508,7 @@ class StructureObj_Tests(unittest.TestCase):
         S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
-        # (Self.A, Self.AFree, Self.AFixed) = Self.Compute_Equilibrium_Matrix(Self.Elements_Cos0, Self.C, Self.IsDOFfree)
+        # (Cur.A, Cur.AFree, Cur.AFixed) = Cur.Compute_Equilibrium_Matrix(Cur.Elements_Cos0, Cur.C, Cur.IsDOFfree)
         t0 = np.array([1, 10, 10])*1000
         q0 = t0/S0.ElementsLFree.reshape(-1, )
         Q = np.diag(q0)
@@ -591,10 +582,10 @@ class StructureObj_Tests(unittest.TestCase):
         S0.Km = S0.Compute_StiffnessMat_Matrix(S0.A, S0.Elements_L, S0.ElementsA, S0.ElementsE)
         S0.Km_free = S0.Compute_StiffnessMat_Matrix(S0.AFree, S0.Elements_L, S0.ElementsA, S0.ElementsE)
         S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.ElementsLFree)
-        # Self.SVD = Self.SVD_Equilibrium_Matrix(Self.AFree)
+        # Cur.SVD = Cur.SVD_Equilibrium_Matrix(Cur.AFree)
 
         # Solve B0.U0 = e_inelastic
-        # Self.Displacements_Results = np.linalg.solve(Self.AFree.transpose(),Self.Elongations_To_Apply) # try to solve 3 eq with 2 unknowns raise a LinAlgError because AFree is not square
+        # Cur.Displacements_Results = np.linalg.solve(Cur.AFree.transpose(),Cur.Elongations_To_Apply) # try to solve 3 eq with 2 unknowns raise a LinAlgError because AFree is not square
         S0.Displacements_Results = \
         np.linalg.lstsq(S0.AFree.transpose(), S0.Elongations_To_Apply.reshape(-1), rcond=0.001)[0]
 
@@ -647,7 +638,7 @@ class StructureObj_Tests(unittest.TestCase):
         e2_tot = e2_elastic
 
         # find total forces
-        # L_def_approx = Self.ElementsLFree.reshape(-1,1)+Self.Elongations_To_Apply
+        # L_def_approx = Cur.ElementsLFree.reshape(-1,1)+Cur.Elongations_To_Apply
         # S2.F = S2.Flexibility_Matrix(S2.ElementsE, S2.ElementsA, L_def_approx.reshape(-1,))
         # k2_bsc = np.linalg.inv(S2.F)
         t2_tot = k1_bsc @ e2_tot

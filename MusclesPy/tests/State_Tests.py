@@ -98,6 +98,18 @@ class MyTestCase(unittest.TestCase):
         successUm = np.allclose(SVD.Um_free_row,Um_answer)
         self.assertEqual(successUm, True)
 
+    def test_FlexibilityMatrix(self):
+
+        ElementsA = np.array([1e4,1e4]) #mm²
+        ElementsE = np.array([100e3,0]) #MPa
+        ElementsL = np.array([2,2]) #m
+
+        S = StructureObj(0,2)
+        Initial = State(S)
+        F = Initial.Flexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
+        self.assertEqual(F[0], 2/(100e7))
+        self.assertEqual(F[1], 1e6)
+
     def test_Simple_ComputeTension(self):
 
         #A structure composed of 2 elements. The first element has E = 100e3 and A=1e4 both in tension and compression. The second element has no stiffness in compression hence it slacks if compressed.
