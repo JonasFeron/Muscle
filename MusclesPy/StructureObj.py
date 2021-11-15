@@ -127,16 +127,13 @@ class ResultsSVD():
         SVD.PopulateWith(S, r, Sr, s, Vr_row, Vs_row, SS, m, Ur_row, Ur_free_row, Um_row, Um_free_row)
 
 class State():
-    def __init__(Cur, S=None, nodesCoord=np.zeros((0,)), loadsApplied=np.zeros((0,)), tensionApplied=np.zeros((0,)), reactionsApplied=np.zeros((0,)), loadsToApply=np.zeros((0,)), lengtheningsToApply=np.zeros((0,))):
+    def __init__(Cur, S=None, nodesCoord=np.zeros((0,)), loads=np.zeros((0,)), tension=np.zeros((0,)), reactions=np.zeros((0,))):
         """
         The Current State of a Structure Object S is defined by
         :param NodesCoord: The current nodes coordinates of the structure
-        :param LoadsApplied: The loads already applied on the structure
-        :param TensionApplied: The internal tension forces already existing in the structure due to LoadsApplied or to prestress forces
-        :param ReactionsApplied: The reactions forces already applied on the structure by the structure fixations
-        :param LoadsToApply: The additionnal external loads to apply on the structure
-        :param LengtheningsToApply: The additionnal lengthenings to impose on the elements free lengths of the structure
-
+        :param Loads: The total loads currently applied on the structure
+        :param Tension: The internal tension forces currently existing in the structure
+        :param Reactions: The reactions forces currently applied on the structure by the structure fixations
         """
         ##### State inputs #####
 
@@ -145,11 +142,10 @@ class State():
         else :
             Cur.S = StructureObj()
         Cur.NodesCoord = nodesCoord.reshape((-1,))
-        Cur.LoadsApplied = loadsApplied.reshape((-1,))
-        Cur.TensionApplied = tensionApplied.reshape((-1,))
-        Cur.ReactionsApplied = reactionsApplied.reshape((-1,))
-        Cur.LoadsToApply = loadsToApply.reshape((-1,))
-        Cur.LengtheningsToApply = lengtheningsToApply.reshape((-1,))
+        Cur.Loads = loads.reshape((-1,))
+        Cur.Tension = tension.reshape((-1,))
+        Cur.Reactions = reactions.reshape((-1,))
+
 
         ##### Initialize the State properties #####
         Cur.ElementsL = np.zeros((S.ElementsCount,)) #Elements lengths
@@ -280,12 +276,42 @@ class State():
         T = Kbsc*DeltaL # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
         return T
 
-    def Residual(Cur,A,LoadApplied):
+    def ComputeResidual(Cur,A,Loads,Tension):
+        """
+        Returns the Residual (=unbalanced loads) considering the equilibrium equation R = Loads - A @ Tension.
+        If A=A with shape(3 NodesCount,ElementsCount), the Residual = the Reaction where the DOF are fixed.
+        If A=Afree with shape (DOFfreeCount,ElementsCount), the Residual = 0 where the DOF are fixed.
 
+        :param A: [/] - (3*NodesCount,ElementsCount) OR (DOFfreeCount,ElementsCount) depending if A=A or A=Afree - the equilibrium matrix of the structure.
+        :param Loads: [N] - shape (3*NodesCount,) - The total external load acting in the current state.
+        :param Tension: [N] - shape (ElementsCount,) - The total internal forces acting in the elements in the current state.
+        :return: Residual: [N] - shape (3*NodesCount,) whatever the shape of A -  The unbalanced loads.
+        """
 
-        #N.B. It is not because TensionApplied were in equilibrium with LoadsApplied in a previous state of the structure
-        # that they are still in equilibrium in the current state.
-        # simply because the nodes coordinates may have changed.
+        #1) Check the inputs
+        NodesCount = Cur.S.NodesCount
+        ElementsCount = Cur.S.ElementsCount
+        DOFfreeCount = Cur.S.DOFfreeCount
+        IsDOFfree = Cur.S.IsDOFfree
+        assert A.shape == (3*NodesCount,ElementsCount) or A.shape == (DOFfreeCount,ElementsCount), "Please check the shape of A"
+        assert Loads.shape == (3*NodesCount,), "Please check the shape of Loads"
+        assert Tension.shape == (ElementsCount,), "Please check the shape of Tension"
+        assert IsDOFfree.shape == (3*NodesCount,), "Please check the shape of IsDOFfree"
+        #2) Check if A=A or A=Afree
+        DOF2Compute = np.ones((3*NodesCount,),dtype=bool) #a vector of true. if true, the residual is computed. if false, the residual = 0.
+        if A.shape == (DOFfreeCount, ElementsCount): #if A=Afree
+            DOF2Compute = IsDOFfree # then Compute the Residual only for the free DOF and impose Residual=0 for the fixed DOF.
+
+        #3) Compute the Residual
+        Residual = np.zeros((3*NodesCount,))
+        R = Residual[DOF2Compute]
+        T = Tension
+        L = Loads[DOF2Compute]
+
+        R = L - A @ T # equilibrium equations such that A @ T = L if equilibrium.
+        Residual[DOF2Compute] = R #the Residual is computed everywherer (if A=A) or only for the free DOF (if A=Afree). 
+
+        return Residual
 
 
 class StructureObj():
@@ -309,6 +335,12 @@ class StructureObj():
         Self.ElementsA = np.zeros((Self.ElementsCount,))
         Self.ElementsE = np.zeros((Self.ElementsCount,))
         Self.IsDOFfree = np.zeros((3 * Self.NodesCount,), dtype=bool) #the supports conditions
+
+        Self.LoadsApplied = np.zeros((3 * Self.NodesCount,)) #The loads already applied on the structure
+        Self.TensionApplied = np.zeros((Self.ElementsCount,)) #The internal tension forces already existing in the structure due to LoadsApplied or to prestress forces
+        Self.ReactionsApplied = np.zeros((Self.FixationsCount,)) #The reactions forces already applied on the structure by the structure fixations
+        Self.LoadsToApply = np.zeros((3 * Self.NodesCount,)) #The additionnal external loads to apply on the structure
+        Self.LengtheningsToApply = np.zeros((Self.ElementsCount,)) #The additionnal lengthenings to impose on the elements free lengths of the structure
 
         Self.C = np.zeros((Self.ElementsCount, Self.NodesCount), dtype=int) #matrice de connectivité C # (nbr lines, nbr nodes)
         #Self.Elements_Cos0 = np.zeros((Self.ElementsCount, 3)) # Cos directors of the elements in the initial structure #(nbr lines,3)
