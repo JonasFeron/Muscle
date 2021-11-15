@@ -144,7 +144,7 @@ class SharedSolverResult():
             Answ.AxialForces_Results = S0.AxialForces_Results.round(2).tolist()
             Answ.Displacements_Results = S0.Displacements_Results.round(5).tolist()
             Answ.Reactions_Results = S0.Reactions_Results.round(2).tolist()
-            # if S0.NodesCount<=10: #it may be interesting to analyze the matrices of small structures
+            # if Self.NodesCount<=10: #it may be interesting to analyze the matrices of small structures
 
 
 class SharedSolverResultEncoder(json.JSONEncoder):
