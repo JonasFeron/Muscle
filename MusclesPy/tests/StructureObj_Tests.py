@@ -39,7 +39,7 @@ class StructureObj_Tests(unittest.TestCase):
         NodesCount = 3
         ElementsEndNodes = np.array([[0,1],[1,2]])
 
-        C = S0.Connectivity_Matrix(NodesCount,ElementsCount,ElementsEndNodes) #test the method
+        C = S0.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)  #test the method
 
         #check the results
         success = (C == np.array([[-1,  1,  0],[ 0, -1, 1]])).all()
@@ -58,7 +58,7 @@ class StructureObj_Tests(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
         (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
 
@@ -263,7 +263,7 @@ class StructureObj_Tests(unittest.TestCase):
         Elements_E = np.array([10000000000.0, 10000000000.0])
 
         S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E)
-        C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
 
         #1) Compute Elements Geometry
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, C)
@@ -505,7 +505,7 @@ class StructureObj_Tests(unittest.TestCase):
         Elements_E = np.array([E,E,E])
 
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E)
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         # (Cur.A, Cur.AFree, Cur.AFixed) = Cur.Compute_Equilibrium_Matrix(Cur.Elements_Cos0, Cur.C, Cur.IsDOFfree)

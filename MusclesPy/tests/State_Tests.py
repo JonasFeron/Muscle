@@ -15,7 +15,7 @@ class MyTestCase(unittest.TestCase):
         IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
 
         S.RegisterData(NodesCoord,ElementsEndNodes,IsDOFfree)
-        S.C = S.Connectivity_Matrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
 
         Initial = State(S,NodesCoord)
         (Initial.ElementsL, Initial.ElementsCos) = Initial.ComputeElementsLengthsAndCos(Initial.NodesCoord, S.C)
@@ -51,7 +51,7 @@ class MyTestCase(unittest.TestCase):
                               False, False, False])
 
         S.RegisterData(NodesCoord,ElementsEndNodes,IsDOFfree)
-        C = S.Connectivity_Matrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+        C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S,NodesCoord)
         (l,ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord,C)
         (A, A_free, A_fixed) = Initial.ComputeEquilibriumMatrix(C,IsDOFfree,ElementsCos)
@@ -75,7 +75,7 @@ class MyTestCase(unittest.TestCase):
                               False, False, False])
 
         S.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S.Connectivity_Matrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+        C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S,NodesCoord)
         (l, ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord,C)
         (A, A_free, A_fixed) = Initial.ComputeEquilibriumMatrix(C,IsDOFfree,ElementsCos)
@@ -143,7 +143,7 @@ class MyTestCase(unittest.TestCase):
                               False, False, False])
 
         S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
-        C = S.Connectivity_Matrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+        C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S, NodesCoord)
         (l, ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord, C)
         (A, AFree, A_fixed) = Initial.ComputeEquilibriumMatrix(C, IsDOFfree, ElementsCos)

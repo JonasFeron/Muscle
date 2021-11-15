@@ -604,14 +604,14 @@ class StructureObj():
         Assemble the equilibrim Matrix and the material stiffness matrix. N.B. Do not perfom the SVD -> do it separately
         :return:
         """
-        Self.C = Self.Connectivity_Matrix(Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
+        Self.C = Self.ConnectivityMatrix(Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
         (Self.Elements_L, Self.Elements_Cos) = Self.Compute_Elements_Geometry(Self.NodesCoord, Self.C)
         (Self.A, Self.AFree, Self.AFixed) = Self.Compute_Equilibrium_Matrix(Self.Elements_Cos, Self.C, Self.IsDOFfree)
         # if Cur.ElementsA.sum()!=0 and Cur.ElementsE.sum()!=0:
         #     Cur.Km = Cur.Compute_StiffnessMat_Matrix(Cur.A, Cur.ElementsL, Cur.ElementsA, Cur.ElementsE)
         #     Cur.Km_free = Cur.Compute_StiffnessMat_Matrix(Cur.AFree, Cur.ElementsL, Cur.ElementsA, Cur.ElementsE)
 
-    def Connectivity_Matrix(Self, NodesCount, ElementsCount, ElementsEndNodes):
+    def ConnectivityMatrix(Self, NodesCount, ElementsCount, ElementsEndNodes):
         """
         :return: the connectivity matrix C of shape (ElementsCount, NodesCount). C contains the same info than ElementsEndNodes but presented under a matrix form.
         """
@@ -630,6 +630,26 @@ class StructureObj():
         return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually do not change the equilibrum matrix.
         # print(C)
 
+    def StackedConnectivityMatrix(Self,C):
+        """
+        Stack the connectivity matrix such that each row (=1element) is arranged according to the DOF [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
+        :param C: [/] - shape (ElementsCount, NodesCount) - the connectivity matrix
+        :return: Cxyz: [/] - shape (ElementsCount, 3*NodesCount) - the connectivity matrix stacked 3 times
+        """
+        #1) Check inputs
+        ElementsCount = Self.ElementsCount
+        NodesCount = Self.NodesCount
+        assert C.shape == (ElementsCount, NodesCount), "Please check the connectivity matrix C shape"
+
+        #2) Stack the degrees of freedoms
+        Cxyz = np.zeros((ElementsCount, 3 * NodesCount))
+
+        for i in range(NodesCount):
+            Cxyz[:, 3 * i] = C[:,i]
+            Cxyz[:, 3 * i + 1] = C[:,i]
+            Cxyz[:, 3 * i + 2] = C[:,i]
+
+        return Cxyz
 
 
 
@@ -640,7 +660,7 @@ class StructureObj():
 
     def Core_LinearSolve_Displ_Method(S0):
 
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         perturb = 1e-6  # [m], à appliquer si matrice singulière uniquement
@@ -809,7 +829,7 @@ class StructureObj():
     # region Private Methods : Non Linear Solver based on displacement methods
     def Core_NonLinearSolve_Displ_Method(S0):
 
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
 
         (Stages,StagesLoad,StagesDispl,StagesN,StagesR) = S0.NonLinearSolve_Displ_Method(S0.n_steps, S0.NodesCoord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
@@ -1014,7 +1034,7 @@ class StructureObj():
 
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.AFree, S0.AFixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
 
@@ -1190,7 +1210,7 @@ class StructureObj():
         """
         :return:
         """
-        S0.C = S0.Connectivity_Matrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
+        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
         (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
         (S0.A, S0.AFree, S0.AFixed) = S0.Compute_Equilibrium_Matrix(S0.Elements_Cos0, S0.C, S0.IsDOFfree)
         S0.F = S0.Flexibility_Matrix(S0.ElementsE, S0.ElementsA, S0.ElementsLFree)
