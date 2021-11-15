@@ -381,7 +381,6 @@ class State():
         q = T / L
         return q
 
-
     def WIPForceDensityMatrices(Cur, C, q):
         """
         Work In Progress
@@ -411,7 +410,47 @@ class State():
         #Kgeo= Cxyz.T @ Q @ Cxyz # shape (3*NodesCount,3*NodesCount) = (3*NodesCount,ElementsCount) @ (ElementsCount,ElementsCount) @ (ElementsCount,3*NodesCount)
         #wrong results
 
+    def GeometricLocalStiffness_list(Cur,q):
 
+
+        #1) Check inputs
+        ElementsCount = Cur.S.ElementsCount
+        assert q.size == ElementsCount, "Please check the shape of q"
+        kglocList = []
+
+        #2) Compute the List of Geometric Local Stiffness Matrices
+        for i in np.arange(ElementsCount):
+            kg = q[i] * np.array([  [1, 0, 0, -1, 0, 0],
+                                    [0, 1, 0, 0, -1, 0],
+                                    [0, 0, 1, 0, 0, -1],
+                                    [-1, 0, 0, 1, 0, 0],
+                                    [0, -1, 0, 0, 1, 0],
+                                    [0, 0, -1, 0, 0, 1]])  # geometric stiffness matrix
+
+            kglocList.append(kg)
+
+        return kglocList
+
+    def GeometricStiffnessMatrix(Cur, CurTension, CurElementsL):
+        """
+        Compute the global geometric stiffness matrix
+        :param CurTension: [N] - shape (ElementsCount,) - The current tension forces in the elements
+        :param CurElementsL: [m] - shape (ElementsCount,) - The current lengths of the elements
+        :return: Kgeo : [N/m] - shape (3*NodesCount,3*NodesCount) - The global geometric stiffness matrix
+        """
+
+        #1) Check inputs
+        ElementsCount = Cur.S.ElementsCount
+        assert CurTension.size == ElementsCount, "Please check the shape of CurTension"
+        assert CurElementsL.size == ElementsCount, "Please check the shape of CurTension"
+        T = CurTension.reshape(-1,)
+        L = CurElementsL.reshape(-1,)
+        q = Cur.ForceDensities(T, L)
+        kgLocList = Cur.GeometricLocalStiffness_list(q)
+        Kgeo = Cur.S.GlobalFromLocalStiffnessMatrix(kgLocList)
+        return Kgeo
+
+    
 
 class StructureObj():
 
@@ -705,7 +744,7 @@ class StructureObj():
 
         #2) Compute stiffness matrices. NB: computed with current Length and current Cos !
         (cur.Elements_L, cur.Elements_Cos) = cur.Compute_Elements_Geometry(NodesCoord, C)
-        (List_km_loc, List_kg_loc) = cur.Compute_StiffnessMatGeo_LocalMatrices(cur.Elements_L, cur.Elements_Cos, Elements_A, Elements_E, AxialForces_Already_Applied)
+        (List_km_loc, List_kg_loc) = cur.MaterialAndGeometricLocalStiffness_list(cur.Elements_L, cur.Elements_Cos, Elements_A, Elements_E, AxialForces_Already_Applied)
         cur.K_constrained = cur.Compute_StiffnessMatGeo_Matrix(List_km_loc, List_kg_loc) # (3n+c,3n+c)
 
         #3) Solve Linear System  # NB: this might throw the exception np.linalg.linalg.LinAlgError that we need to catch somewhere
@@ -718,7 +757,8 @@ class StructureObj():
         AxialForces = cur.Post_Process_Displ_Method(d, List_km_loc, List_kg_loc, cur.Elements_Cos)
         return (d, AxialForces, Reactions)
 
-    def Compute_StiffnessMatGeo_LocalMatrices(cur, Elements_L, Elements_Cos, Elements_A, Elements_E,AxialForces_Already_Applied):
+
+    def MaterialAndGeometricLocalStiffness_list(cur, Elements_L, Elements_Cos, Elements_A, Elements_E, AxialForces_Already_Applied):
         """
             This is the old way of computing the local material and geometric stiffness matrices. It relies on the current nodes coordinates and the already applied axial forces.
             :return:    Liste (Bx1) local material stiffness matrices

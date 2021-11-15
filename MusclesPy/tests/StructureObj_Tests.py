@@ -289,7 +289,7 @@ class StructureObj_Tests(unittest.TestCase):
         (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, C)
 
         # 2) Compute stiffness matrices
-        (List_km_loc, List_kg_loc) = S0.Compute_StiffnessMatGeo_LocalMatrices(Elements_L, Elements_Cos, S0.ElementsA, S0.ElementsE, S0.AxialForces_Already_Applied)
+        (List_km_loc, List_kg_loc) = S0.MaterialAndGeometricLocalStiffness_list(Elements_L, Elements_Cos, S0.ElementsA, S0.ElementsE, S0.AxialForces_Already_Applied)
         K = S0.Compute_StiffnessMatGeo_Matrix(List_km_loc,List_kg_loc) # (3n+c,3n+c) mat+geo (but here Geo is null)
 
         # 3) Cross checks

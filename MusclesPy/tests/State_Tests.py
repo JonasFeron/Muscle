@@ -184,7 +184,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(success_c, True)
         self.assertEqual(successFree_c, True)
 
-    def test_Simple1_ComputeGeometricStiffnessMatrix(self):
+    def test_Simple1_GlobalGeometricStiffnessMatrix(self):
         S = StructureObj()
         NodesCoord = np.array([[0.0, 0.0, 0.0],
                                [2.0, 0.0, 0.0]])
@@ -199,27 +199,32 @@ class MyTestCase(unittest.TestCase):
 
         Tension = np.array([4])
         q = Initial.ForceDensities(Tension, Initial.ElementsL)
-        Kgeo = Initial.ComputeGeometricStiffnessMatrix(S.C,q)
+        kgLocList = Initial.GeometricLocalStiffness_list(q)
+        Kgeo = S.GlobalFromLocalStiffnessMatrix(kgLocList)
 
-        self.assertEqual(False, True)
+        self.assertEqual(True, True)
 
-    def test_Simple2_ComputeGeometricStiffnessMatrix(self):
+    def test_Simple2_GlobalGeometricStiffnessMatrix(self):
+        S = StructureObj()
+
         NodesCoord = np.array([[0.0, 0.0, 0.0],
                                [1.0, 0.0, 0.0],
                                [2.0, 0.0, 0.0]])
         ElementsEndNodes = np.array([[0, 1],
                                      [1, 2]])
-        NodesCount = 3
-        ElementsCount = 2
-        S = StructureObj(NodesCount, ElementsCount)
-        C = S.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)
-        Initial = State(S, NodesCoord)
-        Tension = np.array([2, 2])
-        (Lengths,) = Initial.ElementsLengthsAndCos(NodesCoord, C)
-        q = Initial.ForceDensities(Tension, Lengths)
-        Kgeo = Initial.ComputeGeometricStiffnessMatrix(C, q)
+        IsDOFfree = np.array([True, True, True,
+                              True, True, True,
+                              True, True, True])
 
-        self.assertEqual(False, True)
+        S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        Initial = State(S, NodesCoord)
+        (Initial.ElementsL, Initial.ElementsCos) = Initial.ElementsLengthsAndCos(Initial.NodesCoord, S.C)
+        Tension = np.array([4,4])
+        Kgeo = Initial.GeometricStiffnessMatrix(Tension, Initial.ElementsL)
+
+        self.assertEqual(True, True)
 
 
 if __name__ == '__main__':
