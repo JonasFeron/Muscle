@@ -560,10 +560,13 @@ class StructureObj():
 
 
 
-
-
-
-    def Compute_StiffnessMat_Matrix(S0,A,Elements_L,Elements_A,Elements_E):
+    def ComputeMaterialStiffnessMatrix(Self,A,F):
+        """
+        
+        :param A:
+        :param F:
+        :return:
+        """
 
         Diag_A = np.diag(Elements_A.reshape((-1,))) #(nbr lines, nbr lines)
         Diag_E = np.diag(Elements_E.reshape((-1,))) #(nbr lines, nbr lines)
@@ -576,6 +579,8 @@ class StructureObj():
         Km = A @ Diag_EAsL @ B # (3*nbr nodes, 3*nbr nodes) OR (nbr free dof, nbr free dof)
 
         return Km
+
+
 
     # endregion
 
