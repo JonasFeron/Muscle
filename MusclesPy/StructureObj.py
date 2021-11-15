@@ -555,30 +555,29 @@ class StructureObj():
 
         #2) Compute the flexibility
         F = L/(E*A)
-        F[NoStiffnessElementsIndex] = 1e3 # [m/N] elements with 0 stiffness have an infinite flexibility
+        F[NoStiffnessElementsIndex] = 1e6 # [m/N] elements with 0 stiffness have an infinite flexibility
         return F
 
-
-
-    def ComputeMaterialStiffnessMatrix(Self,A,F):
+    def ComputeMaterialStiffnessMatrix(Self,A,Flexibility):
         """
-        
-        :param A:
-        :param F:
-        :return:
+        Compute the material stiffness matrix of the structure in the current state given the equilibrium matrix and the flexibilities in the current state
+        :param A: [/] - shape (3*NodesCount,ElementsCount) - The equilibrium matrix of the structure in the current state
+        :param Flexibility: [m/N] - shape (ElementsCount,) - The flexibility vector L/EA for each element in the current state
+        :return: Kmat : [N/m] - shape(3*NodesCount,3*NodesCount) - the material stiffness matrix of the structure in the current state
         """
+        ElementsCount = Self.ElementsCount
+        NodesCount = Self.NodesCount
+        DOFfreeCount = Self.DOFfreeCount
 
-        Diag_A = np.diag(Elements_A.reshape((-1,))) #(nbr lines, nbr lines)
-        Diag_E = np.diag(Elements_E.reshape((-1,))) #(nbr lines, nbr lines)
-        Diag_L_inv = np.diag(1 / Elements_L) #(nbr lines, nbr lines) #current length ! (not initial)
+        assert A.shape == (3*NodesCount,ElementsCount) or A.shape == (DOFfreeCount,ElementsCount), "Please check the shape of A"
+        assert Flexibility.size == ElementsCount, "Please check the shape of the Flexibility vector"
 
-        Diag_EAsL = Diag_A @ Diag_E @ Diag_L_inv #(nbr lines, nbr lines)
+        F = Flexibility.reshape(-1,)
+        Kbsc = np.diag(1/F) # EA/L in a diagonal matrix. Note that EA/L can be equal to 0 if the cable is slacked
+        B = A.T # The compatibility matrix is the linear application which transforms the displacements into elongation.
+        Kmat = A @ Kbsc @ B # (3*NodesCount,3*NodesCount) OR (DOFfreeCount, DOFfreeCount)
 
-        A = A  # (3*nbr nodes, nbr lines) Or if input A=AFree (nbr free dof, nbr lines)
-        B = A.transpose() # (nbr lines, 3*nbr nodes)  Or if input A=AFree (nbr lines, nbr free dof)
-        Km = A @ Diag_EAsL @ B # (3*nbr nodes, 3*nbr nodes) OR (nbr free dof, nbr free dof)
-
-        return Km
+        return Kmat
 
 
 
