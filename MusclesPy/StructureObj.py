@@ -233,7 +233,14 @@ class State():
         return Cur.SVD
 
     def ComputeTension(Cur,ElementsLCur,ElementsLFree,ElementsE,ElementsA):
+        """
 
+        :param ElementsLCur: Current lengths of the elements. shape (ElementsCount,).
+        :param ElementsLFree: Free lengths of the elements. shape (ElementsCount,).
+        :param ElementsE: Young modules of the elements if in compression or if in tension. [EinComp, EinTens]. shape (ElementsCount, 2).
+        :param ElementsA: Area of the elements if in compression or if in tension. [AinComp, AinTens]. shape (ElementsCount, 2).
+        :return: T, the tension forces in each elements. shape (ElementsCount,).
+        """
 
         # TensionApplied = np.zeros((0,))
         # assert TensionApplied.size == ElementsCount or TensionApplied.size == 0 , "Please check the shape of TensionApplied"
@@ -241,9 +248,8 @@ class State():
         #1) Check the inputs
 
         ElementsCount = Cur.S.ElementsCount
-
-        assert ElementsLFree.size == ElementsCount, "Please check the shape of ElementsL0"
-        assert ElementsLCur.size == ElementsCount , "Please check the shape of ElementsLCur"
+        assert ElementsLCur.shape == (ElementsCount,), "Please check the shape of ElementsLCur"
+        assert ElementsLFree.shape == (ElementsCount,), "Please check the shape of ElementsL0"
         assert ElementsE.shape == (ElementsCount,2), "Please check the shape of ElementsE"
         assert ElementsA.shape == (ElementsCount,2), "Please check the shape of ElementsA"
 
@@ -274,6 +280,12 @@ class State():
         T = Kbsc*DeltaL # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
         return T
 
+    def Residual(Cur,A,LoadApplied):
+
+
+        #N.B. It is not because TensionApplied were in equilibrium with LoadsApplied in a previous state of the structure
+        # that they are still in equilibrium in the current state.
+        # simply because the nodes coordinates may have changed.
 
 
 class StructureObj():
