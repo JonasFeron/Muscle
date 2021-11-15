@@ -106,7 +106,7 @@ class MyTestCase(unittest.TestCase):
 
         S = StructureObj(0,2)
         Initial = State(S)
-        F = Initial.Flexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
+        F = Initial.ComputeFlexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
         self.assertEqual(F[0], 2/(100e7))
         self.assertEqual(F[1], 1e6)
 

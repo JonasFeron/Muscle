@@ -414,7 +414,7 @@ class State():
 
         #2) Compute the force density Matrices E, EFree and EFixed as per reference Zhang 2015 p45 equation (2.104)
         Q = np.diag(q.reshape(-1,)) # shape (ElementsCount,ElementsCount) with diagonal entry = qi = Ti/Li
-        E= C.T @ Q @ C # shape (NodesCount, ) = (NodesCount,ElementsCount) @ (ElementsCount,ElementsCount) @ (ElementsCount, NodesCount)
+        E= C.T @ Q @ C # shape (NodesCount, 
 
 
 class StructureObj():
