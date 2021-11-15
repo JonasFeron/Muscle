@@ -55,7 +55,7 @@ class StructureObj_Tests(unittest.TestCase):
         S = StructureObj(0,2)
         F = S.Flexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
         self.assertEqual(F[0], 2/(100e7))
-        self.assertEqual(F[1], 1e3)
+        self.assertEqual(F[1], 1e6)
 
 
 
