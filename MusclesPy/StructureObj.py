@@ -273,6 +273,7 @@ class State():
         #4) Compute the tension
 
         T = Kbsc*DeltaL # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
+        return T
 
 
 
@@ -511,7 +512,7 @@ class StructureObj():
 
         #2) Compute the flexibility
         F = L/(E*A)
-        F[NoStiffnessElementsIndex] = 1e12 #elements with 0 stiffness have an infinite flexibility
+        F[NoStiffnessElementsIndex] = 1e3 # [m/N] elements with 0 stiffness have an infinite flexibility
         return F
 
 

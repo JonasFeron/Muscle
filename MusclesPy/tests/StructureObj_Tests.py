@@ -55,7 +55,7 @@ class StructureObj_Tests(unittest.TestCase):
         S = StructureObj(0,2)
         F = S.Flexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
         self.assertEqual(F[0], 2/(100e7))
-        self.assertEqual(F[1], 1e12)
+        self.assertEqual(F[1], 1e3)
 
 
 
@@ -124,7 +124,7 @@ class StructureObj_Tests(unittest.TestCase):
         #cfr solution in excel files attached
         S0 = StructureObj()
         NodesCoord = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
+        ElementsEndNodes = np.array([[0, 1], [1, 2]])
         IsDOFfree = np.array([False, False, False, True, False, True, False, False, False])
         Elements_A = np.array([0.000050, 0.000050])*1e6
         Elements_E = np.array([100, 100])*1e3
@@ -133,13 +133,13 @@ class StructureObj_Tests(unittest.TestCase):
         #we need a function to pass from axialforces to prestressloads (see in c#)
         PrestressLoads_To_Apply = np.array([[20000.0, 0.0, 0.0], [0.0, 0.0, 0.0], [-20000.0, 0.0, 0.0]]).reshape((-1,))
 
-        S0.test_Main_LinearSolve_Displ_Method(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, [], PrestressLoads_To_Apply)
+        S0.test_Main_LinearSolve_Displ_Method(NodesCoord, ElementsEndNodes, IsDOFfree, Elements_A, Elements_E, [], PrestressLoads_To_Apply)
 
         AxialForces_Already_Applied = S0.AxialForces_Results+AxialForces_To_Apply.reshape((-1,1))
         Loads_To_Apply1 = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, -5109.0], [0.0, 0.0, 0.0]]).reshape((-1,))
 
         S1 = StructureObj()
-        S1.test_Main_NonLinearSolve_Displ_Method(100, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E,
+        S1.test_Main_NonLinearSolve_Displ_Method(100, NodesCoord, ElementsEndNodes, IsDOFfree, Elements_A, Elements_E,
                                                  AxialForces_Already_Applied, Loads_To_Apply1)
 
         last_step = S1.Stages.size - 1
@@ -164,7 +164,7 @@ class StructureObj_Tests(unittest.TestCase):
         NodesCoord2 = S1.NodesCoord+S1.Displacements_Results[:,last_step].reshape((-1,1))
 
         S2 = StructureObj()
-        S2.test_Main_NonLinearSolve_Displ_Method(100, NodesCoord2, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E,
+        S2.test_Main_NonLinearSolve_Displ_Method(100, NodesCoord2, ElementsEndNodes, IsDOFfree, Elements_A, Elements_E,
                                                  AxialForces_Already_Applied2, Loads_To_Apply2)
 
         last_step2 = S2.Stages.size - 1

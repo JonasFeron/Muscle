@@ -98,5 +98,22 @@ class MyTestCase(unittest.TestCase):
         successUm = np.allclose(SVD.Um_free_row,Um_answer)
         self.assertEqual(successUm, True)
 
+    def test_Simple_ComputeTension(self):
+
+        #A structure composed of 2 elements. The first element has E = 100e3 and A=1e4 both in tension and compression. The second element has no stiffness in compression hence it slacks if compressed.
+        ElementsA = np.array([[1e4,1e4],
+                              [1e4, 1e4]]) #mm²
+        ElementsE = np.array([[100e3,100e3],
+                              [0, 100e3]]) #MPa
+        ElementsLFree = np.array([2.0,2.0]) #m
+        ElementsLCur = np.array([2.1,1.9])  #first is tensionned, second is compressed
+
+        S = StructureObj(0,2) #a structure with no node and 2 elements
+        deformed = State(S)
+        T = deformed.ComputeTension(ElementsLFree,ElementsLCur)
+        self.assertEqual(T[0], 100e7/2*0.1)
+        self.assertEqual(T[1], 0)
+
+
 if __name__ == '__main__':
     unittest.main()
