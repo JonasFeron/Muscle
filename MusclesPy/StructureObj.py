@@ -137,10 +137,8 @@ class State():
         """
         ##### State inputs #####
 
-        if isinstance(S, StructureObj):
-            Cur.S = S # the structure object in the current state
-        else :
-            Cur.S = StructureObj()
+
+        Cur.S = S
         Cur.NodesCoord = nodesCoord.reshape((-1,))
         Cur.Loads = loads.reshape((-1,))
         Cur.Tension = tension.reshape((-1,))
@@ -200,6 +198,7 @@ class State():
         CosX = ElementsCos[:, 0]
         CosY = ElementsCos[:, 1]
         CosZ = ElementsCos[:, 2]
+
 
         # 2) calculate equilibrium matrix
         # for each node (corresponding to one row), if the line (corresponding to a column) is connected to the node, then the entry of A contains the cos director, else 0.
@@ -383,8 +382,9 @@ class State():
         return q
 
 
-    def ComputeGeometricStiffnessMatrix(Cur, C, q):
+    def ForceDensityMatrices(Cur, C, q):
         """
+        Work In Progress
         :param C: [/] - shape (ElementsCount, NodesCount) - The connectivity matrix
         :param q: [N/m] - shape (ElementsCount,) - The force densities q= T/L
         :return: Kgeo: [N/m] - shape (3*NodesCount,3*NodesCount) - The force densities q= T/L
@@ -401,19 +401,17 @@ class State():
         assert C.shape == (ElementsCount,NodesCount), "Please check the shape of the connectivity matrix C"
         Q = np.diag(q.reshape(-1,)) # shape (ElementsCount,ElementsCount) with diagonal entry = qi = Ti/Li
 
-        #2) Stack the degrees of freedoms
-        Cxyz = np.zeros((ElementsCount, 3 * NodesCount))
-        # the Degrees Of Freedom are sorted like this [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
-        for i in range(NodesCount):
-            Cxyz[:, 3 * i] = C[:,i]
-            Cxyz[:, 3 * i + 1] = C[:,i]
-            Cxyz[:, 3 * i + 2] = C[:,i]
 
         #3) Compute the force density Matrices E, EFree and EFixed as per reference Zhang 2015 p45 equation (2.104)
         #To be implemented
+        #C.T @ Q @ C
 
         #4) Compute the Geometrical stiffness matrix as per reference Zhang 2015 p109 equation (4.55)
-        Kgeo= Cxyz.T @ Q @ Cxyz # shape (3*NodesCount,3*NodesCount) = (3*NodesCount,ElementsCount) @ (ElementsCount,ElementsCount) @ (ElementsCount,3*NodesCount)
+        #np.tensordot()
+        #Kgeo= Cxyz.T @ Q @ Cxyz # shape (3*NodesCount,3*NodesCount) = (3*NodesCount,ElementsCount) @ (ElementsCount,ElementsCount) @ (ElementsCount,3*NodesCount)
+        #wrong results
+
+
 
 class StructureObj():
 
@@ -429,7 +427,7 @@ class StructureObj():
 
         ##### Structure informations #####
 
-        Self.Initial = State(Self,np.zeros((3 * Self.NodesCount,))) # Initialize the initial State of the structure.
+        Self.Initial = None  # the initial State of the structure.
         #Cur.NodesCoord = np.zeros((3 * Cur.NodesCount,)) #The NodesCoord depend on the Structure State.
         Self.ElementsEndNodes = np.zeros((Self.ElementsCount, 2), dtype=int)
         Self.ElementsLFree = np.zeros((Self.ElementsCount,)) # Lengths of the elements when the elements are free of any tension, or in other words, when the structure is disassemble.
@@ -630,26 +628,6 @@ class StructureObj():
         return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually do not change the equilibrum matrix.
         # print(C)
 
-    def StackedConnectivityMatrix(Self,C):
-        """
-        Stack the connectivity matrix such that each row (=1element) is arranged according to the DOF [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
-        :param C: [/] - shape (ElementsCount, NodesCount) - the connectivity matrix
-        :return: Cxyz: [/] - shape (ElementsCount, 3*NodesCount) - the connectivity matrix stacked 3 times
-        """
-        #1) Check inputs
-        ElementsCount = Self.ElementsCount
-        NodesCount = Self.NodesCount
-        assert C.shape == (ElementsCount, NodesCount), "Please check the connectivity matrix C shape"
-
-        #2) Stack the degrees of freedoms
-        Cxyz = np.zeros((ElementsCount, 3 * NodesCount))
-
-        for i in range(NodesCount):
-            Cxyz[:, 3 * i] = C[:,i]
-            Cxyz[:, 3 * i + 1] = C[:,i]
-            Cxyz[:, 3 * i + 2] = C[:,i]
-
-        return Cxyz
 
 
 

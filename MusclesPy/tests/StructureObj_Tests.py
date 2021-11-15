@@ -28,7 +28,7 @@ class StructureObj_Tests(unittest.TestCase):
         self.assertEqual(S0.FixationsCount, 6)
         self.assertEqual(S0.DOFfreeCount, 3)
 
-    def test_Simple_Connectivity_Matrix(self):
+    def test_Simple_ConnectivityMatrix(self):
         """
         test to see if the computation of the connectivity_matrix of 2 cables (*--c1--*--c2--*) works
         """
@@ -45,6 +45,26 @@ class StructureObj_Tests(unittest.TestCase):
         success = (C == np.array([[-1,  1,  0],[ 0, -1, 1]])).all()
         self.assertEqual(success, True)
 
+    def test_Simple_StackedConnectivityMatrix(self):
+        """
+        test to see if the computation of the connectivity_matrix of 2 cables (*--c1--*--c2--*) works
+        """
+        ElementsCount = 2
+        NodesCount = 3
+        ElementsEndNodes = np.array([[0,1],[1,2]])
+
+        S = StructureObj(NodesCount,ElementsCount) #empty object
+
+        #required input for the method
+
+
+        C = S.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)  #test the method
+        Cxyz = S.StackedConnectivityMatrix(C)
+        #check the results
+        success = (Cxyz == np.array([[-1., - 1., - 1.,  1.,  1.,  1.,  0.,  0.,  0.],
+                                     [0.,  0.,  0., - 1., - 1., - 1.,  1.,  1.,  1.]])).all()
+
+        self.assertEqual(success, True)
 
 
 

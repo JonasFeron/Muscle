@@ -184,7 +184,42 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(success_c, True)
         self.assertEqual(successFree_c, True)
 
+    def test_Simple1_ComputeGeometricStiffnessMatrix(self):
+        S = StructureObj()
+        NodesCoord = np.array([[0.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        ElementsEndNodes = np.array([[0, 1]])
+        IsDOFfree = np.array([True, True, True, True, True, True])
 
+        S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        Initial = State(S, NodesCoord)
+        (Initial.ElementsL, Initial.ElementsCos) = Initial.ComputeElementsLengthsAndCos(Initial.NodesCoord, S.C)
+
+        Tension = np.array([4])
+        q = Initial.ComputeForceDensities(Tension,Initial.ElementsL)
+        Kgeo = Initial.ComputeGeometricStiffnessMatrix(S.C,q)
+
+        self.assertEqual(False, True)
+
+    def test_Simple2_ComputeGeometricStiffnessMatrix(self):
+        NodesCoord = np.array([[0.0, 0.0, 0.0],
+                               [1.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
+        NodesCount = 3
+        ElementsCount = 2
+        S = StructureObj(NodesCount, ElementsCount)
+        C = S.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)
+        Initial = State(S, NodesCoord)
+        Tension = np.array([2, 2])
+        (Lengths,) = Initial.ComputeElementsLengthsAndCos(NodesCoord, C)
+        q = Initial.ComputeForceDensities(Tension, Lengths)
+        Kgeo = Initial.ComputeGeometricStiffnessMatrix(C, q)
+
+        self.assertEqual(False, True)
 
 
 if __name__ == '__main__':
