@@ -294,22 +294,22 @@ class State():
         DOFfreeCount = Cur.S.DOFfreeCount
         IsDOFfree = Cur.S.IsDOFfree
         assert A.shape == (3*NodesCount,ElementsCount) or A.shape == (DOFfreeCount,ElementsCount), "Please check the shape of A"
-        assert Loads.shape == (3*NodesCount,), "Please check the shape of Loads"
-        assert Tension.shape == (ElementsCount,), "Please check the shape of Tension"
-        assert IsDOFfree.shape == (3*NodesCount,), "Please check the shape of IsDOFfree"
+        assert Loads.size == 3*NodesCount, "Please check the shape of Loads"
+        assert Tension.size == ElementsCount, "Please check the shape of Tension"
+        assert IsDOFfree.size == 3*NodesCount, "Please check the shape of IsDOFfree"
         #2) Check if A=A or A=Afree
         DOF2Compute = np.ones((3*NodesCount,),dtype=bool) #a vector of true. if true, the residual is computed. if false, the residual = 0.
         if A.shape == (DOFfreeCount, ElementsCount): #if A=Afree
-            DOF2Compute = IsDOFfree # then Compute the Residual only for the free DOF and impose Residual=0 for the fixed DOF.
+            DOF2Compute = IsDOFfree.reshape(-1,) # then Compute the Residual only for the free DOF and impose Residual=0 for the fixed DOF.
 
         #3) Compute the Residual
         Residual = np.zeros((3*NodesCount,))
         R = Residual[DOF2Compute]
-        T = Tension
-        L = Loads[DOF2Compute]
+        T = Tension.reshape(-1,)
+        L = Loads.reshape(-1,)[DOF2Compute]
 
         R = L - A @ T # equilibrium equations such that A @ T = L if equilibrium.
-        Residual[DOF2Compute] = R #the Residual is computed everywherer (if A=A) or only for the free DOF (if A=Afree). 
+        Residual[DOF2Compute] = R #the Residual is computed everywherer (if A=A) or only for the free DOF (if A=Afree).
 
         return Residual
 
