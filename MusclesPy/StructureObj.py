@@ -382,7 +382,7 @@ class State():
         return q
 
 
-    def ForceDensityMatrices(Cur, C, q):
+    def WIPForceDensityMatrices(Cur, C, q):
         """
         Work In Progress
         :param C: [/] - shape (ElementsCount, NodesCount) - The connectivity matrix
@@ -628,8 +628,37 @@ class StructureObj():
         return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually do not change the equilibrum matrix.
         # print(C)
 
+    def GlobalFromLocalStiffnessMatrix(Self, klocList):
+        """
+        Assemble the global stiffness matrix from the local matrices of the elements in the current state.
+        The local matrices can either be the geometrical stiffness or the material stiffness.
+        TO DO: make this method FASTER !
+        :param klocList: [N/m] - list(np.array[6][6]) of size ElementsCount - List of the current Local Stiffness Matrix of the elements
+        :return: K: [N/m] - shape (3*NodesCount,3*NodesCount)- the global stiffness matrix of the structure in the current state
+        """
 
 
+        n = Self.NodesCount
+        e = Self.ElementsCount
+        ElementsEndNodes = Self.ElementsEndNodes
+
+        assert len(klocList) == e, "Please check the List size of the Local Stiffness Matrices"
+        assert ElementsEndNodes.shape == (e,2), "Please check the shape of ElementsEndNodes"
+
+        K = np.zeros((3 * n, 3 * n)) #Initialize the Global stiffness matrix
+
+        # assembly of local matrices into a global one
+        for i in np.arange(e): #for each element
+            n0 = ElementsEndNodes[i, 0]
+            n1 = ElementsEndNodes[i, 1]
+            k = klocList[i]
+
+            index = np.array([3 * n0, 3 * n0 + 1, 3 * n0 + 2,
+                              3 * n1, 3 * n1 + 1, 3 * n1 + 2]).astype(int)  # global index
+            for j in np.arange(6):  # local index
+                for j2 in np.arange(6):
+                    K[index[j], index[j2]] += k[j, j2]
+        return K
 
 
     # endregion
