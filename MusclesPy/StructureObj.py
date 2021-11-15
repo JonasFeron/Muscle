@@ -156,7 +156,7 @@ class State():
         Cur.Residual = np.ones((3 * S.NodesCount,)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
 
-    def ComputeElementsLengthsAndCos(Cur, NodesCoord, C):
+    def ElementsLengthsAndCos(Cur, NodesCoord, C):
         """
         Calculates the Lines properties (Lengths, Cos) based on the given NodesCoord and Connectivity Matrix C
         """
@@ -188,7 +188,7 @@ class State():
 
         return (ElementsL,ElementsCos)
 
-    def ComputeEquilibriumMatrix(Cur, C, IsDOFfree, ElementsCos):
+    def EquilibriumMatrix(Cur, C, IsDOFfree, ElementsCos):
         """
         :return: Compute the equilibrium matrix of the structure in its current state based on the current cosinus director of the elements and on the supports conidtions.
         """
@@ -227,7 +227,7 @@ class State():
         Cur.SVD.SVDEquilibriumMatrix(Cur.S, AFree) #Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
-    def ComputeTension(Cur,ElementsLCur,ElementsLFree,ElementsE,ElementsA):
+    def Tension(Cur, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
         """
 
         :param ElementsLCur: Current lengths of the elements. shape (ElementsCount,).
@@ -275,7 +275,7 @@ class State():
         T = Kbsc*DeltaL # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
         return T
 
-    def ComputeResidual(Cur,A,Loads,Tension):
+    def Residual(Cur, A, Loads, Tension):
         """
         Returns the Residual (=unbalanced loads) considering the equilibrium equation R = Loads - A @ Tension.
         If A=A with shape(3 NodesCount,ElementsCount), the Residual = the Reaction where the DOF are fixed.
@@ -312,7 +312,7 @@ class State():
 
         return Residual
 
-    def ComputeFlexibility(Cur, ElementsE, ElementsA, ElementsL):
+    def Flexibility(Cur, ElementsE, ElementsA, ElementsL):
         """
         Returns the flexibility L/EA of the elements (considering a possible infinite flexibility = no stiffness)
         :param ElementsE: the young modulus in [MPa] of the elements. shape (ElementsCount,)
@@ -340,7 +340,7 @@ class State():
         F[NoStiffnessElementsIndex] = 1e6 # [m/N] elements with 0 stiffness have an infinite flexibility
         return F
 
-    def ComputeMaterialStiffnessMatrix(Cur,A,Flexibility):
+    def MaterialStiffnessMatrix(Cur, A, Flexibility):
         """
         Compute the material stiffness matrix of the structure in the current state given the equilibrium matrix and the flexibilities in the current state
         :param A: [/] - shape (3*NodesCount,ElementsCount) - The equilibrium matrix of the structure in the current state
@@ -361,7 +361,7 @@ class State():
 
         return Kmat
 
-    def ComputeForceDensities(Cur,CurTension,CurElementsL):
+    def ForceDensities(Cur, CurTension, CurElementsL):
         """
         Compute the force densities
         :param CurTension: [N] - shape (ElementsCount,) - The current tension forces in the elements

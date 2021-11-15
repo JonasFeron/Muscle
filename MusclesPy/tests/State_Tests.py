@@ -18,7 +18,7 @@ class MyTestCase(unittest.TestCase):
         S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
 
         Initial = State(S,NodesCoord)
-        (Initial.ElementsL, Initial.ElementsCos) = Initial.ComputeElementsLengthsAndCos(Initial.NodesCoord, S.C)
+        (Initial.ElementsL, Initial.ElementsCos) = Initial.ElementsLengthsAndCos(Initial.NodesCoord, S.C)
 
         #check the results
         # test of comparison with Grasshopper
@@ -53,8 +53,8 @@ class MyTestCase(unittest.TestCase):
         S.RegisterData(NodesCoord,ElementsEndNodes,IsDOFfree)
         C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S,NodesCoord)
-        (l,ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord,C)
-        (A, A_free, A_fixed) = Initial.ComputeEquilibriumMatrix(C,IsDOFfree,ElementsCos)
+        (l,ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
+        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(C, IsDOFfree, ElementsCos)
 
         A_free_answer = np.array([[1.0, -1.0],
                                   [0.0, 0.0],
@@ -77,8 +77,8 @@ class MyTestCase(unittest.TestCase):
         S.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
         C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S,NodesCoord)
-        (l, ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord,C)
-        (A, A_free, A_fixed) = Initial.ComputeEquilibriumMatrix(C,IsDOFfree,ElementsCos)
+        (l, ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
+        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(C, IsDOFfree, ElementsCos)
         SVD = Initial.ComputeSVD(A_free)
 
         r_answer = 1
@@ -106,7 +106,7 @@ class MyTestCase(unittest.TestCase):
 
         S = StructureObj(0,2)
         Initial = State(S)
-        F = Initial.ComputeFlexibility(ElementsE,ElementsA,ElementsL) #F=L/EA
+        F = Initial.Flexibility(ElementsE, ElementsA, ElementsL)  #F=L/EA
         self.assertEqual(F[0], 2/(100e7))
         self.assertEqual(F[1], 1e6)
 
@@ -122,7 +122,7 @@ class MyTestCase(unittest.TestCase):
 
         S = StructureObj(0,2) #a structure with no node and 2 elements
         deformed = State(S)
-        T = deformed.ComputeTension(ElementsLCur,ElementsLFree,ElementsE,ElementsA)
+        T = deformed.Tension(ElementsLCur, ElementsLFree, ElementsE, ElementsA)
         self.assertAlmostEqual(T[0], 100e7/2*0.01,places=0)
         self.assertAlmostEqual(T[1], 0,places=0)
 
@@ -145,8 +145,8 @@ class MyTestCase(unittest.TestCase):
         S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
         C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S, NodesCoord)
-        (l, ElementsCos) = Initial.ComputeElementsLengthsAndCos(NodesCoord, C)
-        (A, AFree, A_fixed) = Initial.ComputeEquilibriumMatrix(C, IsDOFfree, ElementsCos)
+        (l, ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
+        (A, AFree, A_fixed) = Initial.EquilibriumMatrix(C, IsDOFfree, ElementsCos)
 
         #2) Define the Loads
         Loads = np.array([[0, 0, 0],
@@ -157,8 +157,8 @@ class MyTestCase(unittest.TestCase):
         #3a) equilibrium in X
         Tension = np.array([1, -1])
         fint = A@Tension #FYI
-        Residual_a = Initial.ComputeResidual(A,Loads,Tension)
-        ResidualFree_a = Initial.ComputeResidual(AFree, Loads, Tension)
+        Residual_a = Initial.Residual(A, Loads, Tension)
+        ResidualFree_a = Initial.Residual(AFree, Loads, Tension)
         success_a = np.all(Residual_a == np.array([[1, 0, 0],[0, 0, 3],[1, 0, 0]]).reshape(-1,))
         successFree_a = np.all(ResidualFree_a == np.array([[0, 0, 0],[0, 0, 3],[0, 0, 0]]).reshape(-1,))
         self.assertEqual(success_a, True)
@@ -167,8 +167,8 @@ class MyTestCase(unittest.TestCase):
         # 3b) equilibrium in X bis
         Tension = np.array([2, 0])
         fint = A@Tension #FYI
-        Residual_b = Initial.ComputeResidual(A,Loads,Tension)
-        ResidualFree_b = Initial.ComputeResidual(AFree, Loads, Tension)
+        Residual_b = Initial.Residual(A, Loads, Tension)
+        ResidualFree_b = Initial.Residual(AFree, Loads, Tension)
         success_b = np.all(Residual_b == np.array([[2, 0, 0],[0, 0, 3],[0, 0, 0]]).reshape(-1,))
         successFree_b = np.all(ResidualFree_b == np.array([[0, 0, 0],[0, 0, 3],[0, 0, 0]]).reshape(-1,))
         self.assertEqual(success_b, True)
@@ -177,8 +177,8 @@ class MyTestCase(unittest.TestCase):
         # 3C) equilibrium in X bis
         Tension = np.array([1, 0])
         fint = A@Tension #FYI
-        Residual_c = Initial.ComputeResidual(A,Loads,Tension)
-        ResidualFree_c = Initial.ComputeResidual(AFree, Loads, Tension)
+        Residual_c = Initial.Residual(A, Loads, Tension)
+        ResidualFree_c = Initial.Residual(AFree, Loads, Tension)
         success_c = np.all(Residual_c == np.array([[1, 0, 0],[1, 0, 3],[0, 0, 0]]).reshape(-1,))
         successFree_c = np.all(ResidualFree_c == np.array([[0, 0, 0],[1, 0, 3],[0, 0, 0]]).reshape(-1,))
         self.assertEqual(success_c, True)
@@ -195,10 +195,10 @@ class MyTestCase(unittest.TestCase):
         S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
 
         Initial = State(S, NodesCoord)
-        (Initial.ElementsL, Initial.ElementsCos) = Initial.ComputeElementsLengthsAndCos(Initial.NodesCoord, S.C)
+        (Initial.ElementsL, Initial.ElementsCos) = Initial.ElementsLengthsAndCos(Initial.NodesCoord, S.C)
 
         Tension = np.array([4])
-        q = Initial.ComputeForceDensities(Tension,Initial.ElementsL)
+        q = Initial.ForceDensities(Tension, Initial.ElementsL)
         Kgeo = Initial.ComputeGeometricStiffnessMatrix(S.C,q)
 
         self.assertEqual(False, True)
@@ -215,8 +215,8 @@ class MyTestCase(unittest.TestCase):
         C = S.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)
         Initial = State(S, NodesCoord)
         Tension = np.array([2, 2])
-        (Lengths,) = Initial.ComputeElementsLengthsAndCos(NodesCoord, C)
-        q = Initial.ComputeForceDensities(Tension, Lengths)
+        (Lengths,) = Initial.ElementsLengthsAndCos(NodesCoord, C)
+        q = Initial.ForceDensities(Tension, Lengths)
         Kgeo = Initial.ComputeGeometricStiffnessMatrix(C, q)
 
         self.assertEqual(False, True)
