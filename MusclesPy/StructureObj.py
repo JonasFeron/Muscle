@@ -383,39 +383,37 @@ class State():
         return q
 
 
-    def ComputeForceDensityMatrix(Cur,q,C,IsDOFfree):
+    def ComputeGeometricStiffnessMatrix(Cur, C, q):
         """
-
-        :param q: [N/m] - shape (ElementsCount,) - The force densities q= T/L
         :param C: [/] - shape (ElementsCount, NodesCount) - The connectivity matrix
-        :param IsDOFfree: [bool] - shape (ElementsCount,) - The supports conditions
-        :return: E
+        :param q: [N/m] - shape (ElementsCount,) - The force densities q= T/L
+        :return: Kgeo: [N/m] - shape (3*NodesCount,3*NodesCount) - The force densities q= T/L
         """
         #References:
         # Sheck, 1974, The force density method for formfinding and computation of networks
         # Vassart, Motro, 1999, Multiparametered Formfinding Method: Application to Tensegrity Systems
         # Zhang, Ohsaki, 2015, Tensegrity structures: Form, Stability, and Symmetry
 
-
-        # A = np.zeros((3 * NodesCount, ElementsCount)) # (3*nbr nodes, nbr lines)
-        #
-        # # the Degrees Of Freedom are sorted like this [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
-        # for i in range(NodesCount):
-        #     A[3 * i, :] = Ax[i, :]
-        #     A[3 * i + 1, :] = Ay[i, :]
-        #     A[3 * i + 2, :] = Az[i, :]
-
         #1) Check the input
         ElementsCount = Cur.S.ElementsCount
         NodesCount = Cur.S.NodesCount
         assert q.size == ElementsCount, "Please check the shape of the force densities q"
-        assert IsDOFfree.size == ElementsCount, "Please check the shape of IsDOFfree"
         assert C.shape == (ElementsCount,NodesCount), "Please check the shape of the connectivity matrix C"
-
-        #2) Compute the force density Matrices E, EFree and EFixed as per reference Zhang 2015 p45 equation (2.104)
         Q = np.diag(q.reshape(-1,)) # shape (ElementsCount,ElementsCount) with diagonal entry = qi = Ti/Li
-        E= C.T @ Q @ C # shape (NodesCount, ) = (NodesCount,ElementsCount) @ (ElementsCount,ElementsCount) @ (ElementsCount, NodesCount)
 
+        #2) Stack the degrees of freedoms
+        Cxyz = np.zeros((ElementsCount, 3 * NodesCount))
+        # the Degrees Of Freedom are sorted like this [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
+        for i in range(NodesCount):
+            Cxyz[:, 3 * i] = C[:,i]
+            Cxyz[:, 3 * i + 1] = C[:,i]
+            Cxyz[:, 3 * i + 2] = C[:,i]
+
+        #3) Compute the force density Matrices E, EFree and EFixed as per reference Zhang 2015 p45 equation (2.104)
+        #To be implemented
+
+        #4) Compute the Geometrical stiffness matrix as per reference Zhang 2015 p109 equation (4.55)
+        Kgeo= Cxyz.T @ Q @ Cxyz # shape (3*NodesCount,3*NodesCount) = (3*NodesCount,ElementsCount) @ (ElementsCount,ElementsCount) @ (ElementsCount,3*NodesCount)
 
 class StructureObj():
 
