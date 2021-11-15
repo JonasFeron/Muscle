@@ -139,10 +139,11 @@ class State():
 
         """
         ##### State inputs #####
-        Cur.S = StructureObj()
+
         if isinstance(S, StructureObj):
             Cur.S = S # the structure object in the current state
-
+        else :
+            Cur.S = StructureObj()
         Cur.NodesCoord = nodesCoord.reshape((-1,))
         Cur.LoadsApplied = loadsApplied.reshape((-1,))
         Cur.TensionApplied = tensionApplied.reshape((-1,))
@@ -231,7 +232,7 @@ class State():
         Cur.SVD.SVDEquilibriumMatrix(Cur.S, AFree) #Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
-    def ComputeTension(Cur,ElementsLFree,ElementsLCur):
+    def ComputeTension(Cur,ElementsLCur,ElementsLFree,ElementsE,ElementsA):
 
 
         # TensionApplied = np.zeros((0,))
@@ -240,8 +241,6 @@ class State():
         #1) Check the inputs
 
         ElementsCount = Cur.S.ElementsCount
-        ElementsE = Cur.S.ElementsE
-        ElementsA = Cur.S.ElementsA
 
         assert ElementsLFree.size == ElementsCount, "Please check the shape of ElementsL0"
         assert ElementsLCur.size == ElementsCount , "Please check the shape of ElementsLCur"

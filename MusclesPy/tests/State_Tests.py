@@ -106,13 +106,14 @@ class MyTestCase(unittest.TestCase):
         ElementsE = np.array([[100e3,100e3],
                               [0, 100e3]]) #MPa
         ElementsLFree = np.array([2.0,2.0]) #m
-        ElementsLCur = np.array([2.1,1.9])  #first is tensionned, second is compressed
+        ElementsLCur = np.array([2.01,1.99])  #first is tensionned, second is compressed
 
         S = StructureObj(0,2) #a structure with no node and 2 elements
         deformed = State(S)
-        T = deformed.ComputeTension(ElementsLFree,ElementsLCur)
-        self.assertEqual(T[0], 100e7/2*0.1)
-        self.assertEqual(T[1], 0)
+        T = deformed.ComputeTension(ElementsLCur,ElementsLFree,ElementsE,ElementsA)
+        self.assertAlmostEqual(T[0], 100e7/2*0.01,places=0)
+        self.assertAlmostEqual(T[1], 0,places=0)
+
 
 
 if __name__ == '__main__':
