@@ -155,6 +155,10 @@ class State():
 
         Cur.Residual = np.ones((3 * S.NodesCount,)) # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
+        Cur.F = np.zeros((S.ElementsCount,))
+        Cur.Kmat = np.zeros((3 * S.NodesCount,3 * S.NodesCount))
+        Cur.Kgeo = np.zeros((3 * S.NodesCount, 3 * S.NodesCount))
+        Cur.M = np.ones((3 * S.NodesCount,)) #Fictitious Mass for the Dynamic Relaxation Algorithm
 
     def ElementsLengthsAndCos(Cur, NodesCoord, C):
         """
@@ -214,10 +218,10 @@ class State():
             A[3 * i + 1, :] = Ay[i, :]
             A[3 * i + 2, :] = Az[i, :]
 
-        A_free = A[IsDOFfree]  # (nbr free dof, ElementsCount)
-        A_fixed = A[~IsDOFfree] # (nbr fixed dof, ElementsCount)
+        AFree = A[IsDOFfree]  # (nbr free dof, ElementsCount)
+        AFixed = A[~IsDOFfree] # (nbr fixed dof, ElementsCount)
 
-        return (A,A_free,A_fixed)
+        return (A,AFree,AFixed)
 
     def ComputeSVD(Cur, AFree):
         """
@@ -267,13 +271,13 @@ class State():
 
         #3) Compute the elements flexibility L/EA and stiffness EA/L
 
-        F = Cur.S.Flexibility(E,A,ElementsLFree) # shape (ElementsCount,). Important to note that the Free lengths are considered in the flexibility
+        F = Cur.Flexibility(E,A,ElementsLFree) # shape (ElementsCount,). Important to note that the Free lengths are considered in the flexibility
         Kbsc = 1/F # shape (ElementsCount,). basic material stiffness vector of each individual element
 
         #4) Compute the tension
 
         T = Kbsc*DeltaL # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
-        return T
+        return (T,F)
 
     def Residual(Cur, A, Loads, Tension):
         """
@@ -311,6 +315,21 @@ class State():
         Residual[DOF2Compute] = R #the Residual is computed everywherer (if A=A) or only for the free DOF (if A=Afree).
 
         return Residual
+
+    def CheckEquilibrium(Cur,Residual,IsDOFfree,Threshold=0.00001):
+        """
+        Check if the structure is in equilibrium. In this case, the norm of the residual forces (at the free DOF) is below a certain threshold
+        :param Residual: [N] - shape (3*NodesCount,) - the unbalanced loads
+        :param IsDOFfree: [bool] - shape (3*NodesCount,) - the support conditions of the Degrees Of Freedom. False = Fixed.
+        :param Threshold: [N] - scalar - value below which the norm of the residual forces must be.
+        :return: IsInEquilibrium: [bool] - True if the current state is in equilibrium
+        """
+        NodesCount = Cur.S.NodesCount
+        assert Residual.shape == (3*NodesCount,), "Please check the shape of Residual"
+        assert IsDOFfree.shape == (3*NodesCount,), "Please check the shape of IsDOFfree"
+        IsInEquilibrium = np.linalg.norm(Residual[IsDOFfree]) <= Threshold
+        return IsInEquilibrium
+
 
     def Flexibility(Cur, ElementsE, ElementsA, ElementsL):
         """
@@ -450,7 +469,107 @@ class State():
         Kgeo = Cur.S.GlobalFromLocalStiffnessMatrix(kgLocList)
         return Kgeo
 
-    
+
+    def FictitiousMasses4DR(Cur,Dt,MaterialStiffnessMatrix,GeometricStiffnessMatrix):
+        """
+        Compute the fictitious masses for the dynamic relaxation algorithm
+        :param Dt: [s] - scalar - The time step
+        :param MaterialStiffnessMatrix: [N/m] - shape (3*NodesCount,3*NodesCount) - The global material stiffness matrix
+        :param GeometricStiffnessMatrix: [N/m] - shape (3*NodesCount,3*NodesCount) - The global geometric stiffness matrix
+        :return: M : [kg] - shape (3*NodesCount,) - The fictitious masses for the dynamic relaxation algorithm
+        """
+        #ref
+        #[1] Bel Adj Ali et al, 2011, Analysis of clustered tensegrity structures using a modified dynamic relaxation algorithm
+
+        Kmat = MaterialStiffnessMatrix
+        Kgeo = GeometricStiffnessMatrix
+        NodesCount = Cur.S.NodesCount
+
+        assert Kmat.shape == (3*NodesCount,3*NodesCount), "Please check the shape of the global material stiffness matrix Kmat"
+        assert Kgeo.shape == (3*NodesCount,3*NodesCount), "Please check the shape of the global geometric stiffness matrix Kmat"
+
+        #Kmat = Cur.MaterialStiffnessMatrix(A,Flexibility) #shape (3NodesCount, 3NodesCount). the material stiffness matrix
+        SumKmat = Kmat @ np.ones((3*NodesCount,)) # shape (3NodesCount, ) - Each entry of SumKmat correspond to the sum of the row entry of Kmat
+
+        #Kgeo = Cur.GeometricStiffnessMatrix(CurTension,CurElementsL) #shape (3NodesCount, 3NodesCount).
+        # Only the diagonal of Kgeo is of interest because the sum of each row = 0.
+        # ref: Zhang, Ohsaki, 2015, Tensegrity structures: Form, Stability, and Symmetry, p46 equation (2.109) and p109 equation (4.55)
+        SumForceDensities = np.diag(Kgeo) #shape (3NodesCount,) - each entry correspond to the sum of T/L for each element connecting the node
+
+        SumK = SumKmat + SumForceDensities # equation (20) of ref [1].
+        # The differences compared to eq(20) are :
+        # - The material stiffness of an element can be = 0 if the cables slack
+        # - Tcur/Lcur are not multiplied with the cos².
+        # - Tcur is set to 0 only for slack cables, not for compression members
+
+        M = 2*Dt*Dt*SumK # equation (19) of ref [1].
+        return M
+
+    def FictitiousMassesAtSupports4DR(Cur,Mass,IsDOFfree,AmplMass=1,MinMass=0.005):
+
+        HugeMass = 1.0e100; #huge mass to fix the supports
+
+        NodesCount = Cur.S.NodesCount
+        assert Mass.shape == (3*NodesCount,), "Please check the size of Fictitious Mass"
+        assert IsDOFfree.shape == (3*NodesCount,), "Please check the size of the Support Conditions"
+
+        AmplifiedMass = Mass * AmplMass + MinMass
+        FinalMass = np.where(IsDOFfree,AmplifiedMass,HugeMass) #Apply a huge mass where the DOF are fixed (False). Keep the calculated mass otherwise
+        return FinalMass
+
+
+
+
+
+
+    def UpdateDR(Cur,NodesCoord, Loads,Dt=0.01, Residual0Threshold, AmplMass=1,MinMass=0.005):
+
+        #1) Check inputs
+        NodesCount = Cur.S.NodesCount #scalar
+        ElementsCount = Cur.S.ElementsCount #scalar
+        IsDOFfree = Cur.S.IsDOFfree.reshape((-1,)) # [bool] - shape (3*NodesCount,) - support conditions of each DOF
+        DOFfreeCount = Cur.S.DOFfreeCount #scalar
+        C = Cur.S.C  #the connectivity matrix
+
+
+        assert NodesCount > 0, "Please check the NodesCount"
+        assert ElementsCount > 0, "Please check the ElementsCount"
+        assert IsDOFfree.shape == (3*NodesCount,), "Please check the supports conditions IsDOFfree"
+        assert DOFfreeCount > 0, "Please check that at least one degree of freedom is free"
+        assert C.shape == (ElementsCount,NodesCount), "Please check that the connectivity matrix C has been computed"
+        assert NodesCoord.size == 3*NodesCount, "Please check that the size of NodesCoord"
+        assert Loads.size == 3*NodesCount, "Please check that the size of Loads"
+
+        ElementsE = Cur.S.ElementsE #[N/mm²] - shape (ElementsCount, 2) - young modulus in [compression,tension]
+        ElementsA = Cur.S.ElementsA #[mm²] - shape (ElementsCount, 2)  - area in [compression,tension]
+        LFree = Cur.S.ElementsLFree # [m] - shape (ElementsCount,)  - free lengths when structure is disassembled
+        # no need to assert, it will be done in "Tension" Method
+
+        Cur.NodesCoord = NodesCoord.reshape(-1,)
+        Cur.Loads = Loads.reshape(-1,)
+
+        #2) Compute Residual
+        (Cur.ElementsL,Cur.ElementsCos)=Cur.ElementsLengthsAndCos(Cur.NodesCoord,C)
+        (Cur.A,Cur.AFree,Cur.AFixed) = Cur.EquilibriumMatrix(C,IsDOFfree,Cur.ElementsCos)
+        (Cur.Tension,Cur.F) = Cur.Tension(Cur.ElementsL, LFree, ElementsE, ElementsA) #F = LFree/EA. T=(Lcur-Lfree)/F. F can be infinity and T=0 if slack cables
+        Cur.Residual = Cur.Residual(Cur.A, Cur.Loads, Cur.Tension)
+        Cur.IsInEquilibrium = Cur.CheckEquilibrium(Cur.Residual,IsDOFfree,Residual0Threshold)
+
+        #3) Compute Fictitious Mass
+        Cur.Kmat = Cur.MaterialStiffnessMatrix(Cur.A,Cur.F) #note that material stiffness associated to slack cables = 0
+        Cur.Kgeo = Cur.GeometricStiffnessMatrix(Cur.Tension,Cur.ElementsL)
+        TensionOnly = np.where(Cur.Tension>=0,Cur.Tension,0)
+        KgeoInTensionOnly = Cur.GeometricStiffnessMatrix(TensionOnly,Cur.ElementsL)
+        FictM = Cur.FictitiousMasses4DR(Dt,Cur.Kmat,KgeoInTensionOnly)
+        Cur.M = Cur.FictitiousMassesAtSupports4DR(FictM,IsDOFfree,AmplMass,MinMass)
+
+
+
+
+
+
+
+
 
 class StructureObj():
 
@@ -699,7 +818,7 @@ class StructureObj():
                     K[index[j], index[j2]] += k[j, j2]
         return K
 
-
+    def CoreDynamicRelaxationMethod(Cur):
     # endregion
 
     # region Private Methods : Linear Solver based on displacement methods
