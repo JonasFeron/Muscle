@@ -226,6 +226,45 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(True, True)
 
+    def test_Simple_UpdateDR(self):
+        S = StructureObj()
 
+        NodesCoord = np.array([[2.0, 0.0, 1.0],
+                               [0.0, 0.0, 0.0],
+                               [4.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        IsDOFfree = np.array([False, False, False,
+                              False, False, False,
+                              False, False, False,
+                              True, True, True])
+
+        ElementsEndNodes = np.array([[0, 3],
+                                     [1, 3],
+                                     [2, 3]])
+        ElementsE = np.array([[0, 70], #let's say cable 0 can only be in tension
+                              [70, 70],
+                              [70, 70]])*1e3  #MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1],
+                              [1, 1]])*50.26 #mm²
+        # Imposed_Lengthening = np.array([-126.775,
+        #                                 0,
+        #                                 0])*1e-3 #m
+        Loads = np.array([  [0, 0, 0],
+                            [0, 0, 0],
+                            [0, 0, 0],
+                            [1, 0, 1]])
+        Imposed_Lengthening
+        S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        ElementsE = np.array([[0, 1],
+                              [1, 2]])
+
+        Initial = State(S, NodesCoord)
+
+        Initial.UpdateDR(Initial.NodesCoord, Loads)
+
+        self.assertEqual(True, True)
 if __name__ == '__main__':
     unittest.main()
