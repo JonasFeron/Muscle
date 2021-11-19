@@ -122,20 +122,20 @@ class SharedSolverResult():
         Answ.Stages = []
 
         # Answ.Loads_Already_Applied = np.zeros((Answ.NodesCount,3))
-        # Answ.Loads_To_Apply = np.zeros((Answ.NodesCount, 3))
-        # Answ.Loads_Applied = np.zeros((Answ.NodesCount, 3)) # results of Stages*Loads_To_Apply
+        # Answ.LoadsToApply = np.zeros((Answ.NodesCount, 3))
+        # Answ.Loads_Applied = np.zeros((Answ.NodesCount, 3)) # results of Stages*LoadsToApply
         # Answ.Loads_Total = np.zeros((Answ.NodesCount, 3)) # Already_Applied + To_Apply
 
-        # Answ.AxialForces_Already_Applied = np.zeros((Answ.ElementsCount,)) #considered in Geometric stiffness
-        Answ.AxialForces_Results = [] # [N] #results from Loads_To_Apply
+        # Answ.TensionInit = np.zeros((Answ.ElementsCount,)) #considered in Geometric stiffness
+        Answ.AxialForces_Results = [] # [N] #results from LoadsToApply
         # Answ.AxialForces_Total = np.zeros((Answ.ElementsCount,)) # Results + Already_Applied
 
         # Answ.Displacements_Already_Applied = np.zeros((Answ.NodesCount,3)) # this is such that this.NodesCoord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
-        Answ.Displacements_Results = [] #[mm] #results from Loads_To_Apply
+        Answ.Displacements_Results = [] #[mm] #results from LoadsToApply
         # Answ.Displacements_Total = np.zeros((Answ.NodesCount, 3)) # Results + Already_Applied
 
         # Answ.Reactions_Already_Applied = np.zeros((Answ.FixationsCount,))
-        Answ.Reactions_Results = [] #[N] #results from Loads_To_Apply
+        Answ.Reactions_Results = [] #[N] #results from LoadsToApply
         # Answ.Reactions_Total = np.zeros((Answ.FixationsCount,)) # Results + Already_Applied
 
     def PopulateWith(Answ,S0):

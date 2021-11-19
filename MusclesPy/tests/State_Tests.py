@@ -54,7 +54,7 @@ class MyTestCase(unittest.TestCase):
         C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S,NodesCoord)
         (l,ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
-        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(C, IsDOFfree, ElementsCos)
+        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(None, ElementsCos)
 
         A_free_answer = np.array([[1.0, -1.0],
                                   [0.0, 0.0],
@@ -78,8 +78,8 @@ class MyTestCase(unittest.TestCase):
         C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S,NodesCoord)
         (l, ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
-        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(C, IsDOFfree, ElementsCos)
-        SVD = Initial.ComputeSVD(A_free)
+        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(None, ElementsCos)
+        SVD = Initial.ComputeSVD(None, A_free)
 
         r_answer = 1
         self.assertEqual(SVD.r, r_answer)
@@ -106,7 +106,7 @@ class MyTestCase(unittest.TestCase):
 
         S = StructureObj(0,2)
         Initial = State(S)
-        F = Initial.Flexibility(ElementsE, ElementsA, ElementsL)  #F=L/EA
+        F = Initial.Flexibility(StructureObj(), ElementsE, ElementsA, ElementsL)  #F=L/EA
         self.assertEqual(F[0], 2/(100e7))
         self.assertEqual(F[1], 1e6)
 
@@ -146,7 +146,7 @@ class MyTestCase(unittest.TestCase):
         C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
         Initial = State(S, NodesCoord)
         (l, ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
-        (A, AFree, A_fixed) = Initial.EquilibriumMatrix(C, IsDOFfree, ElementsCos)
+        (A, AFree, A_fixed) = Initial.EquilibriumMatrix(None, ElementsCos)
 
         #2) Define the Loads
         Loads = np.array([[0, 0, 0],
@@ -199,7 +199,7 @@ class MyTestCase(unittest.TestCase):
 
         Tension = np.array([4])
         q = Initial.ForceDensities(Tension, Initial.ElementsL)
-        kgLocList = Initial.GeometricLocalStiffness_list(q)
+        kgLocList = Initial.GeometricLocalStiffnessList(None, q)
         Kgeo = S.GlobalFromLocalStiffnessMatrix(kgLocList)
 
         self.assertEqual(True, True)
@@ -222,7 +222,7 @@ class MyTestCase(unittest.TestCase):
         Initial = State(S, NodesCoord)
         (Initial.ElementsL, Initial.ElementsCos) = Initial.ElementsLengthsAndCos(Initial.NodesCoord, S.C)
         Tension = np.array([4,4])
-        Kgeo = Initial.GeometricStiffnessMatrix(Tension, Initial.ElementsL)
+        Kgeo = Initial.GeometricStiffnessMatrix(None, Tension, Initial.ElementsL)
 
         self.assertEqual(True, True)
 
@@ -263,7 +263,7 @@ class MyTestCase(unittest.TestCase):
 
         Initial = State(S, NodesCoord)
 
-        Initial.UpdateDR(Initial.NodesCoord, Loads)
+        Initial.UpdateDR(None, Initial.NodesCoord, Loads)
 
         self.assertEqual(True, True)
 if __name__ == '__main__':

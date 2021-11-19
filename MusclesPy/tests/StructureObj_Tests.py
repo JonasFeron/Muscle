@@ -218,12 +218,12 @@ class StructureObj_Tests(unittest.TestCase):
     #     W = 311.38 #N
     #     t0 = 4448.2 #N
     #     Loads_Already_Applied = np.array([[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]])
-    #     AxialForces_Already_Applied = np.array([t0,t0])
-    #     Loads_To_Apply = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,0.0]])
+    #     TensionInit = np.array([t0,t0])
+    #     LoadsToApply = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,0.0]])
     #     Elongations_To_Apply = np.array([0,0])
     #
     #     Cur.test_Main_LinearSolve_Force_Method(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE,
-    #                                        AxialForces_Already_Applied, Loads_To_Apply, Loads_Already_Applied,
+    #                                        TensionInit, LoadsToApply, Loads_Already_Applied,
     #                                        Elongations_To_Apply)
     #
     #     Displacements_answer_free = np.array([0,166.54])*1e-3 #analytique solution
@@ -571,7 +571,7 @@ class StructureObj_Tests(unittest.TestCase):
         t1 = q0 * S1.ElementsLFree
 
         # Loads_Already_Applied = np.array([[0.0,0.0,0.0],[0.0,0.0,-W],[0.0,0.0,-W],[0.0,0.0,0.0]])
-        # AxialForces_Already_Applied = np.array([t1,t2,t1])
+        # TensionInit = np.array([t1,t2,t1])
         self.assertEqual(False, True)
 
     # endregion
@@ -624,7 +624,7 @@ class StructureObj_Tests(unittest.TestCase):
 
         # Compute Equilibrium matrix
         (S1.ElementsL, S1.ElementsCos) = S1.ElementsLengthsAndCos(S1.NodesCoord, S1.C)  # cos = (X2_def - X1_def)/L_def
-        (S1.A, S1.AFree, S1.AFixed) = S1.EquilibriumMatrix(S1.C, S1.IsDOFfree, S1.ElementsCos)
+        (S1.A, S1.AFree, S1.AFixed) = S1.EquilibriumMatrix(None, S1.ElementsCos)
 
         # find e_elastic = B1@U0
         e_elastic = S1.AFree.transpose() @ Displacements_Results_free  # AFree contient les cos dans la position déformée avec les longueurs déformées
@@ -649,7 +649,7 @@ class StructureObj_Tests(unittest.TestCase):
 
         # Compute Equilibrium matrix
         (S2.ElementsL, S2.ElementsCos) = S2.ElementsLengthsAndCos(S2.NodesCoord, S2.C)  # cos = (X2_def - X1_def)/L_def
-        (S2.A, S2.AFree, S2.AFixed) = S2.EquilibriumMatrix(S2.C, S2.IsDOFfree, S2.ElementsCos)
+        (S2.A, S2.AFree, S2.AFixed) = S2.EquilibriumMatrix(None, S2.ElementsCos)
 
         # find e_elastic = B1@U0
         e2_elastic = S2.AFree.transpose() @ Displacements1_Results_free  # AFree contient les cos dans la position déformée avec les longueurs déformées
