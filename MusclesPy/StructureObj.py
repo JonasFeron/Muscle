@@ -1,6 +1,9 @@
 import numpy as np
 from data import SharedData
 
+#All kinds of objects are defined here in a single file in order to avoid the user to unblock manually too many files
+#at the installation stage. I know it is a bit messy, but it is for the sake of the user best experience.
+
 class ResultsSVD():
     """
     This class stores the results into a ResultsSVD object of the Singular Value Decomposition of the Equilibrium Matrix of the structure in the current state.
@@ -638,11 +641,6 @@ class DRState():
 
 
 
-
-
-
-
-
 class DRMethod():
     def __init__(DR):
         """
@@ -882,16 +880,32 @@ class StructureObj():
 
     def MainDynamicRelaxation(Self, Data):
 
-        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLfreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply,Residual0Threshold)
-        Self.DR.InitialData(Dt,AmplMass,MinMass,MaxTimeStep,MaxKEReset)
-        Self.DR.Core(Self)
+        Self.InitialData(Data.NodesCoord,
+                         Data.ElementsEndNodes,
+                         Data.IsDOFfree,
+                         Data.ElementsA,
+                         Data.ElementsE,
+                         Data.ElementsLFreeInit,
+                         Data.LoadsInit,
+                         Data.TensionInit,
+                         Data.ReactionsInit,
+                         Data.LoadsToApply,
+                         Data.LengtheningsToApply,
+                         Data.Residual0Threshold)
+        Self.DR.InitialData(Data.Dt,
+                            Data.AmplMass,
+                            Data.MinMass,
+                            Data.MaxTimeStep,
+                            Data.MaxKEReset)
+        Self.DR.Core(Self) # Compute the Dynamic Relaxation Method on the StructureObj
+        # GO BACK to MainDynamicRelaxation.py to send the results to C#
 
     def test_MainDynamicRelaxation(Self, NodesCoord,
                                    ElementsEndNodes,
                                    IsDOFfree,
                                    ElementsA,
                                    ElementsE,
-                                   ElementsLfreeInit=np.zeros((0,)),
+                                   ElementsLFreeInit=np.zeros((0,)),
                                    LoadsInit=np.zeros((0,)),
                                    TensionInit=np.zeros((0,)),
                                    ReactionsInit=np.zeros((0,)),
@@ -905,9 +919,10 @@ class StructureObj():
                                    MaxKEReset=1000,
                                    ):
 
-        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLfreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply,Residual0Threshold)
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply,Residual0Threshold)
         Self.DR.InitialData(Dt,AmplMass,MinMass,MaxTimeStep,MaxKEReset)
         Self.DR.Core(Self)
+
 
 
     def Main_LinearSolve_Displ_Method(S0,Data):

@@ -1,7 +1,5 @@
 import numpy as np
 
-
-
 def ReadDataFile(path):
     f = open(path, "r")
     key = f.readline()
@@ -14,49 +12,64 @@ def ReadDataFile(path):
     return (key[:l-1],Data_str)
 
 class SharedData():
-    def __init__(Data,TypeName,NodesCoord,Elements_ExtremitiesIndex, IsDOFfree, Elements_A=[], Elements_E=[], AxialForces_Already_Applied=[], Loads_To_Apply=[],n_steps=1):
+    def __init__(Data,TypeName,
+                 NodesCoord,
+                 ElementsEndNodes,
+                 IsDOFfree,
+                 ElementsA=[],
+                 ElementsE=[],
+                 ElementsLFreeInit=[],
+                 LoadsInit=[],
+                 TensionInit=[],
+                 ReactionsInit=[],
+                 LoadsToApply=[],
+                 LengtheningsToApply=[],
+                 Residual0Threshold=0.0001,
+                 Dt=0.01,
+                 AmplMass=1,
+                 MinMass=0.005,
+                 MaxTimeStep=10000,
+                 MaxKEReset=1000,
+                 n_steps=1):
         """
-        initialise tous les attributs de l'objet SharedData
+        Initialize all the properties of a SharedData Object. A SharedData Object is an object that contains the same data in C# than in Python in order to communicate between the two languages via a file.txt encrypted in json format.
         Note that sharing Data is a task expensive in time (data are converted to a string which is printed and read).
         Therefore : only share the minimum amount of informations and recalculate other data if necessary.
         """
-        Data.TypeName = TypeName
+        Data.TypeName = TypeName #SharedData
 
         ##### Required Input From C# #####
         #input arguments from C# are lists which are converted in numpy.array
         Data.NodesCoord = np.array(NodesCoord) #in m (it must be in m otherwise: K matrix is in N/mm and it is too small)
-        Data.Elements_ExtremitiesIndex = np.array(Elements_ExtremitiesIndex, dtype=int)
+        Data.ElementsEndNodes = np.array(ElementsEndNodes, dtype=int)
         Data.IsDOFfree = np.array(IsDOFfree, dtype=bool)
-        Data.Elements_A = np.array(Elements_A) #data are in mm²
-        Data.Elements_E = np.array(Elements_E) #data are in MPa
-        Data.AxialForces_Already_Applied = np.array(AxialForces_Already_Applied)
-        Data.Loads_To_Apply = np.array(Loads_To_Apply) #Note that Loads to Apply already contain the axialforces to Apply as PointLoads
+        Data.ElementsA = np.array(ElementsA).reshape((-1,2)) #[mm²] - [AreaInCompression, AreaInTension]
+        Data.ElementsE = np.array(ElementsE).reshape((-1,2)) #[MPa] - [EInCompression, EInTension]
+        Data.ElementsLFreeInit = np.array(ElementsLFreeInit).reshape((-1,)) #[m] - The free lengths before the Lengthenings are applied
+        Data.LoadsInit = np.array(LoadsInit).reshape((-1,))
+        Data.TensionInit = np.array(TensionInit).reshape((-1,))
+        Data.ReactionsInit = np.array(ReactionsInit).reshape((-1,))
+        Data.LoadsToApply = np.array(LoadsToApply).reshape((-1,))
+        Data.LengtheningsToApply = np.array(LengtheningsToApply).reshape((-1,))
+        Data.Residual0Threshold = Residual0Threshold
+
+        #Data for the Dynamic Relaxation method
+        Data.Dt = Dt
+        Data.AmplMass = AmplMass
+        Data.MinMass = MinMass
+        Data.MaxTimeStep = MaxTimeStep
+        Data.MaxKEReset = MaxKEReset
+
+        #Data for the Non-Linear displacement method
         Data.n_steps = n_steps
 
-        # ##### Calculation Datas #####
-        # Data.n_it
-        #
-        # Data.Loads_Already_Applied
-        # Data.Displacements_Already_Applied
-        # Data.Reactions_Already_Applied
-
-        #
-        #
-        # Data.AxialForces_To_Apply
-        #
-        # ##### Calculation Results #####
-        # Data.Displacements_Results
-        # Data.Displacements_Results_Total
-        # Data.Reactions_Results
-        # Data.Reactions_Results_Total
-        # Data.AxialForces_Results
 
 def ToSharedDataObject(dct):
     """
     Function that takes in a dictionary and returns a custom object SharedData associated to the dict.
     """
     if 'SharedData' in dct.values():
-        return SharedData(**dct) #call the constructor of SharedData with all the values of the dictionnary. The properties must be in the same order than in CSharp !!
+        return SharedData(**dct) #call the constructor of SharedData with all the values of the dictionnary. The Name of the properties in Python must match with the ones in CSharp !!
     return dct
 
 

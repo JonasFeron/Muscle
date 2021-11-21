@@ -25,7 +25,7 @@ def main(): # START READING FROM HERE
     else:
         output_str = "Keys from command prompt and Data text file did not match"
 
-    resultPath = r.WriteResultFile(dataPath,r.DRResultFile,key,output_str)
+    resultPath = r.WriteResultFile(dataPath,r.FileDRResult,key,output_str)
     print(key + ":" + resultPath)  #Send the results to C#
 
 
@@ -35,16 +35,16 @@ def core(Data_str):
     :return: print key:output
     """
     # print("input in python is\n",Data_str)
-    result = r.SharedDRResult() #initialize empty results
+    result = r.SharedSolverResult() #initialize empty results
     data = json.loads(Data_str, object_hook = d.ToSharedDataObject)  #Data are stored in SharedData object
 
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
-        S0 = StructureObj() #initial empty structure
-        S0.Main_Assemble(data) #do some calculations
-        result.PopulateWith(S0) #register the results
+        Struct = StructureObj() #initial empty structure
+        Struct.MainDynamicRelaxation(data) #do some calculations
+        result.PopulateWith(Struct) #register the results
         # print("I finished calculation")
 
-    output_dct = json.dumps(result, cls=r.SharedAssemblyResultEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
+    output_dct = json.dumps(result, cls=r.SharedSolverResultEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
     return output_dct
 
 if __name__ == '__main__': #what happens if called from C#
