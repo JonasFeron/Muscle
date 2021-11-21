@@ -190,7 +190,6 @@ class State():
         Copy.F = Cur.F.copy()
         Copy.Kmat = Cur.Kmat.copy()
         Copy.Kgeo = Cur.Kgeo.copy()
-        Copy.M = Cur.M.copy()
         Copy.DRState = Cur.DRState.Copy()
         return Copy
 
@@ -213,8 +212,8 @@ class State():
             ElementsE = Struct.ElementsE  # will be asserted in a deeper method
             ElementsA = Struct.ElementsA  # will be asserted in a deeper method
 
-            (Cur.Tension, Cur.F) = Cur.Tension(Struct, Cur.ElementsL, Cur.ElementsLFree, ElementsE,ElementsA)  # F = LFree/EA. T=(Lcur-Lfree)/F. F can be infinity and T=0 if slack cables
-            Cur.Residual = Cur.Residual(Struct, Cur.A, Cur.Loads, Cur.Tension)
+            (Cur.Tension, Cur.F) = Cur.TensionForces(Struct, Cur.ElementsL, Cur.ElementsLFree, ElementsE, ElementsA)  # F = LFree/EA. T=(Lcur-Lfree)/F. F can be infinity and T=0 if slack cables
+            Cur.Residual = Cur.UnbalancedLoads(Struct, Cur.AFree, Cur.Loads, Cur.Tension)
             Cur.IsInEquilibrium = Cur.CheckEquilibrium(Struct, Cur.Residual, Struct.Residual0Threshold)
 
             if ComputeStiffness:
@@ -301,7 +300,7 @@ class State():
         Cur.SVD.SVDEquilibriumMatrix(Struct,AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
-    def Tension(Cur, Struct, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
+    def TensionForces(Cur, Struct, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
         """
 
         :param Struct: The StructureObject in the current state
@@ -340,7 +339,7 @@ class State():
         T = Kbsc * DeltaL  # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
         return (T, F)
 
-    def Residual(Cur, Struct, A, Loads, Tension):
+    def UnbalancedLoads(Cur, Struct, A, Loads, Tension):
         """
         Returns the Residual (=unbalanced loads) considering the equilibrium equation R = Loads - A @ Tension.
         If A=A with shape(3 NodesCount,ElementsCount), the Residual = the Reaction where the DOF are fixed.
@@ -534,9 +533,12 @@ class DRState():
         Cur.ComputeState(Struct,ComputeResidual=True, ComputeStiffness=True)
 
         # Compute Fictitious Mass
-        TensionOnly = np.where(Cur.Tension >= 0, Cur.Tension, 0)
-        KgeoInTensionOnly = Cur.GeometricStiffnessMatrix(Struct, TensionOnly, Cur.ElementsL)
-        TempM = DRCur.FictitiousMasses(Struct, Dt, Cur.Kmat, KgeoInTensionOnly)
+        #Option 1
+        # TensionOnly = np.where(Cur.Tension >= 0, Cur.Tension, 0)
+        # KgeoInTensionOnly = Cur.GeometricStiffnessMatrix(Struct, TensionOnly, Cur.ElementsL)
+        # TempM = DRCur.FictitiousMasses(Struct, Dt, Cur.Kmat, KgeoInTensionOnly)
+        # Option 2 reach an equilibrium much (10%) faster !
+        TempM = DRCur.FictitiousMasses(Struct, Dt, Cur.Kmat, Cur.Kgeo)
         DRCur.M = DRCur.FictitiousMassesWithSupports(Struct, TempM, Struct.IsDOFfree)  #take the support conditions into account in the mass
 
     def FictitiousMasses(Cur, Struct, Dt, MaterialStiffnessMatrix, GeometricStiffnessMatrix):
@@ -555,7 +557,7 @@ class DRState():
         Kgeo = GeometricStiffnessMatrix
         NodesCount = Struct.NodesCount
 
-        assert (Kmat >= np.zeros((3 * NodesCount, 3 * NodesCount))).all(), "Please check that the global material stiffness matrix Kmat has been computed"
+        assert Kmat.shape == (3 * NodesCount, 3 * NodesCount), "Please check the shape of the global material stiffness matrix Kmat"
         assert Kgeo.shape == (3 * NodesCount, 3 * NodesCount), "Please check the shape of the global geometric stiffness matrix Kgeo"
 
         # 1) Find the total material stiffness associated to each DOF.
@@ -592,20 +594,6 @@ class DRState():
 
 
 
-    def InitialVelocities(Cur, Settings, Residual, Mass):
-        """
-        Compute the initial velocities V = 0.5*Dt*R/M for each DOF
-        :param Settings.Dt: [s] - scalar - the time step
-        :param Residual: [N] - np.zeros((3 * NodesCount,)) - the unbalanced loads that generate an acceleration
-        :param Mass: [kg] - np.zeros((3 * NodesCount,)) - the fictitious mass
-        :return: Vi: [m/s] - np.zeros((3 * NodesCount,)) - the initial velocities of each Degree of freedom
-        """
-        #0) Reset velocities and Kinetic Energy
-        Cur.KE = 0 # In the current state "t", the velocities are reset to 0
-
-        #1) Compute the velocities at t+Dt/2
-        HalfDt = Settings.Dt/2
-        return Cur.Velocities(None, HalfDt, Residual, Mass)
 
     def Velocities(Cur, Struct, Dt, Residual, Mass):
         """
@@ -623,9 +611,10 @@ class DRState():
         assert Residual.shape == (3 * NodesCount,), "Please check Residual and Mass shapes"
         assert Dt >0, "Please ensure that the DR time step is larger than 0"
 
-        index0 = np.where(~IsDOFfree or Mass<=0) # where the DOF are fixed or where the Mass are smaller than or equal to 0.
-        Mass[index0] = 1 # set the mass to 1 to avoid dividing by zero
-        V = Dt * Residual/Mass
+        index0 = np.where(np.logical_or(~IsDOFfree,Mass<=0)) # where the DOF are fixed or where the Mass are smaller than or equal to 0.
+        TempMass = Mass.copy() # this is needed to avoid modifying the Mass in the next instruction
+        TempMass[index0] = 1 # set the mass to 1 to avoid dividing by zero
+        V = Dt * Residual/TempMass
         V[index0] = 0 #the velocities are set to 0 where the masses are zero or where the DOF are fixed.
         return V
 
@@ -662,7 +651,7 @@ class DRMethod():
 
         DR.AmplMass = 1 #[kg] - scalar - the amplification factor of the mass in every DOF in case we run into convergence issue
         DR.MinMass = 0.005 #[kg] - scalar - the min mass applied on every DOF
-        DR.HugeMass = 1.0e100  #[kg] - scalar - huge mass to fix the supports
+        DR.HugeMass = 1e15  #[kg] - scalar - huge mass to fix the supports
 
         DR.Dt = 0.01 #[s] - scalar - the time step of the time incremental method
         DR.nTimeStep = 0  # [/] - scalar - the number of time step such that t = nTimeStep * Dt
@@ -672,7 +661,7 @@ class DRMethod():
 
 
 
-    def InitialData(DR,Dt=0.01,AmplMass=1,MinMass=0.005,HugeMass = 1.0e100):
+    def InitialData(DR,Dt=0.01,AmplMass=1,MinMass=0.005,MaxTimeStep = 10000,MaxKeReset=1000):
 
         if Dt > 0:
             DR.Dt = Dt
@@ -689,10 +678,15 @@ class DRMethod():
         else:
             DR.MinMass = 0.005
 
-        if HugeMass > 0:
-            DR.HugeMass = HugeMass
+        if MaxTimeStep > 0:
+            DR.MaxTimeStep = MaxTimeStep
         else:
-            DR.HugeMass = 1.0e100
+            DR.MaxTimeStep = 10000
+
+        if MaxKeReset > 0:
+            DR.MaxKeReset = MaxKeReset
+        else:
+            DR.MaxKeReset = 1000
 
     def Core(DR,Struct):
         """
@@ -782,6 +776,9 @@ class DRMethod():
             #4.6) Update Fictitious Mass
             Cur.DRState.UpdateResidualAndMass(Struct,Cur)
             CurIsInEquilibrium = Cur.IsInEquilibrium #FYI
+            #print(CurIsInEquilibrium)
+
+        #Compute the Reaction forces
 
         Struct.DR.nTimeStep = nTimeStep
         Struct.DR.nKEReset = nKEReset
@@ -818,7 +815,7 @@ class StructureObj():
         Self.C = np.zeros((Self.ElementsCount, Self.NodesCount), dtype=int) #matrice de connectivité C # (nbr lines, nbr nodes)
 
         ##### Solve informations #####
-        Self.Residual0Threshold = 0.00001 # the Zero threshold = tolerance below which the (norm of the) residual forces are considered equal to 0, in other words, the structure is in equilibrium.
+        Self.Residual0Threshold = 0.0001 # the Zero threshold = tolerance below which the (norm of the) residual forces are considered equal to 0, in other words, the structure is in equilibrium.
 
         Self.DR = DRMethod()
         Self.n_steps = 1
@@ -883,6 +880,12 @@ class StructureObj():
         S0.CoreAssemble()
         S0.SVD = S0.SVD_Equilibrium_Matrix(S0.AFree)
 
+    def MainDynamicRelaxation(Self, Data):
+
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLfreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply,Residual0Threshold)
+        Self.DR.InitialData(Dt,AmplMass,MinMass,MaxTimeStep,MaxKEReset)
+        Self.DR.Core(Self)
+
     def test_MainDynamicRelaxation(Self, NodesCoord,
                                    ElementsEndNodes,
                                    IsDOFfree,
@@ -894,14 +897,16 @@ class StructureObj():
                                    ReactionsInit=np.zeros((0,)),
                                    LoadsToApply=np.zeros((0,)),
                                    LengtheningsToApply=np.zeros((0,)),
-                                   Residual0Threshold=0.00001,
+                                   Residual0Threshold=0.0001,
                                    Dt = 0.01,
                                    AmplMass = 1,
-                                   MinMass=0.005
+                                   MinMass=0.005,
+                                   MaxTimeStep=10000,
+                                   MaxKEReset=1000,
                                    ):
 
-        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLfreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply)
-        Self.DR.InitialData(Dt,AmplMass,MinMass)
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLfreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply,Residual0Threshold)
+        Self.DR.InitialData(Dt,AmplMass,MinMass,MaxTimeStep,MaxKEReset)
         Self.DR.Core(Self)
 
 
@@ -1001,7 +1006,7 @@ class StructureObj():
             Self.Initial.ElementsLFree = np.zeros((Self.ElementsCount,))
 
         if (Self.Initial.ElementsLFree <= np.zeros((Self.ElementsCount,))).all(): #if the free lengths are smaller than 0, it means they have not been calculated yet.
-            Self.Initial.ElementsLFree = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
+            (Self.Initial.ElementsLFree,cos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
 
 
         if isinstance(LoadsInit, np.ndarray) and LoadsInit.size == 3 * Self.NodesCount:

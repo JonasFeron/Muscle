@@ -125,14 +125,16 @@ class StructureObj_Tests(unittest.TestCase):
         LoadsToApply = np.array([[0, 0, 0],
                                  [0, 0, 0],
                                  [0, 0, 0]])
-        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFree, None, None, None,LoadsToApply,LengtheningsToApply)
+        Dt = 0.01
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFree, None, None, None,LoadsToApply,LengtheningsToApply,Dt=Dt)
 
-        Initial.UpdateMass(None, Initial.NodesCoord)
+        success = np.isclose(Struct.Final.Tension,70000*50.26*0.001/1.999*np.ones(2,),rtol=1e-2)
 
-        self.assertEqual(True, True)
-    def test_Simple_MainDynamicRelaxation(self):
+        self.assertEqual(success, True)
+
+    def test_SimpleB_MainDynamicRelaxation(self):
         """
-        A simple benchmark test with 3 cables and different shortenings.
+        A simple benchmark test B with 3 cables.
         :return:
         """
 
@@ -150,7 +152,7 @@ class StructureObj_Tests(unittest.TestCase):
         ElementsEndNodes = np.array([[0, 3],
                                      [1, 3],
                                      [2, 3]])
-        ElementsE = np.array([[0, 70],  # let's say cable 0 can only be in tension
+        ElementsE = np.array([[70, 70],
                               [70, 70],
                               [70, 70]]) * 1e3  # MPa
         ElementsA = np.array([[1, 1],
@@ -159,16 +161,232 @@ class StructureObj_Tests(unittest.TestCase):
         LengtheningsToApply = np.array([-126.775,
                                         0,
                                         0])*1e-3 #m
-        # LoadsToApply = np.array([[0, 0, 0],
-        #                          [0, 0, 0],
-        #                          [0, 0, 0],
-        #                          [1, 0, 1]])
-        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,None, LengtheningsToApply)
+        LoadsToApply = np.array([[0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]])
+        #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
 
-        Initial.UpdateMass(None, Initial.NodesCoord)
+        Dt = 0.01
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,LoadsToApply,LengtheningsToApply,Dt=Dt)
 
-        self.assertEqual(True, True)
+        TensionAnalyticAnswer = np.array([888.81,
+                                         7037.17,
+                                         7037.17]) #N
+        NodesCoordAnalyticAnswer = np.array([[2.0, 0.0, 1.0],
+                                             [0.0, 0.0, 0.0],
+                                             [4.0, 0.0, 0.0],
+                                             [2.0, 0.0, 0.126554]]).reshape((-1,))
+        successForces = np.isclose(Struct.Final.Tension,TensionAnalyticAnswer,rtol=1e-3) #relative tolérance of 1/1000
+        successNodes = np.isclose(Struct.Final.NodesCoord,NodesCoordAnalyticAnswer,atol=1e-6)
 
+        self.assertEqual(successForces.all(), True)
+        self.assertEqual(successNodes.all(), True)
+
+    def test_SimpleC_MainDynamicRelaxation(self):
+        """
+        A simple benchmark test with 3 cables and with reorientation of the shortening axis
+        :return:
+        """
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[0.0, 0.0, 1.0],
+                               [0.0, 0.0, 0.0],
+                               [4.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        IsDOFfree = np.array([False, False, False,
+                              False, False, False,
+                              False, False, False,
+                              True, True, True])
+
+        ElementsEndNodes = np.array([[0, 3],
+                                     [1, 3],
+                                     [2, 3]])
+        ElementsE = np.array([[70, 70],  # let's say cable 0 can only be in tension
+                              [70, 70],
+                              [70, 70]]) * 1e3  # MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1],
+                              [1, 1]]) * np.pi *(8/2)**2  # mm²
+        LengtheningsToApply = np.array([-52.110,
+                                        0,
+                                        0])*1e-3 #m
+        LoadsToApply = np.array([[0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]])
+        #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
+
+        Dt = 0.01
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,LoadsToApply,LengtheningsToApply,Residual0Threshold=0.00001,Dt=Dt)
+
+
+        TensionAnalyticAnswer = np.array([1823.48,
+                                         5365.62,
+                                         7037.17]) #N
+        NodesCoordAnalyticAnswer = np.array([[0.0, 0.0, 1.0],
+                                             [0.0, 0.0, 0.0],
+                                             [4.0, 0.0, 0.0],
+                                             [2.0-0.000476, 0.0, 0.118795]]).reshape((-1,))
+        successForces = np.isclose(Struct.Final.Tension,TensionAnalyticAnswer,rtol=1e-3) #relative tolérance of 1/1000
+        successNodes = np.isclose(Struct.Final.NodesCoord,NodesCoordAnalyticAnswer,atol=1e-6)
+
+        self.assertEqual(successForces.all(), True)
+        self.assertEqual(successNodes.all(), True)
+
+    def test_SimpleCslack_MainDynamicRelaxation(self):
+        """
+        A simple benchmark test with 3 cables and slack cables
+        :return:
+        """
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[0.0, 0.0, 1.0],
+                               [0.0, 0.0, 0.0],
+                               [4.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        IsDOFfree = np.array([False, False, False,
+                              False, False, False,
+                              False, False, False,
+                              True, True, True])
+
+        ElementsEndNodes = np.array([[0, 3],
+                                     [1, 3],
+                                     [2, 3]])
+        ElementsE = np.array([[0, 70],  # let's say cable 0 can only be in tension
+                              [70, 70],
+                              [70, 70]]) * 1e3  # MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1],
+                              [1, 1]]) * 50.26  # mm²
+        LengtheningsToApply = np.array([0,
+                                        -7.984,
+                                        0])*1e-3 #m
+        LoadsToApply = np.array([[0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]])
+        #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
+
+        Dt = 0.01
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,LoadsToApply,LengtheningsToApply,Dt=Dt)
+
+
+        TensionAnalyticAnswer = np.array([0,
+                                         7037.17,
+                                         7037.17]) #N
+        NodesCoordAnalyticAnswer = np.array([[0.0, 0.0, 1.0],
+                                             [0.0, 0.0, 0.0],
+                                             [4.0, 0.0, 0.0],
+                                             [2.0-0.004000, 0.0, 0.0]]).reshape((-1,))
+        successForces = np.isclose(Struct.Final.Tension,TensionAnalyticAnswer,rtol=1e-3) #relative tolérance of 1/1000
+        successNodes = np.isclose(Struct.Final.NodesCoord,NodesCoordAnalyticAnswer,atol=1e-6)
+
+        self.assertEqual(successForces.all(), True)
+        self.assertEqual(successNodes.all(), True)
+
+    def test_Simplex_MainDynamicRelaxation(self):
+        """
+        Compare the results of this DR method with the results of Landolf Rhode Barbarigos for the case of the experimental simplex with the shortening of one horizontal cable
+        :return:
+        """
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[   0.00, -2043.82, 0.00],
+                               [   0.00,     0.00, 0.00],
+                               [1770.00, -1021.91, 0.00],
+                               [ 590.00, -2201.91, 1950.00],
+                               [-431.91,  -431.91, 1950.00],
+                               [1611.91,  -431.91, 1950.00]])*1e-3
+        IsDOFfree = np.array([False, True, False,
+                              False, False, False,
+                              True, True, False,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True])
+
+        ElementsEndNodes = np.array([[2, 4],
+                                     [1, 3],
+                                     [0, 5],
+                                     [1, 2],
+                                     [0, 1],
+                                     [0, 2],
+                                     [4, 5],
+                                     [3, 4],
+                                     [3, 5],
+                                     [2, 5],
+                                     [1, 4],
+                                     [0, 3]])
+
+        #Bars can only be in compression and cables only in tension
+        ElementsE = np.array([[70390, 0],
+                              [70390, 0],
+                              [70390, 0],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750]])  # MPa
+        ElementsA = np.ones((12,2))
+        ElementsA[0:3,:] = 364.4
+        ElementsA[3:12,:] = 50.3
+
+        ElementsLFree = np.array([2999.8,
+    2999.8,
+    2999.8,
+    2043.8,
+    2043.8,
+    2043.8,
+    2043.8,
+    2043.8,
+    2043.8,
+    2043.4,
+    2043.4,
+    2043.4])*1e-3
+
+
+        LengtheningsToApply = np.zeros((12,)) #m
+        LengtheningsToApply[0:3] = 0.835*1e-3
+        LengtheningsToApply[8] = -35 * 1e-3
+
+        LoadsToApply = np.zeros((6,3))
+        LoadsToApply[0:3,2] = 45.7
+        LoadsToApply[3:6,2] = 41.6 #N
+
+        Dt = 0.01
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFree, None, None, None,LoadsToApply,LengtheningsToApply,Residual0Threshold=0.00001,Dt=Dt)
+
+        TensionDRMatlabAnswer = np.array([-9848.26151894298,
+        -9882.41664832343,
+        -9874.50280077890,
+        3953.87930064950,
+        3835.52819661200,
+        3808.51599478652,
+        3859.21359327111,
+        3858.16975358279,
+        3947.80984861979,
+        6653.65253640084,
+        6677.35302197632,
+        6744.48294062936]) #N
+
+        NodesCoordDRMatlabAnswer = np.array([[   0.00, -2045.97206933403, 0.00],
+                               [   0.00,     0.00, 0.00],
+                               [1771.89364968302, - 1023.06835531595, 0.00],
+                               [ 616.024764975095, - 2197.43254689303, 1946.45254155930],
+                               [-427.528116330227,  - 437.602999235727, 1953.63046329029],
+                               [1618.37958793442,  - 454.066751469362, 1960.50103999593]]).reshape((-1,))*1e-3
+        successForces = np.isclose(Struct.Final.Tension,TensionDRMatlabAnswer,rtol=1e-2) #relative tolérance of 5/1000
+        successNodes = np.isclose(Struct.Final.NodesCoord,NodesCoordDRMatlabAnswer,rtol=1e-2)
+
+        self.assertEqual(successForces.all(), True)
+        self.assertEqual(successNodes.all(), True)
 
     # endregion
 
