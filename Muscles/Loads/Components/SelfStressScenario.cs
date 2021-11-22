@@ -82,9 +82,9 @@ namespace Muscles.Loads
         {
             StructureObj structure_output = structure.Duplicate();
 
-            int b = structure.Struct_Elements.Count; //number of bars
-            int n = structure.Struct_Nodes.Count;
-            List<Element> elements = structure.Struct_Elements;
+            int b = structure.StructuralElements.Count; //number of bars
+            int n = structure.StructuralNodes.Count;
+            List<Element> elements = structure.StructuralElements;
             List<double> prestressForces = Enumerable.Range(0, b).Select(i => 0d).ToList();
             List<Vector3d> prestressExtLoads = Enumerable.Range(0, n).Select(i => new Vector3d()).ToList();
 
@@ -120,8 +120,8 @@ namespace Muscles.Loads
                     PrestressLoad P = new PrestressLoad(elem,force);
 
                     prestressForces[i] += P.Value; // P.Value = force. The prestress force is added to the force to apply on this element. 
-                    int ind_n0 = P.Element.ExtremitiesIndex[0];
-                    int ind_n1 = P.Element.ExtremitiesIndex[1];
+                    int ind_n0 = P.Element.EndNodes[0];
+                    int ind_n1 = P.Element.EndNodes[1];
                     prestressExtLoads[ind_n0] += P.AsPointLoad0.Vector; //The prestress as point loads are added to the pointload to apply on the element extremitites. 
                     prestressExtLoads[ind_n1] += P.AsPointLoad1.Vector;
                 }                
@@ -135,17 +135,17 @@ namespace Muscles.Loads
 
             for (int j = 0; j < n; j++) //foreach node
             {
-                if (structure.Struct_Nodes[j].isXFree) // if node is free in X, check that the external load due to the self stress force is = 0. 
+                if (structure.StructuralNodes[j].isXFree) // if node is free in X, check that the external load due to the self stress force is = 0. 
                 {
                     double load_adim = Math.Abs(prestressExtLoads[j].X / LVL_ref);
                     if (load_adim > ZeroTol) IsSelfStressed = false; 
                 }
-                if (structure.Struct_Nodes[j].isYFree) 
+                if (structure.StructuralNodes[j].isYFree) 
                 {
                     double load_adim = Math.Abs(prestressExtLoads[j].Y / LVL_ref);
                     if (load_adim > ZeroTol) IsSelfStressed = false;
                 }
-                if (structure.Struct_Nodes[j].isZFree) 
+                if (structure.StructuralNodes[j].isZFree) 
                 {
                     double load_adim = Math.Abs(prestressExtLoads[j].Z / LVL_ref);
                     if (load_adim > ZeroTol) IsSelfStressed = false;
@@ -161,11 +161,11 @@ namespace Muscles.Loads
 
             for (int i = 0; i < b; i++) //foreach element
             {
-                double prev = structure_output.Struct_Elements[i].AxialForce_Current;
+                double prev = structure_output.StructuralElements[i].Tension;
                 double result = prestressForces[i] * 1000;//level is in kN and we register it in N
                 double total = prev + result; 
-                structure_output.Struct_Elements[i].AxialForce_Results = new List<double>() {result} ;
-                structure_output.Struct_Elements[i].AxialForce_Total = new List<double>() {total};
+                structure_output.StructuralElements[i].AxialForce_Results = new List<double>() {result} ;
+                structure_output.StructuralElements[i].AxialForce_Total = new List<double>() {total};
             }
 
             return structure_output;

@@ -647,7 +647,7 @@ class DRMethod():
         An object which contains everything needed to perform the dynamic relaxation method on the structure
         """
 
-        DR.AmplMass = 1 #[kg] - scalar - the amplification factor of the mass in every DOF in case we run into convergence issue
+        DR.AmplMass = 1 #[/] - scalar - the amplification factor of the mass in every DOF in case we run into convergence issue
         DR.MinMass = 0.005 #[kg] - scalar - the min mass applied on every DOF
         DR.HugeMass = 1e15  #[kg] - scalar - huge mass to fix the supports
 
@@ -1020,7 +1020,7 @@ class StructureObj():
         else:
             Self.Initial.ElementsLFree = np.zeros((Self.ElementsCount,))
 
-        if (Self.Initial.ElementsLFree <= np.zeros((Self.ElementsCount,))).all(): #if the free lengths are smaller than 0, it means they have not been calculated yet.
+        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).all(): #if the free lengths are smaller than 0, it means they have not been calculated yet.
             (Self.Initial.ElementsLFree,cos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
 
 

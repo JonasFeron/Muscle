@@ -97,8 +97,9 @@
     <Compile Include="PythonLink\SharedData.cs" />
     <Compile Include="PythonLink\PythonManager.cs" />
     <Compile Include="PythonLink\PythonObjects.cs" />
-    <Compile Include="Solvers\LinearSolverDisplComponent.cs" />
-    <Compile Include="Solvers\NonLinearSolverDisplComponent.cs" />
+    <Compile Include="Solvers\DRMethod.cs" />
+    <Compile Include="Solvers\Component\LinearSolverDisplComponent.cs" />
+    <Compile Include="Solvers\Component\NonLinearSolverDisplComponent.cs" />
     <Compile Include="Structure\Components\DeformedStructureComponent.cs" />
     <Compile Include="Structure\Components\AssembleStructureComponent.cs" />
     <Compile Include="Structure\GH_StructureObj.cs" />

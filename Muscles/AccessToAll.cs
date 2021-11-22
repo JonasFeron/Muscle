@@ -56,6 +56,14 @@ namespace Muscles
                 else return "Main_NonLinearSolveStructure.py";
             }
         }
+        public static string MainDRSolve
+        {
+            get
+            {
+                if (user_mode == true) return "MainDynamicRelaxation.pyc";
+                else return "MainDynamicRelaxation.py";
+            }
+        }
 
         public const string File_Test_Data = "Test_Data.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python
@@ -65,6 +73,7 @@ namespace Muscles
         //public const string File_LinearSolve_Result = "LinearSolve_Result.txt";
         public const string File_NonLinearSolve_Data = "NonLinearSolve_Data.txt";
         //public const string File_NonLinearSolve_Result = "NonLinearSolve_Result.txt";
+        public const string File_DRSolve_Data = "DynamicRelaxationData.txt";
 
 
 

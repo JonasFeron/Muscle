@@ -40,7 +40,7 @@ class SharedData():
 
         ##### Required Input From C# #####
         #input arguments from C# are lists which are converted in numpy.array
-        Data.NodesCoord = np.array(NodesCoord) #in m (it must be in m otherwise: K matrix is in N/mm and it is too small)
+        Data.NodesCoord = np.array(NodesCoord) #[m] - shape (NodesCount, 3) - Coordinates must be in m otherwise: K matrix is in N/mm and it is too small)
         Data.ElementsEndNodes = np.array(ElementsEndNodes, dtype=int)
         Data.IsDOFfree = np.array(IsDOFfree, dtype=bool)
         Data.ElementsA = np.array(ElementsA).reshape((-1,2)) #[mm²] - [AreaInCompression, AreaInTension]

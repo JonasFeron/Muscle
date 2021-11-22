@@ -137,13 +137,13 @@ class SharedSolverResult():
 
     def PopulateWith(Answ, Struct):
         if isinstance(Struct, StructureObj):
-            Answ.NodesCoord = Struct.Final.NodesCoord.round(8).tolist() #[m] - shape (3NodesCount,)
-            Answ.Loads = Struct.Final.Loads.round(5).tolist() #[N] - shape (3NodesCount,)
+            Answ.NodesCoord = Struct.Final.NodesCoord.round(8).reshape((-1,3)).tolist() #[m] - shape (NodesCount,3)
+            Answ.Loads = Struct.Final.Loads.round(5).reshape((-1,3)).tolist() #[N] - shape (NodesCount,3)
             Answ.Tension = Struct.Final.Tension.round(5).tolist() #[N] - shape (ElementsCount,)
             Answ.Reactions = Struct.Final.Reactions.round(5).tolist() #[N] - shape (FixationsCount,)
             Answ.ElementsLFree = Struct.Final.ElementsLFree.round(8).tolist() #[m] - shape (ElementsCount,)
 
-            Answ.Residual = Struct.Final.Residual.round(5).tolist() #[N] - shape (3NodesCount,)
+            Answ.Residual = Struct.Final.Residual.round(5).reshape((-1,3)).tolist() #[N] - shape (NodesCount,3)
             Answ.IsInEquilibrium = Struct.Final.IsInEquilibrium
 
             Answ.nTimeStep = Struct.DR.nTimeStep

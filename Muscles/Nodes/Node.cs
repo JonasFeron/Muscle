@@ -48,21 +48,23 @@ namespace Muscles.Nodes
             get { return Convert.ToInt16(!isXFree) + Convert.ToInt16(!isYFree) + Convert.ToInt16(!isZFree); }
         }
 
-        public Vector3d Reaction_Already_Applied { get; set; }
-        public List<Vector3d> Reaction_Results { get; set; }
-        public List<Vector3d> Reaction_Total { get; set; } // addition of already applied + results
+        public Vector3d Reaction { get; set; }
+        //public List<Vector3d> Reaction_Results { get; set; }
+        //public List<Vector3d> Reaction_Total { get; set; } // addition of already applied + results
 
         #endregion Support
 
         ///// Load informations /////
         #region Load
 
-        public Vector3d Load_Already_Applied { get; set; }
-        public Vector3d Load_To_Apply { get; set; }
+        public Vector3d Load { get; set; }
+        //public Vector3d LoadToApply { get; set; }
+
+        public Vector3d Residual { get; set; } // the unbalanced loads = Load - SUM tension*cos
         //public Vector3d PrestressLoad_To_Apply { get; set; } // load coming from an initial force
 
-        public List<Vector3d> Load_Results { get; set; }
-        public List<Vector3d> Load_Total { get; set; }
+        //public List<Vector3d> Load_Results { get; set; }
+        //public List<Vector3d> Load_Total { get; set; }
 
 
         #endregion Load
@@ -70,9 +72,9 @@ namespace Muscles.Nodes
         ///// Displacement informations /////
         #region Displacement
 
-        public Vector3d Displacement_Already_Applied { get; set; }
-        public List<Vector3d> Displacement_Results { get; set; }
-        public List<Vector3d> Displacement_Total { get; set; } // addition of already applied + results
+        //public Vector3d Displacement_Already_Applied { get; set; }
+        //public List<Vector3d> Displacement_Results { get; set; }
+        //public List<Vector3d> Displacement_Total { get; set; } // addition of already applied + results
 
         #endregion Displacement
 
@@ -94,18 +96,19 @@ namespace Muscles.Nodes
             Ind_RX = -1;
             Ind_RY = -1;
             Ind_RZ = -1;
-            Reaction_Already_Applied = new Vector3d();
-            Reaction_Results = new List<Vector3d>();
-            Reaction_Total = new List<Vector3d>();
+            Reaction = new Vector3d();
+            //Reaction_Results = new List<Vector3d>();
+            //Reaction_Total = new List<Vector3d>();
 
-            Load_Already_Applied = new Vector3d();
-            Load_To_Apply = new Vector3d();
-            Load_Results = new List<Vector3d>();
-            Load_Total = new List<Vector3d>();
+            Load = new Vector3d();
+            Residual = new Vector3d();
+            //LoadToApply = new Vector3d();
+            //Load_Results = new List<Vector3d>();
+            //Load_Total = new List<Vector3d>();
 
-            Displacement_Already_Applied = new Vector3d();
-            Displacement_Results = new List<Vector3d>();
-            Displacement_Total = new List<Vector3d>();
+            //Displacement_Already_Applied = new Vector3d();
+            //Displacement_Results = new List<Vector3d>();
+            //Displacement_Total = new List<Vector3d>();
         }
         public Node()
         {
@@ -134,18 +137,19 @@ namespace Muscles.Nodes
             Ind_RY = other.Ind_RY;
             Ind_RZ = other.Ind_RZ;
 
-            Reaction_Already_Applied = other.Reaction_Already_Applied;
-            Reaction_Results = other.Reaction_Results;
-            Reaction_Total = other.Reaction_Total;
+            Reaction = other.Reaction;
+            //Reaction_Results = other.Reaction_Results;
+            //Reaction_Total = other.Reaction_Total;
 
-            Load_Already_Applied = other.Load_Already_Applied;
-            Load_To_Apply = other.Load_To_Apply;
-            Load_Results = other.Load_Results;
-            Load_Total = other.Load_Total;
+            Load = other.Load;
+            Residual = other.Residual;
+            //LoadToApply = other.LoadToApply;
+            //Load_Results = other.Load_Results;
+            //Load_Total = other.Load_Total;
 
-            Displacement_Already_Applied = other.Displacement_Already_Applied;
-            Displacement_Results = other.Displacement_Results;
-            Displacement_Total = other.Displacement_Total;
+            //Displacement_Already_Applied = other.Displacement_Already_Applied;
+            //Displacement_Results = other.Displacement_Results;
+            //Displacement_Total = other.Displacement_Total;
         }
         public Node Duplicate() //Duplication method calling the copy constructor
         {
@@ -197,7 +201,7 @@ namespace Muscles.Nodes
         {
             if (Point.EpsilonEquals(load.Point, ZeroTol))
             {
-                Load_To_Apply += load.Vector; 
+                LoadToApply += load.Vector; 
             }
         }
 

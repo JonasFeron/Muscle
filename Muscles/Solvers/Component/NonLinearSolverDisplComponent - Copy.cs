@@ -155,7 +155,7 @@ namespace Muscles.Solvers
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            List<Node> nodes = new_structure.Struct_Nodes;
+            List<Node> nodes = new_structure.StructuralNodes;
 
             PointLoad load;
             foreach (var data in datas)
@@ -176,7 +176,7 @@ namespace Muscles.Solvers
                             continue;//go to next point load
                         }
                     }
-                    nodes[ind].Load_To_Apply += load.Vector; //If Point Load is applied on a node of the structure, then the load is added to Loads to apply on this node. 
+                    nodes[ind].LoadToApply += load.Vector; //If Point Load is applied on a node of the structure, then the load is added to Loads to apply on this node. 
                     success = true;
                 }
             }
@@ -188,8 +188,8 @@ namespace Muscles.Solvers
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            List<Node> nodes = new_structure.Struct_Nodes;
-            List<Element> elements = new_structure.Struct_Elements;
+            List<Node> nodes = new_structure.StructuralNodes;
+            List<Element> elements = new_structure.StructuralElements;
 
             PrestressLoad P;
             foreach (var data in datas)
@@ -199,12 +199,12 @@ namespace Muscles.Solvers
                     P = ((GH_PrestressLoad)data).Value;
 
                     int ind_e = P.Element.Ind;
-                    int ind_n0 = P.Element.ExtremitiesIndex[0];
-                    int ind_n1 = P.Element.ExtremitiesIndex[1];
+                    int ind_n0 = P.Element.EndNodes[0];
+                    int ind_n1 = P.Element.EndNodes[1];
 
-                    elements[ind_e].AxialForce_To_Apply += P.Value; //The prestress load is added to the force to apply on this element. 
-                    nodes[ind_n0].Load_To_Apply += P.AsPointLoad0.Vector; //The prestress as point loads are added to the pointload to apply on the element extremitites. 
-                    nodes[ind_n1].Load_To_Apply += P.AsPointLoad1.Vector;
+                    elements[ind_e].LengtheningToApply += P.Value; //The prestress load is added to the force to apply on this element. 
+                    nodes[ind_n0].LoadToApply += P.AsPointLoad0.Vector; //The prestress as point loads are added to the pointload to apply on the element extremitites. 
+                    nodes[ind_n1].LoadToApply += P.AsPointLoad1.Vector;
                     success = true;
                 }
             }

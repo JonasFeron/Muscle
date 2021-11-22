@@ -13,12 +13,16 @@ namespace Muscles.Loads
         #region Properties
 
         public Element Element { get; set; }
-        public double Value { get; set; } //(N)  Initial force in the element when considering that all nodes of the structure are blocked. Once the nodes are realeased this prestress force may spread in the structure. 
+        public double Value { get; set; } //(m)  The lengthening to apply on the element of the structure
         public PointLoad AsPointLoad0
         {
             get
             {
-                Vector3d Load = Element.Line.UnitTangent * Value;
+                double A = Element.CS_Main.Area; //[m2]
+                double E = Element.Mat_Main.E; //[N/m2]
+                double LFree = Element.LFree + Value; //[m]
+                double P = E * A * Value / LFree; //[N] positive for lengthenings, negative for shortenings
+                Vector3d Load = -1*Element.Line.UnitTangent * P;
                 return new PointLoad(Element.Line.From, Load);
             }
         }
@@ -26,7 +30,11 @@ namespace Muscles.Loads
         {
             get
             {
-                Vector3d Load = -1 * Element.Line.UnitTangent * Value;
+                double A = Element.CS_Main.Area; //[m2]
+                double E = Element.Mat_Main.E; //[N/m2]
+                double LFree = Element.LFree + Value; //[m]
+                double P = E * A * Value / LFree; //[N] positive for lengthenings, negative for shortenings
+                Vector3d Load = Element.Line.UnitTangent * P;
                 return new PointLoad(Element.Line.To, Load);
             }
         }
@@ -62,7 +70,9 @@ namespace Muscles.Loads
         }
         public override string ToString()
         {
-            return $"Prestress of {Value/1e3:F3}kN in Element {Element.Ind}.";
+            if (Value >=0) return $"Lengthening of {Value * 1e3:F3}mm in Element {Element.TypeName}{Element.Ind} whose initial free length is {Element.LFree * 1e3:F3}mm.";
+            else return $"Shortening of {Value * 1e3:F3}mm in Element {Element.TypeName}{Element.Ind} whose initial free length is {Element.LFree * 1e3:F3}mm.";
+
         }
 
         //public static InitialForce Merge(InitialForce P1, InitialForce P2)

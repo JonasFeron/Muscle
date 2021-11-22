@@ -45,8 +45,8 @@ namespace Muscles.Structure
 
             if (!DA.GetData(0, ref structure)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
 
-            DA.SetDataList(0, structure.Struct_Nodes);
-            DA.SetDataList(1, structure.Struct_Elements);
+            DA.SetDataList(0, structure.StructuralNodes);
+            DA.SetDataList(1, structure.StructuralElements);
         }
 
         /// <summary>
