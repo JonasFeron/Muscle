@@ -55,9 +55,9 @@ namespace Muscles.Nodes
 
             List<bool> IsFree = new List<bool> { n.isXFree, n.isYFree, n.isZFree };
             DA.SetDataList(2, IsFree);
-            DA.SetData(3, n.Load);
-            DA.SetData(4, n.Residual);
-            DA.SetData(5, n.Reaction);
+            DA.SetData(3, n.Load/1000);
+            DA.SetData(4, n.Residual/1000);
+            DA.SetData(5, n.Reaction/1000);
         }
 
         /// <summary>

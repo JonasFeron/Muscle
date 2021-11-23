@@ -71,13 +71,13 @@ namespace Muscles.Structure
 
             if (!DA.GetData(0, ref gh_struct)) { return; }
 
-            DA.SetData(0, gh_struct.Value.AssemblyResult.r);
-            DA.SetDataList(1, gh_struct.Value.AssemblyResult.S);
-            DA.SetDataTree(2, gh_struct.A);
-            DA.SetData(3, gh_struct.Value.AssemblyResult.s);
-            DA.SetDataTree(4, gh_struct.SS);
-            DA.SetData(5, gh_struct.Value.AssemblyResult.m);
-            DA.SetDataTree(6, gh_struct.Um_row);
+            //DA.SetData(0, gh_struct.Value.AssemblyResult.r);
+            //DA.SetDataList(1, gh_struct.Value.AssemblyResult.S);
+            //DA.SetDataTree(2, gh_struct.A);
+            //DA.SetData(3, gh_struct.Value.AssemblyResult.s);
+            //DA.SetDataTree(4, gh_struct.SS);
+            //DA.SetData(5, gh_struct.Value.AssemblyResult.m);
+            //DA.SetDataTree(6, gh_struct.Um_row);
         }
     }
 }

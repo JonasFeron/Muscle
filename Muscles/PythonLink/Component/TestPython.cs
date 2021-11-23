@@ -57,7 +57,7 @@ namespace Muscles.PythonLink.Component
             string result = null;
             if (AccessToAll.pythonManager != null)
             {
-                result = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.Main_Test, str0, str1);
+                result = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainTest, str0, str1);
             }
             
 

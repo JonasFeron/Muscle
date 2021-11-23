@@ -26,10 +26,11 @@ namespace Muscles.PythonLink
         public string WriteDataInTxtFile()
         {
             string file = null;
-            if (PythonFileName == AccessToAll.Main_Test) file = AccessToAll.File_Test_Data;
-            else if (PythonFileName == AccessToAll.Main_Assemble) file = AccessToAll.File_Assemble_Data;
-            else if (PythonFileName == AccessToAll.Main_LinearSolve) file = AccessToAll.File_LinearSolve_Data;
-            else if (PythonFileName == AccessToAll.Main_NonLinearSolve) file = AccessToAll.File_NonLinearSolve_Data;
+            if (PythonFileName == AccessToAll.MainTest) file = AccessToAll.FileTestData;
+            else if (PythonFileName == AccessToAll.MainAssemble) file = AccessToAll.FileAssembleData;
+            else if (PythonFileName == AccessToAll.MainLinearSolve) file = AccessToAll.FileLinearSolveData;
+            else if (PythonFileName == AccessToAll.MainNonLinearSolve) file = AccessToAll.FileNonLinearSolveData;
+            else if (PythonFileName == AccessToAll.MainDRSolve) file = AccessToAll.File_DRSolve_Data;
             else file = "error_Data.txt";
 
             string IOPath = Path.Combine(AccessToAll.Main_Folder, "IO");

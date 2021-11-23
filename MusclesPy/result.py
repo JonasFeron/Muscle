@@ -144,7 +144,7 @@ class SharedSolverResult():
             Answ.ElementsLFree = Struct.Final.ElementsLFree.round(8).tolist() #[m] - shape (ElementsCount,)
 
             Answ.Residual = Struct.Final.Residual.round(5).reshape((-1,3)).tolist() #[N] - shape (NodesCount,3)
-            Answ.IsInEquilibrium = Struct.Final.IsInEquilibrium
+            Answ.IsInEquilibrium = bool(Struct.Final.IsInEquilibrium)
 
             Answ.nTimeStep = Struct.DR.nTimeStep
             Answ.nKEReset = Struct.DR.nKEReset

@@ -49,10 +49,10 @@ namespace Muscles.Loads
             Element = new Element();
             Value = 0.0;
         }
-        public PrestressLoad(Element e,double P_value)
+        public PrestressLoad(Element e,double DL)
         {
             Element = e;
-            Value = P_value;
+            Value = DL;
         }
 
         public PrestressLoad(PrestressLoad other)

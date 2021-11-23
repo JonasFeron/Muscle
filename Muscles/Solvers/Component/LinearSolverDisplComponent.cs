@@ -127,7 +127,7 @@ namespace Muscles.Solvers
                 string Data_str = JsonConvert.SerializeObject(data, Formatting.None);
                 log.Info("Main Linear Solver: ask Python to execute a command");
 
-                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.Main_LinearSolve, Data_str);
+                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainLinearSolve, Data_str);
 
                 log.Info("Main Linear Solver: received results");
                 //log.Debug(result_str);
@@ -150,21 +150,29 @@ namespace Muscles.Solvers
             DA.SetData(0, gh_structure);
             log.Info("Main Linear Solver: END SOLVE INSTANCE");
         }
+
         private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)
         {
+            //return true if at least one load is added on the structure
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            List<Node> nodes = new_structure.StructuralNodes;
+            new_structure.LoadsToApply = new List<Vector3d>();
+            foreach (var node in new_structure.StructuralNodes) new_structure.LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
+
+
+            List<Node> nodes = new_structure.StructuralNodes; //use a shorter nickname 
 
             PointLoad load;
             foreach (var data in datas)
             {
                 if (data is GH_PointLoad)
                 {
-                    load = ((GH_PointLoad)data).Value;
+                    load = ((GH_PointLoad)data).Value; //retrieve the pointload inputted by the user
+
+                    // we need to know on which point or node the load will have to be applied
                     int ind = -1;
-                    if (load.NodeInd != -1)
+                    if (load.NodeInd != -1) //PointsLoad can be defined on a point or on a node index
                     {
                         ind = load.NodeInd;
                     }
@@ -176,7 +184,7 @@ namespace Muscles.Solvers
                             continue;//go to next point load
                         }
                     }
-                    nodes[ind].LoadToApply += load.Vector; //If Point Load is applied on a node of the structure, then the load is added to Loads to apply on this node. 
+                    new_structure.LoadsToApply[ind] += load.Vector; //If Point Load is applied on a node of the structure, then the load is added to all the Loads to apply on the structure. 
                     success = true;
                 }
             }
@@ -188,27 +196,26 @@ namespace Muscles.Solvers
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            List<Node> nodes = new_structure.StructuralNodes;
+            new_structure.LengtheningsToApply = new List<double>();
+            foreach (var elem in new_structure.StructuralElements) new_structure.LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
+
+            //List<Node> nodes = new_structure.StructuralNodes;
             List<Element> elements = new_structure.StructuralElements;
 
-            PrestressLoad P;
+            PrestressLoad DL;
             foreach (var data in datas)
             {
-                if(data is GH_PrestressLoad)
+                if (data is GH_PrestressLoad)
                 {
-                    P = ((GH_PrestressLoad)data).Value;
+                    DL = ((GH_PrestressLoad)data).Value; //the prestressload is a variation of length
 
-                    int ind_e = P.Element.Ind;
-                    int ind_n0 = P.Element.EndNodes[0];
-                    int ind_n1 = P.Element.EndNodes[1];
+                    int ind_e = DL.Element.Ind;
 
-                    elements[ind_e].LengtheningToApply += P.Value; //The prestress load is added to the force to apply on this element. 
-                    nodes[ind_n0].LoadToApply += P.AsPointLoad0.Vector; //The prestress as point loads are added to the pointload to apply on the element extremitites. 
-                    nodes[ind_n1].LoadToApply += P.AsPointLoad1.Vector;
+                    new_structure.LengtheningsToApply[ind_e] += DL.Value; //The variation of length is added to the force to all the lengthenings to apply on the structure. 
                     success = true;
                 }
             }
-            return success;
+            return success; // if at least one lengthening will be applied on the structure
         }
     }
 }

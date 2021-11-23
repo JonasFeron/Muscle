@@ -75,15 +75,15 @@ namespace Muscles.Elements
         {
         }
 
-        public Strut(Line aLine,double lFree, ICrossSection aCS, Muscles_Material aMat, string law, double k)
+        public Strut(Line aLine,double lFree, ICrossSection aCS, Muscles_Material aMat, string law, double k,bool canResistTension)
             : base(aLine,lFree,aCS,aCS,aMat,aMat,law,k)
         {
-
+            CanResistTension = canResistTension;
         }
 
         public Strut(Strut other) : base(other)
         {
-
+            CanResistTension = other.CanResistTension;
         }
 
         #endregion Constructors

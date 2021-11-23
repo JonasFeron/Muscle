@@ -55,7 +55,7 @@ namespace Muscles.Elements
             DA.SetData(2, e.IsValid);
             DA.SetData(3, e.UC);
             DA.SetData(4, e.Xsi);
-            DA.SetData(5, e.Tension);
+            DA.SetData(5, e.Tension/1000);
             Interval allow = new Interval(e.AllowableTension.T0 / 1e3, e.AllowableTension.T1 / 1e3);
             DA.SetData(6, allow);
 

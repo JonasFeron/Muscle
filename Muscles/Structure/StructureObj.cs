@@ -139,8 +139,8 @@ namespace Muscles.Structure
 
 			Residual0Threshold = other.Residual0Threshold;
 
-			LoadsToApply = new List<Vector3d>(); // do not fill with old value
-			LengtheningsToApply = new List<double>();
+			LoadsToApply = other.LoadsToApply; // do not fill with old value
+			LengtheningsToApply = other.LengtheningsToApply;
 
 			DR = other.DR.Duplicate();
 		}
@@ -209,6 +209,7 @@ namespace Muscles.Structure
 					GH_Element gh_elem = data as GH_Element;
 					StructuralElements.Add(gh_elem.Value);
 					gh_elem.Value.Ind = index;
+					LengtheningsToApply.Add(0.0);
 					index++;
 				}
             }
@@ -255,7 +256,7 @@ namespace Muscles.Structure
 					ind_node++;
 				}
 			}// if user did not give points as input, register the lines extremities
-
+			for (int i = 0; i < NodesCount; i++) LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0));
 		}
 
 		/// <summary>

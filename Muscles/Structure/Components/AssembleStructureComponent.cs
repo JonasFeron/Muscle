@@ -168,7 +168,7 @@ namespace Muscles.Structure
                 {
                     string result_str = null;
                     string Data_str = JsonConvert.SerializeObject(data, Formatting.None);
-                    result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.Main_Assemble, Data_str);
+                    result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainAssemble, Data_str);
                     log.Info("Main ASSEMBLE: received the results");
                     try
                     {

@@ -14,7 +14,7 @@ namespace Muscles.Loads
 
         public PrestressLoadComponent()
           : base("Create Prestress Loads", "P",
-              "Set the initial forces in the elements while considering that all nodes are fixed in space. Once the nodes will be realeased this prestress load may spread in the structure (except if the prestress loads correspond to a self-stress scenario). ",
+              "Set the lengthenings to apply on the elements free lengths.",
               "Muscles", "Loads")
         {
         }
@@ -44,14 +44,14 @@ namespace Muscles.Loads
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Element", "E", "Element (General, Bar, Strut, or Cable) subjected to a prestress load.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Prestress value", "P (kN)", "Prestress load in kN (+ in tension, - in comp) to apply on the element.",GH_ParamAccess.item);
+            pManager.AddNumberParameter("Lengthening", "DL (m)", "Length variation in m (+ lengthening, - shortening) to apply on the element free length.",GH_ParamAccess.item);
 
         }
 
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Prestress", "P (kN)", "Initial force in the element considering that all nodes are fixed in space.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Lengthening", "DL (m)", "Length variation in m (+ lengthening, - shortening) to apply on the element free length.", GH_ParamAccess.item);
         }
 
 
@@ -65,7 +65,7 @@ namespace Muscles.Loads
             if (!DA.GetData(1, ref value)) { return; }
 
             //2) Transform datas into InitialForce object
-            PrestressLoad initialforce = new PrestressLoad(e, (value*1e3));
+            PrestressLoad initialforce = new PrestressLoad(e, value);
 
             //3) output datas
             DA.SetData(0, new GH_PrestressLoad(initialforce));

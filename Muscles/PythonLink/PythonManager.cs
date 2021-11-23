@@ -42,7 +42,7 @@ namespace Muscles.PythonLink
         private const string AnacondaActivatedFeedback = "AnacondaActivatedFeedback";
 
         public static string ActivateCondaBat; // =  @"C:\Users\Jferon\Anaconda3\Scripts\activate.bat";
-        public static string WorkingDirectory; // @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\MusclesPy";
+        public static string WorkingDirectory; // @"C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\MusclesPy";
 
         private static readonly object Locker = new object();
         private static PythonManager _instance;

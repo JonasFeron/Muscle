@@ -23,8 +23,8 @@ namespace Muscles
 
         public static PythonManager pythonManager = null; //pythonManager of the current Canvas
         public static bool user_mode = true;
-        public static string Main_Folder = @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles";
-        public static string Main_Test
+        public static string Main_Folder = @"C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles";
+        public static string MainTest
         {
             get
             {
@@ -32,7 +32,7 @@ namespace Muscles
                 else return "DoStuffInPython.py";
             }
         }
-        public static string Main_Assemble
+        public static string MainAssemble
         {
             get
             {
@@ -40,7 +40,7 @@ namespace Muscles
                 else return "Main_AssembleStructure.py";
             }
         }
-        public static string Main_LinearSolve
+        public static string MainLinearSolve
         {
             get
             {
@@ -48,7 +48,7 @@ namespace Muscles
                 else return "Main_LinearSolveStructure.py";
             }
         }
-        public static string Main_NonLinearSolve
+        public static string MainNonLinearSolve
         {
             get
             {
@@ -65,13 +65,13 @@ namespace Muscles
             }
         }
 
-        public const string File_Test_Data = "Test_Data.txt";
+        public const string FileTestData = "TestData.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python
-        public const string File_Assemble_Data = "Assemble_Data.txt";
+        public const string FileAssembleData = "AssembleData.txt";
         //public const string File_Assemble_Result = "Assemble_Result.txt";
-        public const string File_LinearSolve_Data = "LinearSolve_Data.txt";
+        public const string FileLinearSolveData = "LinearSolveData.txt";
         //public const string File_LinearSolve_Result = "LinearSolve_Result.txt";
-        public const string File_NonLinearSolve_Data = "NonLinearSolve_Data.txt";
+        public const string FileNonLinearSolveData = "NonLinearSolveData.txt";
         //public const string File_NonLinearSolve_Result = "NonLinearSolve_Result.txt";
         public const string File_DRSolve_Data = "DynamicRelaxationData.txt";
 

@@ -116,6 +116,7 @@ namespace Muscles.Solvers
             //2) Format datas before sending and solving in python
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
+
             bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData()); // new_structure.LoadsToApply was filled with the loads
             bool success2 = RegisterPrestressLoads(new_structure, gh_loads_prestress.FlattenData()); // new_structure.LengtheningsToApply was filled with the length variations
 

@@ -197,13 +197,13 @@ namespace Muscles.Nodes
         /// <summary>
         /// Add the Load to the node (if it is applied on a point closer than ZeroTol of the node otherwise do nothing).
         /// </summary>
-        public void AddLoadToApplyIfSamePoint(PointLoad load, double ZeroTol)
-        {
-            if (Point.EpsilonEquals(load.Point, ZeroTol))
-            {
-                LoadToApply += load.Vector; 
-            }
-        }
+        //public void AddLoadToApplyIfSamePoint(PointLoad load, double ZeroTol)
+        //{
+        //    if (Point.EpsilonEquals(load.Point, ZeroTol))
+        //    {
+        //        LoadToApply += load.Vector; 
+        //    }
+        //}
 
         ///// <summary>
         ///// Add the PressLoad to the node (if it is applied on a point closer than ZeroTol of the node otherwise do nothing).

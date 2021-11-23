@@ -159,14 +159,14 @@ namespace Muscles.Loads
                 return null;
             }
 
-            for (int i = 0; i < b; i++) //foreach element
-            {
-                double prev = structure_output.StructuralElements[i].Tension;
-                double result = prestressForces[i] * 1000;//level is in kN and we register it in N
-                double total = prev + result; 
-                structure_output.StructuralElements[i].AxialForce_Results = new List<double>() {result} ;
-                structure_output.StructuralElements[i].AxialForce_Total = new List<double>() {total};
-            }
+            //for (int i = 0; i < b; i++) //foreach element
+            //{
+            //    double prev = structure_output.StructuralElements[i].Tension;
+            //    double result = prestressForces[i] * 1000;//level is in kN and we register it in N
+            //    double total = prev + result; 
+            //    structure_output.StructuralElements[i].AxialForce_Results = new List<double>() {result} ;
+            //    structure_output.StructuralElements[i].AxialForce_Total = new List<double>() {total};
+            //}
 
             return structure_output;
         }
