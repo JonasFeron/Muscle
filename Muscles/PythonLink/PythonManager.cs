@@ -38,7 +38,7 @@ namespace Muscles.PythonLink
         private readonly AutoResetEvent _stopProcessSignal = new AutoResetEvent(false);
         private bool _stop;
         private static bool successInitialized;
-        private static int timeout = 10000; //ms
+        private static int timeout = 20000; //ms
         private const string AnacondaActivatedFeedback = "AnacondaActivatedFeedback";
 
         public static string ActivateCondaBat; // =  @"C:\Users\Jferon\Anaconda3\Scripts\activate.bat";

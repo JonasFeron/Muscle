@@ -62,7 +62,7 @@ namespace Muscles.Solvers
             pManager.AddNumberParameter("Delta t", "Dt (s)", "The time increment for the dynamic relaxation analysis", GH_ParamAccess.item, 0.01);
             pManager.AddIntegerParameter("Max Time Step", "max it (/)", "The maximum number of time increment before the solver aborts looking for the equilibrium", GH_ParamAccess.item, 10000);
             pManager.AddIntegerParameter("Max Peak Reset", "max peak (/)", "A peak of kinetic energy corresponds to a configuration with the minimum potential energy, hence the equilibrium. At each peak of kinetic energy, the velocity of each degree of freedom is reset to 0. This parameter allows to set the maximum number of kinetic energy reset before the solver aborts looking for the equilibrium", GH_ParamAccess.item, 1000);
-            pManager.AddNumberParameter("Mass Amplification", "Ampl (/)", "The fictitious mass can be amplified in case the DR solver faces convergence issue", GH_ParamAccess.item, 1); pManager.AddNumberParameter("Mass Amplification", "Ampl", "The fictitious mass can be amplified in case the DR solver faces convergence issue", GH_ParamAccess.item, 1);
+            pManager.AddNumberParameter("Mass Amplification", "Ampl (/)", "The fictitious mass can be amplified in case the DR solver faces convergence issue", GH_ParamAccess.item, 1);
             pManager.AddNumberParameter("Minimum Mass", "Min (kg)", "The minimum fictitious mass applied on the degrees of freedom with 0 fictitious mass", GH_ParamAccess.item, 0.005);
 
             pManager[1].Optional = true;
@@ -81,6 +81,7 @@ namespace Muscles.Solvers
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure containing the total results.", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("IsInEquilibrium", "Equilibrium", "True if the external load are in equilibrium with the internal forces.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Time Step", "it (/)", "The number of time increments required to reach the equilibrium", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Peak Reset", "peaks (/)", "The number of detected peaks at which the kinetic energy has been reset to 0", GH_ParamAccess.item);
         }
@@ -167,6 +168,10 @@ namespace Muscles.Solvers
 
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
+            DA.SetData(1, new_structure.IsInEquilibrium);
+            DA.SetData(2, new_structure.DR.nTimeStep);
+            DA.SetData(3, new_structure.DR.nKEReset);
+
             log.Info("Main NONLinear Solver: END SOLVE INSTANCE");
         }
 

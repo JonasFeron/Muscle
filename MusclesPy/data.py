@@ -16,6 +16,7 @@ class SharedData():
                  NodesCoord,
                  ElementsEndNodes,
                  IsDOFfree,
+                 ElementsType=[],
                  ElementsA=[],
                  ElementsE=[],
                  ElementsLFreeInit=[],
@@ -43,6 +44,7 @@ class SharedData():
         Data.NodesCoord = np.array(NodesCoord) #[m] - shape (NodesCount, 3) - Coordinates must be in m otherwise: K matrix is in N/mm and it is too small)
         Data.ElementsEndNodes = np.array(ElementsEndNodes, dtype=int)
         Data.IsDOFfree = np.array(IsDOFfree, dtype=bool)
+        Data.ElementsType = np.array(ElementsType, dtype=int).reshape((-1,)) # -1 for struts, +1 for cables
         Data.ElementsA = np.array(ElementsA).reshape((-1,2)) #[mm²] - [AreaInCompression, AreaInTension]
         Data.ElementsE = np.array(ElementsE).reshape((-1,2)) #[MPa] - [EInCompression, EInTension]
         Data.ElementsLFreeInit = np.array(ElementsLFreeInit).reshape((-1,)) #[m] - The free lengths before the Lengthenings are applied

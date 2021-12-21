@@ -153,6 +153,9 @@ class State():
         Cur.Tension = np.zeros((ElementsCount,))
         Cur.Reactions = np.zeros((FixationsCount,))
 
+        Cur.ElementsA = np.zeros((ElementsCount,)) # Area [mm²] - the areas in the current state depend if each element is in tension or compression
+        Cur.ElementsE = np.zeros((ElementsCount,)) # Young Modulus [MPa] - the young modulus in the current state depend if each element is in tension or compression
+
         Cur.ElementsL = np.zeros((ElementsCount,))  # Current Elements lengths
         Cur.ElementsLFree = np.zeros((ElementsCount,))  # Lengths of the elements when the elements are free of any tension, or in other words, when the structure is disassemble.
         Cur.ElementsCos = np.zeros((ElementsCount, 3))  # The cosinus directors of the elements
@@ -163,7 +166,7 @@ class State():
 
         Cur.Residual = np.ones((3 * NodesCount,))  # the unbalanced loads = All external Loads - A @ Tension
         Cur.IsInEquilibrium = False  # the current state of the structure is in equilibrum if the unbalanced loads (Residual) are below a certain threshold (very small)
-        Cur.F = np.zeros((ElementsCount,))  # the current flexbilities Lfree/EA of the elements depending on the sign of the force in the element
+        Cur.Flex = np.zeros((ElementsCount,))  # the current flexbilities Lfree/EA of the elements depending on the sign of the force in the element
         Cur.Kmat = np.zeros((3 * NodesCount, 3 * NodesCount))  # global material stiffness matrix
         Cur.Kgeo = np.zeros((3 * NodesCount, 3 * NodesCount))  # global geometrical stiffness matrix
         Cur.DRState = DRState()
@@ -190,7 +193,7 @@ class State():
 
         Copy.Residual = Cur.Residual.copy()
         Copy.IsInEquilibrium = False
-        Copy.F = Cur.F.copy()
+        Copy.Flex = Cur.Flex.copy()
         Copy.Kmat = Cur.Kmat.copy()
         Copy.Kgeo = Cur.Kgeo.copy()
         Copy.DRState = Cur.DRState.Copy()
@@ -215,12 +218,12 @@ class State():
             ElementsE = Struct.ElementsE  # will be asserted in a deeper method
             ElementsA = Struct.ElementsA  # will be asserted in a deeper method
 
-            (Cur.Tension, Cur.F) = Cur.TensionForces(Struct, Cur.ElementsL, Cur.ElementsLFree, ElementsE, ElementsA)  # F = LFree/EA. T=(Lcur-Lfree)/F. F can be infinity and T=0 if slack cables
+            (Cur.Tension, Cur.Flex) = Cur.TensionForces(Struct, Cur.ElementsL, Cur.ElementsLFree, ElementsE, ElementsA)  # Flex = LFree/EA. T=(Lcur-Lfree)/Flex. Flex can be infinity and T=0 if slack cables
             Cur.Residual = Cur.UnbalancedLoads(Struct, Cur.AFree, Cur.Loads, Cur.Tension)
             Cur.IsInEquilibrium = Cur.CheckEquilibrium(Struct, Cur.Residual, Struct.Residual0Threshold)
 
             if ComputeStiffness:
-                Cur.Kmat = Cur.MaterialStiffnessMatrix(Struct, Cur.A, Cur.F)  # note that material stiffness associated to slack cables = 0
+                Cur.Kmat = Cur.MaterialStiffnessMatrix(Struct, Cur.A, Cur.Flex)  # note that material stiffness associated to slack cables = 0
                 Cur.Kgeo = Cur.GeometricStiffnessMatrix(Struct, Cur.Tension, Cur.ElementsL)
 
     def ElementsLengthsAndCos(Cur, Struct, NodesCoord):
@@ -303,6 +306,7 @@ class State():
         Cur.SVD.SVDEquilibriumMatrix(Struct,AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
+
     def TensionForces(Cur, Struct, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
         """
 
@@ -329,18 +333,20 @@ class State():
         # For instance, the Young modulus of a cable could be 0 in compression and 100e3 MPa in tension.
         # In this case, the cable vanish from stiffness matrix if it slacks
         DeltaL = ElementsLCur - ElementsLFree
-        E = Struct.ElementsPropertyInTensionOrCompression(DeltaL, ElementsE)  # the Young modulus of the elements in the current state (depending if compression or tension)
-        A = Struct.ElementsPropertyInTensionOrCompression(DeltaL, ElementsA)  # the Area of the elements in the current state (depending if compression or tension)
+        Cur.ElementsE = Struct.ElementsInTensionOrCompression(DeltaL,
+                                                  ElementsE)  # the Young modulus of the elements in the current state (depending if compression or tension)
+        Cur.ElementsA = Struct.ElementsInTensionOrCompression(DeltaL,
+                                                  ElementsA)  # the Area of the elements in the current state (depending if compression or tension)
 
         # 3) Compute the elements flexibility L/EA and stiffness EA/L
 
-        F = Struct.Flexibility(E, A, ElementsLFree)  # shape (ElementsCount,). Important to note that the Free lengths are considered in the flexibility
-        Kbsc = 1 / F  # shape (ElementsCount,). basic material stiffness vector of each individual element
+        Flex = Struct.Flexibility(Cur.ElementsE, Cur.ElementsA, ElementsLFree)  # shape (ElementsCount,). Important to note that the Free lengths are considered in the flexibility
+        Kbsc = 1 / Flex  # shape (ElementsCount,). basic material stiffness vector of each individual element
 
         # 4) Compute the tension
 
         T = Kbsc * DeltaL  # shape (ElementsCount,)  T = EA/Lfree * (Lcur - Lfree)
-        return (T, F)
+        return (T, Flex)
 
     def UnbalancedLoads(Cur, Struct, A, Loads, Tension):
         """
@@ -395,6 +401,37 @@ class State():
         IsInEquilibrium = np.linalg.norm(Residual) <= Threshold
         return IsInEquilibrium
 
+    def PrestressLoads(Cur, Struct, LengteningsToApply,ElementsE, ElementsA,ElementsLFree):
+        """
+        Transform the Imposed Lengthenings to apply into an equivalent Presstress loads
+        :param Struct: The structure Object in the current state
+        :param LengteningsToApply: [m] - shape (ElementsCount,) - imposed elongation
+        :param ElementsE: [MPa] - shape (ElementsCount,) - Young modulus in the current state
+        :param ElementsA: [mm²] - shape (ElementsCount,) - Areas in the current state
+        :param ElementsLFree: [m] - shape (ElementsCount,) - Free lengths of the elements
+        :return: (t,f): [N] - t  = shape (ElementsCount,) = the compression equivalent to the imposed elongation considering all nodes are fixed. f = shape (3 NodesCount,), the external loads equivalent to the lengthenings to apply
+        """
+
+        NodesCoord = Cur.NodesCoord
+        assert NodesCoord.shape == (3 * Struct.NodesCount,), "Please check the shape of NodesCoord"
+        assert ElementsLFree.shape == (Struct.ElementsCount,), "Please check the shape of ElementsLFree"
+        assert ElementsE.shape == (Struct.ElementsCount,), "Please check the shape of ElementsE"
+        assert ElementsA.shape == (Struct.ElementsCount,), "Please check the shape of ElementsA"
+        assert LengteningsToApply.shape == (Struct.ElementsCount,), "Please check the shape of LengteningsToApply"
+
+
+        (Cur.ElementsL, Cur.ElementsCos) = Cur.ElementsLengthsAndCos(Struct, Cur.NodesCoord)
+        (Cur.A, Cur.AFree, Cur.AFixed) = Cur.EquilibriumMatrix(Struct, Cur.ElementsCos)
+        Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, ElementsLFree)  #[m/N] - shape (ElementsCount,) - Important to note that the Free lengths are considered in the flexibility
+        Kbsc = 1 / Cur.Flex  #[N/m] - shape (ElementsCount,) - basic material stiffness vector of each individual element
+
+        # 1) Compute the tension
+        t = Kbsc * -LengteningsToApply  # [N] - shape (ElementsCount,) -  t = EA/Lfree * (-eImposed). A lengthening (+) creates a compression force (-)
+
+        #2) Compute the equivalent prestress loads
+        f = - Cur.A @ t # [N] - shape (3 NodesCount,) - the equivalent prestress loads.
+
+        return (t,f)
 
     def MaterialStiffnessMatrix(Cur, Struct, A, Flexibility):
         """
@@ -417,6 +454,44 @@ class State():
         Kmat = A @ Kbsc @ B  # (3*NodesCount,3*NodesCount) OR (DOFfreeCount, DOFfreeCount)
 
         return Kmat
+
+    def MaterialLocalStiffnessList(Cur,Struct, ElementsLFree, ElementsCos, ElementsA, ElementsE):
+        """
+            This is the old way of computing the local material stiffness matrices. It relies on the current cosinus directors of each elements
+            :return:    List (ElementsCount,1) local material stiffness matrices
+
+        """
+        assert ElementsE.size == Struct.ElementsCount, "Please check the shape of ElementsE"
+        assert ElementsA.size == Struct.ElementsCount, "Please check the shape of ElementsA"
+        assert ElementsLFree.size == Struct.ElementsCount, "Please check the shape of ElementsLFree"
+        assert ElementsCos.shape == (Struct.ElementsCount,3), "Please check the shape of ElementsCos"
+
+        A = ElementsA
+        E = ElementsE
+        L = ElementsLFree
+        kmLocList = []
+
+        for i in np.arange(Struct.ElementsCount):
+            cx = ElementsCos[i, 0] # this is the cos in the current state
+            cy = ElementsCos[i, 1]
+            cz = ElementsCos[i, 2]
+            cos = np.array([[-cx, -cy, -cz, cx, cy, cz]])
+            R = np.dot(cos.transpose(), cos)  # local compatibility * local equilibrium
+            km = E[i] * A[i] / L[i] * R  # material stiffness matrix
+
+            kmLocList.append(km)
+
+        return kmLocList
+
+    def GlobalStiffnessMatrix(Cur, Struct,LocalStiffnessList):
+        """
+        Compute the global material stiffness matrix in the old fashioned way
+        :param Struct: The StructureObject in the current state
+        :param LocalStiffnessList: [N/m] - shape (ElementsCount,) - A list containing ElementsCount local stiffness matrices
+        :return: K : [N/m] - shape (3*NodesCount,3*NodesCount) - The global geometric or material stiffness matrix
+        """
+        K = Struct.LocalToGlobalStiffnessMatrix(LocalStiffnessList)
+        return K
 
     def ForceDensities(Cur, CurTension, CurElementsL):
         """
@@ -500,8 +575,115 @@ class State():
         L = CurElementsL.reshape(-1, )
         q = Cur.ForceDensities(T, L)
         kgLocList = Cur.GeometricLocalStiffnessList(Struct, q)
-        Kgeo = Struct.GlobalFromLocalStiffnessMatrix(kgLocList)
+        Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
         return Kgeo
+
+    def ConstrainedStiffnessMatrix(Cur,Struct,K):
+        """
+            Apply the support conditions on the stiffness matrix of the structure
+            :param K: [N/m] - shape (3*NodesCount,3*NodesCount) -  can be the material stiffness matrix or the geometric+material stiffness matrix
+
+            :return: KConstrained: [N/m] - shape (3*NodesCount+FixationsCount,3*NodesCount+FixationsCount) - Stiffness matrix with support conditions
+            """
+        n = Struct.NodesCount
+        c = Struct.FixationsCount
+        IsDOFfree = Struct.IsDOFfree
+
+        assert K.shape == (3*n, 3*n), "Please check the size of the global stiffness matrix"
+
+        # Considerations of the fixations
+        IndexDOFfixed = np.arange(3*n)[~IsDOFfree] #(nbr fixations,)
+
+        constrains = np.zeros((c, 3*n))
+        for ind_c, ind_dof in enumerate(IndexDOFfixed):
+            constrains[ind_c,ind_dof]=1
+
+        KConstrained = np.zeros((3 * n + c, 3 * n + c))
+        KConstrained[:3*n,:3*n] = K
+        KConstrained[3*n:, :3*n] = constrains
+        KConstrained[:3*n, 3*n:] = constrains.transpose()
+        return KConstrained
+
+    def PostProcessing(cur,Struct, d, kmLocList, kgLocList, ElementsCos):
+        """
+        Compute the Tension in the elements from the displacements
+        :param Struct:
+        :param d: [m] - shape (3NodesCount,) - The displacements
+        :param kmLocList: [N/m] - list (ElementsCount,)  - The local material stiffness matrix of each element
+        :param kgLocList: [N/m] - list (ElementsCount,)  - The local geometric stiffness matrix of each element
+        :param ElementsCos: [/] - shape (ElementsCount,3) - The current cosinus director of each element.
+        :return: Tension: [N] - shape (ElementsCount,) - The tension forces in each elements.
+        """
+        ElementsEndNodes = Struct.ElementsEndNodes
+        b = Struct.ElementsCount
+
+        Tension = np.zeros((b,))
+        for i in np.arange(b):
+            n0 = ElementsEndNodes[i, 0]
+            n1 = ElementsEndNodes[i, 1]
+            index = np.array([3*n0, 3*n0+1, 3*n0+2, 3*n1, 3*n1+1, 3*n1+2])
+            dLoc = d[index] #(6,)  displacements at the extremities of the bars
+
+            kLoc = kmLocList[i] + kgLocList[i] #local stiffness matrix
+
+            fLoc = kLoc @ dLoc #(6,) forces in the global coordinates
+
+            cx = ElementsCos[i, 0] #this is the cos in the current state
+            cy = ElementsCos[i, 1]
+            cz = ElementsCos[i, 2]
+
+            Tension[i] = -(fLoc[0] * cx + fLoc[1] * cy + fLoc[2] * cz) #forces in the local coordinates of the bar
+            #Tension[i] = (fLoc[3] * cx + fLoc[4] * cy + fLoc[5] * cz) #equivalent
+        return Tension
+
+    def LinearDisplacementMethod(Cur, Struct, NodesCoord, PreviousTension, Loads, ElementsE, ElementsA, ElementsLFree):
+
+        assert ElementsE.size == Struct.ElementsCount, "Please check the shape of ElementsE"
+        assert ElementsA.size == Struct.ElementsCount, "Please check the shape of ElementsA"
+        assert ElementsLFree.size == Struct.ElementsCount, "Please check the shape of ElementsLFree"
+        assert PreviousTension.size == Struct.ElementsCount, "Please check the shape of PreviousTension"
+
+
+        #0) Input
+        n = Struct.NodesCount
+        nr = Struct.FixationsCount
+
+        #initialization
+        Loads = Loads.reshape((-1, 1))
+        DisplacementImposedAtSupports = np.zeros((nr, 1))
+        ToApply = np.vstack((Loads, DisplacementImposedAtSupports))
+
+        #1) Compute the geometry in the current state
+        (Cur.ElementsL, Cur.ElementsCos) = Cur.ElementsLengthsAndCos(Struct, NodesCoord)
+
+        #2) Compute Material stiffness matrices. NB: computed with FreeLengths and current Cos !
+
+        kmLocList = Cur.MaterialLocalStiffnessList(Struct, ElementsLFree, Cur.ElementsCos, ElementsA, ElementsE)
+        Cur.Kmat = Cur.GlobalStiffnessMatrix(Struct,kmLocList)
+
+        #this method would also work but we need the list of local stiffness matrices for post process
+        #(Cur.A, Cur.AFree, Cur.AFixed) = Cur.EquilibriumMatrix(Struct, Cur.ElementsCos)
+        #Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, ElementsLFree)
+        #Cur.Kmat = Cur.MaterialStiffnessMatrix(Struct,Cur.A,Cur.Flex)
+
+        #3) Compute geometric stiffness matrices. NB: computed with current length and previous tension !
+        q = Cur.ForceDensities(PreviousTension,Cur.ElementsL)
+        kgLocList = Cur.GeometricLocalStiffnessList(Struct, q)
+        Cur.Kgeo = Cur.GlobalStiffnessMatrix(Struct,kgLocList)
+
+        #4)Consider the supports conditions
+        KConstrained = Cur.ConstrainedStiffnessMatrix(Struct, Cur.Kmat + Cur.Kgeo)
+
+        #3) Solve Linear System  # NB: this might throw the exception np.linalg.linalg.LinAlgError that we need to catch somewhere
+        Displacements_Reactions = np.linalg.solve(KConstrained, ToApply)  # voir equation 2.7 page 32 du mémoire J.Feron
+        #N.B. K must be in N/m otherwise problem
+
+        #4) Post-Process
+        d = Displacements_Reactions[:3 * n]
+        Reactions = - Displacements_Reactions[3 * n:]
+        Tension = Cur.PostProcessing(Struct, d, kmLocList, kgLocList, Cur.ElementsCos) # Tension are not computed from EA(Lcur-Lfree)/Lfree because, in linear calculation, tension must be computed in the initial geometry and not in the deformed geometry.
+        return (d.reshape((-1,)), Tension.reshape((-1,)), Reactions.reshape((-1,)))
+
 
 
 
@@ -594,8 +776,6 @@ class DRState():
         AmplifiedMass = Mass * AmplMass + MinMass
         FinalMass = np.where(IsDOFfree, AmplifiedMass, HugeMass)  # Apply a huge mass where the DOF are fixed (False). Keep the calculated mass otherwise
         return FinalMass
-
-
 
 
     def Velocities(Cur, Struct, Dt, Residual, Mass):
@@ -795,14 +975,14 @@ class StructureObj():
         Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
 
         ##### Structure inputs #####
-        #Self.State0 = None # the free State of the structure where no load and no elongation are imposed.
         Self.Initial = State()  # the Initial State of the structure which may already be loaded or prestressed from a previous calculation.
         Self.Start = None  # the Start State of the structure = the Initial State + New LoadsToApply and LengtheningsToApply. we must seek for a new equilibrium from the Start state and via intermediate states
         Self.Final = None  # the Final or Deformed State of the structure in equilibrium with all loads and all elongations.
-        #DR.NodesCoord = np.zeros((3 * DR.NodesCount,)) #The NodesCoord depend on the Structure State.
+        #Self.NodesCoord = np.zeros((3 * DR.NodesCount,)) #The NodesCoord depend on the Structure State.
         Self.ElementsEndNodes = np.zeros((Self.ElementsCount, 2), dtype=int)
         Self.ElementsA = np.zeros((Self.ElementsCount,2)) # Area [mm²] - [AinCompression, AinTension] for each element
         Self.ElementsE = np.zeros((Self.ElementsCount,2)) # Young Modulus [MPa] - [EinCompression, EinTension] for each element
+        Self.ElementsType = np.zeros((Self.ElementsCount,)) # [/] - Type = -1 if the element mainly behave in compression such as struts, Type = 1 if the element mainly behave in tension such as cables
         Self.IsDOFfree = np.zeros((3 * Self.NodesCount,), dtype=bool) #the supports conditions
 
         Self.LoadsToApply = np.zeros((3 * Self.NodesCount,)) #The additionnal external loads to apply on the inital state of the structure
@@ -818,51 +998,7 @@ class StructureObj():
         Self.DR = DRMethod()
         Self.n_steps = 1
 
-        #DR.Elements_Cos0 = np.zeros((DR.ElementsCount, 3)) # Cos directors of the elements in the initial structure #(nbr lines,3)
-        #Self.FLinear = np.eye(Self.ElementsCount,) # Flexibility containing LFree/EA of each element in the diagonal #note that this matrix may be affected if cables slack for instance.
 
-        #DR.Elements_L = np.zeros((DR.ElementsCount, 1))  # Lengths of the elements in the current structure. (Initial = Current at the first step of NL Solve)
-        #DR.Elements_Cos = np.zeros((DR.ElementsCount, 3)) # (nbr lines,3)
-
-        # ##### Assembly informations #####
-        # DR.A = np.zeros((3 * DR.NodesCount, DR.ElementsCount)) #Equilibrium matrix
-        # DR.AFree = np.zeros((DR.DOFfreeCount, DR.ElementsCount)) #Equilibrium matrix of the free dof only
-        # DR.AFixed = np.zeros((DR.FixationsCount, DR.ElementsCount))  # Equilibrium matrix of the fixed dof only. Allows to find reactions from axial forces. AFixed@t=r
-        #
-        # DR.SVD = ResultsSVD() #object containing all the results of the Singular Value Decomposition of the Equilibrium matrix
-
-        # =!0 if E and A are non null
-        # Self.Km = np.zeros((3 * Self.NodesCount, 3 * Self.NodesCount))
-        # Self.Km_free = np.zeros((Self.DOFfreeCount, Self.DOFfreeCount))
-        #
-        # Self.K_constrained = np.zeros((3 * Self.NodesCount + Self.FixationsCount,
-        #                                3 * Self.NodesCount + Self.FixationsCount))  # required to solve the structure with imposed displacements of the supports
-        #
-        # # ##### Solve informations #####
-        #
-        # Self.Stages = np.ones((1,))
-        #
-        # Self.Loads_Already_Applied = np.zeros((3 * Self.NodesCount, 1))
-        # Self.LoadsToApply = np.zeros((3 * Self.NodesCount, 1))
-        # # DR.Loads_Applied = np.zeros((3*DR.NodesCount,))
-        # # DR.Loads_Total = np.zeros((DR.NodesCount, 3)) # Already_Applied + To_Apply
-        #
-        # Self.TensionInit = np.zeros((Self.ElementsCount, 1)) #considered in Geometric stiffness
-        # Self.AxialForces_Results = np.zeros((Self.ElementsCount, 1)) #results from LoadsToApply
-        # # DR.AxialForces_Total = np.zeros((DR.ElementsCount,)) # Results + Already_Applied
-        # Self.Elongations_To_Apply = np.zeros((Self.ElementsCount, 1))
-        #
-        # # DR.Displacements_Already_Applied = np.zeros((DR.NodesCount,3)) # this is such that this.NodesCoord = NodesCoord0 + this.Displacements_Already_Applied. If the structure is solved for the first time,Displacements_Already_Applied =0.
-        # Self.Displacements_Results = np.zeros((3 * Self.NodesCount, 1)) #results from LoadsToApply
-        # # DR.Displacements_Total = np.zeros((DR.NodesCount, 3)) # Results + Already_Applied
-        #
-        # # DR.Reactions_Already_Applied = np.zeros((DR.FixationsCount,))
-        # Self.Reactions_Results = np.zeros((Self.FixationsCount, 1)) #results from LoadsToApply
-        # DR.Reactions_Total = np.zeros((DR.FixationsCount,)) # Results + Already_Applied
-
-        # DR.AxialForces_To_Apply
-        #
-        # ##### Calculation Results #####
 
 
     # endregion
@@ -880,18 +1016,9 @@ class StructureObj():
 
     def MainDynamicRelaxation(Self, Data):
 
-        Self.InitialData(Data.NodesCoord,
-                         Data.ElementsEndNodes,
-                         Data.IsDOFfree,
-                         Data.ElementsA,
-                         Data.ElementsE,
-                         Data.ElementsLFreeInit,
-                         Data.LoadsInit,
-                         Data.TensionInit,
-                         Data.ReactionsInit,
-                         Data.LoadsToApply,
-                         Data.LengtheningsToApply,
-                         Data.Residual0Threshold)
+        Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE,
+                         Data.ElementsLFreeInit, Data.LoadsInit, Data.TensionInit, Data.ReactionsInit,
+                         Data.LoadsToApply, Data.LengtheningsToApply, Data.Residual0Threshold)
         Self.DR.InitialData(Data.Dt,
                             Data.AmplMass,
                             Data.MinMass,
@@ -900,38 +1027,36 @@ class StructureObj():
         Self.DR.Core(Self) # Compute the Dynamic Relaxation Method on the StructureObj
         # GO BACK to MainDynamicRelaxation.py to send the results to C#
 
-    def test_MainDynamicRelaxation(Self, NodesCoord,
-                                   ElementsEndNodes,
-                                   IsDOFfree,
-                                   ElementsA,
-                                   ElementsE,
-                                   ElementsLFreeInit=np.zeros((0,)),
-                                   LoadsInit=np.zeros((0,)),
-                                   TensionInit=np.zeros((0,)),
-                                   ReactionsInit=np.zeros((0,)),
-                                   LoadsToApply=np.zeros((0,)),
-                                   LengtheningsToApply=np.zeros((0,)),
-                                   Residual0Threshold=0.0001,
-                                   Dt = 0.01,
-                                   AmplMass = 1,
-                                   MinMass=0.005,
-                                   MaxTimeStep=10000,
-                                   MaxKEReset=1000,
-                                   ):
+    def test_MainDynamicRelaxation(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                                   ElementsLFreeInit= -1, LoadsInit=np.zeros((0,)),
+                                   TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)),
+                                   LoadsToApply=np.zeros((0,)), LengtheningsToApply=np.zeros((0,)),
+                                   Residual0Threshold=0.0001, Dt=0.01, AmplMass=1, MinMass=0.005, MaxTimeStep=10000,
+                                   MaxKEReset=1000):
 
-        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFreeInit, LoadsInit, TensionInit, ReactionsInit, LoadsToApply,LengtheningsToApply,Residual0Threshold)
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE, ElementsLFreeInit,
+                         LoadsInit, TensionInit, ReactionsInit, LoadsToApply, LengtheningsToApply, Residual0Threshold)
         Self.DR.InitialData(Dt,AmplMass,MinMass,MaxTimeStep,MaxKEReset)
         Self.DR.Core(Self)
 
+    def MainLinearDisplacementMethod(Self,Data):
+        #initialize inputs and compute the connectivity matrix
+        Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE,
+                         Data.ElementsLFreeInit, Data.LoadsInit, Data.TensionInit, Data.ReactionsInit,
+                         Data.LoadsToApply, Data.LengtheningsToApply)
 
+        Self.CoreLinearDisplacementMethod()
 
-    def Main_LinearSolve_Displ_Method(S0,Data):
-        S0.PopulateWith(Data)
-        S0.Core_LinearSolve_Displ_Method()
+    def test_MainLinearDisplacementMethod(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                                   ElementsLFreeInit=-1, LoadsInit=np.zeros((0,)),
+                                   TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)),
+                                   LoadsToApply=np.zeros((0,)), LengtheningsToApply=np.zeros((0,))):
 
-    def test_Main_LinearSolve_Displ_Method(S0, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply):
-        S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply)
-        S0.Core_LinearSolve_Displ_Method()
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                         ElementsLFreeInit, LoadsInit, TensionInit, ReactionsInit,
+                         LoadsToApply, LengtheningsToApply)
+
+        Self.CoreLinearDisplacementMethod()
 
     def Main_NonLinearSolve_Displ_Method(S0,Data):
         S0.PopulateWith(Data)
@@ -951,23 +1076,11 @@ class StructureObj():
     # endregion
 
     # region Private Methods : Retrieve the inputs
-    def PopulateWith(S0,Data):
-        if isinstance(Data,SharedData):
-            S0.RegisterData(Data.NodesCoord,Data.Elements_ExtremitiesIndex,Data.IsDOFfree,Data.Elements_A,Data.Elements_E,Data.AxialForces_Already_Applied,Data.Loads_To_Apply,Data.n_steps)
 
-    def InitialData(Self, NodesCoord,
-                    ElementsEndNodes,
-                    IsDOFfree,
-                    ElementsA=np.zeros((0, 2)),
-                    ElementsE=np.zeros((0, 2)),
-                    ElementsLfreeInit=np.zeros((0,)),
-                    LoadsInit=np.zeros((0,)),
-                    TensionInit=np.zeros((0,)),
-                    ReactionsInit=np.zeros((0,)),
-                    LoadsToApply=np.zeros((0,)),
-                    LengtheningsToApply=np.zeros((0,)),
-                    Residual0Threshold=0.00001,
-                    n_steps=1):
+    def InitialData(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType=np.zeros((0,)), ElementsA=np.zeros((0, 2)),
+                    ElementsE=np.zeros((0, 2)), ElementsLfreeInit = -1, LoadsInit=np.zeros((0,)),
+                    TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)), LoadsToApply=np.zeros((0,)),
+                    LengtheningsToApply=np.zeros((0,)), Residual0Threshold=0.00001, n_steps=1):
 
         ### Initialize fundamental datas ###
         if isinstance(NodesCoord, np.ndarray):
@@ -996,6 +1109,10 @@ class StructureObj():
         ### Initialize optional datas ###
         Self.C = Self.ConnectivityMatrix(Self.NodesCount,Self.ElementsCount,Self.ElementsEndNodes)
 
+        if isinstance(ElementsType, np.ndarray) and ElementsType.size == Self.ElementsCount:
+            Self.ElementsType = ElementsType.reshape((-1,)).astype(int) #-1 if struts, +1 if cables
+        else:
+            Self.ElementsType = -np.ones((Self.ElementsCount,)) #all struts
 
         if isinstance(ElementsA, np.ndarray) and ElementsA.size == 2*Self.ElementsCount:
             Self.ElementsA = ElementsA.reshape((-1, 2)) #[AinCompression,AinTension]
@@ -1020,7 +1137,7 @@ class StructureObj():
         else:
             Self.Initial.ElementsLFree = np.zeros((Self.ElementsCount,))
 
-        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).all(): #if the free lengths are smaller than 0, it means they have not been calculated yet.
+        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).all() or ElementsLfreeInit==-1 : #if the free lengths are smaller than 0, it means they have not been calculated yet.
             (Self.Initial.ElementsLFree,cos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
 
 
@@ -1063,71 +1180,6 @@ class StructureObj():
         else:
             Self.n_steps=1
 
-
-
-
-
-
-    def RegisterData(S0, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A=np.zeros((0,)), Elements_E=np.zeros((0,)),
-                     AxialForces_Already_Applied=np.zeros((0,)), Loads_To_Apply=np.zeros((0,)),n_steps=1,Loads_Already_Applied=np.zeros((0,)),Elongations_To_Apply=np.zeros((0,))):
-
-        if isinstance(NodesCoord, np.ndarray):
-            S0.NodesCount = NodesCoord.reshape(-1, 3).shape[0]
-            S0.NodesCoord = NodesCoord.reshape(-1, 1)
-        else:
-            S0.NodesCoord = None
-            S0.NodesCount = -1
-
-        if isinstance(Elements_ExtremitiesIndex, np.ndarray):
-            S0.ElementsEndNodes = Elements_ExtremitiesIndex.reshape(-1, 2).astype(int)
-            S0.ElementsCount = S0.ElementsEndNodes.shape[0]
-        else:
-            S0.ElementsEndNodes = None
-            S0.ElementsCount = -1
-
-        if isinstance(IsDOFfree, np.ndarray):
-            S0.IsDOFfree = IsDOFfree.reshape((-1,)).astype(bool)
-            S0.DOFfreeCount = np.sum(np.ones(3 * S0.NodesCount, dtype=int)[S0.IsDOFfree])
-            S0.FixationsCount = 3 * S0.NodesCount - S0.DOFfreeCount
-        else:
-            S0.IsDOFfree = None
-            S0.FixationsCount = -1
-            S0.DOFfreeCount = -1
-
-        if isinstance(Elements_A, np.ndarray) and Elements_A.size == S0.ElementsCount:
-            S0.ElementsA = Elements_A.reshape((-1, 1))
-        else:
-            S0.ElementsA = np.zeros((S0.ElementsCount, 1))
-
-        if isinstance(Elements_E, np.ndarray) and Elements_E.size == S0.ElementsCount:
-            S0.ElementsE = Elements_E.reshape((-1, 1))
-        else:
-            S0.ElementsE = np.zeros((S0.ElementsCount, 1))
-
-        if isinstance(AxialForces_Already_Applied, np.ndarray) and AxialForces_Already_Applied.size == S0.ElementsCount:
-            S0.AxialForces_Already_Applied = AxialForces_Already_Applied.reshape((-1,1))
-        else:
-            S0.AxialForces_Already_Applied = np.zeros((S0.ElementsCount,1))
-
-        if isinstance(Loads_To_Apply, np.ndarray) and Loads_To_Apply.size == 3 * S0.NodesCount:
-            S0.Loads_To_Apply = Loads_To_Apply.reshape(-1, 1)
-        else:
-            S0.Loads_To_Apply = np.zeros((3*S0.NodesCount, 1))
-
-        if n_steps >=1:
-            S0.n_steps=n_steps
-        else:
-            S0.n_steps=1
-
-        if isinstance(Loads_Already_Applied, np.ndarray) and Loads_Already_Applied.size == 3 * S0.NodesCount:
-            S0.Loads_Already_Applied = Loads_Already_Applied.reshape(-1, 1)
-        else:
-            S0.Loads_Already_Applied = np.zeros((3*S0.NodesCount, 1))
-
-        if isinstance(Elongations_To_Apply, np.ndarray) and Elongations_To_Apply.size == S0.ElementsCount:
-            S0.Elongations_To_Apply = Elongations_To_Apply.reshape(-1, 1)
-        else:
-            S0.Elongations_To_Apply = np.zeros((S0.ElementsCount, 1))
     # endregion
 
 
@@ -1169,15 +1221,15 @@ class StructureObj():
         return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually do not change the equilibrum matrix.
         # print(C)
 
-    def ElementsPropertyInTensionOrCompression(Self, TensionValue, PropertiesInCompression_Tension):
+    def ElementsInTensionOrCompression(Self, TensionValue, PropertyInCompressionAndTension):
         """
         Select the property of the element depending on if it is in tension or in compression
         :param TensionValue: [any unit] - shape (ElementsCount,) - Any value >= O is considered as tension. It can be force, strain, elongation, stress,...
-        :param PropertiesInCompression_Tension: [any unit] - shape (ElementsCount,2) - The properties [InCompression,InTension] of each element. It can be the Area or Young modulus.
+        :param PropertyInCompressionAndTension: [any unit] - shape (ElementsCount,2) - The properties [InCompression,InTension] of each element. It can be the Area or Young modulus.
         :return: Property: [any unit] - shape (ElementsCount,) - The properties of each element depending if the element is in tension or in compression.
         """
 
-        assert PropertiesInCompression_Tension.shape == (Self.ElementsCount, 2), "Please check the shape of the PropertiesInCompression_Tension"
+        assert PropertyInCompressionAndTension.shape == (Self.ElementsCount, 2), "Please check the shape of the PropertiesInCompression_Tension"
 
         # 2) Check the state of the elements (in compression or in tension) and find their associated stiffness
 
@@ -1185,10 +1237,10 @@ class StructureObj():
         # For instance, the Young modulus of a cable could be 0 in compression and 100e3 MPa in tension.
         # In this case, the cable vanish from stiffness matrix if it slacks
 
-        PropertyInCompression = PropertiesInCompression_Tension[:, 0]
-        PropertyInTension = PropertiesInCompression_Tension[:, 1]
+        PropertyInCompression = PropertyInCompressionAndTension[:, 0]
+        PropertyInTension = PropertyInCompressionAndTension[:, 1]
 
-        IsElementInTension = TensionValue >= 0  # a vector where the entry i is true if the element is in tension, and false if it is in compression
+        IsElementInTension = TensionValue > 0  # a vector where the entry i is true if the element is in tension, and false if it is in compression
         Property = np.where(IsElementInTension, PropertyInTension, PropertyInCompression)  # the property of the elements depending if compression or tension
         return Property
 
@@ -1199,7 +1251,7 @@ class StructureObj():
         :param ElementsE: [N/mm²] - shape (ElementsCount,) - The young modulus of the elements.
         :param ElementsA: [mm²] - shape (ElementsCount,) - The area of the elements.
         :param ElementsL: [m] - shape (ElementsCount,) - The lengths (free or current) of the elements.
-        :return: F : [m/N] - shape (ElementsCount,) - The flexibility L/EA of the elements.
+        :return: Flex : [m/N] - shape (ElementsCount,) - The flexibility L/EA of the elements.
         """
         # 0) Check the inputs
         assert ElementsE.size == Self.ElementsCount, "Please check the shape of ElementsE"
@@ -1221,7 +1273,7 @@ class StructureObj():
         F[NoStiffnessElementsIndex] = 1e6  # [m/N] elements with 0 stiffness have an infinite flexibility
         return F
 
-    def GlobalFromLocalStiffnessMatrix(Self, klocList):
+    def LocalToGlobalStiffnessMatrix(Self, klocList):
         """
         Assemble the global stiffness matrix from the local matrices of the elements in the current state.
         The local matrices can either be the geometrical stiffness or the material stiffness.
@@ -1229,8 +1281,6 @@ class StructureObj():
         :param klocList: [N/m] - list(np.array[6][6]) of size ElementsCount - List of the current Local Stiffness Matrix of the elements
         :return: K: [N/m] - shape (3*NodesCount,3*NodesCount)- the global stiffness matrix of the structure in the current state
         """
-
-
         n = Self.NodesCount
         e = Self.ElementsCount
         ElementsEndNodes = Self.ElementsEndNodes
@@ -1253,172 +1303,63 @@ class StructureObj():
                     K[index[j], index[j2]] += k[j, j2]
         return K
 
-
-
     # endregion
-
-
 
     # region Private Methods : Linear Solver based on displacement methods
 
-    def Core_LinearSolve_Displ_Method(S0):
+    def CoreLinearDisplacementMethod(Self):
+        """
+                Perform the Linear Displacement Method on the Start State of the Structure.
+                This method assumes that the StructureObject has already been initialized with InitialData method
+                :return: The final State of the structure in Equilibrium
+                """
 
-        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
+        # 0) Check inputs
+        NodesCount = Self.NodesCount  # scalar
+        ElementsCount = Self.ElementsCount  # scalar
+        IsDOFfree = Self.IsDOFfree.reshape((-1,))  # [bool] - shape (3*NodesCount,) - support conditions of each DOF
+        DOFfreeCount = Self.DOFfreeCount  # scalar
+        C = Self.C  # the connectivity matrix
 
-        perturb = 1e-6  # [m], à appliquer si matrice singulière uniquement
+        assert NodesCount > 0, "Please check the NodesCount"
+        assert ElementsCount > 0, "Please check the ElementsCount"
+        assert IsDOFfree.shape == (3 * NodesCount,), "Please check the supports conditions IsDOFfree"
+        assert DOFfreeCount > 0, "Please check that at least one degree of freedom is free"
+        assert C.shape == (ElementsCount, NodesCount), "Please check that the connectivity matrix C has been computed"
 
-        d = np.zeros((3*S0.NodesCount,1))
-        AxialForces = np.zeros((S0.ElementsCount,1))
-        Reactions = np.zeros((S0.FixationsCount,1))
+        # 1) Initialize the start state for the Displacement method
+        Self.Start = Self.StartState(Self.LoadsToApply,Self.LengtheningsToApply)  # Start state = the Initial State + LoadsToApply + LengtheningsToApply but in the same geometry as before.
+        Self.Start.ElementsE = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsE) #select the young modulus EinCompression for struts or EinTension for cables
+        Self.Start.ElementsA = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsA)
+        (PrestressForces,PrestressLoads) = Self.Start.PrestressLoads(Self,Self.LengtheningsToApply,Self.Start.ElementsE,Self.Start.ElementsA,Self.Start.ElementsLFree)
+        Self.Start.Loads += PrestressLoads
+        start = Self.Start
+
+        # 2) Solve the linear system of equations K*d=Flex
+
+        perturb = 1e-5  # [m], à appliquer si matrice singulière uniquement
+
+        d = np.zeros((3 * Self.NodesCount, ))
+        Tension = np.zeros((Self.ElementsCount, ))
+        Reactions = np.zeros((Self.FixationsCount, ))
 
         try:
-            (d, AxialForces, Reactions) = S0.LinearSolve_Displ_Method(S0.NodesCoord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
-
-        except np.linalg.linalg.LinAlgError:
+            (d, Tension, Reactions) = start.LinearDisplacementMethod(Self,start.NodesCoord, Self.Initial.Tension, start.Loads, start.ElementsE, start.ElementsA, start.ElementsLFree)
+        except np.linalg.LinAlgError:
             # print("la matrice est singulière")
-            NodesCoord_perturbed = S0.Perturbation(S0.NodesCoord, S0.IsDOFfree, perturb)
-            (d, AxialForces, Reactions) = S0.LinearSolve_Displ_Method(NodesCoord_perturbed, S0.AxialForces_Already_Applied,S0.Loads_To_Apply)
+            NodesCoord_perturbed = Self.Perturbation(start.NodesCoord, Self.IsDOFfree, perturb)
+            (d, Tension, Reactions) = start.LinearDisplacementMethod(Self,NodesCoord_perturbed, Self.Initial.Tension, start.Loads, start.ElementsE, start.ElementsA, start.ElementsLFree)
+
         finally:
-            S0.Displacements_Results = d
-            S0.AxialForces_Results = AxialForces
-            S0.Reactions_Results = Reactions
+            # In Linear calculation, the equilibrium is achieved in the initial state. The final state is the deformed geometry
+            Self.Start.Tension = Tension + PrestressForces
+            Self.Start.Reactions = Reactions
+            Self.Final = Self.Start.Copy()
+            Self.Final.NodesCoord = start.NodesCoord + d
+            Self.Final.Tension = Tension + PrestressForces
+            Self.Final.Reactions = Reactions
 
-    def LinearSolve_Displ_Method(cur, NodesCoord, AxialForces_Already_Applied, Loads_To_Apply):
-
-        #1) Input
-        n = cur.NodesCount
-        c = cur.FixationsCount
-
-        Elements_L0 = cur.ElementsLFree #  = DR.ElementsLFree : Initial Lengths
-        Elements_A = cur.ElementsA
-        Elements_E = cur.ElementsE
-        C = cur.C
-
-        Loads = Loads_To_Apply.reshape((-1, 1))
-        d_Imposed = np.zeros((c, 1))
-        To_Apply = np.vstack((Loads, d_Imposed))
-
-        #2) Compute stiffness matrices. NB: computed with current Length and current Cos !
-        (cur.Elements_L, cur.Elements_Cos) = cur.Compute_Elements_Geometry(NodesCoord, C)
-        (List_km_loc, List_kg_loc) = cur.MaterialAndGeometricLocalStiffness_list(cur.Elements_L, cur.Elements_Cos, Elements_A, Elements_E, AxialForces_Already_Applied)
-        cur.K_constrained = cur.Compute_StiffnessMatGeo_Matrix(List_km_loc, List_kg_loc) # (3n+c,3n+c)
-
-        #3) Solve Linear System  # NB: this might throw the exception np.linalg.linalg.LinAlgError that we need to catch somewhere
-        d_and_Reactions = np.linalg.solve(cur.K_constrained, To_Apply)  # voir equation 2.7 page 32 du mémoire J.Feron
-        #N.B. K*1000 helps when working with length in mm, otherwise we have N/mm which is really smalled. but it works when K is in N/m
-
-        #4) Post-Process
-        d = d_and_Reactions[:3 * n].reshape((-1,1))
-        Reactions = - d_and_Reactions[3 * n:].reshape((-1,1))
-        AxialForces = cur.Post_Process_Displ_Method(d, List_km_loc, List_kg_loc, cur.Elements_Cos)
-        return (d, AxialForces, Reactions)
-
-
-    def MaterialAndGeometricLocalStiffness_list(cur, Elements_L, Elements_Cos, Elements_A, Elements_E, AxialForces_Already_Applied):
-        """
-            This is the old way of computing the local material and geometric stiffness matrices. It relies on the current nodes coordinates and the already applied axial forces.
-            :return:    Liste (Bx1) local material stiffness matrices
-                        Liste (Bx1) local geometric stiffness matrices
-        """
-        b = Elements_A.size
-        A = Elements_A
-        E = Elements_E
-        L = Elements_L # this is the length in the current structure !
-
-
-        t0 = AxialForces_Already_Applied
-
-        List_km_loc = []
-        List_kg_loc = []
-
-        for i in np.arange(b):
-            cx = Elements_Cos[i, 0] # this is the cos in the current stage
-            cy = Elements_Cos[i, 1]
-            cz = Elements_Cos[i, 2]
-            cos = np.array([[-cx, -cy, -cz, cx, cy, cz]])
-            R = np.dot(cos.transpose(), cos)  # local compatibility * local equilibrium
-            km = E[i] * A[i] / L[i] * R  # material stiffness matrix
-
-            kg = t0[i] / L[i] * np.array([[1, 0, 0, -1, 0, 0],
-                                          [0, 1, 0, 0, -1, 0],
-                                          [0, 0, 1, 0, 0, -1],
-                                          [-1, 0, 0, 1, 0, 0],
-                                          [0, -1, 0, 0, 1, 0],
-                                          [0, 0, -1, 0, 0, 1]])  # geometric stiffness matrix
-
-            List_km_loc.append(km)
-            List_kg_loc.append(kg)
-
-        return (List_km_loc, List_kg_loc)
-
-    def Compute_StiffnessMatGeo_Matrix(cur, List_km_loc, List_kg_loc):
-        """
-            Objectif: Calcul la matrice de raideur global K de la structure dans la configuration déformée donnée
-            :param struct: un objet structure composé d'éléments, de noeuds et d'appuis
-            :param List_local_stiffness_matrices: une liste (Bx1) de matrices de raideur locales des éléments dans une configuration déformée donnée
-
-            :return: K: la matrice de rigidité global de la structrue
-            """
-        n = cur.NodesCount
-        b = cur.ElementsCount
-        c = cur.FixationsCount
-        IsDOFfree = cur.IsDOFfree
-        Elements_ExtremitiesIndex=cur.ElementsEndNodes
-
-        Km = np.zeros((3*n, 3*n))
-        Kg = np.zeros((3*n, 3*n))
-
-        #assembly of local matrices into a global one
-        for i in np.arange(b):
-            n0 = Elements_ExtremitiesIndex[i, 0]
-            n1 = Elements_ExtremitiesIndex[i, 1]
-            km = List_km_loc[i]
-            kg = List_kg_loc[i]
-
-            index = np.array([3 * n0, 3 * n0 + 1, 3 * n0 + 2, 3 * n1, 3 * n1 + 1, 3 * n1 + 2]) #global index
-            for j in np.arange(6): #local index
-                for j2 in np.arange(6):
-                    Km[index[int(j)], index[int(j2)]] += km[int(j), int(j2)]
-                    Kg[index[int(j)], index[int(j2)]] += kg[int(j), int(j2)]
-
-        # Considerations of the fixations
-        IndexDOFfixed = np.arange(3*n)[~IsDOFfree] #(nbr fixations,)
-
-        constrains = np.zeros((c, 3*n))
-        for ind_c, ind_dof in enumerate(IndexDOFfixed):
-            constrains[ind_c,ind_dof]=1
-
-        K_constrained = np.zeros((3 * n + c, 3 * n + c))
-        K_constrained[:3*n,:3*n] = Km+Kg
-        K_constrained[3*n:, :3*n] = constrains
-        K_constrained[:3*n, 3*n:] = constrains.transpose()
-
-        return K_constrained
-
-    def Post_Process_Displ_Method(cur, d, List_km_loc, List_kg_loc, Elements_Cos):
-        Elements_ExtremitiesIndex = cur.ElementsEndNodes
-        b = cur.ElementsCount
-        AxialForces = np.zeros((b,1))
-        for i in np.arange(b):
-            n0 = Elements_ExtremitiesIndex[i, 0]
-            n1 = Elements_ExtremitiesIndex[i, 1]
-            index = np.array([3*n0, 3*n0+1, 3*n0+2, 3*n1, 3*n1+1, 3*n1+2])
-            d_loc = d[index] #(6,)  displacements at the extremities of the bars
-
-            k_loc = List_km_loc[i] + List_kg_loc[i] #local stiffness matrix
-
-            f_loc = k_loc @ d_loc #(6,) forces in the global coordinates
-
-            cx = Elements_Cos[i, 0] #this is the cos in the current structure
-            cy = Elements_Cos[i, 1]
-            cz = Elements_Cos[i, 2]
-
-            AxialForces[i] = -(f_loc[0] * cx + f_loc[1] * cy + f_loc[2] * cz) #forces in the local coordinates of the bar
-            #AxialForces[i] = (f_loc[3] * cx + f_loc[4] * cy + f_loc[5] * cz) #equivalent
-        return AxialForces
-
-    def Perturbation(S0,NodesCoord,IsDOFfree,perturb):
+    def Perturbation(Self,NodesCoord,IsDOFfree,perturb):
         """
         Apply a perturbation on all nodes free in Z
         :return: NodesCoord_perturbed: vecteur (Nx3) des coordonnées des noeuds avec perturbation
@@ -1426,7 +1367,7 @@ class StructureObj():
         NodesCoord_perturbed = NodesCoord.copy().reshape((-1,3))
         IsZfree = IsDOFfree.reshape((-1,3))[:,2]
         NodesCoord_perturbed[IsZfree,2] -= perturb
-        return NodesCoord_perturbed.reshape((-1,1))
+        return NodesCoord_perturbed.reshape((-1,))
 
     # endregion
 
@@ -1487,11 +1428,13 @@ class StructureObj():
             cur = S0.NewStructureObj(CurNodesCoord, CurAxialForces, p)
 
             try:
-                (v, N, R) = cur.LinearSolve_Displ_Method(cur.NodesCoord, cur.AxialForces_Already_Applied, cur.Loads_To_Apply)
+                (v, N, R) = cur.LinearDisplacementMethod(None, cur.NodesCoord, cur.AxialForces_Already_Applied,
+                                                         cur.Loads_To_Apply)
             except np.linalg.LinAlgError:
                 # print("la matrice est singulière")
                 NodesCoord_perturbed = cur.Perturbation(cur.NodesCoord, cur.IsDOFfree, perturb)
-                (v, N, R) = cur.LinearSolve_Displ_Method(NodesCoord_perturbed,cur.AxialForces_Already_Applied,cur.Loads_To_Apply)
+                (v, N, R) = cur.LinearDisplacementMethod(None, NodesCoord_perturbed, cur.AxialForces_Already_Applied,
+                                                         cur.Loads_To_Apply)
             finally:
                 cur.Displacements_Results = v #Linear results
                 cur.AxialForces_Results = N
@@ -1500,100 +1443,7 @@ class StructureObj():
                 if k==0: # Initial Structure = current at first step
                     S0.Elements_L = cur.ElementsL
                     S0.Elements_Cos = cur.ElementsCos
-                    S0.K_constrained = cur.K_constrained
-
-                if l0 == 1:  # if incremental length = 1
-                    IncrStage = 1  #final stage is obtained in one step. NonLinear Method = Linear Method
-
-                else:  # use arclength constrain
-                    norm = (v.transpose() @ v)[0,0] #scalar product
-                    f = np.sqrt(1 + norm) #scalar
-                    IncrStage = (l0 / f) * np.sign(np.dot(p.transpose(), v))[0,0]  # it can be negative
-
-                if Stage + IncrStage > 1:  # Ensure to stop exactly on Final Stage = 1.
-                    IncrStage = 1 - Stage
-
-                # Move to next step
-                Stage = Stage + IncrStage
-                IncrLoad = p * IncrStage
-                IncrDispl = v * IncrStage
-                IncrN = N * IncrStage
-                IncrR = R * IncrStage
-
-                #store the results of this stage
-                Stages = np.hstack((Stages,Stage))
-                StagesLoad= np.hstack((StagesLoad,StagesLoad[:,k].reshape((-1,1)) + IncrLoad))
-                StagesDispl= np.hstack((StagesDispl,StagesDispl[:,k].reshape((-1,1)) + IncrDispl))
-                StagesN = np.hstack((StagesN,StagesN[:,k].reshape((-1,1)) + IncrN))
-                StagesR= np.hstack((StagesR,StagesR[:,k].reshape((-1,1)) + IncrR))
-
-                k = k + 1
-
-        if k == Max_n_steps:
-            # print('nbr iterations du solveur non linéaire : {}/{}  progression Stage: {} %'.format(k, Max_n_steps,np.around(Stage * 100,decimals=2)))
-            return (np.array([[]]),np.array([[]]),np.array([[]]),np.array([[]]),np.array([[]]))
-        else:
-            # print('nbr iterations du solveur non linéaire :', k)
-            return (Stages,StagesLoad,StagesDispl,StagesN,StagesR)
-
-    def NonLinearSolve_Displ_Method_NewtonRaphson(S0,n_steps,NodesCoord0,AxialForces_Already_Applied, Loads_To_Apply):
-        """
-        Non linear solve of the structure. Input:
-            NodesCoord0: Initial Nodes coordinates (Nx3)
-            TensionInit: Initial AxialForces in equilibrium in the structure (Bx1)
-            LoadsToApply: Loads to apply on the nodes (Nx3)
-        """
-        AxialForcesInit = AxialForces_Already_Applied.reshape(-1,1)
-
-        perturb = 1e-6  # [mm], to apply if singular matrix
-
-        l0 = 1 / n_steps  # incremental length
-        Max_n_steps = n_steps * 5 #max number of steps
-
-        k = 0  # current step
-        Stage = 0.0  # Initial Stage = 0. Final Stage = 1.
-
-        p = Loads_To_Apply.reshape((-1,1)) #Load applied at each linear step. All the load is applied at each step
-        v = np.zeros((3*S0.NodesCount,1))  #Displacement at each linear step. solution of K_k @ v = p where K_k is the stiffness matrix at the current step k
-        N = np.zeros((S0.ElementsCount,1)) #AxialForce at each linear step
-        R = np.zeros((S0.FixationsCount,1)) #Reaction at each linear step
-
-        IncrStage = 0 #advance in the stage
-        IncrLoad = np.zeros((3*S0.NodesCount,1)) #Incr of Load at this step. IncrLoad = LoadsToApply * IncrStage
-        IncrDispl = np.zeros((3*S0.NodesCount,1))  #Incr of Displacement at this step. IncrDispl = v * IncrStage
-        IncrN = np.zeros((S0.ElementsCount,1)) #Incr of AxialForce at this step. IncrN = N * IncrStage
-        IncrR = np.zeros((S0.FixationsCount,1)) #Incr of Reaction at this step. IncrR = R * IncrStage
-
-        # Stage 0
-        Stages = np.array([Stage]) #succesion of stages
-        StagesLoad = IncrLoad.copy() #list of applied load at all stages.
-        StagesDispl = IncrDispl.copy() #list of Displacement at all stages.
-        StagesN = AxialForcesInit.copy() #list of AxialForces at all stages.
-        StagesR = IncrR.copy() #list of Reactions at all stages.
-
-        while (Stage < 1 and k < Max_n_steps):
-
-            # A new initial structure is considered at each step. A Linear Solve method is applied on it.
-            CurDispl = StagesDispl[:,k].reshape((-1,1))
-            CurNodesCoord = NodesCoord0 + CurDispl
-            CurAxialForces = StagesN[:,k].reshape((-1,1))
-            cur = S0.NewStructureObj(CurNodesCoord, CurAxialForces, p)
-
-            try:
-                (v, N, R) = cur.LinearSolve_Displ_Method(cur.NodesCoord, cur.AxialForces_Already_Applied, cur.Loads_To_Apply)
-            except np.linalg.LinAlgError:
-                # print("la matrice est singulière")
-                NodesCoord_perturbed = cur.Perturbation(cur.NodesCoord, cur.IsDOFfree, perturb)
-                (v, N, R) = cur.LinearSolve_Displ_Method(NodesCoord_perturbed,cur.AxialForces_Already_Applied,cur.Loads_To_Apply)
-            finally:
-                cur.Displacements_Results = v #Linear results
-                cur.AxialForces_Results = N
-                cur.Reactions_Results = R
-
-                if k==0: # Initial Structure = current at first step
-                    S0.Elements_L = cur.ElementsL
-                    S0.Elements_Cos = cur.ElementsCos
-                    S0.K_constrained = cur.K_constrained
+                    S0.K_constrained = cur.KConstrained
 
                 if l0 == 1:  # if incremental length = 1
                     IncrStage = 1  #final stage is obtained in one step. NonLinear Method = Linear Method

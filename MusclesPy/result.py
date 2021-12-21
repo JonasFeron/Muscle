@@ -169,7 +169,7 @@ class SharedSolverResultEncoder(json.JSONEncoder):
 #         Therefore : only share the minimum amount of informations and recalculate other data if necessary.
 #         """
 #         Answ.TypeName = "SharedSolverResult"
-#         # Answ.K_constrained = []  # required to solve the structure with imposed displacements of the supports
+#         # Answ.KConstrained = []  # required to solve the structure with imposed displacements of the supports
 #
 #         # ##### Solve informations #####
 #         Answ.Stages = []

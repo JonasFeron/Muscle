@@ -39,11 +39,11 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(successCosY, True)
         self.assertEqual(successCosZ, True)
 
-    def test_Simple_ComputeEquilibriumMatrix(self):
+    def test_ComputeEquilibriumMatrix_2cables(self):
         S = StructureObj()
-        NodesCoord = np.array([[0.0, 1.0, 0.0],
-                               [1.0, 1.0, 0.0],
-                               [2.0, 1.0, 0.0]])
+        NodesCoord = np.array([[0.0, 0, 0],
+                               [1.0, 0, 0],
+                               [2.0, 0, 0]])
         ElementsEndNodes = np.array([[0, 1],
                                      [1, 2]])
         IsDOFfree = np.array([False, False, False,
@@ -51,10 +51,10 @@ class MyTestCase(unittest.TestCase):
                               False, False, False])
 
         S.RegisterData(NodesCoord,ElementsEndNodes,IsDOFfree)
-        C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
-        Initial = State(S,NodesCoord)
-        (l,ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
-        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(None, ElementsCos)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        (l,ElementsCos) = S.Initial.ElementsLengthsAndCos(S,NodesCoord)
+        (A, A_free, A_fixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
 
         A_free_answer = np.array([[1.0, -1.0],
                                   [0.0, 0.0],
@@ -63,40 +63,135 @@ class MyTestCase(unittest.TestCase):
 
         self.assertEqual(success,True)
 
-    def test_Simple_ComputeSVD(self):
+
+
+    def test_SVDEquilibriumMatrix_2cables(self):
         S = StructureObj()
-        NodesCoord = np.array([[0.0, 1.0, 0.0],
-                               [1.0, 1.0, 0.0],
-                               [2.0, 1.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1],
-                                              [1, 2]])
+        NodesCoord = np.array([[0.0, 0, 0],
+                               [1.0, 0, 0],
+                               [2.0, 0, 0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
         IsDOFfree = np.array([False, False, False,
                               True, True, True,
                               False, False, False])
 
-        S.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
-        Initial = State(S,NodesCoord)
-        (l, ElementsCos) = Initial.ElementsLengthsAndCos(NodesCoord, C)
-        (A, A_free, A_fixed) = Initial.EquilibriumMatrix(None, ElementsCos)
-        SVD = Initial.ComputeSVD(None, A_free)
+        S.RegisterData(NodesCoord,ElementsEndNodes,IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        (l,ElementsCos) = S.Initial.ElementsLengthsAndCos(S,NodesCoord)
+        (A, AFree, AFixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
+        S.Initial.SVD.SVDEquilibriumMatrix(S, AFree)
 
         r_answer = 1
-        self.assertEqual(SVD.r, r_answer)
+        self.assertEqual(S.Initial.SVD.r, r_answer)
 
         s_answer = 1
-        self.assertEqual(SVD.s, s_answer)
+        self.assertEqual(S.Initial.SVD.s, s_answer)
 
         SS_answer = np.array([[-1.0, -1.0]])
-        successSS = np.allclose(SVD.SS,SS_answer)
+        successSS = np.allclose(S.Initial.SVD.SS,SS_answer)
         self.assertEqual(successSS, True)
 
         m_answer = 2
-        self.assertEqual(SVD.m, m_answer)
+        self.assertEqual(S.Initial.SVD.m, m_answer)
 
         Um_answer= np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-        successUm = np.allclose(SVD.Um_free_row,Um_answer)
+        successUm = np.allclose(S.Initial.SVD.Um_free_row,Um_answer)
         self.assertEqual(successUm, True)
+
+    def test_SVDEquilibriumMatrix_2cables_FiniteMechanism(self):
+        S = StructureObj()
+        NodesCoord = np.array([[0.0, 0, 0],
+                               [1.0, 0, 0],
+                               [2.0, 0, 0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              True, False, False])
+
+        S.RegisterData(NodesCoord,ElementsEndNodes,IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        (l,ElementsCos) = S.Initial.ElementsLengthsAndCos(S,NodesCoord)
+        (A, AFree, AFixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
+        S.Initial.SVD.SVDEquilibriumMatrix(S, AFree)
+
+        s_answer = 0
+        self.assertEqual(S.Initial.SVD.s, s_answer)
+
+
+        m_answer = 1
+        self.assertEqual(S.Initial.SVD.m, m_answer)
+
+        Um_answer= np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        successUm = np.allclose(S.Initial.SVD.Um_free_row,Um_answer)
+        self.assertEqual(successUm, True)
+
+    def test_SVDEquilibriumMatrix_3cables(self):
+        S = StructureObj()
+        NodesCoord = np.array([[0.0, 0, 0],
+                               [0.16, 0, -0.08],
+                               [0.32, 0, -0.08],
+                               [0.48, 0, 0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2],
+                                     [2, 3]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              True, False, True,
+                              False, False, False])
+
+        S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        (l, ElementsCos) = S.Initial.ElementsLengthsAndCos(S, NodesCoord)
+        (A, AFree, AFixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
+
+        S.Initial.SVD.SVDEquilibriumMatrix(S, AFree)
+        # success  = (A_free == A_free_answer).all()
+        print(S.Initial.SVD.Um_free_row)  # analysis of the mechanism
+        self.assertEqual(True, True)
+
+    def test_SVDEquilibriumMatrix_ExperimentalSimplex(self):
+        S = StructureObj()
+
+        NodesCoord = np.array([[0.00, - 2043.8, 0.00],
+                               [0.00, 0.00, 0.00],
+                               [1770.00, - 1021.9, 0.00],
+                               [590.00, - 2201.9,1950.00],
+                               [-431.9,- 431.9, 1950.00],
+                               [1611.9,- 431.9,1950.00]])
+        ElementsEndNodes = np.array([[2, 4],
+                                     [1, 3],
+                                     [0, 5],
+                                     [1, 2],
+                                     [0, 1],
+                                     [0, 2],
+                                     [4, 5],
+                                     [3, 4],
+                                     [3, 5],
+                                     [2, 5],
+                                     [1, 4],
+                                     [0, 3]])
+        IsDOFfree = np.array([False, True, False,
+                              False, False, False,
+                              True, True, False,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True])
+
+        S.RegisterData(NodesCoord, ElementsEndNodes, IsDOFfree)
+        S.C = S.ConnectivityMatrix(S.NodesCount, S.ElementsCount, S.ElementsEndNodes)
+
+        (l, ElementsCos) = S.Initial.ElementsLengthsAndCos(S, NodesCoord)
+        (A, AFree, AFixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
+
+        S.Initial.SVD.SVDEquilibriumMatrix(S, AFree)
+        # success  = (A_free == A_free_answer).all()
+        print(S.Initial.SVD.Um_free_row)  # analysis of the mechanism
+        self.assertEqual(True, False)
 
     def test_FlexibilityMatrix(self):
 
@@ -106,7 +201,7 @@ class MyTestCase(unittest.TestCase):
 
         S = StructureObj(0,2)
         Initial = State(S)
-        F = Initial.Flexibility(StructureObj(), ElementsE, ElementsA, ElementsL)  #F=L/EA
+        F = Initial.Flexibility(StructureObj(), ElementsE, ElementsA, ElementsL)  #Flex=L/EA
         self.assertEqual(F[0], 2/(100e7))
         self.assertEqual(F[1], 1e6)
 
@@ -200,7 +295,7 @@ class MyTestCase(unittest.TestCase):
         Tension = np.array([4])
         q = Initial.ForceDensities(Tension, Initial.ElementsL)
         kgLocList = Initial.GeometricLocalStiffnessList(None, q)
-        Kgeo = S.GlobalFromLocalStiffnessMatrix(kgLocList)
+        Kgeo = S.LocalToGlobalStiffnessMatrix(kgLocList)
 
         self.assertEqual(True, True)
 

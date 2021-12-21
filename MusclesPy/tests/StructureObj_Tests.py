@@ -9,24 +9,6 @@ class StructureObj_Tests(unittest.TestCase):
 
 
     # region Assemble methods
-    def test_RegisterData_2cables(self):
-        """
-        test to check that RegisterData calculates correctly the number of nodes, elements, and supports. Test for 2 cables
-        """
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0,1.0,0.0],[1.0,1.0,0.0],[2.0,1.0,0.0]])
-        Elements_ExtremitiesIndex = np.array([[0,1],[1,2]])
-        IsDOFfree = np.array([False,False,False,True,True,True,False,False,False])
-
-        S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        # print(DR.NodesCount)
-        # print(DR.ElementsCount)
-        # print(DR.FixationsCount)
-        # print(DR.DOFfreeCount)
-        self.assertEqual(S0.NodesCount, 3)
-        self.assertEqual(S0.ElementsCount, 2)
-        self.assertEqual(S0.FixationsCount, 6)
-        self.assertEqual(S0.DOFfreeCount, 3)
 
     def test_Simple_ConnectivityMatrix(self):
         """
@@ -45,54 +27,114 @@ class StructureObj_Tests(unittest.TestCase):
         success = (C == np.array([[-1,  1,  0],[ 0, -1, 1]])).all()
         self.assertEqual(success, True)
 
-    def test_Simple_StackedConnectivityMatrix(self):
-        """
-        test to see if the computation of the connectivity_matrix of 2 cables (*--c1--*--c2--*) works
-        """
-        ElementsCount = 2
-        NodesCount = 3
-        ElementsEndNodes = np.array([[0,1],[1,2]])
 
-        S = StructureObj(NodesCount,ElementsCount) #empty object
+    def test_CompareMaterialStiffnessMatricesFromTwoMethods(self):
+        Struct = StructureObj()
+        NodesCoord = np.array([[-1.0, 0.0, 0.0], [0.0, 0.0, 2.0], [1.0, 0.0, 0.0]])
+        ElementsEndNodes = np.array([[0, 1], [1, 2]])
+        IsDOFfree = np.array([False, False, False, True, False, True, False, False, False])
+        ElementsType = np.array([-1, -1]) #two struts
+        ElementsE = np.array([[70, 70],
+                              [70, 70]]) * 1e3  # MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1]]) * 100 # mm²
 
-        #required input for the method
+        Struct.InitialData(NodesCoord,ElementsEndNodes,IsDOFfree,ElementsType,ElementsA,ElementsE)
+
+        ini = Struct.Initial
+        #0) For linear calculation, compute the elements propeteries according to their types.
+        ini.ElementsE = Struct.ElementsInTensionOrCompression(Struct.ElementsType, Struct.ElementsE) #select the young modulus EinCompression for struts or EinTension for cables
+        ini.ElementsA = Struct.ElementsInTensionOrCompression(Struct.ElementsType, Struct.ElementsA)
+
+        #1) Compute the material stiffness matrix by the method 1, from a list of local stiffness matrices
+        (ini.ElementsL, ini.ElementsCos) = ini.ElementsLengthsAndCos(Struct, ini.NodesCoord)
+        kmLocList = ini.MaterialLocalStiffnessList(Struct, ini.ElementsL, ini.ElementsCos, ini.ElementsA, ini.ElementsE)
+        Kmat1 = ini.GlobalStiffnessMatrix(Struct,kmLocList)
+
+        #2) Compute the material stiffness matrix by the method 2, from the equilibrium matrix
+        (ini.A, ini.AFree, ini.AFixed) = ini.EquilibriumMatrix(Struct, ini.ElementsCos)
+        ini.Flex = Struct.Flexibility(ini.ElementsE, ini.ElementsA,ini.ElementsL)
+        Kmat2 = ini.MaterialStiffnessMatrix(Struct,ini.A,ini.Flex)
+
+        successKmat = np.allclose(Kmat1,Kmat2)
+        self.assertEqual(successKmat, True)
+
+    # endregion
+    # region Linear Displacement Method
+
+    def test_MainLinearDisplacementMethod_2bars(self):
+        #Simple tests on 2 bars /\ (cfr Annexe A1.1.1 of J.Feron Master thesis (p103 of pdf))
+        Struct = StructureObj()
+        NodesCoord = np.array([[0.0, 0.0, 0.0],
+                               [1.0, 0.0, 1.0],
+                               [2.0, 0.0, 0.0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              False, False, False])
+        LoadsToApply = np.array([[0.0, 0.0, 0.0],
+                                   [0.0, 0.0, -100000],
+                                   [0.0, 0.0, 0.0]])
+        ElementsType = np.array([-1,-1])
+        ElementsA = np.array([0.002500, 0.002500])
+        ElementsE = np.array([10000000000, 10000000000])
 
 
-        C = S.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)  #test the method
-        Cxyz = S.StackedConnectivityMatrix(C)
-        #check the results
-        success = (Cxyz == np.array([[-1., - 1., - 1.,  1.,  1.,  1.,  0.,  0.,  0.],
-                                     [0.,  0.,  0., - 1., - 1., - 1.,  1.,  1.,  1.]])).all()
+        ini = Struct.Initial
 
-        self.assertEqual(success, True)
+        Struct.test_MainLinearDisplacementMethod( NodesCoord, ElementsEndNodes, IsDOFfree,ElementsType, ElementsA,ElementsE,LoadsToApply=LoadsToApply)
 
+        displacements = Struct.Final.NodesCoord-Struct.Initial.NodesCoord
+        d1Z = displacements.reshape((-1, 3))[1, 2]
+        SuccessD = np.isclose(d1Z ,-5.6568 * 1e-3, atol=1e-6)
 
-
-
+        self.assertEqual(SuccessD, True)
 
 
-    def test_Compute_StiffnessMat_Matrix_2cables(self):
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0, 1.0, 0.0], [1.0, 1.0, 0.0], [2.0, 1.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
-        IsDOFfree = np.array([False, False, False, True, True, True, False, False, False])
+        Forces_answer = np.array([-70711, -70711])  # analytique solution
+        self.assertEqual(np.allclose(Struct.Final.Tension, Forces_answer), True)
 
-        S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree)
-        C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(NodesCoord, C)
-        (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, IsDOFfree)
+        Reactions_answer = np.array([50000, 0, 50000, 0, -50000, 0, 50000])  # analytique solution
+        self.assertEqual(np.allclose(Struct.Final.Reactions, Reactions_answer), True)
 
-        Elements_A = np.array([0.002500,0.002500])
-        Elements_E = np.array([10000000000.0,10000000000.0])
+    def test_MainLinearDisplacementMethod_Prestress2cables(self):
+        #Simple prestress tests on a tight rope
+        Struct = StructureObj()
+        NodesCoord = np.array([[-2.0, 0.0, 0.0],
+                               [0.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0],
+                               [0.0, 0.0, 1.0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2],
+                                     [1, 3]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              False, False, False,
+                              False, False, False])
+        LoadsToApply = np.array([[0.0, 0.0, 0.0],
+                                    [0.0, 0.0, 0.0],
+                                 [0.0, 0.0, 0.0],
+                                    [0.0, 0.0, 0.0]])
+        ElementsType = np.array([1,1,1])
+        ElementsA = np.array([1, 1, 1]) * 50.26 #[mm²]
+        ElementsE = np.array([70, 70, 70])*1e3 #[MPa]
 
-        Km  = S0.Compute_StiffnessMat_Matrix(A,Elements_L,Elements_A,Elements_E)
-        Km_free = S0.Compute_StiffnessMat_Matrix(A_free, Elements_L, Elements_A, Elements_E)
+        LenghteningsToApply = np.array([-0.007984,0,0]) #[m]
 
-        Km_free_answer= np.zeros((S0.DOFfreeCount,S0.DOFfreeCount))
-        Km_free_answer[0,0] = Elements_A @ Elements_E.transpose()
-        successKm = np.allclose(Km_free,Km_free_answer)
-        self.assertEqual(successKm, True)
+        ini = Struct.Initial
 
+        Struct.test_MainLinearDisplacementMethod(NodesCoord, ElementsEndNodes, IsDOFfree,ElementsType, ElementsA,ElementsE,LoadsToApply=LoadsToApply,LengtheningsToApply=LenghteningsToApply)
+
+        displacements = Struct.Final.NodesCoord-Struct.Initial.NodesCoord
+        d1X = displacements.reshape((-1, 3))[1, 0]
+        SuccessD = np.isclose(d1X ,-4 * 1e-3, atol=1e-6)
+
+        self.assertEqual(SuccessD, True)
+
+        t = Struct.Final.Tension
+        t_answer = np.array([7037.17, 7037.17,0])  # analytique solution
+        self.assertEqual(np.allclose(t, t_answer,atol=1), True)
 
     # endregion
 
@@ -126,7 +168,8 @@ class StructureObj_Tests(unittest.TestCase):
                                  [0, 0, 0],
                                  [0, 0, 0]])
         Dt = 0.01
-        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFree, None, None, None,LoadsToApply,LengtheningsToApply,Dt=Dt)
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, None, ElementsA, ElementsE,
+                                          ElementsLFree, None, None, None, LoadsToApply, LengtheningsToApply, Dt=Dt)
 
         success = np.isclose(Struct.Final.Tension,70000*50.26*0.001/1.999*np.ones(2,),rtol=1e-2)
 
@@ -168,7 +211,8 @@ class StructureObj_Tests(unittest.TestCase):
         #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
 
         Dt = 0.01
-        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,LoadsToApply,LengtheningsToApply,Dt=Dt)
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, None, ElementsA, ElementsE, None,
+                                          None, None, None, LoadsToApply, LengtheningsToApply, Dt=Dt)
 
         TensionAnalyticAnswer = np.array([888.81,
                                          7037.17,
@@ -219,7 +263,9 @@ class StructureObj_Tests(unittest.TestCase):
         #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
 
         Dt = 0.01
-        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,LoadsToApply,LengtheningsToApply,Residual0Threshold=0.00001,Dt=Dt)
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, None, ElementsA, ElementsE, None,
+                                          None, None, None, LoadsToApply, LengtheningsToApply,
+                                          Residual0Threshold=0.00001, Dt=Dt)
 
 
         TensionAnalyticAnswer = np.array([1823.48,
@@ -271,7 +317,8 @@ class StructureObj_Tests(unittest.TestCase):
         #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
 
         Dt = 0.01
-        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, None, None, None, None,LoadsToApply,LengtheningsToApply,Dt=Dt)
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, None, ElementsA, ElementsE, None,
+                                          None, None, None, LoadsToApply, LengtheningsToApply, Dt=Dt)
 
 
         TensionAnalyticAnswer = np.array([0,
@@ -361,7 +408,9 @@ class StructureObj_Tests(unittest.TestCase):
         LoadsToApply[3:6,2] = 41.6 #N
 
         Dt = 0.01
-        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsA, ElementsE, ElementsLFree, None, None, None,LoadsToApply,LengtheningsToApply,Residual0Threshold=0.00001,Dt=Dt)
+        Struct.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, None, ElementsA, ElementsE,
+                                          ElementsLFree, None, None, None, LoadsToApply, LengtheningsToApply,
+                                          Residual0Threshold=0.00001, Dt=Dt)
 
         TensionDRMatlabAnswer = np.array([-9848.26151894298,
         -9882.41664832343,
@@ -567,50 +616,6 @@ class StructureObj_Tests(unittest.TestCase):
 
     # region Simple tests on 2 bars /\ (cfr Annexe A1.1.1 of J.Feron Master thesis (p103 of pdf))
 
-    def test_Compute_StiffnessMatGeo_Matrix_2bars(self):
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 1.0], [2.0, 0.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
-        IsDOFfree = np.array([False, False, False, True, False, True, False, False, False])
-
-        Elements_A = np.array([0.002500, 0.002500])
-        Elements_E = np.array([10000000000.0, 10000000000.0])
-
-        S0.RegisterData(NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E)
-        C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-
-        #1) Compute Elements Geometry
-        (Elements_L, Elements_Cos) = S0.Compute_Elements_Geometry(S0.NodesCoord, C)
-
-        # 2) Compute stiffness matrices
-        (List_km_loc, List_kg_loc) = S0.MaterialAndGeometricLocalStiffness_list(Elements_L, Elements_Cos, S0.ElementsA, S0.ElementsE, S0.AxialForces_Already_Applied)
-        K = S0.Compute_StiffnessMatGeo_Matrix(List_km_loc,List_kg_loc) # (3n+c,3n+c) mat+geo (but here Geo is null)
-
-        # 3) Cross checks
-        # a) Elements Geometry
-        rac_2 = np.sqrt(2)
-        Elements_L0_GH = np.array([rac_2,rac_2])
-        Cos_X_GH = np.array([1/rac_2, 1/rac_2])
-        Cos_Y_GH = np.array([0.0, 0.0])
-        Cos_Z_GH = np.array([1/rac_2, -1/rac_2])
-
-        successL = np.allclose(Elements_L,Elements_L0_GH)
-        successCosX = np.allclose(Elements_Cos[:,0],Cos_X_GH)
-        successCosY = np.allclose(Elements_Cos[:,1],Cos_Y_GH)
-        successCosZ = np.allclose(Elements_Cos[:,2],Cos_Z_GH)
-
-        self.assertEqual(successL, True)
-        self.assertEqual(successCosX, True)
-        self.assertEqual(successCosY, True)
-        self.assertEqual(successCosZ, True)
-
-        # b) cross check with the material matrix computed from force Method
-        (A, A_free, A_fixed) = S0.Compute_Equilibrium_Matrix(Elements_Cos,C, S0.IsDOFfree)
-        Km  = S0.Compute_StiffnessMat_Matrix(A, Elements_L, S0.ElementsA, S0.ElementsE) # (3n,3n) mat only
-
-        n = NodesCoord.shape[0]
-        successK = np.allclose(K[:3*n,:3*n], Km)
-        self.assertEqual(successK, True)
 
     def test_Main_LinearSolve_Disp_Meth_2bars(self):
 
@@ -926,8 +931,8 @@ class StructureObj_Tests(unittest.TestCase):
 
         # find total forces
         L_def_approx = S0.ElementsLFree.reshape(-1, 1) + S0.Elongations_To_Apply
-        S1.F = S1.Flexibility_Matrix(S1.ElementsE, S1.ElementsA, L_def_approx.reshape(-1, ))
-        k1_bsc = np.linalg.inv(S1.F)
+        S1.Flex = S1.Flexibility_Matrix(S1.ElementsE, S1.ElementsA, L_def_approx.reshape(-1, ))
+        k1_bsc = np.linalg.inv(S1.Flex)
         t_tot = k1_bsc @ e_tot
 
         f_unbalanced = -(S1.AFree @ t_tot)  # unbalanced = external load - resisting forces (external load = 0)
@@ -951,8 +956,8 @@ class StructureObj_Tests(unittest.TestCase):
 
         # find total forces
         # L_def_approx = DR.ElementsLFree.reshape(-1,1)+DR.Elongations_To_Apply
-        # S2.F = S2.Flexibility_Matrix(S2.ElementsE, S2.ElementsA, L_def_approx.reshape(-1,))
-        # k2_bsc = np.linalg.inv(S2.F)
+        # S2.Flex = S2.Flexibility_Matrix(S2.ElementsE, S2.ElementsA, L_def_approx.reshape(-1,))
+        # k2_bsc = np.linalg.inv(S2.Flex)
         t2_tot = k1_bsc @ e2_tot
 
         f2_unbalanced = -(S2.AFree @ t2_tot)  # unbalanced = external load - resisting forces (external load = 0)
