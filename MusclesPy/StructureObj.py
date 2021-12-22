@@ -308,7 +308,6 @@ class State():
         Cur.SVD.SVDEquilibriumMatrix(Struct,AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
-
     def TensionForces(Cur, Struct, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
         """
 
@@ -687,9 +686,7 @@ class State():
         Tension = Cur.PostProcessing(Struct, d, kmLocList, kgLocList, Cur.ElementsCos) # Tension are not computed from EA(Lcur-Lfree)/Lfree because, in linear calculation, tension must be computed in the initial geometry and not in the deformed geometry.
         return (d.reshape((-1,)), Tension.reshape((-1,)), Reactions.reshape((-1,)))
 
-
-
-
+#region Dynamic Relaxation
 
 class DRState():
     """
@@ -840,8 +837,6 @@ class DRMethod():
         DR.nKEReset = 0 #[/] - scalar - The number of time the Kinetic energy has been reset to 0 at the peaks during the method.
         DR.MaxKeReset = 1000 #[/] - scalar - The maximum number of reset of the Kinetic energy at the peaks before the method fails
 
-
-
     def InitialData(DR,Dt=0.01,AmplMass=1,MinMass=0.005,MaxTimeStep = 10000,MaxKeReset=1000):
 
         if Dt > 0:
@@ -965,6 +960,8 @@ class DRMethod():
         Struct.DR.nKEReset = nKEReset
         Struct.Final = Cur
 
+#endregion Dynamic Relaxation
+
 class StructureObj():
 
     # region Constructors
@@ -1080,13 +1077,13 @@ class StructureObj():
 
         Self.CoreNONLinearDisplacementMethod()
 
-    def test_Main_LinearSolve_Force_Method(S0, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply,Loads_Already_Applied,Elongations_To_Apply):
-        S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply,1,Loads_Already_Applied,Elongations_To_Apply)
-        S0.Core_LinearSolve_Force_Method()
-
-    def test_Main_NonLinearSolve_Force_Method(S0,n_steps,NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply,Loads_Already_Applied,Elongations_To_Apply):
-        S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply,n_steps,Loads_Already_Applied,Elongations_To_Apply)
-        S0.Core_NonLinearSolve_Force_Method()
+    # def test_Main_LinearSolve_Force_Method(S0, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply,Loads_Already_Applied,Elongations_To_Apply):
+    #     S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply,1,Loads_Already_Applied,Elongations_To_Apply)
+    #     S0.Core_LinearSolve_Force_Method()
+    #
+    # def test_Main_NonLinearSolve_Force_Method(S0,n_steps,NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply,Loads_Already_Applied,Elongations_To_Apply):
+    #     S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply,n_steps,Loads_Already_Applied,Elongations_To_Apply)
+    #     S0.Core_NonLinearSolve_Force_Method()
     # endregion
 
     # region Private Methods : Retrieve the inputs
@@ -1149,9 +1146,9 @@ class StructureObj():
         if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount :
             Self.Initial.ElementsLFree = ElementsLfreeInit.reshape((-1,))
         else:
-            Self.Initial.ElementsLFree = np.zeros((Self.ElementsCount,))
+            Self.Initial.ElementsLFree = -np.ones((Self.ElementsCount,))
 
-        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).all() or ElementsLfreeInit==-1 : #if the free lengths are smaller than 0, it means they have not been calculated yet.
+        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).any() or np.any(ElementsLfreeInit==-1) : #if the free lengths are smaller than 0, it means they have not been calculated yet.
             (Self.Initial.ElementsLFree,cos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
 
 
@@ -1443,7 +1440,7 @@ class StructureObj():
         k = 0  #the number of the current step (integer)
         Lambda = 0.0  # Initial State: Lambda=0. Final State: Lambda=1.
 
-        AllLoads = start.Loads.copy()  # Load applied at each linear step. All the load is applied at each step
+        AllLoads = start.Loads - Self.Initial.Loads  # Load applied at each linear step. All the load is applied at each step. Because the method only advance in the solution (and do not iterate to check if equilibrium is satisfied), only apply the additional loads on the structure
         v = np.zeros((3 * Self.NodesCount,))  # Displacement at each linear step. solution of K_k @ v = AllLoads where K_k is the stiffness matrix at the current step k
         t = np.zeros((Self.ElementsCount,))  # tension at each linear step
         R = np.zeros((Self.FixationsCount,))  # Reaction at each linear step
@@ -1498,12 +1495,10 @@ class StructureObj():
         Self.Final.Tension = Prev.Tension + PrestressForces
         Self.Final.Reactions = Prev.Reactions
 
-
-
-
-
     # endregion
 
+
+    #region WORK IN PROGRESS
     # region Linear Solve by Force Method
 
     def Core_LinearSolve_Force_Method(S0):
@@ -1778,7 +1773,7 @@ class StructureObj():
 
     # endregion
 
-
+    #endregion WORK IN PROGRESS
 
 
 
