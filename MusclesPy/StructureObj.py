@@ -186,6 +186,8 @@ class State():
         Copy.ElementsL = Cur.ElementsL.copy()
         Copy.ElementsLFree = Cur.ElementsLFree.copy()
         Copy.ElementsCos = Cur.ElementsCos.copy()
+        Copy.ElementsA = Cur.ElementsA.copy()
+        Copy.ElementsE = Cur.ElementsE.copy()
         Copy.A = Cur.A.copy()
         Copy.AFree = Cur.AFree.copy()
         Copy.AFixed = Cur.AFixed.copy()
@@ -422,7 +424,7 @@ class State():
 
         (Cur.ElementsL, Cur.ElementsCos) = Cur.ElementsLengthsAndCos(Struct, Cur.NodesCoord)
         (Cur.A, Cur.AFree, Cur.AFixed) = Cur.EquilibriumMatrix(Struct, Cur.ElementsCos)
-        Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, ElementsLFree)  #[m/N] - shape (ElementsCount,) - Important to note that the Free lengths are considered in the flexibility
+        Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, Cur.ElementsL)  #[m/N] - shape (ElementsCount,) - Important to note that the Free lengths are considered in the flexibility
         Kbsc = 1 / Cur.Flex  #[N/m] - shape (ElementsCount,) - basic material stiffness vector of each individual element
 
         # 1) Compute the tension
@@ -433,12 +435,12 @@ class State():
 
         return (t,f)
 
-    def MaterialStiffnessMatrix(Cur, Struct, A, Flexibility):
+    def MaterialStiffnessMatrix(Cur, Struct, A, Flex):
         """
         Compute the material stiffness matrix of the structure in the current state given the equilibrium matrix and the flexibilities in the current state
         :param Struct: The StructureObject in the current state
         :param A: [/] - shape (3*NodesCount,ElementsCount) - The equilibrium matrix of the structure in the current state
-        :param Flexibility: [m/N] - shape (ElementsCount,) - The flexibility vector L/EA for each element in the current state
+        :param Flex: [m/N] - shape (ElementsCount,) - The flexibility vector L/EA for each element in the current state
         :return: Kmat : [N/m] - shape(3*NodesCount,3*NodesCount) - the material stiffness matrix of the structure in the current state
         """
         ElementsCount = Struct.ElementsCount
@@ -446,8 +448,8 @@ class State():
         DOFfreeCount = Struct.DOFfreeCount
 
         assert A.shape == (3 * NodesCount, ElementsCount) or A.shape == (DOFfreeCount, ElementsCount), "Please check the shape of A"
-        assert Flexibility.size == ElementsCount, "Please check the shape of the Flexibility vector"
-        F = Flexibility.reshape(-1, )
+        assert Flex.size == ElementsCount, "Please check the shape of the Flex vector"
+        F = Flex.reshape(-1, )
 
         Kbsc = np.diag(1 / F)  # EA/L in a diagonal matrix. Note that EA/L can be equal to 0 if the cable is slacked
         B = A.T  # The compatibility matrix is the linear application which transforms the displacements into elongation.
@@ -455,7 +457,7 @@ class State():
 
         return Kmat
 
-    def MaterialLocalStiffnessList(Cur,Struct, ElementsLFree, ElementsCos, ElementsA, ElementsE):
+    def MaterialLocalStiffnessList(Cur, Struct, ElementsLFree, ElementsCos, ElementsA, ElementsE):
         """
             This is the old way of computing the local material stiffness matrices. It relies on the current cosinus directors of each elements
             :return:    List (ElementsCount,1) local material stiffness matrices
@@ -469,6 +471,7 @@ class State():
         A = ElementsA
         E = ElementsE
         L = ElementsLFree
+        Cur.Flex = Struct.Flexibility(ElementsE,ElementsA,ElementsLFree)
         kmLocList = []
 
         for i in np.arange(Struct.ElementsCount):
@@ -477,7 +480,7 @@ class State():
             cz = ElementsCos[i, 2]
             cos = np.array([[-cx, -cy, -cz, cx, cy, cz]])
             R = np.dot(cos.transpose(), cos)  # local compatibility * local equilibrium
-            km = E[i] * A[i] / L[i] * R  # material stiffness matrix
+            km = 1/Cur.Flex[i] * R  # material stiffness matrix
 
             kmLocList.append(km)
 
@@ -658,12 +661,12 @@ class State():
 
         #2) Compute Material stiffness matrices. NB: computed with FreeLengths and current Cos !
 
-        kmLocList = Cur.MaterialLocalStiffnessList(Struct, ElementsLFree, Cur.ElementsCos, ElementsA, ElementsE)
+        kmLocList = Cur.MaterialLocalStiffnessList(Struct, Cur.ElementsL, Cur.ElementsCos, ElementsA, ElementsE)
         Cur.Kmat = Cur.GlobalStiffnessMatrix(Struct,kmLocList)
 
         #this method would also work but we need the list of local stiffness matrices for post process
         #(Cur.A, Cur.AFree, Cur.AFixed) = Cur.EquilibriumMatrix(Struct, Cur.ElementsCos)
-        #Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, ElementsLFree)
+        #Cur.Flex = Struct.Flex(ElementsE, ElementsA, ElementsLFree)
         #Cur.Kmat = Cur.MaterialStiffnessMatrix(Struct,Cur.A,Cur.Flex)
 
         #3) Compute geometric stiffness matrices. NB: computed with current length and previous tension !
@@ -1058,13 +1061,24 @@ class StructureObj():
 
         Self.CoreLinearDisplacementMethod()
 
-    def Main_NonLinearSolve_Displ_Method(S0,Data):
-        S0.PopulateWith(Data)
-        S0.Core_NonLinearSolve_Displ_Method()
+    def MainNONLinearDisplacementMethod(Self,Data):
+        #initialize inputs and compute the connectivity matrix
+        Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE,
+                         Data.ElementsLFreeInit, Data.LoadsInit, Data.TensionInit, Data.ReactionsInit,
+                         Data.LoadsToApply, Data.LengtheningsToApply,n_steps=Data.n_steps)
 
-    def test_Main_NonLinearSolve_Displ_Method(S0, n_steps, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply):
-        S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply,n_steps)
-        S0.Core_NonLinearSolve_Displ_Method()
+        Self.CoreNONLinearDisplacementMethod()
+
+    def test_MainNONLinearDisplacementMethod(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                                   ElementsLFreeInit=-1, LoadsInit=np.zeros((0,)),
+                                   TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)),
+                                   LoadsToApply=np.zeros((0,)), LengtheningsToApply=np.zeros((0,)),n_steps=100):
+
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                         ElementsLFreeInit, LoadsInit, TensionInit, ReactionsInit,
+                         LoadsToApply, LengtheningsToApply,n_steps=n_steps)
+
+        Self.CoreNONLinearDisplacementMethod()
 
     def test_Main_LinearSolve_Force_Method(S0, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E, AxialForces_Already_Applied, Loads_To_Apply,Loads_Already_Applied,Elongations_To_Apply):
         S0.RegisterData(NodesCoord,Elements_ExtremitiesIndex,IsDOFfree,Elements_A,Elements_E,AxialForces_Already_Applied,Loads_To_Apply,1,Loads_Already_Applied,Elongations_To_Apply)
@@ -1242,6 +1256,14 @@ class StructureObj():
 
         IsElementInTension = TensionValue > 0  # a vector where the entry i is true if the element is in tension, and false if it is in compression
         Property = np.where(IsElementInTension, PropertyInTension, PropertyInCompression)  # the property of the elements depending if compression or tension
+
+        #IF the tension in the element is 0, then choose the property according to the type (strut or cable) of the element
+        BasedOnType = TensionValue==0 # a vector where the entry i is true if the property of the element is computed based on his type.
+        types = Self.ElementsType[BasedOnType] #-1 if struts, 1 if cables, but only for the elements without tension
+        PropertyCables = PropertyInTension[BasedOnType]
+        PropertyStruts = PropertyInCompression[BasedOnType]
+        Property[BasedOnType] = np.where(types > 0, PropertyCables, PropertyStruts)
+
         return Property
 
     def Flexibility(Self, ElementsE, ElementsA, ElementsL):
@@ -1372,112 +1394,113 @@ class StructureObj():
     # endregion
 
     # region Private Methods : Non Linear Solver based on displacement methods
-    def Core_NonLinearSolve_Displ_Method(S0):
+    def CoreNONLinearDisplacementMethod(Self):
 
-        S0.C = S0.ConnectivityMatrix(S0.NodesCount, S0.ElementsCount, S0.ElementsEndNodes)
-        (S0.ElementsLFree, S0.Elements_Cos0) = S0.Compute_Elements_Geometry(S0.NodesCoord, S0.C)
-
-        (Stages,StagesLoad,StagesDispl,StagesN,StagesR) = S0.NonLinearSolve_Displ_Method(S0.n_steps, S0.NodesCoord, S0.AxialForces_Already_Applied, S0.Loads_To_Apply)
-        S0.Stages = Stages
-        S0.Loads_Applied = StagesLoad
-        S0.Displacements_Results = StagesDispl
-        S0.AxialForces_Results = StagesN - S0.AxialForces_Already_Applied #NB return only the additionnal tension coming from the loads to Apply; remove the tensions that were already present before
-        S0.Reactions_Results = StagesR
-
-    def NonLinearSolve_Displ_Method(S0,n_steps,NodesCoord0,AxialForces_Already_Applied, Loads_To_Apply):
         """
-        Non linear solve of the structure. Input:
-            NodesCoord0: Initial Nodes coordinates (Nx3)
-            TensionInit: Initial AxialForces in equilibrium in the structure (Bx1)
-            LoadsToApply: Loads to apply on the nodes (Nx3)
-        """
-        AxialForcesInit = AxialForces_Already_Applied.reshape(-1,1)
+                        Perform the NonLinear Displacement Method on the Start State of the Structure.
+                        This method assumes that the StructureObject has already been initialized with InitialData method
+                        :return: The final State of the structure in Equilibrium
+                        """
 
-        perturb = 1e-6  # [mm], to apply if singular matrix
+        # 0) Check inputs
+        NodesCount = Self.NodesCount  # scalar
+        ElementsCount = Self.ElementsCount  # scalar
+        IsDOFfree = Self.IsDOFfree.reshape((-1,))  # [bool] - shape (3*NodesCount,) - support conditions of each DOF
+        DOFfreeCount = Self.DOFfreeCount  # scalar
+        C = Self.C  # the connectivity matrix
+        n_steps = Self.n_steps
+
+        assert NodesCount > 0, "Please check the NodesCount"
+        assert ElementsCount > 0, "Please check the ElementsCount"
+        assert IsDOFfree.shape == (3 * NodesCount,), "Please check the supports conditions IsDOFfree"
+        assert DOFfreeCount > 0, "Please check that at least one degree of freedom is free"
+        assert C.shape == (ElementsCount, NodesCount), "Please check that the connectivity matrix C has been computed"
+        assert n_steps>=1, "Please check the number of steps for the nonlinear method"
+
+        # 1) Initialize the start state for the Displacement method
+        Self.Start = Self.StartState(Self.LoadsToApply,Self.LengtheningsToApply)  # Start state = the Initial State + LoadsToApply + LengtheningsToApply but in the same geometry as before.
+
+
+        Self.Start.ElementsE = Self.ElementsInTensionOrCompression(Self.Start.Tension, Self.ElementsE) # select the young modulus EinCompression if the element is in compression or EinTension if in tension
+        Self.Start.ElementsA = Self.ElementsInTensionOrCompression(Self.Start.Tension, Self.ElementsA)
+
+        (PrestressForces, PrestressLoads) = Self.Start.PrestressLoads(Self, Self.LengtheningsToApply,
+                                                                      Self.Start.ElementsE, Self.Start.ElementsA,
+                                                                      Self.Initial.ElementsLFree)
+        Self.Start.Loads += PrestressLoads
+        #Self.Start.Tension += PrestressForces #to be added at the end
+
+        start = Self.Start
+
+        # 2) Initialize some parameters for the non-linear method
+        #AxialForcesInit = AxialForces_Already_Applied.reshape(-1, 1)
+
+        perturb = 1e-3  # [m], to apply if singular matrix
 
         l0 = 1 / n_steps  # incremental length
-        Max_n_steps = n_steps * 5 #max number of steps
+        Max_n_steps = n_steps * 5  # max number of steps
 
-        k = 0  # current step
-        Stage = 0.0  # Initial Stage = 0. Final Stage = 1.
+        k = 0  #the number of the current step (integer)
+        Lambda = 0.0  # Initial State: Lambda=0. Final State: Lambda=1.
 
-        p = Loads_To_Apply.reshape((-1,1)) #Load applied at each linear step. All the load is applied at each step
-        v = np.zeros((3*S0.NodesCount,1))  #Displacement at each linear step. solution of K_k @ v = p where K_k is the stiffness matrix at the current step k
-        N = np.zeros((S0.ElementsCount,1)) #AxialForce at each linear step
-        R = np.zeros((S0.FixationsCount,1)) #Reaction at each linear step
+        AllLoads = start.Loads.copy()  # Load applied at each linear step. All the load is applied at each step
+        v = np.zeros((3 * Self.NodesCount,))  # Displacement at each linear step. solution of K_k @ v = AllLoads where K_k is the stiffness matrix at the current step k
+        t = np.zeros((Self.ElementsCount,))  # tension at each linear step
+        R = np.zeros((Self.FixationsCount,))  # Reaction at each linear step
 
-        IncrStage = 0 #advance in the stage
-        IncrLoad = np.zeros((3*S0.NodesCount,1)) #Incr of Load at this step. IncrLoad = LoadsToApply * IncrStage
-        IncrDispl = np.zeros((3*S0.NodesCount,1))  #Incr of Displacement at this step. IncrDispl = v * IncrStage
-        IncrN = np.zeros((S0.ElementsCount,1)) #Incr of AxialForce at this step. IncrN = N * IncrStage
-        IncrR = np.zeros((S0.FixationsCount,1)) #Incr of Reaction at this step. IncrR = R * IncrStage
+        DLambda = 0.0  # the current step (double)
+        IncrDispl = np.zeros((3 * Self.NodesCount, ))  # Incr of Displacement at this step. IncrDispl = v * DLambda
+        Prev = start # State 0
 
-        # Stage 0
-        Stages = np.array([Stage]) #succesion of stages
-        StagesLoad = IncrLoad.copy() #list of applied load at all stages.
-        StagesDispl = IncrDispl.copy() #list of Displacement at all stages.
-        StagesN = AxialForcesInit.copy() #list of AxialForces at all stages.
-        StagesR = IncrR.copy() #list of Reactions at all stages.
+        # 3) apply the incremental nonlinear displacement method
+        while (Lambda < 1 and k < Max_n_steps):
 
-        while (Stage < 1 and k < Max_n_steps):
-
-            # A new initial structure is considered at each step. A Linear Solve method is applied on it.
-            CurDispl = StagesDispl[:,k].reshape((-1,1))
-            CurNodesCoord = NodesCoord0 + CurDispl
-            CurAxialForces = StagesN[:,k].reshape((-1,1))
-            cur = S0.NewStructureObj(CurNodesCoord, CurAxialForces, p)
+            # A new current state is considered at each step. A Linear Solve method is applied on it.
+            k = k + 1
+            Cur = Prev.Copy()
+            Cur.NodesCoord = Prev.NodesCoord + IncrDispl
 
             try:
-                (v, N, R) = cur.LinearDisplacementMethod(None, cur.NodesCoord, cur.AxialForces_Already_Applied,
-                                                         cur.Loads_To_Apply)
+                (v, t, R) = Cur.LinearDisplacementMethod(Self, Cur.NodesCoord, Prev.Tension, AllLoads, Prev.ElementsE, Prev.ElementsA, start.ElementsLFree)
             except np.linalg.LinAlgError:
                 # print("la matrice est singulière")
-                NodesCoord_perturbed = cur.Perturbation(cur.NodesCoord, cur.IsDOFfree, perturb)
-                (v, N, R) = cur.LinearDisplacementMethod(None, NodesCoord_perturbed, cur.AxialForces_Already_Applied,
-                                                         cur.Loads_To_Apply)
+                NodesCoord_perturbed = Self.Perturbation(start.NodesCoord, Self.IsDOFfree, perturb)
+                (v, t, R) = Cur.LinearDisplacementMethod(Self, NodesCoord_perturbed , Prev.Tension, AllLoads, Prev.ElementsE,Prev.ElementsA, start.ElementsLFree)
             finally:
-                cur.Displacements_Results = v #Linear results
-                cur.AxialForces_Results = N
-                cur.Reactions_Results = R
-
-                if k==0: # Initial Structure = current at first step
-                    S0.Elements_L = cur.ElementsL
-                    S0.Elements_Cos = cur.ElementsCos
-                    S0.K_constrained = cur.KConstrained
 
                 if l0 == 1:  # if incremental length = 1
-                    IncrStage = 1  #final stage is obtained in one step. NonLinear Method = Linear Method
-
+                    DLambda = 1  # final stage is obtained in one step. NonLinear Method = Linear Method
                 else:  # use arclength constrain
-                    norm = (v.transpose() @ v)[0,0] #scalar product
-                    f = np.sqrt(1 + norm) #scalar
-                    IncrStage = (l0 / f) * np.sign(np.dot(p.transpose(), v))[0,0]  # it can be negative
+                    normSQ = (v.T@v)
+                    f = np.sqrt(1 + normSQ)  # scalar
+                    DLambda = (l0 / f) * np.sign(np.dot(AllLoads.transpose(), v))  # it can be negative
 
-                if Stage + IncrStage > 1:  # Ensure to stop exactly on Final Stage = 1.
-                    IncrStage = 1 - Stage
+                if Lambda + DLambda > 1:  # Ensure to stop exactly on Final Stage: Lambda=1.
+                    DLambda = 1 - Lambda
 
-                # Move to next step
-                Stage = Stage + IncrStage
-                IncrLoad = p * IncrStage
-                IncrDispl = v * IncrStage
-                IncrN = N * IncrStage
-                IncrR = R * IncrStage
 
-                #store the results of this stage
-                Stages = np.hstack((Stages,Stage))
-                StagesLoad= np.hstack((StagesLoad,StagesLoad[:,k].reshape((-1,1)) + IncrLoad))
-                StagesDispl= np.hstack((StagesDispl,StagesDispl[:,k].reshape((-1,1)) + IncrDispl))
-                StagesN = np.hstack((StagesN,StagesN[:,k].reshape((-1,1)) + IncrN))
-                StagesR= np.hstack((StagesR,StagesR[:,k].reshape((-1,1)) + IncrR))
+                # Compute the advance in the solution for the current state
+                Lambda = Lambda + DLambda
+                Cur.Loads = AllLoads * Lambda #loads applied in the current state
+                Cur.Reactions = Prev.Reactions + R * DLambda
+                Cur.Tension = Prev.Tension + t * DLambda
 
-                k = k + 1
+                IncrDispl = v * DLambda
 
-        if k == Max_n_steps:
-            # print('nbr iterations du solveur non linéaire : {}/{}  progression Stage: {} %'.format(k, Max_n_steps,np.around(Stage * 100,decimals=2)))
-            return (np.array([[]]),np.array([[]]),np.array([[]]),np.array([[]]),np.array([[]]))
-        else:
-            # print('nbr iterations du solveur non linéaire :', k)
-            return (Stages,StagesLoad,StagesDispl,StagesN,StagesR)
+                Cur.ElementsE = Self.ElementsInTensionOrCompression(Cur.Tension,Self.ElementsE)  # select the young modulus EinCompression if the element is in compression or EinTension if in tension
+                Cur.ElementsA = Self.ElementsInTensionOrCompression(Cur.Tension, Self.ElementsA)
+
+                # Initialize the next step
+                Prev = Cur.Copy()
+
+        Self.Final = Prev.Copy()
+        Self.Final.NodesCoord = Prev.NodesCoord + IncrDispl
+        Self.Final.Tension = Prev.Tension + PrestressForces
+        Self.Final.Reactions = Prev.Reactions
+
+
+
+
 
     # endregion
 

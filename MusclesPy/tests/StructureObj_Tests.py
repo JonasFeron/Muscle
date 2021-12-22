@@ -138,6 +138,176 @@ class StructureObj_Tests(unittest.TestCase):
 
     # endregion
 
+    # region NONLinear Displacement Method
+
+    def test_MainNONLinearDisplacementMethod_2bars(self):
+        # Simple tests on 2 bars /\ (cfr Annexe A1.1.1 of J.Feron Master thesis (p103 of pdf))
+        Struct = StructureObj()
+        NodesCoord = np.array([[0.0, 0.0, 0.0],
+                               [1.0, 0.0, 1.0],
+                               [2.0, 0.0, 0.0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              False, False, False])
+        LoadsToApply = np.array([[0.0, 0.0, 0.0],
+                                 [0.0, 0.0, -100000],
+                                 [0.0, 0.0, 0.0]])
+        ElementsType = np.array([-1, -1])
+        ElementsA = np.array([0.002500, 0.002500])
+        ElementsE = np.array([10000000000, 10000000000])
+
+        ini = Struct.Initial
+
+        Struct.test_MainNONLinearDisplacementMethod(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
+                                                 ElementsE, LoadsToApply=LoadsToApply,n_steps=100)
+
+        displacements = Struct.Final.NodesCoord - Struct.Initial.NodesCoord
+        d1Z = displacements.reshape((-1, 3))[1, 2]
+        SuccessD = np.isclose(d1Z, -5.6568 * 1e-3, rtol=1e-2)
+
+        self.assertEqual(SuccessD, True)
+
+        Forces_answer = np.array([-70711, -70711])  # analytique solution
+        self.assertEqual(np.allclose(Struct.Final.Tension, Forces_answer,rtol=1e-2), True)
+
+
+    def test_MainNONLinearDisplacementMethod_Prestress2cables(self):
+        # Simple prestress tests on a tight rope
+        Struct = StructureObj()
+        NodesCoord = np.array([[-2.0, 0.0, 0.0],
+                               [0.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0],
+                               [0.0, 0.0, 1.0]])
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2],
+                                     [1, 3]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              False, False, False,
+                              False, False, False])
+        LoadsToApply = np.array([[0.0, 0.0, 0.0],
+                                 [0.0, 0.0, 0.0],
+                                 [0.0, 0.0, 0.0],
+                                 [0.0, 0.0, 0.0]])
+        ElementsType = np.array([1, 1, 1])
+        ElementsA = np.array([1, 1, 1]) * 50.26  # [mm²]
+        ElementsE = np.array([70, 70, 70]) * 1e3  # [MPa]
+
+        LenghteningsToApply = np.array([-0.007984, 0, 0])  # [m]
+
+        ini = Struct.Initial
+
+        Struct.test_MainNONLinearDisplacementMethod(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
+                                                 ElementsE, LoadsToApply=LoadsToApply,
+                                                 LengtheningsToApply=LenghteningsToApply,n_steps=100)
+
+        displacements = Struct.Final.NodesCoord - Struct.Initial.NodesCoord
+        d1X = displacements.reshape((-1, 3))[1, 0]
+        SuccessD = np.isclose(d1X, -4 * 1e-3, rtol=1e-2)
+
+        self.assertEqual(SuccessD, True)
+
+        t = Struct.Final.Tension
+        t_answer = np.array([7037.17, 7037.17, 0])  # analytique solution
+        self.assertEqual(np.allclose(t[:1], t_answer[:1], rtol=1e-2), True)
+
+    def test_SimpleB_MainNONLinearDisplacementMethod(self):
+        """
+        A simple benchmark test B with 3 cables.
+        :return:
+        """
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[2.0, 0.0, 1.0],
+                               [0.0, 0.0, 0.0],
+                               [4.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        IsDOFfree = np.array([False, False, False,
+                              False, False, False,
+                              False, False, False,
+                              True, False, True])
+
+        ElementsEndNodes = np.array([[0, 3],
+                                     [1, 3],
+                                     [2, 3]])
+        ElementsType = np.array([1,1,1])
+
+        ElementsE = np.array([[70, 70],
+                              [70, 70],
+                              [70, 70]]) * 1e3  # MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1],
+                              [1, 1]]) * 50.26  # mm²
+        LengtheningsToApply = np.array([-126.775,
+                                        0,
+                                        0])*1e-3 #m
+        LoadsToApply = np.array([[0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0],
+                                 [0, 0, 0]])
+        #Let's try the method when initial Lfree is unknown and we want to calculate a lengtheningtoapply
+
+        Struct.test_MainNONLinearDisplacementMethod(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE, LoadsToApply=LoadsToApply,LengtheningsToApply=LengtheningsToApply, n_steps=100)
+
+        TensionAnalyticAnswer = np.array([888.81,
+                                         7037.17,
+                                         7037.17]) #N
+        NodesCoordAnalyticAnswer = np.array([[2.0, 0.0, 1.0],
+                                             [0.0, 0.0, 0.0],
+                                             [4.0, 0.0, 0.0],
+                                             [2.0, 0.0, 0.126554]]).reshape((-1,))
+        successForces = np.isclose(Struct.Final.Tension,TensionAnalyticAnswer,rtol=3e-2) #relative tolérance of 1/1000
+        successNodes = np.isclose(Struct.Final.NodesCoord,NodesCoordAnalyticAnswer,rtol=1e-2)
+
+        self.assertEqual(successForces.all(), True)
+        self.assertEqual(successNodes.all(), True)
+
+    def test_LoadsOnTightRope_MainNONLinearDisplacementMethod(self):
+        #cfr master thesis Jferon
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[0.0, 0.0, 0.0],
+                               [1.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              False, False, False])
+
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
+        ElementsType = np.array([1, 1])
+
+        ElementsE = np.array([[1, 1],
+                              [1, 1]]) * 10000  # MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1]]) * 2500  # mm²
+        LengtheningsToApply = np.array([0, 0]) * 1e-3  # m
+        LoadsToApply = np.array([[0, 0, 0],
+                                 [0, 0, -100000.0],
+                                 [0, 0, 0]]) #m
+
+        Struct.test_MainNONLinearDisplacementMethod(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
+                                                    ElementsE, LoadsToApply=LoadsToApply,
+                                                    LengtheningsToApply=LengtheningsToApply, n_steps=100)
+
+        TensionAnalyticAnswer = np.array([313020,
+                                          313020])  # N
+        NodesCoordAnalyticAnswer = np.array([[0.0, 0.0, 0.0],
+                                             [1.0, 0.0, -158.74*1e-3],
+                                             [2.0, 0.0, 0.0]]).reshape((-1,))
+        successForces = np.isclose(Struct.Final.Tension, TensionAnalyticAnswer, rtol=2e-2)  # relative tolérance of 1/1000
+        successNodes = np.isclose(Struct.Final.NodesCoord, NodesCoordAnalyticAnswer, rtol=2e-2)
+
+        self.assertEqual(successForces.all(), True)
+        self.assertEqual(successNodes.all(), True)
+
+
+    # endregion
+
     # region Dynamic Relaxation Method
     def test_Simplest_MainDynamicRelaxation(self):
         """
@@ -440,39 +610,7 @@ class StructureObj_Tests(unittest.TestCase):
     # endregion
 
     # region NonLinear Methods
-    def test_Main_NonLinearSolve_Disp_Meth_2cables(self):
-        #cfr master thesis Jferon
-        S0 = StructureObj()
-        NodesCoord = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
-        Elements_ExtremitiesIndex = np.array([[0, 1], [1, 2]])
-        IsDOFfree = np.array([False, False, False, True, False, True, False, False, False])
-        Loads_To_Apply = np.array([[0.0, 0.0, 0.0], [0.0, 0.0, -100000.0], [0.0, 0.0, 0.0]]).reshape((-1,))
 
-        Elements_A = np.array([0.002500, 0.002500])*1e6
-        Elements_E = np.array([10000000000.0, 10000000000.0])/1e6
-        AxialForces_Already_Applied = np.array([])
-
-        S0.test_Main_NonLinearSolve_Displ_Method(100, NodesCoord, Elements_ExtremitiesIndex, IsDOFfree, Elements_A, Elements_E,
-                                                 AxialForces_Already_Applied, Loads_To_Apply)
-
-        last_step = S0.Stages.size - 1
-
-        d_obtained = S0.Displacements_Results[3*1+2,last_step]
-        d_sol = -158.74 * 1e-3 #analytique solution
-        err = 2/100 # admissible error
-        d_adm = [d_sol*(1+err),d_sol*(1-err)] # admissible interval
-        successD = d_obtained>=d_adm[0] and d_obtained<=d_adm[1]
-        self.assertEqual(successD, True)
-
-        N_obtained = S0.AxialForces_Results[:,last_step]
-        N_sol = 313020 #analytique solution
-        err = 2/100 # admissible error
-        N_adm = [N_sol*(1-err),N_sol*(1+err)] # admissible interval
-        successN = N_obtained[0] >=N_adm[0] and N_obtained[0]<=N_adm[1] and N_obtained[1] >=N_adm[0] and N_obtained[1]<=N_adm[1]
-        self.assertEqual(successN, True)
-
-        # Reactions_answer = np.array([50000, 0, 50000, 0, -50000, 0, 50000])  # analytique solution
-        # self.assertEqual(np.allclose(DR.Reactions_Results, Reactions_answer), True)
 
     def test_Main_NonLinearSolve_Disp_Meth_2cables_3LoadStages(self):
         #cfr solution in excel files attached

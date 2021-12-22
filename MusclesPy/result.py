@@ -191,12 +191,12 @@ class SharedSolverResultEncoder(json.JSONEncoder):
 #         Answ.Reactions_Results = [] #[N] #results from LoadsToApply
 #         # Answ.Reactions_Total = np.zeros((Answ.FixationsCount,)) # Results + Already_Applied
 #
-#     def PopulateWith(Answ,S0):
-#         if isinstance(S0,StructureObj):
-#             Answ.Stages=S0.Stages.round(5).tolist()
-#             Answ.AxialForces_Results = S0.AxialForces_Results.round(2).tolist()
-#             Answ.Displacements_Results = S0.Displacements_Results.round(5).tolist()
-#             Answ.Reactions_Results = S0.Reactions_Results.round(2).tolist()
+#     def PopulateWith(Answ,Self):
+#         if isinstance(Self,StructureObj):
+#             Answ.Stages=Self.Stages.round(5).tolist()
+#             Answ.AxialForces_Results = Self.AxialForces_Results.round(2).tolist()
+#             Answ.Displacements_Results = Self.Displacements_Results.round(5).tolist()
+#             Answ.Reactions_Results = Self.Reactions_Results.round(2).tolist()
 #             # if DR.NodesCount<=10: #it may be interesting to analyze the matrices of small structures
 #
 #
