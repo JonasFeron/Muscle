@@ -1,5 +1,5 @@
 import unittest
-from Main_NonLinearSolveStructure import core
+from MainNonLinearSolveStructure import core
 import sys
 
 class Main_NonLinearSolveStructure_Tests(unittest.TestCase):

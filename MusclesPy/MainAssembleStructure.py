@@ -23,7 +23,7 @@ def main(): # START READING FROM HERE
     else:
         output_str = "Keys from command prompt and Data text file did not match"
 
-    resultPath = r.WriteResultFile(dataPath,r.FileDRResult,key,output_str)
+    resultPath = r.WriteResultFile(dataPath,r.FileAssembleResult,key,output_str)
     print(key + ":" + resultPath)  #Send the results to C#
 
 
@@ -38,7 +38,7 @@ def core(DataString):
 
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
         Struct = StructureObj() #initial empty structure
-        Struct.MainDynamicRelaxation(data) #do some calculations
+        Struct.MainAssemble(data) #do some calculations
         result.PopulateWith(Struct) #register the results
         # print("I finished calculation")
 

@@ -1,5 +1,5 @@
 import unittest
-from Main_LinearSolveStructure import core
+from MainLinearSolveStructure import core
 import sys
 
 class Main_LinearSolveStructure_Tests(unittest.TestCase):

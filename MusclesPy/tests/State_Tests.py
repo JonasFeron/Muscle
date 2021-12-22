@@ -146,7 +146,7 @@ class MyTestCase(unittest.TestCase):
         (A, AFree, AFixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
 
         S.Initial.SVD.SVDEquilibriumMatrix(S, AFree)
-        # success  = (A_free == A_free_answer).all()
+        # success  = (AFree == A_free_answer).all()
         print(S.Initial.SVD.Um_free_row)  # analysis of the mechanism
         self.assertEqual(True, True)
 
@@ -183,7 +183,7 @@ class MyTestCase(unittest.TestCase):
         (A, AFree, AFixed) = S.Initial.EquilibriumMatrix(S, ElementsCos)
 
         S.Initial.SVD.SVDEquilibriumMatrix(S, AFree)
-        # success  = (A_free == A_free_answer).all()
+        # success  = (AFree == A_free_answer).all()
         print(S.Initial.SVD.Um_free_row)  # analysis of the mechanism
         self.assertEqual(True, True)
 

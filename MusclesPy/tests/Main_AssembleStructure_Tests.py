@@ -1,5 +1,5 @@
 import unittest
-from Main_AssembleStructure import core
+from MainAssembleStructure import core
 import sys
 
 class Main_AssembleStructure_Tests(unittest.TestCase):

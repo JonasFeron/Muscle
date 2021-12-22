@@ -4,6 +4,6 @@ import data
 import result
 import StructureObj
 #import DoStuffInPython
-import Main_AssembleStructure
-import Main_LinearSolveStructure
-import Main_NonLinearSolveStructure
+import MainAssembleStructure
+import MainLinearSolveStructure
+import MainNonLinearSolveStructure
