@@ -39,9 +39,9 @@ namespace Muscles.Elements
             pManager.AddLineParameter("Line", "L", "The current line geometry with the current length of the finite element.", GH_ParamAccess.item); //3
             pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.", GH_ParamAccess.item); //4
             pManager.AddGenericParameter("Main Cross Section", "Main CS", "The main cross section used for the calculation of the volume and for linear analysis.", GH_ParamAccess.item); //5
-            pManager.AddGenericParameter("Cross Sections List", "List CS", "The cross sections used in non-linear finite element analysis.\n The list contains [CS in compression, CS in tension].", GH_ParamAccess.list); //6
+            pManager.AddGenericParameter("Cross Sections List", "List CS", "The cross sections used in non-linear finite element analysis.\n The list contains [CS in compression, CS in Tension].", GH_ParamAccess.list); //6
             pManager.AddGenericParameter("Main Material", "Main Mat", "The main material used for the calculation of the mass and for linear analysis.", GH_ParamAccess.item); //7
-            pManager.AddGenericParameter("Material List", "List Mat", "The materials used in non-linear finite element analysis.\n The list contains [Mat in compression, Mat in tension].", GH_ParamAccess.list); //8
+            pManager.AddGenericParameter("Material List", "List Mat", "The materials used in non-linear finite element analysis.\n The list contains [Mat in compression, Mat in Tension].", GH_ParamAccess.list); //8
             pManager.AddNumberParameter("Volume", "V (m³)", "Volume in m³.", GH_ParamAccess.item); //9
             pManager.AddNumberParameter("Mass", "m (kg)", "Mass in kg.", GH_ParamAccess.item); //10
             pManager.AddVectorParameter("Weight", "W (kN)", "Weight in kN", GH_ParamAccess.item); //11

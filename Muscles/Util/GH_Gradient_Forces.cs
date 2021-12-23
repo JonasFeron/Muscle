@@ -21,7 +21,7 @@ namespace Muscles.Util
             gradient.Linear = true; //linear interpolation of the colors
             gradient.AddGrip(-1, Color.Red); //compression
             gradient.AddGrip(0, Color.White); //0
-            gradient.AddGrip(1, Color.Blue); //tension
+            gradient.AddGrip(1, Color.Blue); //Tension
         }
 
 

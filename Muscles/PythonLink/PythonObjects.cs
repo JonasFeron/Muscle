@@ -30,7 +30,7 @@ namespace Muscles.PythonLink
             else if (PythonFileName == AccessToAll.MainAssemble) file = AccessToAll.FileAssembleData;
             else if (PythonFileName == AccessToAll.MainLinearSolve) file = AccessToAll.FileLinearSolveData;
             else if (PythonFileName == AccessToAll.MainNonLinearSolve) file = AccessToAll.FileNonLinearSolveData;
-            else if (PythonFileName == AccessToAll.MainDRSolve) file = AccessToAll.File_DRSolve_Data;
+            else if (PythonFileName == AccessToAll.MainDRSolve) file = AccessToAll.FileDRSolveData;
             else file = "error_Data.txt";
 
             string IOPath = Path.Combine(AccessToAll.Main_Folder, "IO");

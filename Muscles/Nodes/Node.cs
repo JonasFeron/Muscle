@@ -60,7 +60,7 @@ namespace Muscles.Nodes
         public Vector3d Load { get; set; }
         //public Vector3d LoadToApply { get; set; }
 
-        public Vector3d Residual { get; set; } // the unbalanced loads = Load - SUM tension*cos
+        public Vector3d Residual { get; set; } // the unbalanced loads = Load - SUM Tension*cos
         //public Vector3d PrestressLoad_To_Apply { get; set; } // load coming from an initial force
 
         //public List<Vector3d> Load_Results { get; set; }

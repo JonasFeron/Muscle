@@ -10,19 +10,21 @@ using System;
 namespace Muscles.Elements
 {
     /// <summary>
-    /// An Element is the most general (bi-)linear elastic structural element. It allows modelling linear reinforced concrete element. In tension, the rebars (A_tens, E_tens) are working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material. 
+    /// An Element is the most general (bi-)linear elastic structural element. It allows modelling linear reinforced concrete element. In Tension, the rebars (A_tens, E_tens) are working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material. 
     /// </summary>
     public class Element
     {
         #region Properties
         public int Ind { get; set; } //index of the element in the structure
         public virtual string TypeName { get { return "General Element"; } }
+        public virtual int Type { get { return -1; } } //-1 for struts, 1 for cables. General Elements are considered to mainly behave in compression.
+
         public Line Line { get; set; } // the line with a current length in the current state
         public List<int> EndNodes { get; set; } //index of the end nodes of the element
         public double LFree { get; set; } // [m] - the Free length of the element
-        public virtual ICrossSection CS_Tens { get; set; } //participate to the stiffness in tension
+        public virtual ICrossSection CS_Tens { get; set; } //participate to the stiffness in Tension
         public virtual ICrossSection CS_Comp { get; set; } //participate to the stiffness in compression
-        public virtual Muscles_Material Mat_Tens { get; set; } //participate to the stiffness in tension
+        public virtual Muscles_Material Mat_Tens { get; set; } //participate to the stiffness in Tension
         public virtual Muscles_Material Mat_Comp { get; set; } //participate to the stiffness in compression
 
         public virtual ICrossSection CS_Main { get; set; } //used for calculating volume and displaying the Element in GH. 
@@ -53,47 +55,9 @@ namespace Muscles.Elements
             }
         }
 
-        ///// Acting forces /////
+        public double Tension { get; set; } //[N]
 
-        //public double TensionInit { get; set; } //(N)  Initial force in the element in equilibrium in the structure (with or without external load)
-        //public double LengtheningToApply { get; set; } //(m)  The lengthenings to apply on the freelengths of the elements
-        //public PointLoad PrestressLoad0
-        //{
-        //    get
-        //    {
-        //        Vector3d Load = Line.UnitTangent * LengtheningsToApply;
-        //        return new PointLoad(Line.From, Load);
-        //    }
-        //}
-        //public PointLoad PrestressLoad1
-        //{
-        //    get
-        //    {
-        //        Vector3d Load = -1 * Line.UnitTangent * LengtheningsToApply;
-        //        return new PointLoad(Line.To, Load);
-        //    }
-        //}
-        //public List<double> AxialForce_Results{ get; set; }
-        //public List<double> AxialForce_Total { get; set; }
-        //public double Tension 
-        //{ 
-        //    get
-        //    {
-        //        int final = AxialForce_Total.Count - 1;
-        //        if (final >= 0) return AxialForce_Total[final];
-        //        else return 0.0;
-        //    }    
-        //}
-        public double Tension { get; set; }
 
-        //public double Stress_Already_Applied
-        //{   
-        //    get
-        //    {
-        //        if (AxialForce_Already_Applied>=0) return AxialForce_Already_Applied/CS_Tens.Area;
-        //        else return AxialForce_Already_Applied / CS_Comp.Area;
-        //    }        
-        //}
 
         ///// Resisting forces /////
 
@@ -268,12 +232,8 @@ namespace Muscles.Elements
             CS_Main = CS_Comp;
             Mat_Main = Mat_Comp;
             Buckling_Law = "yielding";
-            kb = 1.0;
-            
+            kb = 1.0;            
             Tension = 0;
-            //LengtheningToApply = 0;
-            //AxialForce_Results = new List<double>();
-            //AxialForce_Total = new List<double>();
 
         }
 
@@ -315,11 +275,7 @@ namespace Muscles.Elements
             Buckling_Law = other.Buckling_Law;
             kb = other.kb;
             Ind = other.Ind;
-            //TensionInit = other.TensionInit;
-            //LengtheningToApply = other.LengtheningToApply;
             Tension = other.Tension;
-            //AxialForce_Results = other.AxialForce_Results;
-            //AxialForce_Total = other.AxialForce_Total;
         }
 
         #endregion Constructors

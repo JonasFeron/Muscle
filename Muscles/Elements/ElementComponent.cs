@@ -11,7 +11,7 @@ namespace Muscles.Elements
     public class ElementComponent : GH_Component
     {
         public bool displayIn3d { get; set; }
-        public ElementComponent() : base("Element - General", "E", "An Element is the most general (bi-)linear elastic structural element. It allows, for instance, modelling linear reinforced concrete element. In tension, the rebar (A_tens, E_tens) is working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material.", "Muscles", "Elements") 
+        public ElementComponent() : base("Element - General", "E", "An Element is the most general (bi-)linear elastic structural element. It allows, for instance, modelling linear reinforced concrete element. In Tension, the rebar (A_tens, E_tens) is working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material.", "Muscles", "Elements") 
         { 
             displayIn3d = true;
         }
@@ -55,11 +55,11 @@ namespace Muscles.Elements
             pManager[1].Optional = true;
             pManager.AddGenericParameter("Cross section in Compression", "CS_Comp", "Cross section of the element when it is subjected to compression. This section is used to determine the volume of the element.", GH_ParamAccess.item);
             pManager[2].Optional = true;
-            pManager.AddGenericParameter("Cross section in Tension", "CS_Tens", "Cross section of the element when it is subjected to tension", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Cross section in Tension", "CS_Tens", "Cross section of the element when it is subjected to Tension", GH_ParamAccess.item);
             pManager[3].Optional = true;
             pManager.AddGenericParameter("Material in Compression", "M_Comp", "Material of the element when it is subjected to compression. This material is used to determine the mass of the element.", GH_ParamAccess.item);
             pManager[4].Optional = true;
-            pManager.AddGenericParameter("Material in Tension", "M_Tens", "Material of the element when it is subjected to tension", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Material in Tension", "M_Tens", "Material of the element when it is subjected to Tension", GH_ParamAccess.item);
             pManager[5].Optional = true;
             pManager.AddTextParameter("Buckling Law", "Buckl law", "Choose a buckling law between \"Euler\", \"Rankine\", Eurocode (EN1993) curves \"a\",\"b\",\"c\",\"d\". \nNote that yielding law will apply if the inputted text does not exactly match any of the \"suggestions\".", GH_ParamAccess.item,"Not Applicable");
             pManager[6].Optional = true;

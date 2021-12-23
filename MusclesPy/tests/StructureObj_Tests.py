@@ -357,7 +357,7 @@ class StructureObj_Tests(unittest.TestCase):
         ElementsA = np.array([[1, 1],
                               [1, 1]]) * 50  # mm²
 
-        LengtheningsToApply = np.array([-4, -4]) * 1e-3  # m
+        LengtheningsToApply = np.array([-3.984, -3.984]) * 1e-3  # m
 
 
         S0.test_MainNONLinearDisplacementMethod(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
@@ -733,7 +733,7 @@ class StructureObj_Tests(unittest.TestCase):
         ElementsA = np.array([[1, 1],
                               [1, 1]]) * 50  # mm²
 
-        LengtheningsToApply = np.array([-4, -4]) * 1e-3  # m
+        LengtheningsToApply = np.array([-3.984, -3.984]) * 1e-3  # m
 
 
         S0.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,

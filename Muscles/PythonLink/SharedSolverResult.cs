@@ -79,12 +79,6 @@ namespace Muscles.PythonLink
 			Init();
 		}
 
-		//public SharedAssemblyResult(StructureObj structObj)
-		//{
-		//	Init();
-		//	RegisterElements(structObj); 
-		//	RegisterNodes(structObj);
-		//}
 
 		#endregion Constructors
 

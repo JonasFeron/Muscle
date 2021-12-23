@@ -33,7 +33,7 @@ def core(DataString):
     :return: print key:output
     """
     # print("input in python is\n",DataString)
-    result = r.SharedSolverResult() #initialize empty results
+    result = r.SharedAssemblyResult() #initialize empty results
     data = json.loads(DataString, object_hook = d.ToSharedDataObject)  #Data are stored in SharedData object
 
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
@@ -42,7 +42,7 @@ def core(DataString):
         result.PopulateWith(Struct) #register the results
         # print("I finished calculation")
 
-    output_dct = json.dumps(result, cls=r.SharedSolverResultEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
+    output_dct = json.dumps(result, cls=r.SharedAssemblyResultEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
     return output_dct
 
 if __name__ == '__main__': #what happens if called from C#

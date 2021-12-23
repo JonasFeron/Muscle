@@ -9,11 +9,11 @@ using Grasshopper.Kernel.Types;
 
 namespace Muscles.Loads
 {
-    public class PrestressLoadComponent : GH_Component
+    public class ImposedLenghteningsComponent : GH_Component
     {
 
-        public PrestressLoadComponent()
-          : base("Create Prestress Loads", "P",
+        public ImposedLenghteningsComponent()
+          : base("Create Imposed Lengthenings to prestress the structure", "DL",
               "Set the lengthenings to apply on the elements free lengths.",
               "Muscles", "Loads")
         {
@@ -64,11 +64,11 @@ namespace Muscles.Loads
             if (!DA.GetData(0, ref e)) { return; }
             if (!DA.GetData(1, ref value)) { return; }
 
-            //2) Transform datas into InitialForce object
-            PrestressLoad initialforce = new PrestressLoad(e, value);
+            //2) Transform datas into ImposedLengthenings object
+            ImposedLenghtenings DL = new ImposedLenghtenings(e, value);
 
             //3) output datas
-            DA.SetData(0, new GH_PrestressLoad(initialforce));
+            DA.SetData(0, new GH_ImposedLengthenings(DL));
 
         }
     }

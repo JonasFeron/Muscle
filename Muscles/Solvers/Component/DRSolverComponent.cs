@@ -115,7 +115,7 @@ namespace Muscles.Solvers
             if (!DA.GetData(8, ref minMass)) { }
 
             //2) Format datas before sending and solving in python
-            StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
+            StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
 
             bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData()); // new_structure.LoadsToApply was filled with the loads
@@ -226,12 +226,12 @@ namespace Muscles.Solvers
             //List<Node> nodes = new_structure.StructuralNodes;
             List<Element> elements = new_structure.StructuralElements;
 
-            PrestressLoad DL; 
+            ImposedLenghtenings DL; 
             foreach (var data in datas)
             {
-                if (data is GH_PrestressLoad)
+                if (data is GH_ImposedLengthenings)
                 {
-                    DL = ((GH_PrestressLoad)data).Value; //the prestressload is a variation of length
+                    DL = ((GH_ImposedLengthenings)data).Value; //the prestressload is a variation of length
 
                     int ind_e = DL.Element.Ind;
 

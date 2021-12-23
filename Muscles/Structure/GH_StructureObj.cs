@@ -18,12 +18,12 @@ namespace Muscles.Structure
         // IGH_Goo defines the bare minimum of methods and properties for any kind of data before it is allowed to play ball
         // GH_Goo abstract class takes care to implement all the basic functionnality of IGH_Goo.
         // GH_Goo<T> is a generic type where T is the actual Type we are wrapping inside this GH Data Type
-        // Here we are wrapping an object Geometry inside GH_Geometry to be able to communicate with the Grasshopper User Interface
+        // Here we are wrapping an object StructureObj inside GH_StructureObj to be able to communicate with the Grasshopper User Interface
         
 
 
         #region Properties
-        public override StructureObj Value // The Geometry object is accessible from the Value property of the GH_Geometry
+        public override StructureObj Value // The StructureObj object is accessible from the Value property of the GH_StructureObj
         {
             get { return base.Value; }
             set
@@ -32,34 +32,12 @@ namespace Muscles.Structure
             }
         }
 
-        // on veut également transformer notre Objet Geometry qui utilise des data de type Rhino.Geometry (Point 3D, Line,...) et de type System.Collections.Generic (list, Dictionnaries) 
-        // En un objet GH_Geometry qui utilise des data de type Grasshopper.Kernel.Types (GH_Point, GH_line, GH_Structure<T>,...) 
-        // un objet Geometry permet de manipuler les données ou faire des calculs
-        // un objet GH_Geometry permet de les afficher et communiquer au sein de GH.
+        // on veut également transformer notre Objet StructureObj qui utilise des data de type Rhino.Geometry (Point 3D, Line,...) et de type System.Collections.Generic (list, Dictionnaries) 
+        // En un objet GH_StructureObj qui utilise des data de type Grasshopper.Kernel.Types (GH_Point, GH_line, GH_Structure<T>,...) 
+        // un objet StructureObj permet de manipuler les données ou faire des calculs
+        // un objet GH_StructureObj permet de les afficher et communiquer au sein de GH.
         // Donc toutes les données de la géométrie qu'on veut pouvoir manipuler//afficher au sein de GH doivent être converties en donnée de type GH
-        
-        //public List<GH_Number> S { get { return Value.Results.S.Select(data => new GH_Number(data)).ToList(); } }
-        public GH_Structure<GH_Number> Km { get { return ListListToGH_Struct(Value.AssemblyResult.Km); } }
-        public GH_Structure<GH_Number> A { get { return ListListToGH_Struct(Value.AssemblyResult.A); } }
-        public GH_Structure<GH_Number> SS { get { return ListListToGH_Struct(Value.AssemblyResult.SS); } }
-        public GH_Structure<GH_Number> Um_row { get { return ListListToGH_Struct(Value.AssemblyResult.Um_row); } }
-
-        private GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
-        {
-            GH_Path path;
-            int i = 0;
-            GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
-            foreach (List<double> datalist in datalistlist)
-            {
-                path = new GH_Path(i);
-                res.AppendRange(datalist.Select(data => new GH_Number(data)),path);
-                i++;
-            }
-            return res;
-        }
-
-        
-
+     
 
         #endregion Properties
 
@@ -72,7 +50,7 @@ namespace Muscles.Structure
 
         public override string TypeName { get { return Value.TypeName; } }
 
-        public override string TypeDescription { get { return "Geometry object is composed of Lines linking the nodes"; } }
+        public override string TypeDescription { get { return "StructureObj object is composed of Lines linking the nodes"; } }
 
         public override string ToString() //return a string representation of the value of this instance
         {

@@ -54,7 +54,7 @@ class SharedAssemblyResult():
                 Answ.C = Struct.C.tolist()
 
                 Answ.A = Struct.Initial.A.round(4).tolist()
-                Answ.AFree = Struct.AFree.round(4).tolist()
+                Answ.AFree = Struct.Initial.AFree.round(4).tolist()
 
                 Answ.S = Struct.Initial.SVD.S.round(4).tolist()
                 Answ.r = int(Struct.Initial.SVD.r)
@@ -63,12 +63,12 @@ class SharedAssemblyResult():
                 Answ.s = int(Struct.Initial.SVD.s)
                 Answ.Vr_row = Struct.Initial.SVD.Vr_row.round(4).tolist()
                 Answ.Vs_row = Struct.Initial.SVD.Vs_row.round(4).tolist()
-                Answ.SS = Struct.Initial.SVD.SS.round(4).tolist()
+                Answ.SS = Struct.Initial.SVD.SS.round(6).tolist()
 
                 Answ.m = int(Struct.Initial.SVD.m)
                 Answ.Ur_row = Struct.Initial.SVD.Ur_row.round(4).tolist()
                 Answ.Ur_free_row = Struct.Initial.SVD.Ur_free_row.round(4).tolist()
-                Answ.Um_row = Struct.Initial.SVD.Um_row.round(4).tolist()
+                Answ.Um_row = Struct.Initial.SVD.Um_row.round(6).tolist()
                 Answ.Um_free_row = Struct.Initial.SVD.Um_free_row.round(4).tolist()
             else :
                 Answ.S = Struct.Initial.SVD.S.round(4).tolist()

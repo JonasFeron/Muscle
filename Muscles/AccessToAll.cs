@@ -16,7 +16,7 @@ namespace Muscles
 
 
         #region Properties
-        public static double DisplaySupportAmpli = 1.0; //N.B. double are value type which means its value is given once for all.to change value dynamically, use reference type such as list
+        public static double DisplaySupportAmpli = 1.0; 
         //public static List<double> DisplaySupportAmpli = new List<double>() {1.0};//default value  
         public static double DisplayLoadAmpli = 1.0; //default value
         public static int DisplayDecimals = 1;
@@ -36,24 +36,24 @@ namespace Muscles
         {
             get
             {
-                if (user_mode == true) return "Main_AssembleStructure.pyc";
-                else return "Main_AssembleStructure.py";
+                if (user_mode == true) return "MainAssembleStructure.pyc";
+                else return "MainAssembleStructure.py";
             }
         }
         public static string MainLinearSolve
         {
             get
             {
-                if (user_mode == true) return "Main_LinearSolveStructure.pyc";
-                else return "Main_LinearSolveStructure.py";
+                if (user_mode == true) return "MainLinearSolveStructure.pyc";
+                else return "MainLinearSolveStructure.py";
             }
         }
         public static string MainNonLinearSolve
         {
             get
             {
-                if (user_mode == true) return "Main_NonLinearSolveStructure.pyc";
-                else return "Main_NonLinearSolveStructure.py";
+                if (user_mode == true) return "MainNonLinearSolveStructure.pyc";
+                else return "MainNonLinearSolveStructure.py";
             }
         }
         public static string MainDRSolve
@@ -68,12 +68,12 @@ namespace Muscles
         public const string FileTestData = "TestData.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python
         public const string FileAssembleData = "AssembleData.txt";
-        //public const string File_Assemble_Result = "Assemble_Result.txt";
+        //public const string File_Assemble_Result = "AssembleResult.txt";
         public const string FileLinearSolveData = "LinearSolveData.txt";
-        //public const string File_LinearSolve_Result = "LinearSolve_Result.txt";
+        //public const string File_LinearSolve_Result = "LinearSolveResult.txt";
         public const string FileNonLinearSolveData = "NonLinearSolveData.txt";
-        //public const string File_NonLinearSolve_Result = "NonLinearSolve_Result.txt";
-        public const string File_DRSolve_Data = "DynamicRelaxationData.txt";
+        //public const string File_NonLinearSolve_Result = "NonLinearSolveResult.txt";
+        public const string FileDRSolveData = "DynamicRelaxationData.txt";
 
 
 

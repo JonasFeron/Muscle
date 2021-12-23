@@ -7,14 +7,15 @@ using Rhino.Geometry;
 
 namespace Muscles.Loads
 {
-    public class PrestressLoad
+    public class ImposedLenghtenings
     {
 
         #region Properties
 
         public Element Element { get; set; }
-        public double Value { get; set; } //(m)  The lengthening to apply on the element of the structure
-        public PointLoad AsPointLoad0
+        public double Value { get; set; } //(m)  The length variation (+ for lengthening) to apply on the element of the structure
+
+        public double AsTension
         {
             get
             {
@@ -22,7 +23,16 @@ namespace Muscles.Loads
                 double E = Element.Mat_Main.E; //[N/m2]
                 double LFree = Element.LFree + Value; //[m]
                 double P = E * A * Value / LFree; //[N] positive for lengthenings, negative for shortenings
-                Vector3d Load = -1*Element.Line.UnitTangent * P;
+                return -P;
+            }
+        }
+
+        public PointLoad AsPointLoad0
+        {
+            get
+            {
+
+                Vector3d Load = 1*Element.Line.UnitTangent * AsTension;
                 return new PointLoad(Element.Line.From, Load);
             }
         }
@@ -30,11 +40,7 @@ namespace Muscles.Loads
         {
             get
             {
-                double A = Element.CS_Main.Area; //[m2]
-                double E = Element.Mat_Main.E; //[N/m2]
-                double LFree = Element.LFree + Value; //[m]
-                double P = E * A * Value / LFree; //[N] positive for lengthenings, negative for shortenings
-                Vector3d Load = Element.Line.UnitTangent * P;
+                Vector3d Load = -1*Element.Line.UnitTangent * AsTension ;
                 return new PointLoad(Element.Line.To, Load);
             }
         }
@@ -44,18 +50,23 @@ namespace Muscles.Loads
         #endregion Properties
         #region Constructors
 
-        public PrestressLoad()
+        public ImposedLenghtenings()
         {
             Element = new Element();
             Value = 0.0;
         }
-        public PrestressLoad(Element e,double DL)
+        public ImposedLenghtenings(Element e)
+        {
+            Element = e;
+            Value = 0.0;
+        }
+        public ImposedLenghtenings(Element e,double DL)
         {
             Element = e;
             Value = DL;
         }
 
-        public PrestressLoad(PrestressLoad other)
+        public ImposedLenghtenings(ImposedLenghtenings other)
         {
             Element = other.Element;
             Value = other.Value;
@@ -64,9 +75,9 @@ namespace Muscles.Loads
 
 
         #region Methods
-        public PrestressLoad Duplicate()
+        public ImposedLenghtenings Duplicate()
         {
-            return new PrestressLoad(this);
+            return new ImposedLenghtenings(this);
         }
         public override string ToString()
         {
@@ -84,6 +95,15 @@ namespace Muscles.Loads
         //    }
         //    return MergedForces;
         //}
+        public double Tension2Lengthening(double tension)
+        {
+            double A = Element.CS_Main.Area; //[m2]
+            double E = Element.Mat_Main.E; //[N/m2]
+            double LFreeInit = Element.LFree; //[m]
+            double LFreeFinal = LFreeInit / (1 + tension / (E * A)); //[m]
+            double DL = LFreeFinal - LFreeInit;
+            return DL;
+        }
 
         #endregion Methods
 

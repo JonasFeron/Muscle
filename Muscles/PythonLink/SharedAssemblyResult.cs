@@ -1,4 +1,6 @@
-﻿using Muscles.Elements;
+﻿using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
+using Muscles.Elements;
 using Muscles.Nodes;
 using Muscles.Structure;
 using Rhino.Geometry;
@@ -28,13 +30,12 @@ namespace Muscles.PythonLink
 		#endregion Supports
 
 		#region StructureAnalysis
-		public List<List<double>> Km { get; set; } //stiffness matrix. shape (3NodesCount,3NodesCount)
-		public List<List<double>> Km_free { get; set; } //stiffness matrix. shape (DOFfreeCount,DOFfreeCount)
+
 		public List<List<double>> A { get; set; } //equilibrium matrix. shape (3NodesCount, ElementsCount)
-		public List<List<double>> A_free { get; set; } //equilibrium matrix. shape (DOFfreeCount, ElementsCount)
-		public List<double> S { get; set; } // eigenvalues of the equilibrium matrix A_free
+		public List<List<double>> AFree { get; set; } //equilibrium matrix. shape (DOFfreeCount, ElementsCount)
+		public List<double> S { get; set; } // eigenvalues of the equilibrium matrix AFree
 		public int r { get; set; } //rank of the equilibrium matrix
-		public List<double> Sr { get; set; } // non null eigenvalues of the equilibrium matrix A_free
+		public List<double> Sr { get; set; } // non null eigenvalues of the equilibrium matrix AFree
 
 		public int s { get; set; } // number of self-stress modes
 		public List<List<double>> Vr_row { get; set; } //shape (r, ElementsCount) Interprétations: Bar tensions in equilibrium with Lambda*Loads of U_r  OR Bar elongations compatible with 1/Lambda * Extensional displacements of U_r
@@ -64,10 +65,8 @@ namespace Muscles.PythonLink
 		private void Init()
 		{
 			C = new List<List<int>>();
-			Km = new List<List<double>>();
-			Km_free = new List<List<double>>();
 			A = new List<List<double>>();
-			A_free = new List<List<double>>();
+			AFree = new List<List<double>>();
 			S = new List<double>();
 			Sr = new List<double>();
 			Vr_row = new List<List<double>>();
@@ -88,16 +87,24 @@ namespace Muscles.PythonLink
 			Init();
 		}
 
-		//public SharedAssemblyResult(StructureObj structObj)
-		//{
-		//	Init();
-		//	RegisterElements(structObj); 
-		//	RegisterNodes(structObj);
-		//}
 
 		#endregion Constructors
 
 		#region Methods
+		public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
+		{
+			GH_Path path;
+			int i = 0;
+			GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
+			foreach (List<double> datalist in datalistlist)
+			{
+				path = new GH_Path(i);
+				res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
+				i++;
+			}
+			return res;
+		}
+
 
 		#endregion Methods
 

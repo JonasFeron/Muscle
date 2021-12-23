@@ -33,7 +33,7 @@ namespace Muscles.Elements
         {
             pManager.AddLineParameter("Line", "L", "Line", GH_ParamAccess.item); //0
             pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.", GH_ParamAccess.item); //1
-            pManager.AddBooleanParameter("Is Valid", "IsValid", "True if the tension is in the interval of allowable tension.", GH_ParamAccess.item);//2
+            pManager.AddBooleanParameter("Is Valid", "IsValid", "True if the Tension is in the interval of allowable Tension.", GH_ParamAccess.item);//2
             pManager.AddNumberParameter("Unity Check", "UC", "Tension/Allowable Tension. The UC can be negative if the cables are compressed or struts are tensed", GH_ParamAccess.item);//3
             pManager.AddNumberParameter("Xsi", "Xsi", "Xsi = Reduction factor in compression = Buckling strength/Yielding strength", GH_ParamAccess.item); //4
             pManager.AddNumberParameter("Tension", "t (kN)", "Total Tension coming from all applied loads", GH_ParamAccess.item); //5

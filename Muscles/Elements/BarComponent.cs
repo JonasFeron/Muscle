@@ -10,7 +10,7 @@ namespace Muscles.Elements
     public class BarComponent : GH_Component
     {
         public bool displayIn3d { get; set; }
-        public BarComponent() : base("Element - Bar", "B", "A Bar is a linear elastic structural element working both in tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.", "Muscles", "Elements") { displayIn3d = true; }
+        public BarComponent() : base("Element - Bar", "B", "A Bar is a linear elastic structural element working both in Tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.", "Muscles", "Elements") { displayIn3d = true; }
         #region Properties
 
         public override Guid ComponentGuid { get { return new Guid("54b274d4-a68d-4171-ac14-8eff54a2c28c"); } }

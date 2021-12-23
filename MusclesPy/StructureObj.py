@@ -423,7 +423,7 @@ class State():
 
         (Cur.ElementsL, Cur.ElementsCos) = Cur.ElementsLengthsAndCos(Struct, Cur.NodesCoord)
         (Cur.A, Cur.AFree, Cur.AFixed) = Cur.EquilibriumMatrix(Struct, Cur.ElementsCos)
-        Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, Cur.ElementsL)  #[m/N] - shape (ElementsCount,) - Important to note that the Free lengths are considered in the flexibility
+        Cur.Flex = Struct.Flexibility(ElementsE, ElementsA, Cur.ElementsLFree)  #[m/N] - shape (ElementsCount,) - Important to note that the Free lengths are considered in the flexibility
         Kbsc = 1 / Cur.Flex  #[N/m] - shape (ElementsCount,) - basic material stiffness vector of each individual element
 
         # 1) Compute the tension
@@ -1160,6 +1160,8 @@ class StructureObj():
         Self.Start.ElementsA = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsA)
         (PrestressForces,PrestressLoads) = Self.Start.PrestressLoads(Self,Self.LengtheningsToApply,Self.Start.ElementsE,Self.Start.ElementsA,Self.Start.ElementsLFree)
         Self.Start.Loads += PrestressLoads
+        Self.Start.Loads -= Self.Initial.Loads # only apply the additionnal load on the structure and not the one that were already there before
+
         start = Self.Start
 
         # 2) Solve the linear system of equations K*d=Flex
@@ -1180,11 +1182,16 @@ class StructureObj():
         finally:
             # In Linear calculation, the equilibrium is achieved in the initial state. The final state is the deformed geometry
             Self.Start.Tension = Tension + PrestressForces
+            Self.Start.Loads -= PrestressLoads #prestress loads are fictive
             Self.Start.Reactions = Reactions
+
             Self.Final = Self.Start.Copy()
+            Self.Final.Loads += Self.Initial.Loads  # total loads applied on the structure
             Self.Final.NodesCoord = start.NodesCoord + d
-            Self.Final.Tension = Tension + PrestressForces
-            Self.Final.Reactions = Reactions
+            (Self.Final.ElementsL, Self.Final.ElementsCos) = Self.Final.ElementsLengthsAndCos(Self,Self.Final.NodesCoord)
+            (Self.Final.A, Self.Final.AFree, Self.Final.AFixed) = Self.Final.EquilibriumMatrix(Self,Self.Final.ElementsCos)
+            Self.Final.Residual = Self.Final.UnbalancedLoads(Self, Self.Final.AFree, Self.Final.Loads,Self.Final.Tension)
+
 
     def Perturbation(Self,NodesCoord,IsDOFfree,perturb):
         """
@@ -1299,8 +1306,13 @@ class StructureObj():
                 Prev = Cur.Copy()
 
         Self.Final = Prev.Copy()
-        Self.Final.NodesCoord = Prev.NodesCoord + IncrDispl
+        Self.Final.Loads += Self.Initial.Loads #total loads applied on the structure
+        Self.Final.Loads -= PrestressLoads  # prestress loads are fictive
         Self.Final.Tension = Prev.Tension + PrestressForces
+        Self.Final.NodesCoord = Prev.NodesCoord + IncrDispl
+        (Self.Final.ElementsL, Self.Final.ElementsCos) = Self.Final.ElementsLengthsAndCos(Self, Self.Final.NodesCoord)
+        (Self.Final.A, Self.Final.AFree, Self.Final.AFixed) = Self.Final.EquilibriumMatrix(Self, Self.Final.ElementsCos)
+        Self.Final.Residual = Self.Final.UnbalancedLoads(Self, Self.Final.AFree, Self.Final.Loads, Self.Final.Tension)
         Self.Final.Reactions = Prev.Reactions
 
     # endregion

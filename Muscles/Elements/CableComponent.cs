@@ -10,7 +10,7 @@ namespace Muscles.Elements
     public class CableComponent : GH_Component
     {
         public bool displayIn3d { get; set; }
-        public CableComponent() : base("Element - Cable", "C", "A Cable is a linear elastic structural element working only in tension.\nCompression force can be allowed in the numerical analysis or not.\nIf compression is not allowed, one shall run the analysis non-linearly to consider slacked cables.\nIf compression is allowed for the sake of simplified analysis, the compressed cables will have negative unity check and IsValid==False property.", "Muscles", "Elements") { displayIn3d = true; }
+        public CableComponent() : base("Element - Cable", "C", "A Cable is a linear elastic structural element working only in Tension.\nCompression force can be allowed in the numerical analysis or not.\nIf compression is not allowed, one shall run the analysis non-linearly to consider slacked cables.\nIf compression is allowed for the sake of simplified analysis, the compressed cables will have negative unity check and IsValid==False property.", "Muscles", "Elements") { displayIn3d = true; }
         #region Properties
 
         public override Guid ComponentGuid { get { return new Guid("0640f59d-323c-4483-9461-6e7cd9d5c58a"); } }

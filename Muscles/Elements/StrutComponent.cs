@@ -56,7 +56,7 @@ namespace Muscles.Elements
             pManager[4].Optional = true;
             pManager.AddNumberParameter("Buckling Factor", "k", "Buckling factor k defines the buckling length Lb such that Lb = k*L", GH_ParamAccess.item, 1.0);
             pManager[5].Optional = true;
-            pManager.AddBooleanParameter("Can Resist Tension ?", "Allow Tens", "If true, tension will be allowed in the finite element analysis.\nIf false, run a non-linear analysis with 0 forces in cracked struts.", GH_ParamAccess.item, true);
+            pManager.AddBooleanParameter("Can Resist Tension ?", "Allow Tens", "If true, Tension will be allowed in the finite element analysis.\nIf false, run a non-linear analysis with 0 forces in cracked struts.", GH_ParamAccess.item, true);
             pManager[6].Optional = true;
 
         }

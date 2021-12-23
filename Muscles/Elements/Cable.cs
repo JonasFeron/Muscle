@@ -9,13 +9,15 @@ using System;
 namespace Muscles.Elements
 {
     /// <summary>
-    /// A Cable is a linear elastic structural element working only in tension.
+    /// A Cable is a linear elastic structural element working only in Tension.
     /// </summary>
     public class Cable : Element
     {
 
         #region Properties
         public override string TypeName { get { return "Cable"; } }
+        public override int Type { get { return 1; } }
+
         public bool CanResistCompression { get; set; } //if true, compression will be allowed in the finite element analysis. If false, run a non-linear analysis with 0 forces in the slack cables.
 
         public override ICrossSection CS_Main

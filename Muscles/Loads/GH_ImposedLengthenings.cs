@@ -3,14 +3,14 @@ using Muscles.Elements;
 
 namespace Muscles.Loads
 {
-    class GH_PrestressLoad : GH_Goo<PrestressLoad>
+    class GH_ImposedLengthenings : GH_Goo<ImposedLenghtenings>
     {
         #region Properties
 
 
         //public bool IsPreviewCapable { get { return true; } } //to implement 
 
-        public override PrestressLoad Value { set; get; }
+        public override ImposedLenghtenings Value { set; get; }
         public override bool IsValid { get { return Value.IsValid; } }
 
         public override string TypeDescription { get { return "Initial force in the element considering that all nodes are fixed in space."; } }
@@ -23,23 +23,23 @@ namespace Muscles.Loads
 
         #region Constructors
 
-        public GH_PrestressLoad() : base()
+        public GH_ImposedLengthenings() : base()
         {
-            Value = new PrestressLoad();
+            Value = new ImposedLenghtenings();
         }
 
-        public GH_PrestressLoad(PrestressLoad prestress) : base(prestress)
+        public GH_ImposedLengthenings(ImposedLenghtenings prestress) : base(prestress)
         {
             Value = prestress;
         }
 
-        public GH_PrestressLoad(GH_Goo<PrestressLoad> gh_prestress)
+        public GH_ImposedLengthenings(GH_Goo<ImposedLenghtenings> gh_prestress)
         {
             Value = gh_prestress.Value.Duplicate();
         }
         public override IGH_Goo Duplicate()
         {
-            return new GH_PrestressLoad(this);
+            return new GH_ImposedLengthenings(this);
         }
 
         #endregion Constructors
@@ -63,7 +63,7 @@ namespace Muscles.Loads
 
         public override bool CastTo<Q>(ref Q target)
         {
-            if (typeof(Q).IsAssignableFrom(typeof(PrestressLoad)))
+            if (typeof(Q).IsAssignableFrom(typeof(ImposedLenghtenings)))
             {
                 object initialforce = Value;
                 target = (Q)initialforce;

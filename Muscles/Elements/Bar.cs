@@ -7,13 +7,15 @@ using System.Collections.Generic;
 namespace Muscles.Elements
 {
     /// <summary>
-    /// A Bar is a linear elastic structural element working both in tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.
+    /// A Bar is a linear elastic structural element working both in Tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.
     /// </summary>
     public class Bar : Element
     {
 
         #region Properties
         public override string TypeName { get { return "Bar"; } }
+        public override int Type { get { return -1; } }
+
 
 
         #endregion Properties

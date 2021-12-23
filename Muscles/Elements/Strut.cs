@@ -16,8 +16,10 @@ namespace Muscles.Elements
 
         #region Properties
         public override string TypeName { get { return "Strut"; } }
+        public override int Type { get { return -1; } }
 
-        public bool CanResistTension { get; set; } //if true, tension will be allowed in the finite element analysis. If false, run a non-linear analysis with 0 forces in the cracked strut.
+
+        public bool CanResistTension { get; set; } //if true, Tension will be allowed in the finite element analysis. If false, run a non-linear analysis with 0 forces in the cracked strut.
 
         public override ICrossSection CS_Main
         {
@@ -56,7 +58,7 @@ namespace Muscles.Elements
             {
                 try
                 {
-                    return Tension / AllowableTension.T0; // AllowableTension.T0 is <=0. Thus this expression returns negative unity check for struts in tension
+                    return Tension / AllowableTension.T0; // AllowableTension.T0 is <=0. Thus this expression returns negative unity check for struts in Tension
                 }
                 catch (DivideByZeroException)
                 {

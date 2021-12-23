@@ -26,6 +26,8 @@ namespace Muscles.PythonLink
 
 
 		#region Elements
+		public List<int> ElementsType { get; set; } //shape (ElementsCount, )
+
 		public List<List<int>> ElementsEndNodes { get; set; } //shape (ElementsCount, 2)
 		public List<List<double>> ElementsA { get; set; } // [mm²] - shape (ElementsCount, 2) - Area in Compression and Area in Tension of the Elements
 		public List<List<double>> ElementsE { get; set; } // [MPa] - shape (ElementsCount, 2) - Young Modulus in Compression and in Tension of the Elements
@@ -67,6 +69,7 @@ namespace Muscles.PythonLink
 		private void Init()
 		{
 			n_steps = 1;
+			ElementsType = new List<int>();
             NodesCoord = new List<List<double>>();
 			LoadsInit = new List<List<double>>();
 			LoadsToApply = new List<List<double>>();
@@ -113,7 +116,7 @@ namespace Muscles.PythonLink
 
 		#region Methods
 		/// <summary>
-		/// No Need to recompute the Assembly of the structure if the geometry has not changed. A geometry only consist in Nodes coordinates, Elements_Extrimities, IsDOFfree.
+		/// No Need to recompute the Assembly of the structure if the geometry has not changed. A geometry only consist in Nodes coordinates, ElementsEndNodes, IsDOFfree.
 		/// </summary>
 		/// <param name="obj"></param>
 		/// <returns></returns>
@@ -169,6 +172,7 @@ namespace Muscles.PythonLink
 				double LFree = Math.Round(e.LFree, 8); //Python and C# works in m
 				double LengtheningToApply = Math.Round(structObj.LengtheningsToApply[e.Ind], 8); //Python and C# works in m
 
+				ElementsType.Add(e.Type);
 				ElementsEndNodes.Add(e.EndNodes);
 				ElementsA.Add(A);
 				ElementsE.Add(E);

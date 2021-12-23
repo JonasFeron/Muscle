@@ -25,11 +25,7 @@ namespace Muscles.Solvers
         public LinearSolverDisplComponent()
           : base("Solver - Linear - Displacements Meth.", "Linear D",
                 "Solve truss.\n" +
-                "  Displacement method is used (solve K.U=L then post-process to find axial forces) with the following assumptions:\n" +
-                "  L=Le+Lp : Application of external (Le) and prestress (Lp) point loads altogether. It is advised to apply Le and Lp successively in 2 Solver components.\n" +
-                "  K=Km+Kg : Addition of material (Km) and geometric (Kg) stiffness matrices.\n" +
-                "  Only forces coming from previous solutions are considered in (first) Kg. Axial prestress P are not considered in Kg.\n" +
-                "  N=Q+P : After solving, addition of the post-processed axial forces Q with the prestress forces P .",
+                "  Displacement method is used (solve K.U=L then post-process to find axial forces)" ,
               "Muscles", "Solvers")
         {
         }
@@ -62,7 +58,7 @@ namespace Muscles.Solvers
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may contain previous results (forces and displacements).", GH_ParamAccess.item);
             pManager.AddGenericParameter("External Point Loads", "Le (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Axial Prestress", "P (kN)", "The prestress forces to apply on the structure.\n Axial Prestress P are converted into point loads Lp which are applied on the structure.\n Axial prestress P are added to the resulted forces Q at the end (N=Q+P).", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Length Variation", "DL (m)", "Lengthening (+) or shortening (-) to apply on the elements.", GH_ParamAccess.tree);
             pManager[1].Optional = true;
             pManager[2].Optional = true;
 
@@ -123,23 +119,23 @@ namespace Muscles.Solvers
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
             {
                 log.Debug("pythonManager exists");
-                string result_str = null;
-                string Data_str = JsonConvert.SerializeObject(data, Formatting.None);
+                string resultString = null;
+                string dataString = JsonConvert.SerializeObject(data, Formatting.None);
                 log.Info("Main Linear Solver: ask Python to execute a command");
 
-                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainLinearSolve, Data_str);
+                resultString = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainLinearSolve, dataString);
 
                 log.Info("Main Linear Solver: received results");
-                //log.Debug(result_str);
+                //log.Debug(resultString);
                 try
                 {
-                    JsonConvert.PopulateObject(result_str, result);
+                    JsonConvert.PopulateObject(resultString, result);
                 }
                 catch
                 {
 
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + result_str);
-                    log.Warn("Main NonLinear Solver: Something went wrong while solving:" + result_str);
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + resultString);
+                    log.Warn("Main NonLinear Solver: Something went wrong while solving:" + resultString);
                     result = null;
                 }
             }
@@ -202,12 +198,12 @@ namespace Muscles.Solvers
             //List<Node> nodes = new_structure.StructuralNodes;
             List<Element> elements = new_structure.StructuralElements;
 
-            PrestressLoad DL;
+            ImposedLenghtenings DL;
             foreach (var data in datas)
             {
-                if (data is GH_PrestressLoad)
+                if (data is GH_ImposedLengthenings)
                 {
-                    DL = ((GH_PrestressLoad)data).Value; //the prestressload is a variation of length
+                    DL = ((GH_ImposedLengthenings)data).Value; //the prestressload is a variation of length
 
                     int ind_e = DL.Element.Ind;
 

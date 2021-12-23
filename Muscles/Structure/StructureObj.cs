@@ -57,7 +57,6 @@ namespace Muscles.Structure
 
 
 		///// Results coming from Python /////
-		public SharedAssemblyResult AssemblyResult { get; set; }
 
 		public bool IsInEquilibrium { get; set; }
 
@@ -89,7 +88,6 @@ namespace Muscles.Structure
 			LengtheningsToApply = new List<double>();
 
 
-			AssemblyResult = new SharedAssemblyResult();
 			DR = new DRMethod();
 
 		}
@@ -150,40 +148,6 @@ namespace Muscles.Structure
 			return new StructureObj(this);
 		}
 
-		//public StructureObj Deformed()
-  //      {
-		//	StructureObj deformed = this.Duplicate();
-		//	foreach (Node n in deformed.StructuralNodes)
-  //          {
-		//		int final = n.Displacement_Results.Count - 1; 
-		//		if(final>=0)
-  //              {
-		//			Vector3d d = n.Displacement_Results[final];
-		//			n.Point += d;           //update nodes coordinates
-		//			n.Displacement_Already_Applied += d; // allows to keep track of the original position of the node
-
-		//			n.Reaction += n.Reaction_Results[final]; //not really a usefull information
-		//			n.Load += n.Load_Results[final]; //not really a usefull information
-		//		}
-  //          }
-		//	foreach (Element e in deformed.StructuralElements)
-		//	{
-		//		int final = e.AxialForce_Results.Count - 1;
-		//		if (final >= 0)
-		//		{
-		//			double t = e.AxialForce_Results[final];
-		//			e.TensionInit += t; // allows to keep track of the original position of the node
-		//		}
-
-		//		//update the lines extremities
-		//		int n0 = e.EndNodes[0]; 
-		//		int n1 = e.EndNodes[1];
-		//		Point3d p0 = deformed.StructuralNodes[n0].Point;
-		//		Point3d p1 = deformed.StructuralNodes[n1].Point;
-		//		e.Line = new Line(p0, p1);
-		//	}
-		//	return deformed;
-  //      }
 
 		#endregion Constructors
 
@@ -223,7 +187,7 @@ namespace Muscles.Structure
 		{
 			int ind_node = 0; 
 			//1) find the points that are extremities of the elements
-			List<Point3d> points_from_lines = ExtremitiesOfElements();
+			List<Point3d> points_from_lines = ElementsEndPoints();
 			SpanXYZ(points_from_lines); // set the main dimensions of the structure and set the zeroTolerance for point equality
 			List<Point3d> points_from_lines_wo_d = Node.RemoveDuplicatedPoints(points_from_lines,ZeroTol); //remove points that are equal in order to keep only one instance
 
@@ -262,7 +226,7 @@ namespace Muscles.Structure
 		/// <summary>
 		/// Creates a List of Point3d that are the extremities of StructuralElements. The duplicated points are not removed. 
 		/// </summary>
-		private List<Point3d> ExtremitiesOfElements()
+		private List<Point3d> ElementsEndPoints()
 		{
 			List<Point3d> points = new List<Point3d>();
 			foreach (Element e in StructuralElements)
@@ -469,97 +433,7 @@ namespace Muscles.Structure
 				Point3d p1 = StructuralNodes[n1].Point;
 				elem.Line = new Line(p0, p1);
 			}
-			////OLD VERSION where the results are the list for all steps of the computations. In the new version, we keep only the final state of the structure in equilibrium. 
 
-			//int final = answ.Stages.Count-1;
-			//for(int e=0; e< StructuralElements.Count;e++)
-			//         {
-			//	Element elem = StructuralElements[e];
-
-			//	//1) axialforce results
-			//	double prev_tension = 0.0;
-			//	int prev = elem.AxialForce_Total.Count - 1;
-			//	if (prev >= 0) //if it is not the first time that the structure has been solved
-			//	{
-			//		prev_tension = elem.AxialForce_Total[prev];
-			//	}
-			//	double Fpre = elem.LengtheningToApply; //internal PrestressLoad
-
-			//	List<double> Tension_Results = new List<double>();
-			//	List<double> Tension_Total = new List<double>();
-			//	for (int k = 0; k < answ.Stages.Count; k++) //for each iteration of the solver, register the solver results and the total results (sum with previous result)
-			//	{
-			//		double Tension = answ.AxialForces_Results[e][k] + Fpre; //Resulting force (from External Load and external PrestressLoad) is added to the pretension 
-			//		Tension_Results.Add(Tension);
-			//		Tension_Total.Add(prev_tension+Tension);
-			//	}
-			//	elem.LengtheningToApply = 0.0; // reinitialize for next solve
-			//	elem.AxialForce_Results = Tension_Results;
-			//	elem.AxialForce_Total = Tension_Total; 
-
-			//}
-
-
-			//for (int n = 0; n < StructuralNodes.Count; n++)
-			//{
-			//	Node node = StructuralNodes[n];
-
-			//	// 1) Register the loads, the displacements, the reactions results from the solver
-			//	Vector3d prev_load = new Vector3d();
-			//	Vector3d prev_displ = new Vector3d();
-			//	Vector3d prev_react = new Vector3d();
-
-			//	int prev = node.Displacement_Total.Count - 1;
-			//	if (prev >= 0) //if it is not the first time that the structure has been solved
-			//	{
-			//		prev_load = node.Load_Total[prev];
-			//		prev_displ = node.Displacement_Total[prev];
-			//		prev_react = node.Reaction_Total[prev];
-			//	}
-
-			//	List<Vector3d> Load_Results = new List<Vector3d>();
-			//	List<Vector3d> Load_Total = new List<Vector3d>();
-			//	List<Vector3d> Displ_Results = new List<Vector3d>();
-			//	List<Vector3d> Displ_Total = new List<Vector3d>();
-			//	List<Vector3d> React_Results = new List<Vector3d>();
-			//	List<Vector3d> React_Total = new List<Vector3d>();
-
-			//	for (int k = 0; k < answ.Stages.Count; k++) //for each iteration of the solver, register the solver results and the total results (sum with previous result)
-			//	{
-			//		//Register Loads Applied
-			//		Vector3d Load = answ.Stages[k] * node.LoadToApply;
-			//		Load_Results.Add(Load);
-			//		Load_Total.Add(prev_load + Load);
-
-			//		//Register Displacements Results
-			//		double DisplX = answ.Displacements_Results[3 * n + 0][k];
-			//		double DisplY = answ.Displacements_Results[3 * n + 1][k];
-			//		double DisplZ = answ.Displacements_Results[3 * n + 2][k];
-			//		Vector3d Displ = new Vector3d(DisplX, DisplY, DisplZ);
-			//		Displ_Results.Add(Displ);
-			//		Displ_Total.Add(prev_displ + Displ);
-
-			//		//Register Reactions Results
-			//		double ReactX = 0;
-			//		double ReactY = 0;
-			//		double ReactZ = 0;
-			//		if (!node.isXFree) ReactX = answ.Reactions_Results[node.Ind_RX][k];
-			//		if (!node.isYFree) ReactY = answ.Reactions_Results[node.Ind_RY][k];
-			//		if (!node.isZFree) ReactZ = answ.Reactions_Results[node.Ind_RZ][k];
-			//		Vector3d React = new Vector3d(ReactX, ReactY, ReactZ);
-			//		React_Results.Add(React);
-			//		React_Total.Add(prev_react + React);
-			//	}
-
-			//	//save the results (and overwrite the previous one)
-			//	node.Load_Results = Load_Results;
-			//	node.Load_Total = Load_Total;
-			//	node.Displacement_Results = Displ_Results;
-			//	node.Displacement_Total = Displ_Total;
-			//	node.Reaction_Results = React_Results;
-			//	node.Reaction_Total = React_Total;
-			//	node.LoadToApply = new Vector3d(); //reinitialize for next solve
-			//}
 			log.Info("Structure: Is well populated with RESULTS");
 		}
 

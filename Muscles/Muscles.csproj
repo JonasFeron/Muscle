@@ -101,12 +101,12 @@
     <Compile Include="Solvers\DRMethod.cs" />
     <Compile Include="Solvers\Component\LinearSolverDisplComponent.cs" />
     <Compile Include="Solvers\Component\DRSolverComponent.cs" />
+    <Compile Include="Solvers\Component\SVDSolverComponent.cs" />
     <Compile Include="Structure\Components\AssembleStructureComponent.cs" />
     <Compile Include="Structure\GH_StructureObj.cs" />
     <Compile Include="Structure\Components\DisassembleStructureComponent.cs" />
-    <Compile Include="Structure\Components\SructureAssemblyPropertiesComponent.cs" />
     <Compile Include="Structure\StructureObj.cs" />
-    <Compile Include="Loads\Components\PrestressLoadComponent.cs" />
+    <Compile Include="Loads\Components\ImposedLenghteningsComponent.cs" />
     <Compile Include="Loads\GH_PointLoad.cs" />
     <Compile Include="Loads\PointLoad.cs" />
     <Compile Include="Loads\Components\PointlLoadComponent.cs" />
@@ -119,8 +119,8 @@
     <Compile Include="Materials\MaterialParam.cs" />
     <Compile Include="MusclesInfo.cs" />
     <Compile Include="Loads\Components\GenesCount.cs" />
-    <Compile Include="Loads\GH_PrestressLoad.cs" />
-    <Compile Include="Loads\PrestressLoad.cs" />
+    <Compile Include="Loads\GH_ImposedLengthenings.cs" />
+    <Compile Include="Loads\ImposedLenghtenings.cs" />
     <Compile Include="Loads\Components\SelfStressScenario.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Support\Components\SupportComponent.cs" />
