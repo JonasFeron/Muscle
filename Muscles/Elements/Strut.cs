@@ -4,6 +4,7 @@ using Muscles.CrossSections;
 using Muscles.Materials;
 using System.Collections.Generic;
 using Muscles.Elements;
+using System;
 
 namespace Muscles.Elements
 {
@@ -15,12 +16,55 @@ namespace Muscles.Elements
 
         #region Properties
         public override string TypeName { get { return "Strut"; } }
+        public override int Type { get { return -1; } }
 
-        public override Interval Stress_Allowable
+
+        public bool CanResistTension { get; set; } //if true, Tension will be allowed in the finite element analysis. If false, run a non-linear analysis with 0 forces in the cracked strut.
+
+        public override ICrossSection CS_Main
         {
             get
             {
-                return new Interval(-Stress_buckling, 0);
+                return CS_Comp;
+            }
+        }
+        public override ICrossSection CS_Tens
+        {
+            get
+            {
+                if (CanResistTension) return CS_Comp;
+                else return new CS_Circular();//create a cross section with null Area
+            }
+        }
+        public override Muscles_Material Mat_Main
+        {
+            get
+            {
+                return Mat_Comp;
+            }
+        }
+        public override Muscles_Material Mat_Tens
+        {
+            get
+            {
+                if (CanResistTension) return Mat_Comp;
+                else return new Muscles_Material();//create a material with null E,Fy and Rho
+            }
+        }
+
+        public override double UC // the unity check should always be between 0 and 1. otherwise element is not valid. 
+        {
+            get
+            {
+                try
+                {
+                    return Tension / AllowableTension.T0; // AllowableTension.T0 is <=0. Thus this expression returns negative unity check for struts in Tension
+                }
+                catch (DivideByZeroException)
+                {
+                    if (Tension >= 0) return double.NegativeInfinity;
+                    else return double.PositiveInfinity;
+                }
             }
         }
 
@@ -33,18 +77,15 @@ namespace Muscles.Elements
         {
         }
 
-        public Strut(Line aLine, ICrossSection aCS, Muscles_Material aMat, string law, double k)
-            : base(aLine,aCS,aCS,aMat,aMat,law,k)
+        public Strut(Line aLine,double lFree, ICrossSection aCS, Muscles_Material aMat, string law, double k,bool canResistTension)
+            : base(aLine,lFree,aCS,aCS,aMat,aMat,law,k)
         {
-            ICrossSection CS_No_Tension = new CS_Circular(); //create a cross section with null Area
-            Muscles_Material Mat_No_Tension = new Muscles_Material(); //create a material with null E and Rho
-            CS_Tens = CS_No_Tension;
-            Mat_Tens = Mat_No_Tension;
+            CanResistTension = canResistTension;
         }
 
         public Strut(Strut other) : base(other)
         {
-
+            CanResistTension = other.CanResistTension;
         }
 
         #endregion Constructors
@@ -56,10 +97,10 @@ namespace Muscles.Elements
             return new Strut(this);
         }
 
-        public override string ToString()
-        {
-            return $"Strut {Ind} is {Length0:F3}m and {Mass:F1}kg.\n   In Compression : A={CS_Comp.Area * 1e6:F0}mm^2, E={Mat_Comp.E * 1e-6:F0}MPa. No Tension.";
-        }
+        //public override string ToString()
+        //{
+        //    return $"Strut {Ind} is {LFree:F3}m and {Mass:F1}kg.\n   In Compression : A={CS_Comp.Area * 1e6:F0}mm^2, E={Mat_Comp.E * 1e-6:F0}MPa. No Tension.";
+        //}
 
         #endregion Methods
 

@@ -174,16 +174,16 @@ namespace Muscles.Display
 
 
         /// <summary>
-        /// Map a force value to a number between -1 (Red : compression), 0 (white: 0) and 1 (Blue : tension)
+        /// Map a force value to a number between -1 (Red : compression), 0 (white: 0) and 1 (Blue : Tension)
         /// </summary>
         public double ForceToColorParam(double aForce, double forceMin, double forceMax)
         {
             if (aForce <= 0) { return -Math.Abs(aForce/forceMin); } // -1 = Red = compression max
-            else { return Math.Abs(aForce / forceMax); } // 1 = Blue = tension max
+            else { return Math.Abs(aForce / forceMax); } // 1 = Blue = Tension max
 
             //double span = forceMax - forceMin;
-            //double param = (aForce - forceMin) / span; // 0 = Blue = compression and 1 = Red = tension
-            //return 1-(double)param; // 0 = Blue = tension and 1 = Red = compression
+            //double param = (aForce - forceMin) / span; // 0 = Blue = compression and 1 = Red = Tension
+            //return 1-(double)param; // 0 = Blue = Tension and 1 = Red = compression
         }
 
         /// <summary>

@@ -8,6 +8,6 @@ import tests.StructureObj_Tests
 import tests.Main_AssembleStructure_Tests
 import tests.Main_LinearSolveStructure_Tests
 import tests.Main_NonLinearSolveStructure_Tests
-
+import tests.State_Tests
 
 

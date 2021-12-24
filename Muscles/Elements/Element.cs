@@ -10,29 +10,31 @@ using System;
 namespace Muscles.Elements
 {
     /// <summary>
-    /// An Element is the most general (bi-)linear elastic structural element. It allows modelling linear reinforced concrete element. In tension, the rebars (A_tens, E_tens) are working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material. 
+    /// An Element is the most general (bi-)linear elastic structural element. It allows modelling linear reinforced concrete element. In Tension, the rebars (A_tens, E_tens) are working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material. 
     /// </summary>
     public class Element
     {
         #region Properties
         public int Ind { get; set; } //index of the element in the structure
         public virtual string TypeName { get { return "General Element"; } }
-        public Line Line { get; set; }
-        public List<int> ExtremitiesIndex { get; set; }
-        public double Length0 { get; set; }
-        public ICrossSection CS_Tens { get; set; } //participate to the stiffness in tension
-        public ICrossSection CS_Comp { get; set; } //participate to the stiffness in compression
-        public Muscles_Material Mat_Tens { get; set; } //participate to the stiffness in tension
-        public Muscles_Material Mat_Comp { get; set; } //participate to the stiffness in compression
+        public virtual int Type { get { return -1; } } //-1 for struts, 1 for cables. General Elements are considered to mainly behave in compression.
 
-        public ICrossSection CS_Main { get; set; } //used for calculating volume and displaying the Element in GH. 
-        public Muscles_Material Mat_Main { get; set; } //used for calculating mass
+        public Line Line { get; set; } // the line with a current length in the current state
+        public List<int> EndNodes { get; set; } //index of the end nodes of the element
+        public double LFree { get; set; } // [m] - the Free length of the element
+        public virtual ICrossSection CS_Tens { get; set; } //participate to the stiffness in Tension
+        public virtual ICrossSection CS_Comp { get; set; } //participate to the stiffness in compression
+        public virtual Muscles_Material Mat_Tens { get; set; } //participate to the stiffness in Tension
+        public virtual Muscles_Material Mat_Comp { get; set; } //participate to the stiffness in compression
+
+        public virtual ICrossSection CS_Main { get; set; } //used for calculating volume and displaying the Element in GH. 
+        public virtual Muscles_Material Mat_Main { get; set; } //used for calculating mass
 
         public double V //m3
         {
             get 
             {
-                return Length0 * CS_Main.Area;
+                return LFree * CS_Main.Area;
             } 
         }  
         public double Mass//kg
@@ -48,51 +50,14 @@ namespace Muscles.Elements
         {
             get
             {
-                if (CS_Main.IsValid && Mat_Main.IsValid && Line.IsValid && AxialForce_Current >= AxialForce_Allowable.T0 && AxialForce_Current<=AxialForce_Allowable.T1) return true;
+                if (CS_Main.IsValid && Mat_Main.IsValid && Line.IsValid && UC>=0 && UC<=1) return true;
                 else return false;
             }
         }
 
-        ///// Acting forces /////
+        public double Tension { get; set; } //[N]
 
-        public double AxialForce_Already_Applied { get; set; } //(N)  Initial force in the element in equilibrium in the structure (with or without external load)
-        public double AxialForce_To_Apply { get; set; } //(N)  Initial force in the element when considering that all nodes of the structure are blocked. Once the nodes are realeased this prestress force may spread in the structure.
-        //public PointLoad PrestressLoad0
-        //{
-        //    get
-        //    {
-        //        Vector3d Load = Line.UnitTangent * AxialForce_To_Apply;
-        //        return new PointLoad(Line.From, Load);
-        //    }
-        //}
-        //public PointLoad PrestressLoad1
-        //{
-        //    get
-        //    {
-        //        Vector3d Load = -1 * Line.UnitTangent * AxialForce_To_Apply;
-        //        return new PointLoad(Line.To, Load);
-        //    }
-        //}
-        public List<double> AxialForce_Results{ get; set; }
-        public List<double> AxialForce_Total { get; set; }
-        public double AxialForce_Current 
-        { 
-            get
-            {
-                int final = AxialForce_Total.Count - 1;
-                if (final >= 0) return AxialForce_Total[final];
-                else return 0.0;
-            }    
-        }
 
-        //public double Stress_Already_Applied
-        //{   
-        //    get
-        //    {
-        //        if (AxialForce_Already_Applied>=0) return AxialForce_Already_Applied/CS_Tens.Area;
-        //        else return AxialForce_Already_Applied / CS_Comp.Area;
-        //    }        
-        //}
 
         ///// Resisting forces /////
 
@@ -102,7 +67,7 @@ namespace Muscles.Elements
         {
             get
             {
-                double Lb = kb * Length0; // buckling length [m]
+                double Lb = kb * LFree; //[m] - buckling length based on the free length of the element
                 double A = CS_Comp.Area;
                 double I = CS_Comp.Inertia;
                 return Lb * Math.Sqrt(A / I);
@@ -216,35 +181,35 @@ namespace Muscles.Elements
                 return Xsi * Fy;
             }
         }
-        public virtual Interval Stress_Allowable
+        public virtual Interval AllowableStress
         {
             get
             {
                 return new Interval(-Stress_buckling, Mat_Tens.Fy);
             }
         }
-        public Interval AxialForce_Allowable
+        public Interval AllowableTension
         {
             get
             {
-                double S_Tens = Stress_Allowable.T1;
-                double S_Comp = Stress_Allowable.T0;
+                double S_Tens = AllowableStress.T1;
+                double S_Comp = AllowableStress.T0;
                 return new Interval(S_Comp*CS_Comp.Area, S_Tens * CS_Tens.Area);
             }
         }
-        public double UC
+        public virtual double UC
         {
             get
             {
                 try
                 {
-                    if (AxialForce_Current >= 0) return AxialForce_Current / AxialForce_Allowable.T1;
-                    else return AxialForce_Current / AxialForce_Allowable.T0;
+                    if (Tension >= 0) return Tension / AllowableTension.T1;
+                    else return Tension / AllowableTension.T0;
                 }
                 catch (DivideByZeroException)
                 {
-                    if (AxialForce_Current >= 0) return AxialForce_Current / AxialForce_Allowable.T0; // for strut in tension return negative unity check 
-                    else return AxialForce_Current / AxialForce_Allowable.T1; // for cable in compression return negative unity check 
+                    if (Tension >= 0) return double.PositiveInfinity;
+                    else return double.NegativeInfinity;
                 }
             }
         }
@@ -258,8 +223,8 @@ namespace Muscles.Elements
         {
             Ind = -1;
             Line = new Line();
-            Length0 = 0.0;
-            ExtremitiesIndex = new List<int>();
+            LFree = -1.0;
+            EndNodes = new List<int>();
             CS_Tens = new CS_Circular();
             CS_Comp = new CS_Circular();
             Mat_Tens = new Muscles_Material();
@@ -267,12 +232,8 @@ namespace Muscles.Elements
             CS_Main = CS_Comp;
             Mat_Main = Mat_Comp;
             Buckling_Law = "yielding";
-            kb = 1.0;
-            
-            AxialForce_Already_Applied = 0;
-            AxialForce_To_Apply = 0;
-            AxialForce_Results = new List<double>();
-            AxialForce_Total = new List<double>();
+            kb = 1.0;            
+            Tension = 0;
 
         }
 
@@ -282,11 +243,12 @@ namespace Muscles.Elements
             Init();
         }
 
-        public Element(Line aLine, ICrossSection aCS_Comp, ICrossSection aCS_Tens, Muscles_Material aMat_Comp, Muscles_Material aMat_Tens,string buckling_law, double buckling_factor)
+        public Element(Line aLine,double lFree, ICrossSection aCS_Comp, ICrossSection aCS_Tens, Muscles_Material aMat_Comp, Muscles_Material aMat_Tens,string buckling_law, double buckling_factor)
         {
             Init();
             Line = aLine;
-            Length0 = aLine.Length;
+            if (lFree < 0) LFree = aLine.Length; // if the inputted free length is smaller than 0, use the length of the inputted line. 
+            else LFree = lFree;
             CS_Comp = aCS_Comp;
             CS_Tens = aCS_Tens;
             Mat_Comp = aMat_Comp;
@@ -302,8 +264,8 @@ namespace Muscles.Elements
         public Element(Element other) // Copy constructor. This allows to create a new Element and modify it, without alterating the original
         {
             Line = other.Line;
-            Length0 = other.Length0;
-            ExtremitiesIndex = other.ExtremitiesIndex;
+            LFree = other.LFree;
+            EndNodes = other.EndNodes;
             CS_Tens = other.CS_Tens.Duplicate();
             CS_Comp = other.CS_Comp.Duplicate();
             Mat_Tens = other.Mat_Tens.Duplicate();
@@ -313,10 +275,7 @@ namespace Muscles.Elements
             Buckling_Law = other.Buckling_Law;
             kb = other.kb;
             Ind = other.Ind;
-            AxialForce_Already_Applied = other.AxialForce_Already_Applied;
-            AxialForce_To_Apply = other.AxialForce_To_Apply;
-            AxialForce_Results = other.AxialForce_Results;
-            AxialForce_Total = other.AxialForce_Total;
+            Tension = other.Tension;
         }
 
         #endregion Constructors
@@ -333,7 +292,7 @@ namespace Muscles.Elements
             //if (this is Cable) return (this as Cable).ToString();
             //if (this is Strut) return (this as Strut).ToString();
             //if (this is Bar) return (this as Bar).ToString();
-            return $"Element {Ind} is {Length0:F3}m and {Mass:F1}kg.\n   In Tension : A={CS_Tens.Area * 1e6:F0}mm^2, E={Mat_Tens.E* 1e-6:F0}MPa.\n    In Compression : A={CS_Comp.Area * 1e6:F0}mm^2, E={Mat_Comp.E * 1e-6:F0}MPa.";
+            return $"{TypeName} {Ind} with free length {LFree:F3}m and mass {Mass:F1}kg.\n    In Compression : A={CS_Comp.Area * 1e6:F0}mm^2, E={Mat_Comp.E * 1e-6:F0}MPa.\n   In Tension : A={CS_Tens.Area * 1e6:F0}mm^2, E={Mat_Tens.E* 1e-6:F0}MPa.";
         }
 
 

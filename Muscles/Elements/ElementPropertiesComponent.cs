@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
+using Muscles.CrossSections;
+using Muscles.Materials;
 using Rhino.Geometry;
 
 namespace Muscles.Elements
@@ -32,18 +34,21 @@ namespace Muscles.Elements
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("Type", "type", "General, Bar, Strut or Cable.", GH_ParamAccess.item); //0
-            pManager.AddIntegerParameter("Nodes Indexes", "ind", "The indexes of the extreme nodes.", GH_ParamAccess.list); //1
-            pManager.AddLineParameter("Line", "L", "The line geometry of the finite element.", GH_ParamAccess.item); //2
-            pManager.AddGenericParameter("Cross Section", "CS", "The cross section of the finite element.", GH_ParamAccess.item); //3
-            pManager.AddGenericParameter("Material", "Mat", "The material of the finite element.", GH_ParamAccess.item); //4
-            pManager.AddNumberParameter("Volume", "V (m³)", "Volume in m³.", GH_ParamAccess.item); //5
-            pManager.AddNumberParameter("Mass", "m (kg)", "Mass in kg.", GH_ParamAccess.item); //6
-            pManager.AddVectorParameter("Weight", "W (kN)", "Weight in kN", GH_ParamAccess.item); //7
-
+            pManager.AddIntegerParameter("Element Index", "Ind", "The indexes of the structural elements.", GH_ParamAccess.item); //1
+            pManager.AddIntegerParameter("Nodes Indexes", "End nodes", "The indexes of the elements end nodes.", GH_ParamAccess.list); //2
+            pManager.AddLineParameter("Line", "L", "The current line geometry with the current length of the finite element.", GH_ParamAccess.item); //3
+            pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.", GH_ParamAccess.item); //4
+            pManager.AddGenericParameter("Main Cross Section", "Main CS", "The main cross section used for the calculation of the volume and for linear analysis.", GH_ParamAccess.item); //5
+            pManager.AddGenericParameter("Cross Sections List", "List CS", "The cross sections used in non-linear finite element analysis.\n The list contains [CS in compression, CS in Tension].", GH_ParamAccess.list); //6
+            pManager.AddGenericParameter("Main Material", "Main Mat", "The main material used for the calculation of the mass and for linear analysis.", GH_ParamAccess.item); //7
+            pManager.AddGenericParameter("Material List", "List Mat", "The materials used in non-linear finite element analysis.\n The list contains [Mat in compression, Mat in Tension].", GH_ParamAccess.list); //8
+            pManager.AddNumberParameter("Volume", "V (m³)", "Volume in m³.", GH_ParamAccess.item); //9
+            pManager.AddNumberParameter("Mass", "m (kg)", "Mass in kg.", GH_ParamAccess.item); //10
+            pManager.AddVectorParameter("Weight", "W (kN)", "Weight in kN", GH_ParamAccess.item); //11
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// 
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -53,16 +58,24 @@ namespace Muscles.Elements
             if (!DA.GetData(0, ref e)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
 
             DA.SetData(0, e.TypeName);
-            DA.SetDataList(1, e.ExtremitiesIndex);
-            DA.SetData(2, e.Line);
-            DA.SetData(3, e.CS_Main);
-            DA.SetData(4, e.Mat_Main);
-            DA.SetData(5, e.V);
-            DA.SetData(6, e.Mass);
-            DA.SetData(7, e.Weight/1000);
+            DA.SetData(1, e.Ind);
+            DA.SetDataList(2, e.EndNodes);
+            DA.SetData(3, e.Line);
+            DA.SetData(4, e.LFree);
 
+            DA.SetData(5, e.CS_Main);
 
+            List<ICrossSection> CS = new List<ICrossSection> { e.CS_Comp, e.CS_Tens};
+            DA.SetDataList(6, CS);
 
+            DA.SetData(7, e.Mat_Main);
+
+            List<Muscles_Material> Mat = new List<Muscles_Material> { e.Mat_Comp, e.Mat_Tens };
+            DA.SetDataList(8, Mat);
+
+            DA.SetData(9, e.V);
+            DA.SetData(10, e.Mass);
+            DA.SetData(11, e.Weight/1000);
         }
 
         /// <summary>
@@ -83,7 +96,7 @@ namespace Muscles.Elements
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("40100cb6-a980-4d65-b37e-7c169c32d1ce"); }
+            get { return new Guid("83c5746d-d54d-4f88-b553-0d4cbe86bac8"); }
         }
     }
 }

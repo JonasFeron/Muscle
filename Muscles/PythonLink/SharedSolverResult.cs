@@ -15,22 +15,32 @@ namespace Muscles.PythonLink
 		#region Properties
 
 		public string TypeName { get { return "SharedSolverResult"; } }
+		public bool IsInEquilibrium { get; set; }
+
+		#region Nodes
+		public List<List<double>> NodesCoord { get; set; }  //[m] - shape (NodesCount,3)
+
+		public List<List<double>> Loads { get; set; } //[N] - shape (NodesCount,3)
+		public List<List<double>> Residual { get; set; } //[N] - shape (NodesCount,3)
+		#endregion Nodes
 
 
 		#region Elements
+		public List<double> Tension { get; set; } //[N] - shape (ElementsCount,)
+		public List<double> ElementsLFree { get; set; } //[m] - shape (ElementsCount,)
 
 		#endregion Elements
 
 
 		#region Supports
+		public List<double> Reactions { get; set; } //[N] - shape (FixationsCount,)
 
 		#endregion Supports
 
 		#region StructureAnalysis
-		public List<double> Stages { get; set; }
-		public List<List<double>> AxialForces_Results { get; set; }
-		public List<List<double>> Displacements_Results { get; set; }
-		public List<List<double>> Reactions_Results { get; set; }
+		// Performance of the DR method
+		public int nTimeStep { get; set; }
+		public int nKEReset { get; set; }
 
 		#endregion StructureAnalysis
 
@@ -49,10 +59,15 @@ namespace Muscles.PythonLink
 		/// </summary>
 		private void Init()
 		{
-			Stages = new List<double>();
-			AxialForces_Results = new List<List<double>>();
-			Displacements_Results = new List<List<double>>();
-			Reactions_Results = new List<List<double>>();
+			IsInEquilibrium = false;
+			NodesCoord = new List<List<double>>();
+			Loads = new List<List<double>>();
+			Residual = new List<List<double>>();
+			Tension = new List<double>();
+			ElementsLFree = new List<double>();
+			Reactions = new List<double>();
+			nTimeStep = 0;
+			nKEReset = 0;
 		}
 
 
@@ -64,12 +79,6 @@ namespace Muscles.PythonLink
 			Init();
 		}
 
-		//public SharedAssemblyResult(StructureObj structObj)
-		//{
-		//	Init();
-		//	RegisterElements(structObj); 
-		//	RegisterNodes(structObj);
-		//}
 
 		#endregion Constructors
 

@@ -46,8 +46,8 @@ namespace Muscles.Loads
 
             List<GH_PointLoad> selfweights = new List<GH_PointLoad>();
 
-            GH_PointLoad p0 = new GH_PointLoad(new PointLoad(e.ExtremitiesIndex[0], e.Weight / 2));
-            GH_PointLoad p1 = new GH_PointLoad(new PointLoad(e.ExtremitiesIndex[1], e.Weight / 2));
+            GH_PointLoad p0 = new GH_PointLoad(new PointLoad(e.EndNodes[0], e.Weight / 2));
+            GH_PointLoad p1 = new GH_PointLoad(new PointLoad(e.EndNodes[1], e.Weight / 2));
             selfweights.Add(p0);
             selfweights.Add(p1);
         

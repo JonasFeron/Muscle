@@ -31,17 +31,17 @@ namespace Muscles.Elements
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddLineParameter("Line", "L", "Line", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("Is Valid", "IsValid", "True if the total tension is in the interval of allowable tension.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Unity Check", "UC", "Tension Total/Tension Allowable or NAN if cables are compressed or struts are tensed", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Xsi", "Xsi", "Xsi = Reduction factor in compression = Buckling strength/Yielding strength", GH_ParamAccess.item); //2
-            pManager.AddNumberParameter("Tension Additional", "t (kN)", "Additional Tension coming only from the last applied loads", GH_ParamAccess.item); //2
-            pManager.AddNumberParameter("Tension Total", "t_tot (kN)", "Total Tension coming from all applied loads", GH_ParamAccess.item); //3
-            pManager.AddIntervalParameter("Tension Allowable", "t allow (kN)", "Allowable Tension [-Buckling,Yielding]", GH_ParamAccess.item); //2
+            pManager.AddLineParameter("Line", "L", "Line", GH_ParamAccess.item); //0
+            pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.", GH_ParamAccess.item); //1
+            pManager.AddBooleanParameter("Is Valid", "IsValid", "True if the Tension is in the interval of allowable Tension.", GH_ParamAccess.item);//2
+            pManager.AddNumberParameter("Unity Check", "UC", "Tension/Allowable Tension. The UC can be negative if the cables are compressed or struts are tensed", GH_ParamAccess.item);//3
+            pManager.AddNumberParameter("Xsi", "Xsi", "Xsi = Reduction factor in compression = Buckling strength/Yielding strength", GH_ParamAccess.item); //4
+            pManager.AddNumberParameter("Tension", "t (kN)", "Total Tension coming from all applied loads", GH_ParamAccess.item); //5
+            pManager.AddIntervalParameter("Tension Allowable", "allow. t (kN)", "Allowable Tension [Buckling,Yielding]", GH_ParamAccess.item); //6
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        /// 
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -51,23 +51,13 @@ namespace Muscles.Elements
             if (!DA.GetData(0, ref e)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
 
             DA.SetData(0, e.Line);
-            DA.SetData(1, e.IsValid);
-            DA.SetData(2, e.UC);
-            DA.SetData(3, e.Xsi);
-            int final = e.AxialForce_Results.Count - 1;
-            if (final>=0)
-            {
-                DA.SetData(4, e.AxialForce_Results[final]/1e3);
-                DA.SetData(5, e.AxialForce_Total[final]/1e3);
-            }
-            Interval kn = new Interval(e.AxialForce_Allowable.T0 / 1e3, e.AxialForce_Allowable.T1 / 1e3);
-            DA.SetData(6, kn);
-
-            //else
-            //{
-            //    DA.SetData(2,null);
-            //    DA.SetData(3,null);
-            //}
+            DA.SetData(1, e.LFree);
+            DA.SetData(2, e.IsValid);
+            DA.SetData(3, e.UC);
+            DA.SetData(4, e.Xsi);
+            DA.SetData(5, e.Tension/1000);
+            Interval allow = new Interval(e.AllowableTension.T0 / 1e3, e.AllowableTension.T1 / 1e3);
+            DA.SetData(6, allow);
 
         }
 
@@ -89,7 +79,7 @@ namespace Muscles.Elements
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("a7c78f2a-bc16-4c84-93b2-2bb0c0ca009d"); }
+            get { return new Guid("c2d33622-f493-4c17-a652-824b08241145"); }
         }
     }
 }
