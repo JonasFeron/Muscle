@@ -54,8 +54,6 @@ namespace Muscles.PythonLink.Component
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string assemblyTitle = "Muscles v0.4";
-
             bool user_mode = true;
             bool start = false;
             string LogLvl = "Debug";
@@ -80,7 +78,7 @@ namespace Muscles.PythonLink.Component
                 if (user_mode)
                 {
                     DirectoryInfo librairies = SpecialFolder();
-                    string Folder_Muscles = Path.Combine(librairies.FullName, assemblyTitle);
+                    string Folder_Muscles = Path.Combine(librairies.FullName, AccessToAll.assemblyTitle);
                     AccessToAll.Main_Folder = Folder_Muscles;
                     //retrieve path to anaconda
                     activateCondaBat = PathToAnaconda(Folder_Muscles);
