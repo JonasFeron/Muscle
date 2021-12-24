@@ -152,8 +152,8 @@ namespace Muscles.Solvers
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            new_structure.LoadsToApply = new List<Vector3d>();
-            foreach (var node in new_structure.StructuralNodes) new_structure.LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
+            //new_structure.LoadsToApply = new List<Vector3d>();
+            //foreach (var node in new_structure.StructuralNodes) new_structure.LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
 
 
             List<Node> nodes = new_structure.StructuralNodes; //use a shorter nickname 
@@ -191,8 +191,8 @@ namespace Muscles.Solvers
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            new_structure.LengtheningsToApply = new List<double>();
-            foreach (var elem in new_structure.StructuralElements) new_structure.LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
+            //new_structure.LengtheningsToApply = new List<double>();
+            //foreach (var elem in new_structure.StructuralElements) new_structure.LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
 
             //List<Node> nodes = new_structure.StructuralNodes;
             List<Element> elements = new_structure.StructuralElements;

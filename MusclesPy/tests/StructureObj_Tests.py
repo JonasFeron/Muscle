@@ -785,6 +785,81 @@ class StructureObj_Tests(unittest.TestCase):
         d2 = S2.Final.NodesCoord-S0.Initial.NodesCoord
         successDispl2 = np.isclose(d2.reshape(-1,3)[1,2], d_sol2,rtol=2e-2)
         self.assertEqual(successDispl2.all(),True)
+
+    def test_MainDynamicRelaxation_TightRope_3stages_Reversed(self):
+        #cfr solution in excel files attached
+
+        ### STAGE PRESTRESS
+        S0 = StructureObj()
+
+        NodesCoord = np.array([[0.0, 0.0, 0.0],
+                               [1.0, 0.0, 0.0],
+                               [2.0, 0.0, 0.0]])
+        IsDOFfree = np.array([False, False, False,
+                              True, False, True,
+                              False, False, False])
+
+        ElementsEndNodes = np.array([[0, 1],
+                                     [1, 2]])
+        ElementsType = np.array([1, 1])
+
+        ElementsE = np.array([[1, 1],
+                              [1, 1]]) * 100000  # MPa
+        ElementsA = np.array([[1, 1],
+                              [1, 1]]) * 50  # mm²
+
+
+        LoadsToApply1 = np.array([[0, 0, 0],
+                                 [0, 0, -5109.0],
+                                 [0, 0, 0]])  # N
+
+        S0.test_MainDynamicRelaxation(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
+                                                    ElementsE,LoadsToApply=LoadsToApply1, Dt=0.1)
+
+        # PrestressForcesResult= np.array([20000, 20000])# N
+        # successForces = np.isclose(S0.Final.Tension, PrestressForcesResult,rtol=2e-2)
+        # self.assertEqual(successForces.all(), True)
+
+        ### STAGE FIRST LOAD
+        S1 = StructureObj()
+
+        LengtheningsToApply = np.array([-3.984, -3.984]) * 1e-3  # m
+        S1.test_MainDynamicRelaxation(S0.Final.NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
+                                                ElementsE, ElementsLFreeInit=S0.Final.ElementsLFree, LengtheningsToApply=LengtheningsToApply,
+                                                LoadsInit=S0.Final.Loads,TensionInit=S0.Final.Tension,ReactionsInit=S0.Final.Reactions, Dt=0.1)
+
+        d_sol1 = -75.0 * 1e-3  # analytique solution
+        t_sol1 = 34043 # analytique solution
+
+        successForces1 = np.isclose(S1.Final.Tension, np.array([t_sol1,t_sol1]),rtol=2e-2)
+        self.assertEqual(successForces1.all(), True)
+
+        d1 = S1.Final.NodesCoord-S0.Initial.NodesCoord
+        successDispl1 = np.isclose(d1.reshape(-1,3)[1,2], d_sol1,rtol=2e-2)
+        self.assertEqual(successDispl1.all(), True)
+
+
+        ### STAGE SECOND LOAD
+        S2 = StructureObj()
+        LoadsToApply2 = np.array([[0, 0, 0],
+                                 [0, 0, -9988.0],
+                                 [0, 0, 0]])  # N
+
+        AdditionalLoads = LoadsToApply2-LoadsToApply1
+
+        S2.test_MainDynamicRelaxation(S1.Final.NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA,
+                                                ElementsE, ElementsLFreeInit=S1.Final.ElementsLFree, LoadsToApply=AdditionalLoads,
+                                                LoadsInit=S1.Final.Loads, TensionInit=S1.Final.Tension, ReactionsInit=S1.Final.Reactions, Dt=0.1)
+
+        d_sol2 = -105.0 * 1e-3  # analytique solution
+        t_sol2 = 47487 # analytique solution
+
+        successForces2 = np.isclose(S2.Final.Tension, np.array([t_sol2,t_sol2]),rtol=2e-2)
+        self.assertEqual(successForces2.all(), True)
+
+        d2 = S2.Final.NodesCoord-S0.Initial.NodesCoord
+        successDispl2 = np.isclose(d2.reshape(-1,3)[1,2], d_sol2,rtol=2e-2)
+        self.assertEqual(successDispl2.all(),True)
     # endregion
 
     # region FORCE Methods

@@ -138,7 +138,13 @@ namespace Muscles.Structure
 			Residual0Threshold = other.Residual0Threshold;
 
 			LoadsToApply = other.LoadsToApply; // do not fill with old value
-			LengtheningsToApply = other.LengtheningsToApply;
+			LoadsToApply = new List<Vector3d>();
+			foreach (var node in StructuralNodes) LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
+
+			//LengtheningsToApply = other.LengtheningsToApply;
+			LengtheningsToApply = new List<double>();
+			foreach (var elem in StructuralElements) LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
+
 
 			DR = other.DR.Duplicate();
 		}

@@ -15,6 +15,7 @@ C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\log4net.dll
 C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\Newtonsoft.Json.dll
 C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\log4net.xml
 C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\bin\Newtonsoft.Json.xml
+C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Release\Muscles.csprojAssemblyReference.cache
 C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Release\Muscles.csproj.CoreCompileInputs.cache
 C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Release\Muscles.csproj.CopyComplete
 C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\Muscles\obj\Release\Muscles.dll
