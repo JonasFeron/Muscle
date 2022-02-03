@@ -9,3 +9,14 @@ C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\M
 C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\Muscles\obj\Debug\Muscles.dll
 C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\Muscles\obj\Debug\Muscles.pdb
 C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\Muscles\obj\Debug\Muscles.csprojAssemblyReference.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\obj\Debug\Muscles.csproj.AssemblyReference.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\obj\Debug\Muscles.csproj.CoreCompileInputs.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\obj\Debug\Muscles.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\obj\Debug\Muscles.pdb
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\bin\Muscles.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\bin\Muscles.pdb
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\bin\log4net.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\bin\Newtonsoft.Json.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\bin\log4net.xml
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\bin\Newtonsoft.Json.xml
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles\obj\Debug\Muscles.csproj.CopyComplete

@@ -23,7 +23,7 @@ namespace Muscles
 
         public static PythonManager pythonManager = null; //pythonManager of the current Canvas
         public static bool user_mode = true;
-        public static string Main_Folder = @"C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles";
+        public static string Main_Folder = @"C:\Users\desme\Documents\GitHub\Muscles_ADE";
         public static string assemblyTitle = "Muscles v0.5";
 
         public static string MainTest
