@@ -1127,5 +1127,228 @@ class StructureObj_Tests(unittest.TestCase):
         Displacements2_Results_free = np.linalg.solve(S2.Km_free, f2_unbalanced)
     # endregion
 
+    #region Dynamics
+    def test_dyn_bar(self):
+        """
+        Check if the obtained natural frequency of a single bar is correct
+        TEST on a simple beam
+        Name of SCIA file : SimpleBEAM
+        :return:
+        """
+        Struct = StructureObj()
+        Struct.NodesCoord = np.array([[0.00, 0.00, 0.00],
+                                      [3.00, 0.00, 0.00]])
+
+        Struct.IsDOFfree = np.array([False, False, False,
+                                     True, False, False])
+
+        Struct.ElementsType = np.array([1])
+        Struct.NodesCount = 2
+        Struct.ElementsCount = 1
+        Struct.FixationsCount = 5
+        Struct.DOFfreeCount = 3 * Struct.NodesCount - Struct.FixationsCount
+        Struct.ElementsEndNodes = np.array([[0, 1]])
+
+        Struct.ElementsE = 0.21 * np.ones((Struct.ElementsCount, 2)) * 10 ** 6  # MPa
+        Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
+        Struct.DynMasses = 1 * np.array([1, 1])  # kg
+        PrestrainLevel = 0  # [kN]
+        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        print(w)
+        wScia = np.array([79370])  # Data coming from the SCIA model
+        self.assertEqual(np.allclose(w, wScia, atol=3), True)
+        #self.assertEqual(True, True)
+
+
+    def test_dyn_doublebar(self):
+        """
+        Check if the obtained natural frequencies of a structure are correct
+        TEST on a inversed V structure
+        Name of SCIA file : test_2BEAM
+        :return:
+        """
+        Struct = StructureObj()
+        Struct.NodesCoord = np.array([[0.00, 0.00, 0.00],
+                                      [2.00, 2.00, 0.00],
+                                      [4.00, 0.00, 0.00]])
+
+        Struct.IsDOFfree = np.array([False, False, False,
+                                     True, True, False,
+                                     False, False, False])
+
+        Struct.ElementsType = np.array([1, 1 ])
+        Struct.NodesCount = 3
+        Struct.ElementsCount = 2
+        Struct.FixationsCount = 7
+        Struct.DOFfreeCount = 3 * Struct.NodesCount - Struct.FixationsCount
+        Struct.ElementsEndNodes = np.array([[0, 1],
+                                            [1, 2]])
+
+        Struct.ElementsE = 0.21 * np.ones((Struct.ElementsCount, 2)) * 10 ** 6  # MPa
+        Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
+        Struct.DynMasses = 1 * np.array([1, 1, 1])  # kg
+        PrestrainLevel = 0  # [kN]
+        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        print(w)
+        wScia = np.array([81741 , 81741])  # Data coming from the SCIA model
+        self.assertEqual(np.allclose(w, wScia, atol=3), True)
+
+
+    def test_Dyn_truss(self):
+        """
+        Check if the obtained natural frequencies of a structure are correct
+        TEST on a truss
+        Name of SCIA file : TEST_simpleTRUSS
+        :return:
+        """
+        Struct = StructureObj()
+        Struct.NodesCoord = np.array([[0.00, 0.00, 0.00],
+                               [2.50, 5.00, 0.00],
+                               [5.00, 0.00, 0.00],
+                               [7.50, 5.00, 0.00],
+                               [10.00, 0.00, 0.00]])
+
+        Struct.IsDOFfree = np.array([False, False, False,
+                              True, True, False,
+                              True, True, False,
+                              True, True, False,
+                              True, False, False])
+
+        Struct.ElementsType = np.array([1, 1, 1, 1, 1, 1, 1])
+        Struct.NodesCount = 5
+        Struct.ElementsCount = 7
+        Struct.FixationsCount = 8
+        Struct.DOFfreeCount = 3 * Struct.NodesCount - Struct.FixationsCount
+        Struct.ElementsEndNodes = np.array([[0, 1],
+                                            [0, 2],
+                                            [1, 2],
+                                            [2, 4],
+                                            [1, 3],
+                                            [2, 3],
+                                            [3, 4]])
+
+        Struct.ElementsE = 0.21*np.ones((Struct.ElementsCount, 2))*10**6  # MPa
+        Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
+        Struct.DynMasses = np.array([1, 1, 1, 1, 1])  # kg
+        PrestrainLevel = 0  # [kN]
+        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        print('w', w)
+        wScia = np.array([25810.53 , 36157.38 , 53325.3 , 68567.28 , 89122.83 , 102607.29 , 108948.17])  # Data coming from the SCIA model
+        self.assertEqual(np.allclose(w, wScia, atol=3), True)
+
+    def test_Dyn_truss(self):
+        """
+        Check if the obtained natural frequencies of a structure are correct
+        TEST on a 3D truss
+        Name of SCIA file :
+        :return:
+        """
+
+    def test_Simplex_NaturalFrequencies(self):
+        """
+        Find the natural frequencies of the experimental simplex
+
+        :return:
+        """
+
+        # theoretical nodes coordinates
+        NodesCoord = np.array([[0.00, -2043.82, 0.00],
+                               [0.00, 0.00, 0.00],
+                               [1770.00, -1021.91, 0.00],
+                               [590.00, -2201.91, 1950.00],
+                               [-431.91, -431.91, 1950.00],
+                               [1611.91, -431.91, 1950.00]]) * 1e-3
+        IsDOFfree = np.array([False, True, False,
+                              False, False, False,
+                              True, True, False,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True])
+        ElementsType = np.array([-1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        ElementsEndNodes = np.array([[2, 4],
+                                     [1, 3],
+                                     [0, 5],
+                                     [1, 2],
+                                     [0, 1],
+                                     [0, 2],
+                                     [4, 5],
+                                     [3, 4],
+                                     [3, 5],
+                                     [2, 5],
+                                     [1, 4],
+                                     [0, 3]])
+
+        # Bars can only be in compression and cables only in tension
+        ElementsE = np.array([[70390, 0],
+                              [70390, 0],
+                              [70390, 0],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 72190],
+                              [0, 72190],
+                              [0, 72190]])  # MPa
+
+        ElementsA = np.ones((12, 2))
+        ElementsA[0:3, :] = 364.4
+        ElementsA[3:12, :] = 50.3
+
+        # ElementsLFree = np.array([2999.8,
+        #                           2999.8,
+        #                           2999.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.4,
+        #                           2043.4,
+        #                           2043.4])*1e-3
+
+        Struct = StructureObj()
+        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
+        Struct.Initial.ElementsE = Struct.ElementsInTensionOrCompression(ElementsType, ElementsE)
+        Struct.Initial.ElementsA = Struct.ElementsInTensionOrCompression(ElementsType, ElementsA)
+
+        (l, ElementsCos) = Struct.Initial.ElementsLengthsAndCos(Struct, NodesCoord)
+        (A, AFree, AFixed) = Struct.Initial.EquilibriumMatrix(Struct, ElementsCos)
+
+        # precontrainte dans la structure theorique. On impose directement une force (plutot que d'imposer un "LengtheningToApply")
+        Struct.Initial.SVD.SVDEquilibriumMatrix(Struct, AFree)
+
+        S = Struct.Initial.SVD.SS.T  # Self-stress matrix
+
+        print(S)
+        a = 1500  # prestress level [N]
+        t0 = S * a  # prestress forces [N] # assumption no self-weight
+
+
+        print(t0)
+
+        # matrice de rigidite geometrique
+        q = Struct.Initial.ForceDensities(t0, l)  #
+        kgLocList = Struct.Initial.GeometricLocalStiffnessList(Struct, q)
+        Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
+        KgeoFree = Kgeo[Struct.IsDOFfree].T[Struct.IsDOFfree].T
+
+        # matrice de rigidite materielle
+        Struct.Initial.Flex = Struct.Flexibility(Struct.Initial.ElementsE, Struct.Initial.ElementsA, l)
+        F = np.diag(Struct.Initial.Flex)
+        Ke = np.diag(1 / Struct.Initial.Flex)
+
+        # KmatFree = AFree @ Ke @ AFree.T #methode 1
+        kmatLocList = Struct.Initial.MaterialLocalStiffnessList(Struct, l, ElementsCos, Struct.Initial.ElementsA,
+                                                                Struct.Initial.ElementsE)
+        Kmat = Struct.LocalToGlobalStiffnessMatrix(kmatLocList)
+        KmatFree = Kmat[Struct.IsDOFfree].T[Struct.IsDOFfree].T  # methode 2
+
+        self.assertEqual(False, True)
+
+    # endregion
+
 if __name__ == '__main__':
     unittest.main()
