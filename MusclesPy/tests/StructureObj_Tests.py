@@ -1240,9 +1240,42 @@ class StructureObj_Tests(unittest.TestCase):
         """
         Check if the obtained natural frequencies of a structure are correct
         TEST on a 3D truss
-        Name of SCIA file :
+        Name of SCIA file : TEST_3D_dyn
         :return:
         """
+        Struct = StructureObj()
+        Struct.NodesCoord = np.array([[0.00, 0.00, 0.00],
+                                      [-1.00, 4.00, 0.00],
+                                      [1.00, 4.00, 0.00],
+                                      [0.00, 2.00, 3.00]])
+
+        Struct.IsDOFfree = np.array([False, False, False,
+                                     True, False, False,
+                                     True, False, False,
+                                     True, True, True])
+
+        Struct.ElementsType = np.array([1, 1, 1, 1, 1, 1])
+        Struct.NodesCount = 4
+        Struct.ElementsCount = 6
+        Struct.FixationsCount = 7
+        Struct.DOFfreeCount = 3 * Struct.NodesCount - Struct.FixationsCount
+        Struct.ElementsEndNodes = np.array([[0, 1],
+                                            [1, 2],
+                                            [2, 0],
+                                            [0, 3],
+                                            [1, 3],
+                                            [2, 3]])
+
+        Struct.ElementsE = 0.21 * np.ones((Struct.ElementsCount, 2)) * 10 ** 6  # MPa
+        Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
+        Struct.DynMasses = np.array([1, 1, 1, 1])  # kg
+        PrestrainLevel = 0  # [kN]
+        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        print('w', w)
+        wScia = np.array(
+            [12795.77, 34470.83, 62397.29, 101845.22, 141015.39])  # Data coming from the SCIA model
+        self.assertEqual(np.allclose(w, wScia, atol=3), True)
+        #self.assertEqual(True, True)
 
     def test_Simplex_NaturalFrequencies(self):
         """
