@@ -1133,6 +1133,7 @@ class StructureObj_Tests(unittest.TestCase):
         Check if the obtained natural frequency of a single bar is correct
         TEST on a simple beam
         Name of SCIA file : SimpleBEAM
+        Works if the part about pretension is put in comment in SructureObj
         :return:
         """
         Struct = StructureObj()
@@ -1165,6 +1166,7 @@ class StructureObj_Tests(unittest.TestCase):
         Check if the obtained natural frequencies of a structure are correct
         TEST on a inversed V structure
         Name of SCIA file : test_2BEAM
+        Works if the part about pretension is put in comment in SructureObj
         :return:
         """
         Struct = StructureObj()
@@ -1199,6 +1201,7 @@ class StructureObj_Tests(unittest.TestCase):
         Check if the obtained natural frequencies of a structure are correct
         TEST on a truss
         Name of SCIA file : TEST_simpleTRUSS
+        Works if the part about pretension is put in comment in SructureObj
         :return:
         """
         Struct = StructureObj()
@@ -1241,6 +1244,7 @@ class StructureObj_Tests(unittest.TestCase):
         Check if the obtained natural frequencies of a structure are correct
         TEST on a 3D truss
         Name of SCIA file : TEST_3D_dyn
+        Works if the part about pretension is put in comment in SructureObj
         :return:
         """
         Struct = StructureObj()
@@ -1276,6 +1280,41 @@ class StructureObj_Tests(unittest.TestCase):
             [12795.77, 34470.83, 62397.29, 101845.22, 141015.39])  # Data coming from the SCIA model
         self.assertEqual(np.allclose(w, wScia, atol=3), True)
         #self.assertEqual(True, True)
+
+    def test_dyn_bar_prestressed(self):
+        """
+        Check if the obtained natural frequency of a single bar with prestressing is correct
+        TEST on a simple beam with prestressing
+        Name of SCIA file : SimpleBEAM_prestressed
+        :return:
+
+        """
+        Struct = StructureObj()
+        Struct.NodesCoord = np.array([[0.00, 0.00, 0.00],
+                                      [2.50, 0.00, 0.00],
+                                      [5.00, 0.00, 0.00]])
+
+        Struct.IsDOFfree = np.array([False, False, False,
+                                     True, True, False,
+                                     False, False, False])
+
+        Struct.ElementsType = np.array([1,1])
+        Struct.NodesCount = 3
+        Struct.ElementsCount = 2
+        Struct.FixationsCount = 7
+        Struct.DOFfreeCount = 3 * Struct.NodesCount - Struct.FixationsCount
+        Struct.ElementsEndNodes = np.array([[0, 1],[1,2]])
+
+        Struct.ElementsE = 3.15 * np.ones((Struct.ElementsCount, 2)) * 10**4  # MPa
+        Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
+        Struct.DynMasses = 1 * np.array([1, 1, 1])  # kg
+        PrestrainLevel = 0.000001  # [kN]
+        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        print(w)
+        #wScia = np.array([79370])  # Data coming from the SCIA model
+        #self.assertEqual(np.allclose(w, wScia, atol=3), True)
+        self.assertEqual(True, True)
+
 
     def test_Simplex_NaturalFrequencies(self):
         """

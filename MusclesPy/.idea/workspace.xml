@@ -27,21 +27,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
   </component>
-  <component name="RunManager" selected="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_truss">
-    <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_simple" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="MusclesPy" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;StructureObj_Tests.StructureObj_Tests.test_Dyn_simple&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed">
     <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_truss" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="MusclesPy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -53,6 +39,20 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;StructureObj_Tests.StructureObj_Tests.test_Dyn_truss&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_Simplex_NaturalFrequencies" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="MusclesPy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;StructureObj_Tests.StructureObj_Tests.test_Simplex_NaturalFrequencies&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -70,6 +70,20 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="MusclesPy" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_doublebar" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="MusclesPy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -84,27 +98,13 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_easy" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
-      <module name="MusclesPy" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;StructureObj_Tests.StructureObj_Tests.test_dyn_easy&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed" />
+        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_Simplex_NaturalFrequencies" />
+        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar" />
         <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_truss" />
         <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_doublebar" />
-        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar" />
-        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_simple" />
-        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_easy" />
       </list>
     </recent_temporary>
   </component>

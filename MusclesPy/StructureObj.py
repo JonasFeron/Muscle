@@ -1825,22 +1825,22 @@ class StructureObj():
 
         Self.Initial.SVD.SVDEquilibriumMatrix(Self, AFree)
 
-        #PrestressMode = Self.Initial.SVD.SS.T  # prestress modes in the initial shape [ # of modes , # of elements in the structure]
+        PrestressMode = Self.Initial.SVD.SS.T  # prestress modes in the initial shape [ # of modes , # of elements in the structure]
 
             #2 - Compute the internal forces in the members due to the PrestrainLevel
 
-        #PrestressIntForces = PrestrainLevel * PrestressMode
-
+        PrestressIntForces = PrestrainLevel * PrestressMode
+        #print(PrestressMode)
 
         # Compute the K_geo - the rigidity matrix due to the Prestress
             #1 - Compute the force densities for each member  - Q [ #member] = F/l [N/m]
-        #Q = Self.Initial.ForceDensities(PrestressIntForces, l)
+        Q = Self.Initial.ForceDensities(PrestressIntForces, l)
 
             # 2 - Obtain a list containing the local rigidity matrix for each member
-        #kgLocList = Self.Initial.GeometricLocalStiffnessList(Self, Q)
+        kgLocList = Self.Initial.GeometricLocalStiffnessList(Self, Q)
             #3 - Construct the global stiffness matrix of the structure
-        #Kgeo = Self.LocalToGlobalStiffnessMatrix(kgLocList)
-        #KgeoFree = Kgeo[Self.IsDOFfree].T[Self.IsDOFfree].T # Obtain the Final matrix with only the free DOF
+        Kgeo = Self.LocalToGlobalStiffnessMatrix(kgLocList)
+        KgeoFree = Kgeo[Self.IsDOFfree].T[Self.IsDOFfree].T # Obtain the Final matrix with only the free DOF
 
         # Compute the K_mat - the rigidity matrix linked to the material rigidity
         # The material rigidity is only axial
@@ -1853,8 +1853,8 @@ class StructureObj():
         Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
         KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
 
-        #KFree = KgeoFree*1000 + KmatFree # [N/m]
-        KFree = KmatFree
+        KFree = KgeoFree*1000 + KmatFree # [N/m]
+
         # Used units
         # K_geo = [kN/m]
         # K_mat = [N/m]
@@ -1886,9 +1886,14 @@ class StructureObj():
 
         return w, PHI
 
+    #def Module_dynamics_mode(Self):
+
+    #"""
+    #Module that display the mode
+
+    #"""
 
 
-        #Take the masses in the
 
     #endregion
 
