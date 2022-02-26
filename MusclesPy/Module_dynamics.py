@@ -105,7 +105,7 @@ for i in range(Str.NodesCount):
     
 
 ax = plt.axes(projection='3d')
-ax = plt.axes(projection='3d')
+
 ax.set_title("3D Structure", pad=25, size=15)
 ax.set_xlabel("X") 
 ax.set_ylabel("Y") 
