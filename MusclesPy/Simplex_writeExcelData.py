@@ -91,8 +91,8 @@ freq = omega/(2*np.pi)
 ################################################################
 
 # Create a workbook and add a worksheet.
-workbook = xlsxwriter.Workbook('C:/Users/desme/OneDrive - UCL\Mémoire - Drive/Simulation_num/Geom_initale.xlsx')
-worksheet = workbook.add_worksheet('prestrain')
+#workbook = xlsxwriter.Workbook('C:/Users/desme/OneDrive - UCL\Mémoire - Drive/Simulation_num/Geom_initale2.xlsx')
+worksheet = workbook.add_worksheet('Precontr')
 
 # Some data we want to write to the worksheet.
 
@@ -101,43 +101,73 @@ worksheet = workbook.add_worksheet('prestrain')
 
 # Start from the first cell. Rows and columns are zero indexed.
 #worksheet.write(row, col,item)
+# for i in range(nbreMass):
+#     strlettre = 'A'
+#     str1 = strlettre+str(i)
+#     strin = 'Intitial Mass +'
+#     str2 = i*10
+#     str3 = '[kN]'
+#     worksheet.write(0,1+5*i, strin+str(str2)+str3)
+    
+#     worksheet.write(1, 1+i*5,'freq'+str(1))
+#     worksheet.write(1, 1+i*5+1,'freq'+str(2))
+#     worksheet.write(1, 1+i*5+2,'freq'+str(3))
+#     worksheet.write(1, 1+i*5+3,'freq'+str(4))
+#     worksheet.write(1, 1+i*5+4,'freq'+str(5))
+    
+# # worksheet.write('A1', 'Prestrain [kN]')
+# # worksheet.write('A2', 'Frequency  [Hz]')
+# worksheet.write(1, 0,'Précontrainte [kN]')
+
+# for i in range(len(DeltaPrestrain)):
+#     worksheet.write(2+i, 0,DeltaPrestrain[i])
+    
+# row = 0
+
+# for col, data in enumerate(freq.T):
+#     worksheet.write_column(2+row, 1+col, data)
+
+# Start from the first cell. Rows and columns are zero indexed.
+#worksheet.write(row, col,item)
+
+worksheet = workbook.add_worksheet('Mass')
+worksheet.write(0, 0,'frequence 1 [Hz]')
+worksheet.write(1, 0,'Mass [kg]')
+
 for i in range(nbreMass):
     strlettre = 'A'
     str1 = strlettre+str(i)
     strin = 'Intitial Mass +'
     str2 = i*10
     str3 = '[kN]'
-    worksheet.write(0,1+5*i, strin+str(str2)+str3)
+    worksheet.write(2+i,0, strin+str(str2)+str3)
     
-    worksheet.write(1, 1+i*5,'freq'+str(1))
-    worksheet.write(1, 1+i*5+1,'freq'+str(2))
-    worksheet.write(1, 1+i*5+2,'freq'+str(3))
-    worksheet.write(1, 1+i*5+3,'freq'+str(4))
-    worksheet.write(1, 1+i*5+4,'freq'+str(5))
     
-# worksheet.write('A1', 'Prestrain [kN]')
-# worksheet.write('A2', 'Frequency  [Hz]')
-worksheet.write(1, 0,'Précontrainte [kN]')
-
-for i in range(len(DeltaPrestrain)):
-    worksheet.write(2+i, 0,DeltaPrestrain[i])
     
-row = 0
-
-for col, data in enumerate(freq.T):
-    worksheet.write_column(2+row, 1+col, data)
-
-
-# row = 1
-# col = 0
-# # Iterate over the data and write it out row by row.
-# for item, cost in (expenses):
-#     worksheet.write(row, col,item)
-#     worksheet.write(row, col + 1, cost)
-#     row += 1
-
-# # Write a total using a formula.
-# worksheet.write(row, 0, 'Total')
-# worksheet.write(row, 1, '=SUM(B1:B4)')
+for i in range(10):
+    if i == 0:
+        
+        strin = 'Précontr +'
+        str2 = DeltaPrestrain[1]
+        str3 = '[kN]'
+        worksheet.write(1,1+i, strin+str(str2)+str3)
+        for j in range(nbreMass):
+            worksheet.write(2+j,1, float(freq[1,j*5]))
+    elif i == 9:
+        strin = 'Précontr +'
+        str2 = DeltaPrestrain[-1]
+        str3 = '[kN]'
+        worksheet.write(1,1+i, strin+str(str2)+str3)
+        for j in range(nbreMass):
+            worksheet.write(2+j,10, float(freq[-1,j*5]))
+    else:
+        strin = 'Précontr +'
+        str2 = DeltaPrestrain[i*10]
+        str3 = '[kN]'
+        worksheet.write(1,1+i, strin+str(str2)+str3)
+        for j in range(nbreMass):
+            worksheet.write(2+j,1+i, float(freq[10*i,j*5]))
+        
+        
 
 workbook.close()
