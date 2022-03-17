@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Muscles</RootNamespace>
     <AssemblyName>Muscles</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
@@ -36,27 +36,12 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Eto, Version=2.6.0.0, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>..\packages\RhinoCommon.7.14.22010.17001\lib\net48\Eto.dll</HintPath>
-    </Reference>
-    <Reference Include="GH_IO, Version=7.14.22010.17000, Culture=neutral, PublicKeyToken=6a29997d2e6b4f97, processorArchitecture=MSIL">
-      <HintPath>..\packages\Grasshopper.7.14.22010.17001\lib\net48\GH_IO.dll</HintPath>
-    </Reference>
-    <Reference Include="Grasshopper, Version=7.14.22010.17000, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
-      <HintPath>..\packages\Grasshopper.7.14.22010.17001\lib\net48\Grasshopper.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net, Version=2.0.12.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.12\lib\net45\log4net.dll</HintPath>
+    <Reference Include="log4net, Version=2.0.14.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.14\lib\net45\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Rhino.UI, Version=7.14.22010.17000, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>..\packages\RhinoCommon.7.14.22010.17001\lib\net48\Rhino.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="RhinoCommon, Version=7.14.22010.17000, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <HintPath>..\packages\RhinoCommon.7.14.22010.17001\lib\net48\RhinoCommon.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -166,13 +151,13 @@ Erase "$(TargetPath)"</PostBuildEvent>
     <StartAction>Program</StartAction>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
-  <Import Project="..\packages\RhinoCommon.7.14.22010.17001\build\RhinoCommon.targets" Condition="Exists('..\packages\RhinoCommon.7.14.22010.17001\build\RhinoCommon.targets')" />
+  <Import Project="..\packages\Grasshopper.7.16.22067.13001\build\Grasshopper.targets" Condition="Exists('..\packages\Grasshopper.7.16.22067.13001\build\Grasshopper.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>Ce projet fait référence à des packages NuGet qui sont manquants sur cet ordinateur. Utilisez l'option de restauration des packages NuGet pour les télécharger. Pour plus d'informations, consultez http://go.microsoft.com/fwlink/?LinkID=322105. Le fichier manquant est : {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\RhinoCommon.7.14.22010.17001\build\RhinoCommon.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RhinoCommon.7.14.22010.17001\build\RhinoCommon.targets'))" />
-    <Error Condition="!Exists('..\packages\Grasshopper.7.14.22010.17001\build\Grasshopper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Grasshopper.7.14.22010.17001\build\Grasshopper.targets'))" />
+    <Error Condition="!Exists('..\packages\Grasshopper.7.16.22067.13001\build\Grasshopper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Grasshopper.7.16.22067.13001\build\Grasshopper.targets'))" />
+    <Error Condition="!Exists('..\packages\RhinoCommon.7.16.22067.13001\build\RhinoCommon.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\RhinoCommon.7.16.22067.13001\build\RhinoCommon.targets'))" />
   </Target>
-  <Import Project="..\packages\Grasshopper.7.14.22010.17001\build\Grasshopper.targets" Condition="Exists('..\packages\Grasshopper.7.14.22010.17001\build\Grasshopper.targets')" />
+  <Import Project="..\packages\RhinoCommon.7.16.22067.13001\build\RhinoCommon.targets" Condition="Exists('..\packages\RhinoCommon.7.16.22067.13001\build\RhinoCommon.targets')" />
 </Project>
