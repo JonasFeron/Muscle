@@ -34,7 +34,7 @@ for i in range(len(DeltaPrestrain)):
     Struct.ElementsE = 71750 * np.ones((Struct.ElementsCount, 2))  # MPa
     Struct.ElementsA = 50.3 * np.ones((Struct.ElementsCount, 2))  # mm2
     DynMasses = 1 * np.array([1, 1, 1])  # kg
-    w, PHI = Struct.test_Module_dynamics(DeltaPrestrain[i],DynMasses)
+    w, PHI = Struct.test_ModuleDynamics(DeltaPrestrain[i],DynMasses)
     print(w)
     omega[i] = w
 

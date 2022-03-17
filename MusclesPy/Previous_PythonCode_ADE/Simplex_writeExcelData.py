@@ -74,7 +74,7 @@ for j in range(nbreMass):
         Str.ElementsA[0:3, :] = 364.4 # poutres
         Str.ElementsA[3:12, :] = 50.3 # cables
         DynMasses = np.array([4.66,4.66,4.66, 4.24,4.24,4.24])+j*10 #kg
-        w,PHI = Str.test_Module_dynamics(DeltaPrestrain[i],DynMasses)
+        w,PHI = Str.test_ModuleDynamics(DeltaPrestrain[i],DynMasses)
         omega[i,0+5*j] = w[0]
         omega[i,1+5*j] = w[1]
         omega[i,2+5*j] = w[2]

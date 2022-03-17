@@ -1792,7 +1792,7 @@ class StructureObj():
 
     # region DYNAMICS
 
-    def test_Module_dynamics(Self, PrestrainLevel,DynMasses):
+    def test_ModuleDynamics(Self, PrestrainLevel,DynMasses):
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
         Input:
@@ -1886,7 +1886,7 @@ class StructureObj():
 
         return w, PHI
 
-    def Module_dynamics(Self, Data): # PrestrainLevel,DynMasses
+    def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
         Input:

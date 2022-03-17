@@ -25,7 +25,13 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyIntegratedToolsModulesConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy" />
+    </key>
   </component>
   <component name="RunManager" selected="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed">
     <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_truss" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">

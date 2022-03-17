@@ -67,7 +67,7 @@ Str.ElementsA[0:3, :] = 364.4 # poutres
 Str.ElementsA[3:12, :] = 50.3 # cables
 DynMasses = 4*np.array([1,1,1,1,1,1]) #kg
 Prestrain = 2 #[kN]
-w,PHI = Str.test_Module_dynamics(Prestrain,DynMasses)
+w,PHI = Str.test_ModuleDynamics(Prestrain,DynMasses)
 print(Str.ElementsA)
 print(w)
 #------------------------------------------------------------------------------
