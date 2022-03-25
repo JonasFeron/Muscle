@@ -62,8 +62,7 @@
     <Compile Include="CrossSections\GH_CrossSection.cs" />
     <Compile Include="Display\DisplaySettingsComponent.cs" />
     <Compile Include="Display\ShowForces.cs" />
-    <Compile Include="Dynamics\Dyn.cs" />
-    <Compile Include="Dynamics\DynComponent.cs" />
+    <Compile Include="Dynamics\DynamicsComponent.cs" />
     <Compile Include="Elements\ElementParam.cs" />
     <Compile Include="Elements\ElementResultsComponent.cs" />
     <Compile Include="Elements\ElementPropertiesComponent.cs" />

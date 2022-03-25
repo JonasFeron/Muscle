@@ -1,19 +1,20 @@
 ﻿using Grasshopper.Kernel;
-using Muscles.CrossSections;
-using Muscles.Materials;
+using Muscles_ADE.CrossSections;
+using Muscles_ADE.Materials;
 using Rhino.Geometry;
 using System;
 using System.Windows.Forms;
 
-namespace Muscles.Dynamics 
+
+namespace Muscles_ADE.Elements
 {
-    public class DynComponent : GH_Component
+    public class BarComponent : GH_Component
     {
         public bool displayIn3d { get; set; }
-        public DynComponent() : base("Element - Bar", "B", "A Bar is a linear elastic structural element working both in Tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.", "Muscles", "Elements") { displayIn3d = true; }
+        public BarComponent() : base("Element - Bar", "B", "A Bar is a linear elastic structural element working both in Tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.", "Muscles", "Elements") { displayIn3d = true; }
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("48769a07-afbf-4a73-8074-3e74ef042978"); } }
+        public override Guid ComponentGuid { get { return new Guid("54b274d4-a68d-4171-ac14-8eff54a2c28c"); } }
 
         public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
         {
@@ -46,7 +47,7 @@ namespace Muscles.Dynamics
         {
             pManager.AddLineParameter("Line", "L", "Line defining the bar element.", GH_ParamAccess.item);
             pManager.HideParameter(0);
-            pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.\nIf left blank or negative value, the free length will be considered as the length of the inputted Line.", GH_ParamAccess.item,-1.0); //4
+            pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.\nIf left blank or negative value, the free length will be considered as the length of the inputted Line.", GH_ParamAccess.item, -1.0); //4
             pManager[1].Optional = true;
             pManager.AddGenericParameter("Cross section", "CS", "Cross section of the bar element.", GH_ParamAccess.item);
             pManager[2].Optional = true;
@@ -81,8 +82,8 @@ namespace Muscles.Dynamics
             if (!DA.GetData(5, ref k)) { }
 
 
-            Bar e = new Bar(line,lFree, ghCS.Value, ghMat.Value, law, k);
-            GH_Dynamics gh_e = new GH_Dynamics(e);
+            Bar e = new Bar(line, lFree, ghCS.Value, ghMat.Value, law, k);
+            GH_Element gh_e = new GH_Element(e);
 
             DA.SetData(0, gh_e);
         }
@@ -90,3 +91,4 @@ namespace Muscles.Dynamics
         #endregion Methods
     }
 }
+

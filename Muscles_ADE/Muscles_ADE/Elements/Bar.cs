@@ -1,19 +1,19 @@
-using Rhino.Geometry;
+﻿using Rhino.Geometry;
 using Grasshopper.Kernel.Types;
-using Muscles.CrossSections;
-using Muscles.Materials;
+using Muscles_ADE.CrossSections;
+using Muscles_ADE.Materials;
 using System.Collections.Generic;
 
-namespace Muscles.Dynamics 
+namespace Muscles_ADE.Elements
 {
     /// <summary>
     /// A Bar is a linear elastic structural element working both in Tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.
     /// </summary>
-    public class Dyn : Element
+    public class Bar : Element
     {
 
         #region Properties
-        public override string TypeName { get { return "Dyn"; } }
+        public override string TypeName { get { return "Bar"; } }
         public override int Type { get { return -1; } }
 
 
@@ -22,16 +22,16 @@ namespace Muscles.Dynamics
 
         #region Constructors
 
-        public Dyn(): base()
+        public Bar() : base()
         {
         }
 
-        public Dyn(Line aLine,double lFree, ICrossSection aCS, Muscles_Material aMat, string law, double k)
-            : base(aLine,lFree,aCS,aCS,aMat,aMat,law, k)
+        public Bar(Line aLine, double lFree, ICrossSection aCS, Muscles_Material aMat, string law, double k)
+            : base(aLine, lFree, aCS, aCS, aMat, aMat, law, k)
         {
         }
 
-        public Dyn(Dyn other) : base(other)
+        public Bar(Bar other) : base(other)
         {
 
         }
@@ -40,7 +40,7 @@ namespace Muscles.Dynamics
 
         #region Methods
 
-        public override Dynamics Duplicate()
+        public override Element Duplicate()
         {
             return new Bar(this);
         }
