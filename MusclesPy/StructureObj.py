@@ -1,5 +1,8 @@
 import numpy as np
+import scipy.linalg as lin
+
 from data import SharedData
+
 
 #All kinds of objects are defined here in a single file in order to avoid the user to unblock manually too many files
 #at the installation stage. I know it is a bit messy, but it is for the sake of the user best experience.
@@ -104,9 +107,10 @@ class ResultsSVD():
 
         if s != 0: #rescale the eigen vectors Vs_row such that the highest value = -1 (compression) and store the results in the DR-Stress mode matrix SS.
             Vs_row = V_row[-s:,:]  # s Vecteurs (lignes) propres (associés aux VaP nulles) de longueur ElementsCount. Interprétations : DR-stress modes (sol of A@t=0) (=Bar tensions in equilibrium without external loads) OR incompatible Bar elongations (=bar elongations which can't be obtained in this geometry)
-            bool = -Vs_row.min(axis=1) > Vs_row.max(axis=1)  # true if |compression max| > tension max
-            max = np.where(bool, Vs_row.min(axis=1), Vs_row.max(axis=1))
-            SS = (Vs_row.transpose() / -max).transpose()  # self-stress modes Matrix. we made sure the max value is always equal to 1 in compression whatever the modes
+            Vs_row_sorted = SVD.SortSelfStressModes(Struct,Vs_row)
+            bool = -Vs_row_sorted.min(axis=1) > Vs_row_sorted.max(axis=1)  # true if |compression max| > tension max
+            max = np.where(bool, Vs_row_sorted.min(axis=1), Vs_row_sorted.max(axis=1))
+            SS = (Vs_row_sorted.transpose() / -max).transpose()  # self-stress modes Matrix. we made sure the max value is always equal to 1 in compression whatever the modes
 
         # NB : Vr_t est orthogonal à Vs_t.  check : print(Vr_row.transpose()@Vs_row) return matrix zeros
 
@@ -128,6 +132,122 @@ class ResultsSVD():
         # NB : Ur est orthogonal à Um.  check : print(Ur.transpose()@Um) return matrix zeros
 
         SVD.PopulateWith(S, r, Sr, s, Vr_row, Vs_row, SS, m, Ur_row, Ur_free_row, Um_row, Um_free_row)
+
+    def SortSelfStressModes(SVD, Struct, Vs_row):
+        """
+
+        :param Struct:
+        :param Vs_row: [/] - shape (s,ElementsCount) - the s row eigen vectors of the equilibrium matrix
+        :return:
+        """
+
+        #ref
+        # L. R. Sanchez Sandoval, “Contribution à l’étude du dimensionnement optimal des systèmes de tenségrité,” Université Montpellier II, 2005. p 49
+        # R. Sánchez, B. Maurin, M. N. Kazi-Aoual, and R. Motro, “Selfstress States Identification and Localization in Modular Tensegrity Grids:,” Int. J. Sp. Struct., vol. 22, no. 4, pp. 215–224, Nov. 2007.
+
+        assert Struct.Initial.ElementsL.size > 0
+        (s, b) = Vs_row.shape
+        L = np.diag(Struct.Initial.ElementsL)
+        Linv = np.diag(1/Struct.Initial.ElementsL)
+        qs_row = Vs_row @ Linv # [1/m] - shape (s,ElementsCount) - force densities associated to each self-stress mode. One row = one mode. One column = one element.
+        qs_row_sorted = SVD.RecursiveSelfStressReduction(qs_row)
+        Vs_row_sorted = qs_row_sorted @ L
+        return Vs_row_sorted
+
+
+    def RecursiveSelfStressReduction(SVD, modes_brut):
+
+        # Part 1 : sort the modes (=row) per number of elements involved in the modes.
+        # The modes with the less elements (the more localized modes) are placed first.
+        # The modes with the more elements (the more generalized modes) are placed last.
+        (s, b) = modes_brut.shape
+        if s<= 1 :
+            return modes_brut
+
+        ZeroTol = 1e-12
+        numberElementsPerMode = np.sum(np.where(~np.isclose(modes_brut, np.zeros((s, b)), atol=ZeroTol), True, False), axis=1)
+        # numberElementsperMode = np.array([1,0])
+
+        ind = np.argsort(numberElementsPerMode)  # sort from the smallest to the biggest
+        modes_sorted = modes_brut[ind]
+        numberElementsPerMode_sorted = numberElementsPerMode[ind]
+
+        # Part 2: Seek to perform a reduction Lj -> Lj - Li * Lj[k]/Li[k]
+        performReduction = False
+        mode = modes_sorted  # simplify the word. one mode = one row L
+        # i = 0  # the row of the mode with the less elements
+        # j = 1  # the row of the mode with more elements where we seek to reduce the number of elements thanks to row i.
+        # k  # the pivot (column number) where the reduction may be performed
+
+        for j in range(1, s):
+            for i in range(0, j):
+                for k in range(0, b):
+                    if (np.isclose(mode[i][k],0,atol=ZeroTol) or np.isclose(mode[j][k],0,atol=ZeroTol)): #if mode[i][k]==0 or mode[j][k]==0
+                        continue  # go to k++
+                    # if mode[i][k]!=0 AND mode[j][k]!=0 then DO
+
+                    # test if the reduction will reduce the number of elements in the mode j
+                    modeI = mode[i][:].copy()
+                    modeJ = mode[j][:].copy()
+                    modeJ -= modeI * (modeJ[k] / modeI[k])
+
+                    numberElementsInModeJ = np.sum(np.where(~np.isclose(modeJ,np.zeros((b,)),atol=ZeroTol), True, False))
+                    # test if the numberElementsInModeJ has reduced
+                    performReduction = numberElementsInModeJ < numberElementsPerMode_sorted[j]
+
+                    if performReduction:  # truly perform the reduction if the numberElementsInModeJ has reduced
+                        mode[j][:] -= mode[i][:] * (mode[j][k] / mode[i][k])
+                        # restart at part 1.
+                        break
+
+                    else:  # do not perform the reduction, try with the next pivot
+                        continue
+
+                if performReduction:
+                    break
+            if performReduction:
+                break
+
+        if performReduction:
+            mode = SVD.RecursiveSelfStressReduction(mode)
+
+        return mode
+
+
+
+
+    # def ConformSelfStressState(SVD, Struct, Vs_row):
+    #     # linear programming method to find a conform self-stress state i.e. which respect tension in cables
+    #     # solve
+    #     # Minimize nothing
+    #     # variables : a1 ... a_s     # a : the vector of the prestress levels associated to each mode
+    #     # subject to constrains:
+    #     # 1) tension in cable i = SS1 * a1 + SS2 * a2 + ... + SS_s * a_s >= 0. the total tension in the cable i comes from the participation of different self-stress modes SS
+    #     # 2) a1 + a2 + ... + a_s = 1    #to make sure the solution is not trivial (all a_i = 0)
+    #
+    #     type = Struct.ElementsType
+    #     Iscable = np.where(type > 0, True, False)
+    #     number_cables = np.sum(Iscable)
+    #     # constrain 1) to ensure the cables are in tensions
+    #     Aub = SS[Iscable]  # impose constrain on all the cables :  SS1 * a1 + SS2 * a2 + ... + SS_s * a_s >= 0
+    #     Aub = Aub * -1  # impose constrain on all the cables :  -(SS1 * a1 + SS2 * a2 + ... + SS_s * a_s) <= 0
+    #     smaller_0 = np.zeros((number_cables,))
+    #
+    #     # constrain 2) to make sure the solution is not trivial
+    #     c = np.ones((s, 1))  # c.T @ a = a1 + a2 + ... + a_s   # = 1
+    #     equal1 = np.ones((1,))
+    #
+    #     # stack all the constrains
+    #     x0 = np.zeros((s,))
+    #     x0[0] = 1.0
+    #     options = {'maxiter': 5000, 'disp': True, 'presolve': True, 'tol': 1e-3, 'autoscale': False, 'rr': True,
+    #                'maxupdate': 10, 'mast': False, 'pivot': 'bland'}
+    #
+    #     res = opt.linprog(-np.ones((s, 1)).T, A_ub=Aub, b_ub=smaller_0, A_eq=c.T, b_eq=equal1, method='revised simplex',
+    #                       x0=x0, options=options)
+    #
+
+
 
 
 class State():
@@ -1773,19 +1893,3 @@ class StructureObj():
         if k == kmax:
             # print('nbr iterations du solveur non linéaire : {}/{}  progression Stage: {} %'.format(k, Max_n_steps,np.around(Stage * 100,decimals=2)))
             return (np.array([[]]),np.array([[]]))
-        else:
-            # print('nbr iterations du solveur non linéaire :', k)
-            return (t[:,k-1],d[:,k-1])
-
-
-
-
-
-
-    # endregion
-
-    #endregion WORK IN PROGRESS
-
-
-
-

@@ -2,6 +2,9 @@
 import unittest
 from StructureObj import *
 import numpy as np
+import scipy.linalg as lin
+import scipy.optimize as opt
+
 
 class StructureObj_Tests(unittest.TestCase):
 
@@ -711,6 +714,8 @@ class StructureObj_Tests(unittest.TestCase):
         self.assertEqual(successForces.all(), True)
         self.assertEqual(successNodes.all(), True)
 
+
+
     def test_MainDynamicRelaxation_TightRope_3stages(self):
         #cfr solution in excel files attached
 
@@ -863,6 +868,423 @@ class StructureObj_Tests(unittest.TestCase):
     # endregion
 
     # region FORCE Methods
+
+
+
+    def test_Simplex_SensitivityMatrix(self):
+        """
+        Find the sensitivity matrix of the experimental simplex
+
+        :return:
+        """
+
+
+        #ref :  [1] Kwan, Pellegrino, 1993, Prestressing a Space Structure
+        # [2] Xue, Y. et al. (2021) “Comparison of different sensitivity matrices relating element elongations to structural response of pin-jointed structures,” Mechanics Research Communications. Elsevier Ltd, 118(May), p. 103789. doi: 10.1016/j.mechrescom.2021.103789.
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[   0.00, -2043.82, 0.00],
+                               [   0.00,     0.00, 0.00],
+                               [1770.00, -1021.91, 0.00],
+                               [ 590.00, -2201.91, 1950.00],
+                               [-431.91,  -431.91, 1950.00],
+                               [1611.91,  -431.91, 1950.00]])*1e-3
+        IsDOFfree = np.array([False, True, False,
+                              False, False, False,
+                              True, True, False,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True])
+        ElementsType = np.array([-1, -1,-1,1,1,1,1,1,1,1,1,1])
+        ElementsEndNodes = np.array([[2, 4],
+                                     [1, 3],
+                                     [0, 5],
+                                     [1, 2],
+                                     [0, 1],
+                                     [0, 2],
+                                     [4, 5],
+                                     [3, 4],
+                                     [3, 5],
+                                     [2, 5],
+                                     [1, 4],
+                                     [0, 3]])
+
+        #Bars can only be in compression and cables only in tension
+        ElementsE = np.array([[70390, 0],
+                              [70390, 0],
+                              [70390, 0],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 72190],
+                              [0, 72190],
+                              [0, 72190]])  # MPa
+        # ElementsE = np.array([[70390, 0],
+        #                       [70390, 0],
+        #                       [70390, 0],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860]])  # MPa
+        ElementsA = np.ones((12,2))
+        ElementsA[0:3,:] = 364.4
+        ElementsA[3:12,:] = 50.3
+
+        # ElementsLFree = np.array([2999.8,
+        #                           2999.8,
+        #                           2999.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.4,
+        #                           2043.4,
+        #                           2043.4])*1e-3
+
+        Struct = StructureObj()
+        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
+        Struct.Initial.ElementsE = Struct.ElementsInTensionOrCompression(ElementsType,ElementsE)
+        Struct.Initial.ElementsA = Struct.ElementsInTensionOrCompression(ElementsType, ElementsA)
+
+        (l, ElementsCos) = Struct.Initial.ElementsLengthsAndCos(Struct, NodesCoord)
+        (A, AFree, AFixed) = Struct.Initial.EquilibriumMatrix(Struct, ElementsCos)
+        Struct.Initial.SVD.SVDEquilibriumMatrix(Struct, AFree)
+        #S = Struct.Initial.SVD.Vs_row.T #Self-stress matrix
+        S = Struct.Initial.SVD.SS.T  # Self-stress matrix
+        Struct.Initial.Flex = Struct.Flexibility(Struct.Initial.ElementsE, Struct.Initial.ElementsA, l)
+        F = np.diag(Struct.Initial.Flex)
+        Ke = np.diag(1/Struct.Initial.Flex)
+
+        a = 1500 # prestress level [N]
+        t0 = S * a # prestress forces [N] # assumption no self-weight
+        q = Struct.Initial.ForceDensities(t0, l) #
+        kgLocList = Struct.Initial.GeometricLocalStiffnessList(Struct, q)
+        Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
+        KgeoFree = Kgeo[Struct.IsDOFfree].T[Struct.IsDOFfree].T
+
+        BFree = AFree.T # the compatibility matrix
+
+        #According to [1] and [2]
+        SFS = S.T @ F @ S # This is the structural flexibility ! because the shortening of a flexible cable increase as much the prestress level than the lengthening of a strut
+        Ks = np.linalg.inv(SFS)
+        Sa = -Ks @ S.T # Sensitivity of the prestress level to a given elongation
+        St1 = S @ Sa # Sensitivity of the tensions to a given elongation
+        Se1 = F @ St1 # Sensitivity of the elastic elongations to a given imposed elongation
+
+        B__ = np.linalg.pinv(BFree) #the pseudo inverse of the compatibility matrix to get rid of the mechanism  https://numpy.org/doc/stable/reference/generated/numpy.linalg.pinv.html
+        Sd1 = B__ @ (Se1 + np.eye(Struct.ElementsCount)) #Sensitivity of the displacements to a given imposed elongation, assuming the elongation do not activate the mechanism.
+
+        # According to [1]
+        Kmat = AFree @ Ke @ BFree
+        Kmat__ = np.linalg.pinv(Kmat)
+        Sd2 = Kmat__ @ AFree @ Ke #equivalent to Sd1
+        St2 = Ke @ BFree @ Sd2 - Ke #equivalent to St1
+        SD2 = np.around(Sd2.reshape((1,-1)),4)
+
+        # According to [1]
+
+        Ktan__ = np.linalg.inv(Kmat+KgeoFree)
+        Sd3 = Ktan__ @ AFree @ Ke
+        St3 = Ke @ BFree @ Sd3 - Ke
+        CT3 = Sd3[:,8]
+
+        self.assertEqual(False, True)
+
+
+
+    def test_2Simplex_SensitivityMatrix(self):
+        """
+        Find the sensitivity matrix of the two experimental simplex superimposed
+
+        :return:
+        """
+
+        # ref :  [1] Kwan, Pellegrino, 1993, Prestressing a Space Structure
+        # [2] Xue, Y. et al. (2021) “Comparison of different sensitivity matrices relating element elongations to structural response of pin-jointed structures,” Mechanics Research Communications. Elsevier Ltd, 118(May), p. 103789. doi: 10.1016/j.mechrescom.2021.103789.
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[0.00, -2043.82, 0.00],
+                               [0.00, 0.00, 0.00],
+                               [1770.00, -1021.91, 0.00],
+                               [590.00, -2201.91, 1950.00],
+                               [-431.91, -431.91, 1950.00],
+                               [1611.91, -431.91, 1950.00],
+                               [1180.00, -2043.82, 3900.00],
+                               [-590.00, -1021.91, 3900.00],
+                               [1180.00, 0.00, 3900.00]]) * 1e-3
+
+        IsDOFfree = np.array([False, True, False,
+                              False, False, False,
+                              True, True, False,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True])
+        ElementsType = np.array([-1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, 1, 1, 1, 1, 1, 1])
+        ElementsEndNodes1 = np.array([[2, 4],
+                                      [1, 3],
+                                      [0, 5],
+                                      [1, 2],
+                                      [0, 1],
+                                      [0, 2],
+                                      [4, 5],
+                                      [3, 4],
+                                      [3, 5],
+                                      [2, 5],
+                                      [1, 4],
+                                      [0, 3]])
+        ElementsEndNodesTemp = ElementsEndNodes1 + 3  # il faut retirer les câbles de bases en commun entre les 2 simplex
+        ElementsEndNodes2 = np.delete(ElementsEndNodesTemp, [3, 4, 5], 0)
+
+        ElementsEndNodes = np.vstack((ElementsEndNodes1, ElementsEndNodes2))
+
+        # Bars can only be in compression and cables only in tension
+        ElementsE1 = np.array([[70390, 0],
+                               [70390, 0],
+                               [70390, 0],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750],
+                               [0, 71750]])  # MPa
+
+        ElementsE = np.vstack((ElementsE1, np.delete(ElementsE1, [3, 4, 5], 0)))
+
+        # ElementsE = np.array([[70390, 0],
+        #                       [70390, 0],
+        #                       [70390, 0],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860],
+        #                       [0, 2860]])  # MPa
+        ElementsA1 = np.ones((12, 2))
+        ElementsA1[0:3, :] = 364.4
+        ElementsA1[3:12, :] = 50.3
+        ElementsA = np.vstack((ElementsA1, np.delete(ElementsA1, [3, 4, 5], 0)))
+
+        # ElementsLFree = np.array([2999.8,
+        #                           2999.8,
+        #                           2999.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.8,
+        #                           2043.4,
+        #                           2043.4,
+        #                           2043.4])*1e-3
+
+        Struct = StructureObj()
+        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
+        Struct.Initial.ElementsE = Struct.ElementsInTensionOrCompression(ElementsType, ElementsE)
+        Struct.Initial.ElementsA = Struct.ElementsInTensionOrCompression(ElementsType, ElementsA)
+
+        (l, ElementsCos) = Struct.Initial.ElementsLengthsAndCos(Struct, NodesCoord)
+        (A, AFree, AFixed) = Struct.Initial.EquilibriumMatrix(Struct, ElementsCos)
+        Struct.Initial.SVD.SVDEquilibriumMatrix(Struct, AFree)
+        # S = Struct.Initial.SVD.Vs_row.T #Self-stress matrix
+        S = Struct.Initial.SVD.SS.T  # Self-stress matrix
+        S = np.array([
+            [-1, 0],  # bottom struts
+            [-1, 0],
+            [-1, 0],
+            [0.39335503, 0],  # bottom horizontal cables
+            [0.39335503, 0],
+            [0.39335503, 0],
+            [0.39335503, 0.39335503],  # middle horizontal cables shared between both simplex
+            [0.39335503, 0.39335503],
+            [0.39335503, 0.39335503],
+            [0.68117977, 0],  # bottom vertical cables
+            [0.68117977, 0],
+            [0.68117977, 0],
+            [0, -1],  # top struts
+            [0, -1],
+            [0, -1],
+            [0, 0.39335503],  # top horizontal cables
+            [0, 0.39335503],
+            [0, 0.39335503],
+            [0, 0.68117977],  # top vertical cables
+            [0, 0.68117977],
+            [0, 0.68117977]])
+
+        Struct.Initial.Flex = Struct.Flexibility(Struct.Initial.ElementsE, Struct.Initial.ElementsA, l)
+        F = np.diag(Struct.Initial.Flex)
+        Ke = np.diag(1 / Struct.Initial.Flex)
+
+        a = np.array([1500, 1500])  # prestress levels [N]
+        t0 = S @ a  # prestress forces [N] # assumption no self-weight
+        q = Struct.Initial.ForceDensities(t0, l)  #
+        kgLocList = Struct.Initial.GeometricLocalStiffnessList(Struct, q)
+        Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
+        KgeoFree = Kgeo[Struct.IsDOFfree].T[Struct.IsDOFfree].T
+
+        BFree = AFree.T  # the compatibility matrix
+
+        # According to [1] and [2]
+        SFS = S.T @ F @ S  # This is the structural flexibility ! because the shortening of a flexible cable increase as much the prestress level than the lengthening of a strut
+        Ks = np.linalg.inv(SFS)
+        Sa = -Ks @ S.T  # Sensitivity of the prestress level to a given elongation
+        St1 = S @ Sa  # Sensitivity of the tensions to a given elongation
+        Se1 = F @ St1  # Sensitivity of the elastic elongations to a given imposed elongation
+
+        B__ = np.linalg.pinv(
+            BFree)  # the pseudo inverse of the compatibility matrix to get rid of the mechanism  https://numpy.org/doc/stable/reference/generated/numpy.linalg.pinv.html
+        Sd1 = B__ @ (Se1 + np.eye(
+            Struct.ElementsCount))  # Sensitivity of the displacements to a given imposed elongation, assuming the elongation do not activate the mechanism.
+
+        # According to [1]
+        Kmat = AFree @ Ke @ BFree
+        Kmat__ = np.linalg.pinv(Kmat)
+        Sd2 = Kmat__ @ AFree @ Ke  # equivalent to Sd1
+        St2 = Ke @ BFree @ Sd2 - Ke  # equivalent to St1
+
+        # According to [1]
+
+        Ktan__ = np.linalg.inv(Kmat + KgeoFree)
+        Sd3 = Ktan__ @ AFree @ Ke
+        St3 = Ke @ BFree @ Sd3 - Ke
+        CT3 = Sd3[:, 8]
+
+        self.assertEqual(False, True)
+
+
+    def test_2Simplex_SortSelfStressModes(self):
+        """
+        Find the independant self-stress modes of the two experimental simplex superimposed
+
+        :return:
+        """
+
+
+        #ref :  [1] Kwan, Pellegrino, 1993, Prestressing a Space Structure
+        # [2] Xue, Y. et al. (2021) “Comparison of different sensitivity matrices relating element elongations to structural response of pin-jointed structures,” Mechanics Research Communications. Elsevier Ltd, 118(May), p. 103789. doi: 10.1016/j.mechrescom.2021.103789.
+
+        Struct = StructureObj()
+
+        NodesCoord = np.array([[   0.00, -2043.82, 0.00],
+                               [   0.00,     0.00, 0.00],
+                               [1770.00, -1021.91, 0.00],
+                               [ 590.00, -2201.91, 1950.00],
+                               [-431.91,  -431.91, 1950.00],
+                               [1611.91,  -431.91, 1950.00],
+                               [1180.00, -2043.82, 3900.00],
+                               [-590.00, -1021.91, 3900.00],
+                               [1180.00,     0.00, 3900.00]])*1e-3
+
+
+        IsDOFfree = np.array([False, True, False,
+                              False, False, False,
+                              True, True, False,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True,
+                              True, True, True])
+        ElementsType = np.array([-1, -1,-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1])
+        ElementsEndNodes1 = np.array([[2, 4],
+                                     [1, 3],
+                                     [0, 5],
+                                     [1, 2],
+                                     [0, 1],
+                                     [0, 2],
+                                     [4, 5],
+                                     [3, 4],
+                                     [3, 5],
+                                     [2, 5],
+                                     [1, 4],
+                                     [0, 3]])
+        ElementsEndNodesTemp = ElementsEndNodes1+3 #il faut retirer les câbles de bases en commun entre les 2 simplex
+        ElementsEndNodes2 = np.delete(ElementsEndNodesTemp, [3,4,5], 0)
+
+        ElementsEndNodes = np.vstack((ElementsEndNodes1,ElementsEndNodes2))
+
+        #Bars can only be in compression and cables only in tension
+        ElementsE1 = np.array([[70390, 0],
+                              [70390, 0],
+                              [70390, 0],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750]])  # MPa
+
+        ElementsE = np.vstack((ElementsE1,np.delete(ElementsE1, [3,4,5], 0)))
+
+
+        ElementsA1 = np.ones((12,2))
+        ElementsA1[0:3,:] = 364.4
+        ElementsA1[3:12,:] = 50.3
+        ElementsA = np.vstack((ElementsA1, np.delete(ElementsA1, [3,4,5], 0)))
+
+
+        Struct = StructureObj()
+        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
+        Struct.Initial.ElementsE = Struct.ElementsInTensionOrCompression(ElementsType,ElementsE)
+        Struct.Initial.ElementsA = Struct.ElementsInTensionOrCompression(ElementsType, ElementsA)
+        (Struct.Initial.ElementsL, Struct.Initial.ElementsCos) = Struct.Initial.ElementsLengthsAndCos(Struct, NodesCoord)
+        (A, AFree, AFixed) = Struct.Initial.EquilibriumMatrix(Struct, Struct.Initial.ElementsCos)
+        Struct.Initial.SVD.SVDEquilibriumMatrix(Struct, AFree)
+        Vs = Struct.Initial.SVD.Vs_row.T #Self-stress matrix
+        SS = Struct.Initial.SVD.SS.T  # Self-stress matrix
+
+        SS_sol = np.array([
+            [-1, 0],#bottom struts
+            [-1, 0],
+            [-1, 0],
+            [0.39335503, 0],#bottom horizontal cables
+            [0.39335503, 0],
+            [0.39335503, 0],
+            [0.39335503, 0.39335503],  # middle horizontal cables shared between both simplex
+            [0.39335503, 0.39335503],
+            [0.39335503, 0.39335503],
+            [0.68117977, 0],  # bottom vertical cables
+            [0.68117977, 0],
+            [0.68117977, 0],
+            [0, -1], #top struts
+            [0, -1],
+            [0, -1],
+            [0, 0.39335503],#top horizontal cables
+            [0, 0.39335503],
+            [0, 0.39335503],
+            [0, 0.68117977],  # top vertical cables
+            [0, 0.68117977],
+            [0, 0.68117977]])
+
+        CheckMode0 = np.logical_or(np.isclose(SS[:,0],SS_sol[:,0],atol=1e-6),np.isclose(SS[:,0],SS_sol[:,1],atol=1e-6))
+        CheckMode1 = np.logical_or(np.isclose(SS[:,1],SS_sol[:,0],atol=1e-6),np.isclose(SS[:,1],SS_sol[:,1],atol=1e-6))
+        Check = np.logical_and(CheckMode0,CheckMode1).all()
+
+        self.assertEqual(Check, True)
+
     def Test_LinearSolve_Force_Method_3cables(self): # change Test by test to run it
         """
         Tests on 3 cables \_/ (cfr Luo 2006 - Geometrically NL-FM for assemblies with infinitesimal mechanisms)
