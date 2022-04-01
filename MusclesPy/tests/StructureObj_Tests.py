@@ -938,6 +938,8 @@ class StructureObj_Tests(unittest.TestCase):
         ElementsA = np.ones((12,2))
         ElementsA[0:3,:] = 364.4
         ElementsA[3:12,:] = 50.3
+        # ElementsA[3:12,:] = 0
+
 
         # ElementsLFree = np.array([2999.8,
         #                           2999.8,
@@ -953,51 +955,56 @@ class StructureObj_Tests(unittest.TestCase):
         #                           2043.4])*1e-3
 
         Struct = StructureObj()
-        Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
-        Struct.Initial.ElementsE = Struct.ElementsInTensionOrCompression(ElementsType,ElementsE)
-        Struct.Initial.ElementsA = Struct.ElementsInTensionOrCompression(ElementsType, ElementsA)
 
-        (l, ElementsCos) = Struct.Initial.ElementsLengthsAndCos(Struct, NodesCoord)
-        (A, AFree, AFixed) = Struct.Initial.EquilibriumMatrix(Struct, ElementsCos)
-        Struct.Initial.SVD.SVDEquilibriumMatrix(Struct, AFree)
-        #S = Struct.Initial.SVD.Vs_row.T #Self-stress matrix
-        S = Struct.Initial.SVD.SS.T  # Self-stress matrix
-        Struct.Initial.Flex = Struct.Flexibility(Struct.Initial.ElementsE, Struct.Initial.ElementsA, l)
-        F = np.diag(Struct.Initial.Flex)
-        Ke = np.diag(1/Struct.Initial.Flex)
+        Struct.test_MainAssemble(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
 
-        a = 1500 # prestress level [N]
-        t0 = S * a # prestress forces [N] # assumption no self-weight
-        q = Struct.Initial.ForceDensities(t0, l) #
-        kgLocList = Struct.Initial.GeometricLocalStiffnessList(Struct, q)
-        Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
-        KgeoFree = Kgeo[Struct.IsDOFfree].T[Struct.IsDOFfree].T
 
-        BFree = AFree.T # the compatibility matrix
-
-        #According to [1] and [2]
-        SFS = S.T @ F @ S # This is the structural flexibility ! because the shortening of a flexible cable increase as much the prestress level than the lengthening of a strut
-        Ks = np.linalg.inv(SFS)
-        Sa = -Ks @ S.T # Sensitivity of the prestress level to a given elongation
-        St1 = S @ Sa # Sensitivity of the tensions to a given elongation
-        Se1 = F @ St1 # Sensitivity of the elastic elongations to a given imposed elongation
-
-        B__ = np.linalg.pinv(BFree) #the pseudo inverse of the compatibility matrix to get rid of the mechanism  https://numpy.org/doc/stable/reference/generated/numpy.linalg.pinv.html
-        Sd1 = B__ @ (Se1 + np.eye(Struct.ElementsCount)) #Sensitivity of the displacements to a given imposed elongation, assuming the elongation do not activate the mechanism.
-
-        # According to [1]
-        Kmat = AFree @ Ke @ BFree
-        Kmat__ = np.linalg.pinv(Kmat)
-        Sd2 = Kmat__ @ AFree @ Ke #equivalent to Sd1
-        St2 = Ke @ BFree @ Sd2 - Ke #equivalent to St1
-        SD2 = np.around(Sd2.reshape((1,-1)),4)
-
-        # According to [1]
-
-        Ktan__ = np.linalg.inv(Kmat+KgeoFree)
-        Sd3 = Ktan__ @ AFree @ Ke
-        St3 = Ke @ BFree @ Sd3 - Ke
-        CT3 = Sd3[:,8]
+        # Struct.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE)
+        # Struct.Initial.ElementsE = Struct.ElementsInTensionOrCompression(ElementsType,ElementsE)
+        # Struct.Initial.ElementsA = Struct.ElementsInTensionOrCompression(ElementsType, ElementsA)
+        #
+        # (l, ElementsCos) = Struct.Initial.ElementsLengthsAndCos(Struct, NodesCoord)
+        # (A, AFree, AFixed) = Struct.Initial.EquilibriumMatrix(Struct, ElementsCos)
+        # Struct.Initial.SVD.SVDEquilibriumMatrix(Struct, AFree)
+        #
+        # #S = Struct.Initial.SVD.Vs_row.T #Self-stress matrix
+        # S = Struct.Initial.SVD.SS.T  # Self-stress matrix
+        # Struct.Initial.Flex = Struct.Flexibility(Struct.Initial.ElementsE, Struct.Initial.ElementsA, l)
+        # F = np.diag(Struct.Initial.Flex)
+        # Ke = np.diag(1/Struct.Initial.Flex)
+        #
+        # a = 1500 # prestress level [N]
+        # t0 = S * a # prestress forces [N] # assumption no self-weight
+        # q = Struct.Initial.ForceDensities(t0, l) #
+        # kgLocList = Struct.Initial.GeometricLocalStiffnessList(Struct, q)
+        # Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
+        # KgeoFree = Kgeo[Struct.IsDOFfree].T[Struct.IsDOFfree].T
+        #
+        # BFree = AFree.T # the compatibility matrix
+        #
+        # #According to [1] and [2]
+        # SFS = S.T @ F @ S # This is the structural flexibility ! because the shortening of a flexible cable increase as much the prestress level than the lengthening of a strut
+        # Ks = np.linalg.inv(SFS)
+        # Sa = -Ks @ S.T # Sensitivity of the prestress level to a given elongation
+        # St1 = S @ Sa # Sensitivity of the tensions to a given elongation
+        # Se1 = F @ St1 # Sensitivity of the elastic elongations to a given imposed elongation
+        #
+        # B__ = np.linalg.pinv(BFree) #the pseudo inverse of the compatibility matrix to get rid of the mechanism  https://numpy.org/doc/stable/reference/generated/numpy.linalg.pinv.html
+        # Sd1 = B__ @ (Se1 + np.eye(Struct.ElementsCount)) #Sensitivity of the displacements to a given imposed elongation, assuming the elongation do not activate the mechanism.
+        #
+        # # According to [1]
+        # Kmat = AFree @ Ke @ BFree
+        # Kmat__ = np.linalg.pinv(Kmat)
+        # Sd2 = Kmat__ @ AFree @ Ke #equivalent to Sd1
+        # St2 = Ke @ BFree @ Sd2 - Ke #equivalent to St1
+        # SD2 = np.around(Sd2.reshape((1,-1)),4)
+        #
+        # # According to [1]
+        #
+        # Ktan__ = np.linalg.inv(Kmat+KgeoFree)
+        # Sd3 = Ktan__ @ AFree @ Ke
+        # St3 = Ke @ BFree @ Sd3 - Ke
+        # CT3 = Sd3[:,8]
 
         self.assertEqual(False, True)
 

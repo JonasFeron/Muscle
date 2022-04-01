@@ -37,6 +37,12 @@ class ResultsSVD():
         SVD.Um_row = np.zeros((SVD.m, 3 * NodesCount)) #same as free but considering 0 reaction/displacement at the support.
         SVD.Um_free_row = np.zeros((SVD.m, DOFfreeCount)) # m row eigenvectors. Interpretation: Loads which can not be equilibrated in the current struct OR Inextensional displacements (sol of B@d = 0)
 
+        #IF FLEXIBILITY of the STRUCTURE has been defined
+        SVD.Ks = np.zeros((SVD.s, SVD.s)) # [N/m] - stiffness matrix of the self-stress modes
+        SVD.Sa = np.zeros((SVD.s, ElementsCount)) # [N/m] Sensitivity of the prestress level to a given elongation
+        SVD.Sd = np.zeros((3 * NodesCount, ElementsCount)) # [m/m] Sensitivity of the displacements to a given elongation
+
+
     def PopulateWith(SVD,S,r,Sr,s,Vr_row,Vs_row,SS,m,Ur_row,Ur_free_row,Um_row,Um_free_row):
         """
         Fill in the ResultsSVD object with the obtained results
@@ -68,9 +74,10 @@ class ResultsSVD():
         SVD.Um_row = Um_row
         SVD.Um_free_row = Um_free_row
 
-    def SVDEquilibriumMatrix(SVD, Struct, AFree):
+    def SVDEquilibriumMatrix(SVD, Struct, AFree, ZeroTol=1e-3):
         """
         Compute the Singular Value Decomposition of the Equilibrium Matrix of the structure
+        :param ZeroTol:
         :param Struct: The structure object
         :param AFree: The Equilibrium Matrix. shape (DOFfreeCount, ElementsCount)
         :return: The resulting (eigen) vectors of the Equilibrium Matrix decomposition
@@ -94,7 +101,7 @@ class ResultsSVD():
         U_free_col, S, V_row = np.linalg.svd(AFree)  # Struct contains the eigen values of AFree in decreasing order. U_col is a matrix (nbr free DOF,nbr free DOF) containing the column eigen vectors. V_row is a matrix (nbr lines,nbr lines) containing the row eigen vectors.
 
         Lambda_1 = S.max()
-        Tol = Lambda_1 * 10 ** -3  # Tol is the limit below which an eigen value is considered as null.
+        Tol = Lambda_1 * ZeroTol  # Tol is the limit below which an eigen value is considered as null.
         Sr = S[S >= Tol]  # non null eigen values
         r = Sr.size  #number of non null eigen value. rank of AFree
         m = DOFfreeCount - r  #degree of kinematic indeterminacy = nbr of mechanisms
@@ -214,7 +221,65 @@ class ResultsSVD():
         return mode
 
 
+    def SensitivityMatrix(SVD, Struct):
+        """
+        Compute Sensitivity Matrices in the Initial state according to [ref] Xue, Y. et al. (2021) “Comparison of different sensitivity matrices relating element elongations to structural response of pin-jointed structures,”
 
+        :param Struct:
+        :return:
+        """
+
+        L = Struct.Initial.ElementsL
+        Struct.Initial.Flex = Struct.Flexibility(Struct.Initial.ElementsE, Struct.Initial.ElementsA, L)
+
+        SS = SVD.SS.T # SVD.SS is a row matrix to be transposed
+        s = SVD.s
+
+        F = np.diag(Struct.Initial.Flex)
+        Ke = np.diag(1 / Struct.Initial.Flex)
+
+
+        AFree = Struct.Initial.AFree # [/] - (nbr dof, nbr lines) - the equilibrium matrix
+        BFree = AFree.T  # [/] - (nbr lines,nbr dof) - the compatibility matrix
+        B = Struct.Initial.A.T  # [/] - (nbr lines, 3 * nbr nodes) - the compatibility matrix
+
+
+        # According to [1] and [2]
+        SFS = SS.T @ F @ SS  # This is the flexibility of the self-stress modes! because the shortening of a flexible cable increase as much the prestress level than the lengthening of a strut
+        Ks = np.linalg.inv(SFS) # Stiffness of the self-stress modes
+        Sa = -Ks @ SS.T  # Sensitivity of the prestress level to a given elongation
+        St1 = SS @ Sa  # Sensitivity of the tensions to a given elongation
+        Se1 = F @ St1  # Sensitivity of the elastic elongations to a given imposed elongation
+
+        B__ = np.linalg.pinv(BFree)  # the pseudo inverse of the compatibility matrix to get rid of the mechanism  https://numpy.org/doc/stable/reference/generated/numpy.linalg.pinv.html
+        Sd1 = B__ @ (Se1 + np.eye(Struct.ElementsCount))  # Sensitivity of the displacements to a given imposed elongation, assuming the elongation do not activate the mechanism.
+
+        Sd = np.zeros((3 * Struct.NodesCount,Struct.ElementsCount))
+        Sd[Struct.IsDOFfree,:] = Sd1
+
+
+        # # According to method2 of [ref]
+        # Kmat = AFree @ Ke @ BFree
+        # Kmat__ = np.linalg.pinv(Kmat)
+        # Sd2 = Kmat__ @ AFree @ Ke  # equivalent to Sd1
+        # St2 = Ke @ BFree @ Sd2 - Ke  # equivalent to St1
+
+
+        # # According to method2 of [ref]
+        # t0 = Struct.Initial.Tension  # prestress forces [N] # assumption no self-weight
+        # q = Struct.Initial.ForceDensities(t0, L)  #
+        # kgLocList = Struct.Initial.GeometricLocalStiffnessList(Struct, q)
+        # Kgeo = Struct.LocalToGlobalStiffnessMatrix(kgLocList)
+        # KgeoFree = Kgeo[Struct.IsDOFfree].T[Struct.IsDOFfree].T
+        #
+        # Ktan__ = np.linalg.inv(Kmat + KgeoFree)
+        # Sd3 = Ktan__ @ AFree @ Ke
+        # St3 = Ke @ BFree @ Sd3 - Ke
+
+        SVD.Ks = Ks
+        SVD.Sa = Sa
+        SVD.Sd = Sd
+        #return (Ks, Sa, Sd1)
 
     # def ConformSelfStressState(SVD, Struct, Vs_row):
     #     # linear programming method to find a conform self-stress state i.e. which respect tension in cables
@@ -425,7 +490,8 @@ class State():
         :param AFree: The Equilibrium Matrix with shape (DOFfreeCount, ElementsCount)
         :return: the ResultsSVD object in the current state is filled with the results of the singular value decomposition of AFree
         """
-        Cur.SVD.SVDEquilibriumMatrix(Struct,AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
+        Cur.SVD.SVDEquilibriumMatrix(Struct,
+                                     AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
     def TensionForces(Cur, Struct, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
@@ -1204,9 +1270,9 @@ class StructureObj():
         assert ElementsE.size == Self.ElementsCount, "Please check the shape of ElementsE"
         assert ElementsA.size == Self.ElementsCount, "Please check the shape of ElementsA"
         assert ElementsL.size == Self.ElementsCount, "Please check the shape of ElementsL"
-        E = ElementsE.reshape(-1, )
-        A = ElementsA.reshape(-1, )
-        L = ElementsL.reshape(-1, )
+        E = ElementsE.reshape(-1, ).copy()
+        A = ElementsA.reshape(-1, ).copy()
+        L = ElementsL.reshape(-1, ).copy()
 
         # 1) Find the slack clables, they have a 0 stiffness, hence infinite flexibility
 
@@ -1439,15 +1505,25 @@ class StructureObj():
 
     # region Public Methods : Main
     def MainAssemble(Self, Data):
-        Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType)
+        Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE,
+                         Data.ElementsLFreeInit, Data.LoadsInit, Data.TensionInit, Data.ReactionsInit, Data.LoadsToApply, Data.LengtheningsToApply, Data.Residual0Threshold)
         Self.Initial.ComputeState(Self,False,False)
-        Self.Initial.SVD.SVDEquilibriumMatrix(Self, Self.Initial.AFree)
+        Self.Initial.SVD.SVDEquilibriumMatrix(Self, Self.Initial.AFree, Self.Residual0Threshold)
+        Self.Initial.SVD.SensitivityMatrix(Self)
 
-    def test_MainAssemble(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType=None):
-        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree,ElementsType)
+
+    def test_MainAssemble(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                                   ElementsLFreeInit=-1, LoadsInit=np.zeros((0,)),
+                                   TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)),
+                                   LoadsToApply=np.zeros((0,)), LengtheningsToApply=np.zeros((0,)),
+                                   Residual0Threshold=0.001):
+
+        Self.InitialData(NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType, ElementsA, ElementsE,
+                         ElementsLFreeInit, LoadsInit, TensionInit, ReactionsInit,
+                         LoadsToApply, LengtheningsToApply, Residual0Threshold)
         Self.Initial.ComputeState(Self,False,False)
-        Self.Initial.SVD.SVDEquilibriumMatrix(Self, Self.Initial.AFree)
-
+        Self.Initial.SVD.SVDEquilibriumMatrix(Self, Self.Initial.AFree, Self.Residual0Threshold)
+        Self.Initial.SVD.SensitivityMatrix(Self)
 
     def MainDynamicRelaxation(Self, Data):
 
@@ -1576,6 +1652,11 @@ class StructureObj():
             Self.ElementsE = np.hstack((EinTensionAndCompression,EinTensionAndCompression))
         else:
             Self.ElementsE = None
+
+        if Self.ElementsE.shape == (Self.ElementsCount,2):
+            Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.ElementsType,Self.ElementsE)
+        if Self.ElementsA.shape == (Self.ElementsCount,2):
+            Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.ElementsType,Self.ElementsA)
 
 
         if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount :

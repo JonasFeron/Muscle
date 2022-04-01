@@ -47,37 +47,34 @@ class SharedAssemblyResult():
         Answ.Ur_free_row = []
         Answ.Um_row = []
         Answ.Um_free_row = []
+        Answ.Ks = [] # [N/m] - stiffness matrix of the self-stress modes
+        Answ.Sa = [] # [N/m] Sensitivity of the prestress level to a given elongation
+        Answ.Sd = [] # [m/m] Sensitivity of the displacements to a given elongation
 
     def PopulateWith(Answ, Struct):
         if isinstance(Struct, StructureObj):
             if Struct.NodesCount<=10: #it may be interesting to analyze the matrices of small structures
                 Answ.C = Struct.C.tolist()
-
                 Answ.A = Struct.Initial.A.round(4).tolist()
                 Answ.AFree = Struct.Initial.AFree.round(4).tolist()
-
-                Answ.S = Struct.Initial.SVD.S.round(4).tolist()
-                Answ.r = int(Struct.Initial.SVD.r)
-                Answ.Sr = Struct.Initial.SVD.Sr.round(4).tolist()
-
-                Answ.s = int(Struct.Initial.SVD.s)
                 Answ.Vr_row = Struct.Initial.SVD.Vr_row.round(4).tolist()
                 Answ.Vs_row = Struct.Initial.SVD.Vs_row.round(4).tolist()
-                Answ.SS = Struct.Initial.SVD.SS.round(6).tolist()
-
-                Answ.m = int(Struct.Initial.SVD.m)
                 Answ.Ur_row = Struct.Initial.SVD.Ur_row.round(4).tolist()
                 Answ.Ur_free_row = Struct.Initial.SVD.Ur_free_row.round(4).tolist()
-                Answ.Um_row = Struct.Initial.SVD.Um_row.round(6).tolist()
                 Answ.Um_free_row = Struct.Initial.SVD.Um_free_row.round(4).tolist()
-            else :
-                Answ.S = Struct.Initial.SVD.S.round(4).tolist()
-                Answ.r = int(Struct.Initial.SVD.r)
-                Answ.s = int(Struct.Initial.SVD.s)
-                Answ.SS = Struct.Initial.SVD.SS.round(4).tolist() #self-stress modes
 
-                Answ.m = int(Struct.Initial.SVD.m)
-                Answ.Um_row = Struct.Initial.SVD.Um_row.round(4).tolist() #mechanisms
+            #the results sent to grasshopper whatever the size of the structure
+            Answ.S = Struct.Initial.SVD.S.round(6).tolist()
+            Answ.r = int(Struct.Initial.SVD.r)
+            Answ.s = int(Struct.Initial.SVD.s)
+            Answ.SS = Struct.Initial.SVD.SS.round(6).tolist() #self-stress modes
+            Answ.m = int(Struct.Initial.SVD.m)
+            Answ.Um_row = Struct.Initial.SVD.Um_row.round(6).tolist() #mechanisms
+            Answ.Ks = Struct.Initial.SVD.Ks.round(2).tolist()
+            Answ.Sa = Struct.Initial.SVD.Sa.round(2).tolist()
+            Answ.Sd = Struct.Initial.SVD.Sd.round(6).tolist()
+
+
 
 class SharedAssemblyResultEncoder(json.JSONEncoder):
     """

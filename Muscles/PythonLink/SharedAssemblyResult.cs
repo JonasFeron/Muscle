@@ -47,6 +47,11 @@ namespace Muscles.PythonLink
 		public List<List<double>> Ur_free_row { get; set; } // shape (r, DOFfreeCount)
 		public List<List<double>> Um_row { get; set; } // mechanisms. shape (m, 3NodesCount). Interprétations : Loads which can not be equilibrated in the initial structure OR Inextensional displacements (sol of B@d = 0)
 		public List<List<double>> Um_free_row { get; set; } // mechanisms. shape (m, DOFfreeCount)
+
+		public List<List<double>> Ks { get; set; } //[N/m] - shape(s,s) - stiffness of the self-stress modes
+		public List<List<double>> Sa { get; set; } //[N/m] - shape(s,ElementsCount) - sensitivity matrix of the prestress level
+		public List<List<double>> Sd { get; set; } //[m/m] - shape(3NodesCount,ElementsCount) - sensitivity matrix of the displacements
+
 		#endregion StructureAnalysis
 
 
@@ -76,6 +81,9 @@ namespace Muscles.PythonLink
 			Ur_free_row = new List<List<double>>();
 			Um_row = new List<List<double>>();
 			Um_free_row = new List<List<double>>();
+			Ks = new List<List<double>>();
+			Sa = new List<List<double>>();
+			Sd = new List<List<double>>();
 		}
 
 
@@ -104,6 +112,8 @@ namespace Muscles.PythonLink
 			}
 			return res;
 		}
+
+
 
 
 		#endregion Methods

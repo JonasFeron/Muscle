@@ -30,5 +30,21 @@ namespace Muscles.Util
             result.Append("\"");
             return result.ToString();
         }
+        public static List<List<double>> MultiplyListListPerX(List<List<double>> datalistlist, double X)
+        {
+            List<List<double>> res = new List<List<double>>();
+            List<double> list = null;
+
+            foreach (List<double> datalist in datalistlist)
+            {
+                list = new List<double>();
+                foreach(double data in datalist)
+                {
+                    list.Add(data * X);
+                }
+                res.Add(list);
+            }
+            return res;
+        }
     }
 }
