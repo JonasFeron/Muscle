@@ -63,7 +63,7 @@
             },
             "log4net": {
               "target": "Package",
-              "version": "[2.0.14, )"
+              "version": "[2.0.12, )"
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"

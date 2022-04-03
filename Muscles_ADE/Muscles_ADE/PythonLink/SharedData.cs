@@ -56,6 +56,8 @@ namespace Muscles_ADE.PythonLink
 		public int MaxKEReset { get; set; }
 		public int n_steps { get; set; } // number of steps for the non-linear solver
 
+		public int DynMasses { get; set; } //Added for dyn
+
 		#endregion SolverInputs
 
 		#endregion Properties
@@ -71,6 +73,7 @@ namespace Muscles_ADE.PythonLink
 			n_steps = 1;
 			ElementsType = new List<int>();
 			NodesCoord = new List<List<double>>();
+			DynMasses = new int();
 			LoadsInit = new List<List<double>>();
 			LoadsToApply = new List<List<double>>();
 			ElementsEndNodes = new List<List<int>>();

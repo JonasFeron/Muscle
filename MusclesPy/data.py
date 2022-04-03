@@ -16,8 +16,7 @@ class SharedData():
                  NodesCoord,
                  ElementsEndNodes,
                  IsDOFfree,
-                 DynMasses,
-                 PreStrainLevel,
+                 #DynMasses, #Added for dyn
                  ElementsType=[],
                  ElementsA=[],
                  ElementsE=[],
@@ -49,10 +48,7 @@ class SharedData():
         Data.IsDOFfree = np.array(IsDOFfree, dtype=bool)
 
         # Data for the dynamics module
-        Data.DynMasses = DynMasses
-        Data.PreStrainLevel = PreStrainLevel
-
-
+        #Data.DynMasses = DynMasses
 
         Data.ElementsType = np.array(ElementsType, dtype=int).reshape((-1,)) # -1 for struts, +1 for cables
         Data.ElementsA = np.array(ElementsA).reshape((-1,2)) #[mm²] - [AreaInCompression, AreaInTension]

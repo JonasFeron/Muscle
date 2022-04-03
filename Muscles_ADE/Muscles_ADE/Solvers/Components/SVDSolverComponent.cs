@@ -54,6 +54,7 @@ namespace Muscles_ADE.Solvers
         public override Guid ComponentGuid
         {
             get { return new Guid("016c793a-aa02-416c-9bcf-4d06d43c1b01"); }
+   
         }
 
         /// <summary>

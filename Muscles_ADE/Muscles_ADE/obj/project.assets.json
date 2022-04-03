@@ -18,7 +18,7 @@
           "build/Grasshopper.targets": {}
         }
       },
-      "log4net/2.0.14": {
+      "log4net/2.0.12": {
         "type": "package",
         "frameworkAssemblies": [
           "System.Configuration",
@@ -143,10 +143,10 @@
         "lib/net48/Grasshopper.xml"
       ]
     },
-    "log4net/2.0.14": {
-      "sha512": "KevyXUuhOyhx7l1jWwq6ZGVlRC2Aetg0qDp6rJpfSZGcDPKQDwfOE6yEuVkVf0kEP08NQqBDn/TQ/TJv4wgyhw==",
+    "log4net/2.0.12": {
+      "sha512": "9P67BCftJ7KG+B7rNOM1A9KczUwyEDed6zbAddy5Cj/73xVkzi+rEAHeOgUnW5wDqy1JFlY8+oTP0m1PgJ03Tg==",
       "type": "package",
-      "path": "log4net/2.0.14",
+      "path": "log4net/2.0.12",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -166,7 +166,7 @@
         "lib/netstandard1.3/log4net.xml",
         "lib/netstandard2.0/log4net.dll",
         "lib/netstandard2.0/log4net.xml",
-        "log4net.2.0.14.nupkg.sha512",
+        "log4net.2.0.12.nupkg.sha512",
         "log4net.nuspec",
         "package-icon.png"
       ]
@@ -401,7 +401,7 @@
       "Microsoft.CSharp >= 4.7.0",
       "Newtonsoft.Json >= 13.0.1",
       "System.Reactive.Windows.Forms >= 5.0.0",
-      "log4net >= 2.0.14"
+      "log4net >= 2.0.12"
     ]
   },
   "packageFolders": {
@@ -467,7 +467,7 @@
           },
           "log4net": {
             "target": "Package",
-            "version": "[2.0.14, )"
+            "version": "[2.0.12, )"
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
