@@ -7,7 +7,6 @@ FileDRResult = "DynamicRelaxationResult.txt"
 FileAssembleResult = "AssembleResult.txt"
 FileLinearSolveResult = "LinearSolveResult.txt"
 FileNonLinearSolveResult = "NonLinearSolveResult.txt"
-FileDynamicsModule = "DynamicsModule.txt"
 
 
 def WriteResultFile(dataPath,resultFileName,key,result):
@@ -130,10 +129,6 @@ class SharedSolverResult():
             Answ.nTimeStep = Struct.DR.nTimeStep
             Answ.nKEReset = Struct.DR.nKEReset
 
-    def PopulateWith_Dyn(Answ,Struct):
-        if isinstance(Struct, StructureObj):
-            Answ.freq = Struct.freq
-            Answ.mode = Struct.mode
 
 class SharedSolverResultEncoder(json.JSONEncoder):
     """

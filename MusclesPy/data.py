@@ -16,7 +16,6 @@ class SharedData():
                  NodesCoord,
                  ElementsEndNodes,
                  IsDOFfree,
-                 #DynMasses, #Added for dyn
                  ElementsType=[],
                  ElementsA=[],
                  ElementsE=[],
@@ -33,7 +32,6 @@ class SharedData():
                  MaxTimeStep=10000,
                  MaxKEReset=1000,
                  n_steps=1):
-
         """
         Initialize all the properties of a SharedData Object. A SharedData Object is an object that contains the same data in C# than in Python in order to communicate between the two languages via a file.txt encrypted in json format.
         Note that sharing Data is a task expensive in time (data are converted to a string which is printed and read).
@@ -46,10 +44,6 @@ class SharedData():
         Data.NodesCoord = np.array(NodesCoord) #[m] - shape (NodesCount, 3) - Coordinates must be in m otherwise: K matrix is in N/mm and it is too small)
         Data.ElementsEndNodes = np.array(ElementsEndNodes, dtype=int)
         Data.IsDOFfree = np.array(IsDOFfree, dtype=bool)
-
-        # Data for the dynamics module
-        #Data.DynMasses = DynMasses
-
         Data.ElementsType = np.array(ElementsType, dtype=int).reshape((-1,)) # -1 for struts, +1 for cables
         Data.ElementsA = np.array(ElementsA).reshape((-1,2)) #[mm²] - [AreaInCompression, AreaInTension]
         Data.ElementsE = np.array(ElementsE).reshape((-1,2)) #[MPa] - [EInCompression, EInTension]
@@ -70,8 +64,6 @@ class SharedData():
 
         #Data for the Non-Linear displacement method
         Data.n_steps = n_steps
-
-
 
 
 def ToSharedDataObject(dct):
