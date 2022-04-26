@@ -5,11 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace Muscles.PythonLink
+namespace Muscles_ADE.PythonLink
 {
     public class PythonManager : IDisposable
     {
-        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        ///private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Signal to the writer when a new command has been set
@@ -43,7 +43,7 @@ namespace Muscles.PythonLink
 
         public static string ActivateCondaBat; // =  @"C:\Users\desme\anaconda3\Scripts\activate.bat";
         public static string WorkingDirectory; // @"C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy";
-
+        
         private static readonly object Locker = new object();
         private static PythonManager _instance;
         public static PythonManager Instance
@@ -64,10 +64,10 @@ namespace Muscles.PythonLink
 
                         if (!successInitialized)
                         {
-                            log.Warn($"Main PythonManager: did not receive signal - Initialized - after waiting {timeout} ms");
+                            ///log.Warn($"Main PythonManager: did not receive signal - Initialized - after waiting {timeout} ms");
                             _instance = null;
                         }
-                        else log.Debug("Main PythonManager: received signal - python is ready.");
+                        /// else log.Debug("Main PythonManager: received signal - python is ready.");
                     }
                 }
                 return _instance;
@@ -92,42 +92,42 @@ namespace Muscles.PythonLink
 
             lock (_commands)
             {
-                log.Debug("Main PythonManager: LOCKED - Add a new command.");
+                ///log.Debug("Main PythonManager: LOCKED - Add a new command.");
                 // Add the new command to the list of commands to execute
                 _commands.Add(command);
             }
-            log.Debug("Main PythonManager: REALEASED");
-            log.Debug("Main PythonManager: send signal - New Command");
+            ///log.Debug("Main PythonManager: REALEASED");
+            ///log.Debug("Main PythonManager: send signal - New Command");
             _newCommand_Signal.Set();
 
             while (true)
             {
-                log.Debug("Main PythonManager: wait for signal - Executed Command");
-                
+                ///log.Debug("Main PythonManager: wait for signal - Executed Command");
+
                 bool success = _executedCommand_SignalFromWriter.WaitOne(timeout);
                 if (!success)
                 {
-                    log.Warn($"Main PythonManager: did not receive signal - Executed Command - after waiting {timeout} ms");
+                    ///log.Warn($"Main PythonManager: did not receive signal - Executed Command - after waiting {timeout} ms");
                     return "Python failed to answer";
                 }
-                log.Debug("Main PythonManager: received signal from Writer - Executed Command");
+                ///log.Debug("Main PythonManager: received signal from Writer - Executed Command");
                 string result = String.Empty;
                 lock (_results)
                 {
-                    log.Debug("Main PythonManager: LOCKED - look for the result.");
+                    ///log.Debug("Main PythonManager: LOCKED - look for the result.");
                     result = _results.FirstOrDefault(o => o.Id == command.Id)?.Result;
 
                     if (!string.IsNullOrEmpty(result))
                     {
-                        log.Debug("Main PythonManager: well retrieved the result.");
+                        ///log.Debug("Main PythonManager: well retrieved the result.");
                         _results.RemoveAll(o => o.Id == command.Id);
                     }
-                    else log.Warn("Main PythonManager: DID NOT FIND THE RESULT");
+                    ///else log.Warn("Main PythonManager: DID NOT FIND THE RESULT");
                 }
-                log.Debug("Main PythonManager: RELEASED");
+                ///log.Debug("Main PythonManager: RELEASED");
                 _executedCommand_SignalFromWriter.Reset();
-                log.Debug("Main PythonManager: Resetted signal - Executed Command");
-                log.Debug("Main PythonManager: return the result");
+                ///log.Debug("Main PythonManager: Resetted signal - Executed Command");
+                ///log.Debug("Main PythonManager: return the result");
                 return result;
             }
         }
@@ -144,7 +144,7 @@ namespace Muscles.PythonLink
             _executedCommand_SignalFromReader?.Dispose();
             _executedCommand_SignalFromWriter?.Dispose();
             _instance = null;
-            log.Fatal("PythonManager is dead");
+            ///log.Fatal("PythonManager is dead");
         }
 
         #endregion
@@ -154,7 +154,7 @@ namespace Muscles.PythonLink
         private void StartProcess(Object stateInfo)
         {
             #region Initialize Process
-            
+
             var startInfo = new ProcessStartInfo
             {
                 FileName = "cmd.exe",
@@ -204,7 +204,7 @@ namespace Muscles.PythonLink
                 return;
             }
             // Vital to activate Anaconda
-            log.Info("Writer: activate python");
+            ///log.Info("Writer: activate python");
             var activateCondaCmd = ($"activateConda.bat \"{ActivateCondaBat}\" {AnacondaActivatedFeedback}");
             sw.WriteLine(activateCondaCmd);
 
@@ -214,25 +214,25 @@ namespace Muscles.PythonLink
 
             while (!_stop)
             {
-                log.Debug("Writer: wait for signal - New Command ");
-                var index = WaitHandle.WaitAny(new WaitHandle[] {_newCommand_Signal, _stopProcessSignal});
-                log.Debug("Writer: received signal");
+                ///log.Debug("Writer: wait for signal - New Command ");
+                var index = WaitHandle.WaitAny(new WaitHandle[] { _newCommand_Signal, _stopProcessSignal });
+                ///log.Debug("Writer: received signal");
 
 
                 if (index == 1)
                 {
-                    log.Warn("Signal wants to kill pythonManager");
+                    ///log.Warn("Signal wants to kill pythonManager");
                     _stopProcessSignal?.Dispose();
                     break;
                 }
-                log.Debug("Writer: receveid signal is - New Command");
+                ///log.Debug("Writer: receveid signal is - New Command");
                 lock (_commands)
                 {
-                    log.Debug("Writer: LOCKED");
-                    log.Debug("Writer: There is " + _commands.Count + " commands to execute.");
+                    ///log.Debug("Writer: LOCKED");
+                    ///log.Debug("Writer: There is " + _commands.Count + " commands to execute.");
                     if (!_commands.Any())
                     {
-                        log.Warn("0 newCommand received"); 
+                        ///log.Warn("0 newCommand received");
                         continue;
                     }
 
@@ -246,43 +246,43 @@ namespace Muscles.PythonLink
                         //var commandString = command.Parameters.Any()
                         //    ? $"python {command.PythonFileName} \"{command.Id}\" {PythonCommand.ToStringRepr(command.Parameters.Aggregate((o, p) => $"{o} {p}"))}"
                         //    : $"python {command.PythonFileName} \"{command.Id}\"";
-                        log.Info("Writer: ask to execute command. ");
+                        ///log.Info("Writer: ask to execute command. ");
                         sw.WriteLine(commandString);
-                        log.Debug("Writer: wait for signal - Executed Command");
+                        ///log.Debug("Writer: wait for signal - Executed Command");
                         _executedCommand_SignalFromReader.WaitOne();
-                        log.Info("Writer: received signal from reader -  Executed Command");
+                        ///log.Info("Writer: received signal from reader -  Executed Command");
                         _executedCommand_SignalFromReader.Reset();
-                        log.Debug("Writer: resetted signal from reader - Executed Command");
+                        ///log.Debug("Writer: resetted signal from reader - Executed Command");
                     }
-                    log.Debug("Writer: Delete " + _commands.Count + " commands");
+                    ///log.Debug("Writer: Delete " + _commands.Count + " commands");
                     _commands.Clear();
-                    log.Debug("Writer: There is " + _commands.Count + " commands to execute.");
+                    ///log.Debug("Writer: There is " + _commands.Count + " commands to execute.");
                     _newCommand_Signal.Reset();
-                    log.Debug("Writer: resetted signal - New Command");
-                    log.Info("Writer: send signal -  Executed Command");
+                    ///log.Debug("Writer: resetted signal - New Command");
+                    ///log.Info("Writer: send signal -  Executed Command");
                     _executedCommand_SignalFromWriter.Set();
                 }
-                log.Debug("Writer: RELEASED");
+                ///log.Debug("Writer: RELEASED");
             }
 
             #endregion
             process.Close();
-            log.Fatal("Python has closed");
+            ///log.Fatal("Python has closed");
         }
 
         private void DataReceived(object s, DataReceivedEventArgs e)
         {
-            log.Info("Reader read: " + e.Data);
+            ///log.Info("Reader read: " + e.Data);
             if (e.Data == null)
             {
-                log.Debug("Python, STOP !");
+                ///log.Debug("Python, STOP !");
                 _stop = true;
             }
             else
             {
                 if (e.Data == AnacondaActivatedFeedback)
                 {
-                    log.Debug("Reader: send signal - Python is ready !");
+                    ///log.Debug("Reader: send signal - Python is ready !");
                     _initializedSignal.Set();
                 }
 
@@ -290,13 +290,13 @@ namespace Muscles.PythonLink
 
                 if (i == -1)
                 {
-                    log.Debug("This message is useless0");
+                    ///log.Debug("This message is useless0");
                     return;
                 }
 
                 if (!Guid.TryParse(e.Data.Substring(0, i), out var id))
                 {
-                    log.Debug("This message is useless");
+                    ///log.Debug("This message is useless");
                     return;
                 }
                 string resultPath = e.Data.Substring(i + 1, e.Data.Length - i - 1);
@@ -305,12 +305,12 @@ namespace Muscles.PythonLink
 
                 lock (_results)
                 {
-                    log.Debug("Reader: Locked");
+                    ///log.Debug("Reader: Locked");
                     _results.Add(result);
-                    log.Debug("There is " + _results.Count + "result(s) pending");
+                    ///log.Debug("There is " + _results.Count + "result(s) pending");
                 }
-                log.Debug("Reader : RELEASED");
-                log.Debug("Reader : send signal - Executed Command");
+                ///log.Debug("Reader : RELEASED");
+                ///log.Debug("Reader : send signal - Executed Command");
                 _executedCommand_SignalFromReader.Set();
             }
         }
