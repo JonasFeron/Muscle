@@ -17,11 +17,11 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Folder Include="Dynamics\" />
+    <Reference Include="System.Net" />
   </ItemGroup>
   
   <ItemGroup>
-    <Reference Include="System.Net" />
+    <Folder Include="Dynamics\" />
   </ItemGroup>
   
   <PropertyGroup Condition="$(Configuration) == 'Debug' AND $([MSBuild]::IsOSPlatform(Windows))">
