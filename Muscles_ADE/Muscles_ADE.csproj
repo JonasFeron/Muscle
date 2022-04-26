@@ -20,10 +20,6 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   
-  <ItemGroup>
-    <Folder Include="Dynamics\" />
-  </ItemGroup>
-  
   <PropertyGroup Condition="$(Configuration) == 'Debug' AND $([MSBuild]::IsOSPlatform(Windows))">
     <StartProgram>C:\Program Files\Rhino 7\System\Rhino.exe</StartProgram>
     <StartArguments></StartArguments>
