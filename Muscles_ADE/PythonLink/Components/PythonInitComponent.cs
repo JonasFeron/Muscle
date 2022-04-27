@@ -93,7 +93,8 @@ namespace Muscles_ADE.PythonLink.Component
 
                     var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); // return bin folder
                     AccessToAll.Main_Folder = directory.Parent.Parent.FullName;
-                    workingDirectory = Path.Combine(AccessToAll.Main_Folder, "MusclesPy");   //  @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\MusclesPy";
+                    ///workingDirectory = Path.Combine(AccessToAll.Main_Folder, "MusclesPy");   //  @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\MusclesPy";
+                    workingDirectory = @"C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy";
                 }
                 if (workingDirectory == null)
                 {
