@@ -162,7 +162,7 @@ namespace Muscles_ADE.PythonLink
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
-                CreateNoWindow = false,
+                CreateNoWindow = true,
                 WorkingDirectory = WorkingDirectory
             };
 

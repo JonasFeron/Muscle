@@ -92,9 +92,10 @@ namespace Muscles_ADE.PythonLink.Component
                     activateCondaBat = @"C:\Users\desme\anaconda3\Scripts\activate.bat";
 
                     var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); // return bin folder
-                    AccessToAll.Main_Folder = directory.Parent.Parent.FullName;
-                    ///workingDirectory = Path.Combine(AccessToAll.Main_Folder, "MusclesPy");   //  @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\MusclesPy";
-                    workingDirectory = @"C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy";
+                    ///AccessToAll.Main_Folder = directory.Parent.Parent.FullName;
+                    AccessToAll.Main_Folder = @"C:\Users\desme\Documents\GitHub\Muscles_ADE";
+                    workingDirectory = Path.Combine(AccessToAll.Main_Folder, "MusclesPy");   //  @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\MusclesPy";
+                    ///workingDirectory = @"C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy";
                 }
                 if (workingDirectory == null)
                 {
