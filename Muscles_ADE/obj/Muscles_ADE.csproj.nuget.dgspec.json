@@ -47,7 +47,7 @@
             "Grasshopper": {
               "include": "Compile, Build",
               "target": "Package",
-              "version": "[7.16.22067.13001, )"
+              "version": "[7.17.22102.5001, )"
             },
             "Microsoft.CSharp": {
               "target": "Package",
