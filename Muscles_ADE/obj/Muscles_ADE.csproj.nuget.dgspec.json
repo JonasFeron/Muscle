@@ -55,7 +55,7 @@
             },
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[12.0.3, )"
+              "version": "[13.0.1, )"
             },
             "System.Reactive.Windows.Forms": {
               "target": "Package",
