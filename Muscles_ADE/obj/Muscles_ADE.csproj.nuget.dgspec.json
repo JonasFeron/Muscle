@@ -22,15 +22,15 @@
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
-          "net45"
+          "net48"
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net45": {
-            "targetAlias": "net45",
+          "net48": {
+            "targetAlias": "net48",
             "projectReferences": {}
           }
         },
@@ -41,12 +41,12 @@
         }
       },
       "frameworks": {
-        "net45": {
-          "targetAlias": "net45",
+        "net48": {
+          "targetAlias": "net48",
           "dependencies": {
             "Grasshopper": {
               "target": "Package",
-              "version": "[7.4.21067.13001, )"
+              "version": "[7.17.22102.5001, )"
             },
             "Microsoft.CSharp": {
               "target": "Package",
@@ -54,7 +54,7 @@
             },
             "Newtonsoft.Json": {
               "target": "Package",
-              "version": "[10.0.1, )"
+              "version": "[13.0.1, )"
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
