@@ -57,6 +57,10 @@
               "target": "Package",
               "version": "[13.0.1, )"
             },
+            "RhinoCommon": {
+              "target": "Package",
+              "version": "[7.17.22102.5001, )"
+            },
             "System.Reactive.Windows.Forms": {
               "target": "Package",
               "version": "[5.0.0, )"
