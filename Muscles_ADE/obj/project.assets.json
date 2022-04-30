@@ -201,8 +201,11 @@
       "Grasshopper >= 7.17.22102.5001",
       "Microsoft.CSharp >= 4.7.0",
 <<<<<<< HEAD
+<<<<<<< HEAD
       "Newtonsoft.Json >= 13.0.1"
 =======
+=======
+>>>>>>> parent of b872745 (maj)
       "Newtonsoft.Json >= 12.0.3",
       "System.Reactive.Windows.Forms >= 5.0.0"
 >>>>>>> parent of b872745 (maj)
@@ -263,8 +266,11 @@
           "Newtonsoft.Json": {
             "target": "Package",
 <<<<<<< HEAD
+<<<<<<< HEAD
             "version": "[13.0.1, )"
 =======
+=======
+>>>>>>> parent of b872745 (maj)
             "version": "[12.0.3, )"
           },
           "System.Reactive.Windows.Forms": {

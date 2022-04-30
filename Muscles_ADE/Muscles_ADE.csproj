@@ -13,8 +13,11 @@
     <PackageReference Include="Grasshopper" Version="7.17.22102.5001" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 <<<<<<< HEAD
+<<<<<<< HEAD
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 =======
+=======
+>>>>>>> parent of b872745 (maj)
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Reactive.Windows.Forms" Version="5.0.0" />
 >>>>>>> parent of b872745 (maj)
