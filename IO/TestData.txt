@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 cb9e6287-00b0-4890-9349-f821920ab786
+=======
+2af4b8c8-6748-418e-9619-9e500603f274
+>>>>>>> parent of b872745 (maj)
 HELLO
-python
+pythO,n
