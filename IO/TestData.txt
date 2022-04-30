@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-cb9e6287-00b0-4890-9349-f821920ab786
-=======
-2af4b8c8-6748-418e-9619-9e500603f274
->>>>>>> parent of b872745 (maj)
-=======
-6949f030-7edd-40a0-a1be-1bf3b53c7868
->>>>>>> parent of 3999f2d (Grasshopper is working)
-=======
-2af4b8c8-6748-418e-9619-9e500603f274
->>>>>>> parent of b872745 (maj)
-HELLO
-pythO,n
+af7683df-10e0-4f05-8747-f584d4c8794c
+bijour
+python
