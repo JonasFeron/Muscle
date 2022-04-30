@@ -1,18 +1,19 @@
 {
   "version": 3,
   "targets": {
-    ".NETFramework,Version=v4.8": {
-      "Grasshopper/7.17.22102.5001": {
+    ".NETFramework,Version=v4.5": {
+      "Grasshopper/7.4.21067.13001": {
         "type": "package",
         "dependencies": {
-          "RhinoCommon": "[7.17.22102.5001]"
+          "RhinoCommon": "[7.4.21067.13001]"
         },
         "compile": {
-          "lib/net48/GH_IO.dll": {},
-          "lib/net48/Grasshopper.dll": {}
+          "lib/net45/GH_IO.dll": {},
+          "lib/net45/Grasshopper.dll": {}
         },
         "runtime": {
-          "lib/net48/_._": {}
+          "lib/net45/GH_IO.dll": {},
+          "lib/net45/Grasshopper.dll": {}
         },
         "build": {
           "build/Grasshopper.targets": {}
@@ -30,7 +31,7 @@
           "lib/net45/_._": {}
         }
       },
-      "Newtonsoft.Json/13.0.1": {
+      "Newtonsoft.Json/10.0.1": {
         "type": "package",
         "compile": {
           "lib/net45/Newtonsoft.Json.dll": {}
@@ -39,95 +40,42 @@
           "lib/net45/Newtonsoft.Json.dll": {}
         }
       },
-      "RhinoCommon/7.17.22102.5001": {
+      "RhinoCommon/7.4.21067.13001": {
         "type": "package",
         "compile": {
-          "lib/net48/Eto.dll": {},
-          "lib/net48/Rhino.UI.dll": {},
-          "lib/net48/RhinoCommon.dll": {}
+          "lib/net45/Eto.dll": {},
+          "lib/net45/Newtonsoft.Json.Rhino.dll": {},
+          "lib/net45/Rhino.UI.dll": {},
+          "lib/net45/RhinoCommon.dll": {}
         },
         "runtime": {
-          "lib/net48/_._": {}
+          "lib/net45/Eto.dll": {},
+          "lib/net45/Newtonsoft.Json.Rhino.dll": {},
+          "lib/net45/Rhino.UI.dll": {},
+          "lib/net45/RhinoCommon.dll": {}
         },
         "build": {
           "build/RhinoCommon.targets": {}
-        }
-      },
-      "System.Reactive/5.0.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Threading.Tasks.Extensions": "4.5.4"
-        },
-        "frameworkAssemblies": [
-          "System.Windows",
-          "System.Windows.Forms",
-          "WindowsBase"
-        ],
-        "compile": {
-          "lib/net472/System.Reactive.dll": {}
-        },
-        "runtime": {
-          "lib/net472/System.Reactive.dll": {}
-        }
-      },
-      "System.Reactive.Windows.Forms/5.0.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Reactive": "5.0.0",
-          "System.Threading.Tasks.Extensions": "4.5.4"
-        },
-        "compile": {
-          "lib/net472/System.Reactive.Windows.Forms.dll": {}
-        },
-        "runtime": {
-          "lib/net472/System.Reactive.Windows.Forms.dll": {}
-        }
-      },
-      "System.Runtime.CompilerServices.Unsafe/4.5.3": {
-        "type": "package",
-        "frameworkAssemblies": [
-          "mscorlib"
-        ],
-        "compile": {
-          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {}
-        },
-        "runtime": {
-          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {}
-        }
-      },
-      "System.Threading.Tasks.Extensions/4.5.4": {
-        "type": "package",
-        "dependencies": {
-          "System.Runtime.CompilerServices.Unsafe": "4.5.3"
-        },
-        "frameworkAssemblies": [
-          "mscorlib"
-        ],
-        "compile": {
-          "lib/net461/System.Threading.Tasks.Extensions.dll": {}
-        },
-        "runtime": {
-          "lib/net461/System.Threading.Tasks.Extensions.dll": {}
         }
       }
     }
   },
   "libraries": {
-    "Grasshopper/7.17.22102.5001": {
-      "sha512": "05kkIXJapZ1joLZgs24QvPUnctmEjSR3/ML5oDRp/3dxF97M/nhyuabavU5o3irKWk4yN1fDko+uBMWaZl7naQ==",
+    "Grasshopper/7.4.21067.13001": {
+      "sha512": "473M6YNBEpNwfnGH1+390tMRc1kpxNedoS0bilKQ2Gt+/cDE9Oxy0em6QzDG/eQQZe29N1FJP5AXjXkG0AbpAw==",
       "type": "package",
-      "path": "grasshopper/7.17.22102.5001",
+      "path": "grasshopper/7.4.21067.13001",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "build/Grasshopper.targets",
-        "grasshopper.7.17.22102.5001.nupkg.sha512",
+        "grasshopper.7.4.21067.13001.nupkg.sha512",
         "grasshopper.nuspec",
         "grasshopper.png",
-        "lib/net48/GH_IO.XML",
-        "lib/net48/GH_IO.dll",
-        "lib/net48/Grasshopper.dll",
-        "lib/net48/Grasshopper.xml"
+        "lib/net45/GH_IO.XML",
+        "lib/net45/GH_IO.dll",
+        "lib/net45/Grasshopper.dll",
+        "lib/net45/Grasshopper.xml"
       ]
     },
     "Microsoft.CSharp/4.7.0": {
@@ -199,14 +147,14 @@
         "version.txt"
       ]
     },
-    "Newtonsoft.Json/13.0.1": {
-      "sha512": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
+    "Newtonsoft.Json/10.0.1": {
+      "sha512": "ebWzW9j2nwxQeBo59As2TYn7nYr9BHicqqCwHOD1Vdo+50HBtLPuqdiCYJcLdTRknpYis/DSEOQz5KmZxwrIAg==",
       "type": "package",
-      "path": "newtonsoft.json/13.0.1",
+      "path": "newtonsoft.json/10.0.1",
+      "hasTools": true,
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
-        "LICENSE.md",
         "lib/net20/Newtonsoft.Json.dll",
         "lib/net20/Newtonsoft.Json.xml",
         "lib/net35/Newtonsoft.Json.dll",
@@ -219,147 +167,39 @@
         "lib/netstandard1.0/Newtonsoft.Json.xml",
         "lib/netstandard1.3/Newtonsoft.Json.dll",
         "lib/netstandard1.3/Newtonsoft.Json.xml",
-        "lib/netstandard2.0/Newtonsoft.Json.dll",
-        "lib/netstandard2.0/Newtonsoft.Json.xml",
-        "newtonsoft.json.13.0.1.nupkg.sha512",
+        "lib/portable-net45+win8+wpa81+wp8/Newtonsoft.Json.dll",
+        "lib/portable-net45+win8+wpa81+wp8/Newtonsoft.Json.xml",
+        "newtonsoft.json.10.0.1.nupkg.sha512",
         "newtonsoft.json.nuspec",
-        "packageIcon.png"
+        "tools/install.ps1"
       ]
     },
-    "RhinoCommon/7.17.22102.5001": {
-      "sha512": "eaD9lY297I99QvB9yo0xerjglclRIahVY1nFLAszUzvF2rBN80v04lk4edKkKNjm8aOnWMN/DWZdd0P6MVBNNg==",
+    "RhinoCommon/7.4.21067.13001": {
+      "sha512": "afj5gmFFTVXKpnWvEEtnMgqB4qCoBZyGDOvQ9dhXohrbTbHT8YWaoSwyWYrxrOmBXqaFiIaZ8nIC8dV2dOCXuw==",
       "type": "package",
-      "path": "rhinocommon/7.17.22102.5001",
+      "path": "rhinocommon/7.4.21067.13001",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Eto-LICENSE.txt",
         "build/RhinoCommon.targets",
-        "lib/net48/Eto.dll",
-        "lib/net48/Eto.xml",
-        "lib/net48/Rhino.UI.dll",
-        "lib/net48/RhinoCommon.XML",
-        "lib/net48/RhinoCommon.dll",
-        "rhinocommon.7.17.22102.5001.nupkg.sha512",
+        "lib/net45/Eto.dll",
+        "lib/net45/Eto.xml",
+        "lib/net45/Newtonsoft.Json.Rhino.dll",
+        "lib/net45/Rhino.UI.dll",
+        "lib/net45/RhinoCommon.XML",
+        "lib/net45/RhinoCommon.dll",
+        "rhinocommon.7.4.21067.13001.nupkg.sha512",
         "rhinocommon.nuspec",
         "rhinocommon.png"
-      ]
-    },
-    "System.Reactive/5.0.0": {
-      "sha512": "erBZjkQHWL9jpasCE/0qKAryzVBJFxGHVBAvgRN1bzM0q2s1S4oYREEEL0Vb+1kA/6BKb5FjUZMp5VXmy+gzkQ==",
-      "type": "package",
-      "path": "system.reactive/5.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "build/net5.0/_._",
-        "build/netcoreapp3.1/System.Reactive.dll",
-        "build/netcoreapp3.1/System.Reactive.targets",
-        "build/netcoreapp3.1/System.Reactive.xml",
-        "buildTransitive/net5.0/_._",
-        "buildTransitive/netcoreapp3.1/System.Reactive.targets",
-        "lib/net472/System.Reactive.dll",
-        "lib/net472/System.Reactive.xml",
-        "lib/net5.0-windows10.0.19041/System.Reactive.dll",
-        "lib/net5.0-windows10.0.19041/System.Reactive.xml",
-        "lib/net5.0/System.Reactive.dll",
-        "lib/net5.0/System.Reactive.xml",
-        "lib/netcoreapp3.1/_._",
-        "lib/netstandard2.0/System.Reactive.dll",
-        "lib/netstandard2.0/System.Reactive.xml",
-        "lib/uap10.0.16299/System.Reactive.dll",
-        "lib/uap10.0.16299/System.Reactive.pri",
-        "lib/uap10.0.16299/System.Reactive.xml",
-        "system.reactive.5.0.0.nupkg.sha512",
-        "system.reactive.nuspec"
-      ]
-    },
-    "System.Reactive.Windows.Forms/5.0.0": {
-      "sha512": "8etq1f+TYSkBU2Z9WIzErjSiE6/Cz0cZC5G1e1ktxKMTRoNO+gJuoXwm+XCnyHCZtQ3fH6zCRB06AxEzAghzsA==",
-      "type": "package",
-      "path": "system.reactive.windows.forms/5.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net472/System.Reactive.Windows.Forms.dll",
-        "lib/net472/System.Reactive.Windows.Forms.xml",
-        "system.reactive.windows.forms.5.0.0.nupkg.sha512",
-        "system.reactive.windows.forms.nuspec"
-      ]
-    },
-    "System.Runtime.CompilerServices.Unsafe/4.5.3": {
-      "sha512": "3TIsJhD1EiiT0w2CcDMN/iSSwnNnsrnbzeVHSKkaEgV85txMprmuO+Yq2AdSbeVGcg28pdNDTPK87tJhX7VFHw==",
-      "type": "package",
-      "path": "system.runtime.compilerservices.unsafe/4.5.3",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net461/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/net461/System.Runtime.CompilerServices.Unsafe.xml",
-        "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/netcoreapp2.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "lib/netstandard1.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/netstandard1.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "lib/netstandard2.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "ref/net461/System.Runtime.CompilerServices.Unsafe.dll",
-        "ref/net461/System.Runtime.CompilerServices.Unsafe.xml",
-        "ref/netstandard1.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "ref/netstandard1.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.dll",
-        "ref/netstandard2.0/System.Runtime.CompilerServices.Unsafe.xml",
-        "system.runtime.compilerservices.unsafe.4.5.3.nupkg.sha512",
-        "system.runtime.compilerservices.unsafe.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "System.Threading.Tasks.Extensions/4.5.4": {
-      "sha512": "zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg==",
-      "type": "package",
-      "path": "system.threading.tasks.extensions/4.5.4",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net461/System.Threading.Tasks.Extensions.dll",
-        "lib/net461/System.Threading.Tasks.Extensions.xml",
-        "lib/netcoreapp2.1/_._",
-        "lib/netstandard1.0/System.Threading.Tasks.Extensions.dll",
-        "lib/netstandard1.0/System.Threading.Tasks.Extensions.xml",
-        "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll",
-        "lib/netstandard2.0/System.Threading.Tasks.Extensions.xml",
-        "lib/portable-net45+win8+wp8+wpa81/System.Threading.Tasks.Extensions.dll",
-        "lib/portable-net45+win8+wp8+wpa81/System.Threading.Tasks.Extensions.xml",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/netcoreapp2.1/_._",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "system.threading.tasks.extensions.4.5.4.nupkg.sha512",
-        "system.threading.tasks.extensions.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
       ]
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.8": [
-      "Grasshopper >= 7.17.22102.5001",
+    ".NETFramework,Version=v4.5": [
+      "Grasshopper >= 7.4.21067.13001",
       "Microsoft.CSharp >= 4.7.0",
-      "Newtonsoft.Json >= 13.0.1",
-      "System.Reactive.Windows.Forms >= 5.0.0"
+      "Newtonsoft.Json >= 10.0.1"
     ]
   },
   "packageFolders": {
@@ -384,15 +224,15 @@
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net48"
+        "net45"
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net48": {
-          "targetAlias": "net48",
+        "net45": {
+          "targetAlias": "net45",
           "projectReferences": {}
         }
       },
@@ -403,13 +243,12 @@
       }
     },
     "frameworks": {
-      "net48": {
-        "targetAlias": "net48",
+      "net45": {
+        "targetAlias": "net45",
         "dependencies": {
           "Grasshopper": {
-            "include": "Compile, Build",
             "target": "Package",
-            "version": "[7.17.22102.5001, )"
+            "version": "[7.4.21067.13001, )"
           },
           "Microsoft.CSharp": {
             "target": "Package",
@@ -417,11 +256,7 @@
           },
           "Newtonsoft.Json": {
             "target": "Package",
-            "version": "[13.0.1, )"
-          },
-          "System.Reactive.Windows.Forms": {
-            "target": "Package",
-            "version": "[5.0.0, )"
+            "version": "[10.0.1, )"
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"

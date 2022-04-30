@@ -1,19 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net45</TargetFramework>
     <Version>1.0</Version>
     <Title>Muscles_ADE</Title>
     <Description>Description of Muscles_ADE</Description>
     <TargetExt>.gha</TargetExt>
     <BaseIntermediateOutputPath></BaseIntermediateOutputPath>
   </PropertyGroup>
-  
+	
   <ItemGroup>
-    <PackageReference Include="Grasshopper" Version="7.17.22102.5001" IncludeAssets="compile;build" />
+    <PackageReference Include="Grasshopper" Version="7.4.21067.13001" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Reactive.Windows.Forms" Version="5.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
   </ItemGroup>
   
   <ItemGroup>

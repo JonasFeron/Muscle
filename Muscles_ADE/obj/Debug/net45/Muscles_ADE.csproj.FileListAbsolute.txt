@@ -1,0 +1,5 @@
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles_ADE\obj\Debug\net45\Muscles_ADE.csproj.AssemblyReference.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles_ADE\obj\Debug\net45\Muscles_ADE.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles_ADE\obj\Debug\net45\Muscles_ADE.AssemblyInfoInputs.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles_ADE\obj\Debug\net45\Muscles_ADE.AssemblyInfo.cs
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscles_ADE\obj\Debug\net45\Muscles_ADE.csproj.CoreCompileInputs.cache
