@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="2.12">
+    <id>System.Reactive.Windows.Forms</id>
+    <version>5.0.0</version>
+    <authors>.NET Foundation and Contributors</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <projectUrl>https://github.com/dotnet/reactive</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/dotnet/reactive/0f837d11385cfaf575861ccc5a5fbcafb22d888f/Rx.NET/Resources/Artwork/Logo.png</iconUrl>
+    <description>Reactive Extensions (Rx) for .NET - v3 compatibility facade for</description>
+    <copyright>Copyright (c) .NET Foundation and Contributors.</copyright>
+    <repository type="git" url="https://github.com/dotnet/reactive" commit="103c252a0ec94eac753f353131ad95cc0be1b390" />
+    <dependencies>
+      <group targetFramework=".NETFramework4.7.2">
+        <dependency id="System.Reactive" version="5.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Threading.Tasks.Extensions" version="4.5.4" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+</package>
