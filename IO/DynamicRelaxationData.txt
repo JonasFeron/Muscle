@@ -1,2 +1,2 @@
-1095c748-8f48-4010-8183-09cabb25ce38
+fa0cc6d2-1d14-4d21-8ad1-056e256f7989
 {"TypeName":"SharedData","NodesCoord":[[1.15,0.0,0.0],[0.0,0.0,0.0],[-1.15,0.0,0.0]],"LoadsInit":[[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]],"LoadsToApply":[[0.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]],"ElementsType":[1,1],"ElementsEndNodes":[[0,1],[2,1]],"ElementsA":[[0.0,162.86016],[0.0,50.26548]],"ElementsE":[[0.0,1000000.0],[0.0,100000.0]],"TensionInit":[0.0,0.0],"ElementsLFreeInit":[1.15,1.15],"LengtheningsToApply":[0.0,0.0],"IsDOFfree":[false,false,false,true,false,true,false,false,false],"ReactionsInit":[0.0,0.0,0.0,0.0,0.0,0.0,0.0],"Residual0Threshold":0.0001,"Dt":0.01,"AmplMass":1.0,"MinMass":0.005,"MaxTimeStep":10000,"MaxKEReset":1000,"n_steps":1}

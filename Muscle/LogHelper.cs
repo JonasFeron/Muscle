@@ -1,26 +1,73 @@
-﻿using Grasshopper;
-using Grasshopper.Kernel;
-using System;
-using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text;
+using log4net;
+using log4net.Repository.Hierarchy;
+using log4net.Core;
+using log4net.Appender;
+using log4net.Layout;
+using System.IO;
 
 namespace Muscle
 {
-    public class LogHelper : GH_AssemblyInfo
+    public class LogHelper
     {
-        public override string Name => "Muscle";
+        public static void Setup(string level)
+        {
+            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
 
-        //Return a 24x24 pixel bitmap to represent this GHA library.
-        public override Bitmap Icon => null;
+            PatternLayout patternLayout = new PatternLayout();
+            patternLayout.ConversionPattern = "%date{ABSOLUTE} [%logger] -%thread-  %level - %message%newline%exception";
+            patternLayout.ActivateOptions();
 
-        //Return a short string describing the purpose of this GHA library.
-        public override string Description => "";
+            RollingFileAppender roller = new RollingFileAppender();
+            roller.AppendToFile = true;
+            roller.File = Path.Combine(AccessToAll.Main_Folder, @"Logs\LogFile.txt");
+            roller.Layout = patternLayout;
+            roller.MaxSizeRollBackups = 3;
+            roller.MaximumFileSize = "5MB";
+            roller.RollingStyle = RollingFileAppender.RollingMode.Size;
+            roller.StaticLogFileName = true;
+            roller.ActivateOptions();
+            hierarchy.Root.AddAppender(roller);
 
-        public override Guid Id => new Guid("4C470200-9416-4DB5-A52C-16E772DC62FC");
+            MemoryAppender memory = new MemoryAppender();
+            memory.ActivateOptions();
+            hierarchy.Root.AddAppender(memory);
 
-        //Return a string identifying you or your company.
-        public override string AuthorName => "";
+            Level lvl = Level.All;
+            switch (level)
+            {
+                case "Debug":
+                    lvl = Level.Debug;
+                    break;
+                case "Info":
+                    lvl = Level.Info;
+                    break;
+                case "Warn":
+                    lvl = Level.Warn;
+                    break;
+                case "Error":
+                    lvl = Level.Error;
+                    break;
+                case "Fatal":
+                    lvl = Level.Fatal;
+                    break;
+                case "Off":
+                    lvl = Level.Off;
+                    break;
+            }
 
-        //Return a string representing your preferred contact details.
-        public override string AuthorContact => "";
+            hierarchy.Root.Level = lvl;
+            hierarchy.Configured = true;
+        }
+        public static log4net.ILog GetLogger(System.Type fileName)
+        {
+            var log = log4net.LogManager.GetLogger(fileName);
+            //log4net.Config.XmlConfigurator.Configure();
+            return log;
+        }
     }
+
 }

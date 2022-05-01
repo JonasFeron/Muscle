@@ -13,6 +13,7 @@
   
   <ItemGroup>
     <PackageReference Include="Grasshopper" Version="7.17.22102.5001" IncludeAssets="compile;build" />
+    <PackageReference Include="log4net" Version="2.0.14" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="RhinoCommon" Version="7.17.22102.5001" />

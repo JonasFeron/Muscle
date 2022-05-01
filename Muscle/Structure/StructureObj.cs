@@ -379,7 +379,7 @@ namespace Muscle.Structure
 		{
 			if (answ == null)
 			{
-				///log.Warn("Structure: FAILED to populate with RESULTS");
+				log.Warn("Structure: FAILED to populate with RESULTS");
 				return;
 			}
 			IsInEquilibrium = answ.IsInEquilibrium;
@@ -440,7 +440,7 @@ namespace Muscle.Structure
 				elem.Line = new Line(p0, p1);
 			}
 
-			///log.Info("Structure: Is well populated with RESULTS");
+			log.Info("Structure: Is well populated with RESULTS");
 		}
 
 		#endregion PopulateWithSolverResult

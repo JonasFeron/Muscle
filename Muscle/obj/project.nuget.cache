@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "UPc8ck90ZoY7Nazgt8T55H4zi31atudm802e9Ta2+yiagycMzi35yezCXFS2LSej12SYiAfQblTOzsIuCzTZ4w==",
+  "dgSpecHash": "NDk1QvRrnZZaXCccxI8nV+xA7EHq1v/J8UKnhnSemNEd2rWCUrEqVzIsPjMgek3EgpH/oBd6xyiHOaaeUHYXbw==",
   "success": true,
   "projectFilePath": "C:\\Users\\desme\\Documents\\GitHub\\Muscles_ADE\\Muscle\\Muscle.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\desme\\.nuget\\packages\\grasshopper\\7.17.22102.5001\\grasshopper.7.17.22102.5001.nupkg.sha512",
+    "C:\\Users\\desme\\.nuget\\packages\\log4net\\2.0.14\\log4net.2.0.14.nupkg.sha512",
     "C:\\Users\\desme\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\desme\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
     "C:\\Users\\desme\\.nuget\\packages\\rhinocommon\\7.17.22102.5001\\rhinocommon.7.17.22102.5001.nupkg.sha512",
