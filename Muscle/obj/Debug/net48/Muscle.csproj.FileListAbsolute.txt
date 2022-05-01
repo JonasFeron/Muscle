@@ -28,4 +28,3 @@ C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj.CopyComplete
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.gha
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.pdb
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Newtonsoft.Json.xml
