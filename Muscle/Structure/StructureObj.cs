@@ -17,7 +17,7 @@ namespace Muscle.Structure
 
 	public class StructureObj
 	{
-		///private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+		private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 		#region Properties
 

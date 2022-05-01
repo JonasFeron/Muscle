@@ -9,7 +9,7 @@ namespace Muscle.PythonLink
 {
     public class PythonManager : IDisposable
     {
-        ///private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Signal to the writer when a new command has been set
@@ -64,10 +64,10 @@ namespace Muscle.PythonLink
 
                         if (!successInitialized)
                         {
-                            ///log.Warn($"Main PythonManager: did not receive signal - Initialized - after waiting {timeout} ms");
+                            log.Warn($"Main PythonManager: did not receive signal - Initialized - after waiting {timeout} ms");
                             _instance = null;
                         }
-                        /// else log.Debug("Main PythonManager: received signal - python is ready.");
+                        else log.Debug("Main PythonManager: received signal - python is ready.");
                     }
                 }
                 return _instance;
@@ -92,42 +92,42 @@ namespace Muscle.PythonLink
 
             lock (_commands)
             {
-                ///log.Debug("Main PythonManager: LOCKED - Add a new command.");
+                log.Debug("Main PythonManager: LOCKED - Add a new command.");
                 // Add the new command to the list of commands to execute
                 _commands.Add(command);
             }
-            ///log.Debug("Main PythonManager: REALEASED");
-            ///log.Debug("Main PythonManager: send signal - New Command");
+            log.Debug("Main PythonManager: REALEASED");
+            log.Debug("Main PythonManager: send signal - New Command");
             _newCommand_Signal.Set();
 
             while (true)
             {
-                ///log.Debug("Main PythonManager: wait for signal - Executed Command");
+                log.Debug("Main PythonManager: wait for signal - Executed Command");
 
                 bool success = _executedCommand_SignalFromWriter.WaitOne(timeout);
                 if (!success)
                 {
-                    ///log.Warn($"Main PythonManager: did not receive signal - Executed Command - after waiting {timeout} ms");
+                    log.Warn($"Main PythonManager: did not receive signal - Executed Command - after waiting {timeout} ms");
                     return "Python failed to answer";
                 }
-                ///log.Debug("Main PythonManager: received signal from Writer - Executed Command");
+                log.Debug("Main PythonManager: received signal from Writer - Executed Command");
                 string result = String.Empty;
                 lock (_results)
                 {
-                    ///log.Debug("Main PythonManager: LOCKED - look for the result.");
+                    log.Debug("Main PythonManager: LOCKED - look for the result.");
                     result = _results.FirstOrDefault(o => o.Id == command.Id)?.Result;
 
                     if (!string.IsNullOrEmpty(result))
                     {
-                        ///log.Debug("Main PythonManager: well retrieved the result.");
+                        log.Debug("Main PythonManager: well retrieved the result.");
                         _results.RemoveAll(o => o.Id == command.Id);
                     }
-                    ///else log.Warn("Main PythonManager: DID NOT FIND THE RESULT");
+                    else log.Warn("Main PythonManager: DID NOT FIND THE RESULT");
                 }
-                ///log.Debug("Main PythonManager: RELEASED");
+                log.Debug("Main PythonManager: RELEASED");
                 _executedCommand_SignalFromWriter.Reset();
-                ///log.Debug("Main PythonManager: Resetted signal - Executed Command");
-                ///log.Debug("Main PythonManager: return the result");
+                log.Debug("Main PythonManager: Resetted signal - Executed Command");
+                log.Debug("Main PythonManager: return the result");
                 return result;
             }
         }

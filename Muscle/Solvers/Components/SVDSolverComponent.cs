@@ -18,7 +18,7 @@ namespace Muscle.Solvers
 {
     public class SVDSolverComponent : GH_Component
     {
-        ///private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private SharedData prev_data;
         private SharedAssemblyResult prev_result;
 
@@ -88,7 +88,7 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            ///log.Info("Main SVD Solver: NEW SOLVE INSTANCE");
+            log.Info("Main SVD Solver: NEW SOLVE INSTANCE");
 
             // 1) Collect Inputs
             bool dataHasChanged = true;
@@ -106,7 +106,7 @@ namespace Muscle.Solvers
                 data = prev_data;
                 result = prev_result;
                 dataHasChanged = false;
-                ///log.Debug("Main ASSEMBLE: the structure has the same geometry than the previous one -> skip the assembly");
+                log.Debug("Main ASSEMBLE: the structure has the same geometry than the previous one -> skip the assembly");
             }
 
             if (dataHasChanged)
@@ -123,7 +123,7 @@ namespace Muscle.Solvers
                     string resultString = null;
                     string dataString = JsonConvert.SerializeObject(data, Formatting.None);
                     resultString = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainAssemble, dataString);
-                    ///log.Info("Main SVD Solver: received the results");
+                    log.Info("Main SVD Solver: received the results");
                     try
                     {
                         JsonConvert.PopulateObject(resultString, result);
@@ -131,7 +131,7 @@ namespace Muscle.Solvers
                     catch
                     {
                         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + resultString);
-                        ///log.Warn("Main SVD Solver: Something went wrong while solving:" + resultString);
+                        log.Warn("Main SVD Solver: Something went wrong while solving:" + resultString);
                         result = null;
                     }
                 }
@@ -141,7 +141,7 @@ namespace Muscle.Solvers
 
 
 
-            if (result != null) ///log.Info("Main SVD Solver: Succeeded to retrieve the SVD results");
+            if (result != null) log.Info("Main SVD Solver: Succeeded to retrieve the SVD results");
 
                 // 3) Set outputs
                 DA.SetData(0, gh_struct);
@@ -153,7 +153,7 @@ namespace Muscle.Solvers
             DA.SetData(6, result.m);
             DA.SetDataTree(7, result.ListListToGH_Struct(result.Um_row));
 
-            ///log.Info("Main SVD Solver: END SOLVE INSTANCE");
+            log.Info("Main SVD Solver: END SOLVE INSTANCE");
         }
 
     }

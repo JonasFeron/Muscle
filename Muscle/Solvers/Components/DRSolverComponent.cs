@@ -17,7 +17,7 @@ namespace Muscle.Solvers
 {
     public class DRSolverComponent : GH_Component
     {
-        ///private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -92,7 +92,7 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            ///log.Info("Main NONLinear Solver: NEW SOLVE INSTANCE");
+            log.Info("Main NONLinear Solver: NEW SOLVE INSTANCE");
             //1) Collect Data
             StructureObj structure = new StructureObj();
             GH_Structure<IGH_Goo> gh_loads_ext = new GH_Structure<IGH_Goo>();
@@ -144,14 +144,14 @@ namespace Muscle.Solvers
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
             {
-                ///log.Debug("pythonManager exists");
+                log.Debug("pythonManager exists");
                 string result_str = null;
                 string Data_str = JsonConvert.SerializeObject(data, Formatting.None);
-                ///log.Info("Main NonLinear Solver: ask Python to execute a command");
+                log.Info("Main NonLinear Solver: ask Python to execute a command");
 
                 result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainDRSolve, Data_str);
 
-                ///log.Info("Main NonLinear Solver: received results");
+                log.Info("Main NonLinear Solver: received results");
                 try
                 {
                     JsonConvert.PopulateObject(result_str, result);
@@ -159,7 +159,7 @@ namespace Muscle.Solvers
                 catch
                 {
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + result_str);
-                    ///log.Warn("Main NonLinear Solver: Something went wrong while solving:" + result_str);
+                    log.Warn("Main NonLinear Solver: Something went wrong while solving:" + result_str);
                     result = null;
                 }
             }
@@ -172,7 +172,7 @@ namespace Muscle.Solvers
             DA.SetData(2, new_structure.DR.nTimeStep);
             DA.SetData(3, new_structure.DR.nKEReset);
 
-            ///log.Info("Main NONLinear Solver: END SOLVE INSTANCE");
+            log.Info("Main NONLinear Solver: END SOLVE INSTANCE");
         }
 
         private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)
