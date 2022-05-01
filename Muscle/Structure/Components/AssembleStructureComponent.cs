@@ -21,7 +21,7 @@ namespace Muscle.Structure
     {
 
         #region Properties
-        ///private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
         #endregion Properties
@@ -98,7 +98,7 @@ namespace Muscle.Structure
         /// <param name="DA">The DA object can be used to retrieve data from input parameters and to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            ///log.Info("Main ASSEMBLE: NEW SOLVE INSTANCE");
+            log.Info("Main ASSEMBLE: NEW SOLVE INSTANCE");
 
             // 1) Collect Inputs
             GH_Structure<IGH_Goo> gh_elements_input = new GH_Structure<IGH_Goo>();
@@ -130,7 +130,7 @@ namespace Muscle.Structure
             // 3) Set outputs
             DA.SetData(0, gh_structure);
 
-            ///log.Info("Main ASSEMBLE: END SOLVE INSTANCE");
+            log.Info("Main ASSEMBLE: END SOLVE INSTANCE");
         }
 
         #endregion Methods
