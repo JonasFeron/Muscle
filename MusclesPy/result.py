@@ -129,7 +129,7 @@ class SharedSolverResult():
             Answ.nTimeStep = Struct.DR.nTimeStep
             Answ.nKEReset = Struct.DR.nKEReset
 
-    def PopulateWith_Dynamics(Answ,Struct):#to do
+    #def PopulateWith_Dynamics(Answ,Struct):#to do
 
 
 class SharedSolverResultEncoder(json.JSONEncoder):

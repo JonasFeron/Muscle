@@ -57,7 +57,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.item);
 
             //pManager[1].Optional = true; /A mettre ? 
             //pManager[2].Optional = true;
@@ -69,8 +69,8 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
             
         }
 
@@ -87,7 +87,7 @@ namespace Muscle.Dynamics
 
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetData(1, ref DynMass)) { }
+            if (!DA.GetData(1, ref DynMass)) { } ///problemn
 
 
             //2) Format data before sending and solving in python
