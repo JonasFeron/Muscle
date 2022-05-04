@@ -66,14 +66,17 @@ namespace Muscle
                 else return "MainDynamicRelaxation.py";
             }
         }
-        ///public static string Dyn
-        ///{
-        /// get
-        ///{
-        /// if (user_mode == true) return "ModuleDynamics.pyc";
-        ///else return "ModuleDynamics.py";
-        ///   }
-        ///}
+
+
+
+        public static string DynSolve
+        {
+            get
+            {
+                if (user_mode == true) return "ModuleDynamics.pyc";
+                else return "ModuleDynamics.py";
+            }
+        }
 
         public const string FileTestData = "TestData.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python

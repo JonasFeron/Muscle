@@ -8,6 +8,7 @@ using Muscle.Elements;
 using Muscle.Loads;
 using Muscle.Nodes;
 using Muscle.PythonLink;
+using Muscle.Dynamics;
 using Muscle.PythonLink.Component;
 using Muscle.Structure;
 using Newtonsoft.Json;
@@ -56,7 +57,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.tree);
 
             //pManager[1].Optional = true; /A mettre ? 
             //pManager[2].Optional = true;
@@ -68,8 +69,8 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.item);
             
         }
 
@@ -79,7 +80,7 @@ namespace Muscle.Dynamics
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Main NONLinear Solver: NEW SOLVE INSTANCE");
+            log.Info("Dynamic computation: NEW SOLVE INSTANCE");
             //1) Collect Data
             StructureObj structure = new StructureObj();
             double DynMass = 1; // Default value
@@ -101,8 +102,7 @@ namespace Muscle.Dynamics
             /// Call the method "DynMethod" to make the computation in Python
             ///new_structure.DR = new DRMethod(dt, amplMass, minMass, maxTimeStep, maxKEReset);
 
-            //Call the method "DynMethod" to make the computation in Python
-            //structure.DR = new DynMethod(DynMass); //Call StructureObj in the python code --> a travailler
+            //Call the method "DynMethod" to make the computation in Python ?
 
             // // even if both success 1 and 2 failed to collect data, we can still run the analysis because the LengtheningsToApply can also come from direct change of the Free lengths 
             //if (!success1 && !success2)
@@ -119,108 +119,40 @@ namespace Muscle.Dynamics
                 return;
             }
 
-            SharedData data = new SharedData(structure); //Object data contains all the essential informations of structure
-            SharedSolverResult result = new SharedSolverResult();
+            SharedData data = new SharedData(structure,DynMass) ; //Object data contains all the essential informations of structure + the dynMass considered
+            SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
             {
                 log.Debug("pythonManager exists");
                 string result_str = null;
-                string Data_str = JsonConvert.SerializeObject(data, Formatting.None);
-                log.Info("Main NonLinear Solver: ask Python to execute a command");
+                string Data_str = JsonConvert.SerializeObject(data, Formatting.None); /// Json is formatting the data for the transfert to Python
+                log.Info("Dynamic computation: ask Python to execute a command");
 
-                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainDRSolve, Data_str);
+                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.DynSolve, Data_str); 
+                ///AccessToAll launch a Python file who contains the steps of computations
 
-                log.Info("Main NonLinear Solver: received results");
+                log.Info("Dynamic computation: received results");
                 try
                 {
-                    JsonConvert.PopulateObject(result_str, result);
+                    JsonConvert.PopulateObject(result_str, result); //Obtain all the results
                 }
                 catch
                 {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + result_str);
-                    log.Warn("Main NonLinear Solver: Something went wrong while solving:" + result_str);
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while computing: " + result_str);
+                    log.Warn("Dynamic computation: Something went wrong while solving:" + result_str);
                     result = null;
                 }
             }
 
-            //Not needed because the computation is not changing the structure
-            //new_structure.PopulateWithSolverResult(result); // Update the new structure, the elements and the nodes with the results of python. 
+            //Not need to create a new structure because the computation is not changing the structure
+            //Obtain the results from "result"
 
-            //GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
-            //DA.SetData(0, gh_structure);
-            //DA.SetData(1, new_structure.IsInEquilibrium);
-            //DA.SetData(2, new_structure.DR.nTimeStep);
-            //DA.SetData(3, new_structure.DR.nKEReset);
+            DA.SetData(0, result.Frequency); //Don't use PopulateWithSolverResult
+            DA.SetData(1, result.Modes);
 
-            log.Info("Main NONLinear Solver: END SOLVE INSTANCE");
+            log.Info("Dynamic computation: END SOLVE INSTANCE");
         }
-        /*
-        private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)
-        {
-            //return true if at least one load is added on the structure
-            bool success = false;
-            if (datas.Count == 0 || datas == null) return false; //failure and abort
-
-            //new_structure.LoadsToApply = new List<Vector3d>(); //this is already done in Duplicate
-            //foreach (var node in new_structure.StructuralNodes) new_structure.LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
-
-
-            List<Node> nodes = new_structure.StructuralNodes; //use a shorter nickname 
-
-            PointLoad load;
-            foreach (var data in datas)
-            {
-                if (data is GH_PointLoad)
-                {
-                    load = ((GH_PointLoad)data).Value; //retrieve the pointload inputted by the user
-
-                    // we need to know on which point or node the load will have to be applied
-                    int ind = -1;
-                    if (load.NodeInd != -1) //PointsLoad can be defined on a point or on a node index
-                    {
-                        ind = load.NodeInd;
-                    }
-                    else // load may have been defined on a point not on a node
-                    {
-                        if (!Node.EpsilonContains(nodes, load.Point, new_structure.ZeroTol, out ind)) //try to find the point between all nodes
-                        {
-                            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "A point Load is applied on a point which does not belong to the structure. This point load is ignored.");
-                            continue;//go to next point load
-                        }
-                    }
-                    new_structure.LoadsToApply[ind] += load.Vector; //If Point Load is applied on a node of the structure, then the load is added to all the Loads to apply on the structure. 
-                    success = true;
-                }
-            }
-            return success;
-        }
-
-        private bool RegisterPrestressLoads(StructureObj new_structure, List<IGH_Goo> datas)
-        {
-            bool success = false;
-            if (datas.Count == 0 || datas == null) return false; //failure and abort
-
-            //new_structure.LengtheningsToApply = new List<double>();
-            //foreach (var elem in new_structure.StructuralElements) new_structure.LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
-
-            //List<Node> nodes = new_structure.StructuralNodes;
-            List<Element> elements = new_structure.StructuralElements;
-
-            ImposedLenghtenings DL;
-            foreach (var data in datas)
-            {
-                if (data is GH_ImposedLengthenings)
-                {
-                    DL = ((GH_ImposedLengthenings)data).Value; //the prestressload is a variation of length
-
-                    int ind_e = DL.Element.Ind;
-
-                    new_structure.LengtheningsToApply[ind_e] += DL.Value; //The variation of length is added to the force to all the lengthenings to apply on the structure. 
-                    success = true;
-                }
-            }
-            return success; // if at least one lengthening will be applied on the structure
-        }*/
+       
     }
 }

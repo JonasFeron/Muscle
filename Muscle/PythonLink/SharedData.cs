@@ -2,6 +2,7 @@
 using Muscle.Nodes;
 using Muscle.Solvers;
 using Muscle.Structure;
+using Muscle.Dynamics;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,6 @@ namespace Muscle.PythonLink
 		public int MaxKEReset { get; set; }
 		public int n_steps { get; set; } // number of steps for the non-linear solver
 
-		///public int DynMasses { get; set; } //Added for dyn
 
 		#endregion SolverInputs
 
@@ -119,8 +119,15 @@ namespace Muscle.PythonLink
 			RegisterNodes(structObj);
 			n_steps = number_steps;
 		}
-
-
+	
+		public SharedData(StructureObj structObj, double DynMass) //For the dynamic computation
+		{
+			Init();
+			RegisterElements(structObj);
+			RegisterNodes(structObj);
+			DynamicMass = DynMass;
+		}
+		
 		#endregion Constructors
 
 
@@ -237,6 +244,7 @@ namespace Muscle.PythonLink
 			MinMass = dr.MinMass;
 			MaxTimeStep = dr.MaxTimeStep;
 			MaxKEReset = dr.MaxKEReset;
+
 		}
 		#endregion Methods
 

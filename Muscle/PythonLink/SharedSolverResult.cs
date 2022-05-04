@@ -44,6 +44,12 @@ namespace Muscle.PythonLink
 
 		#endregion StructureAnalysis
 
+		#region Dynamics
+		// Results of the dynamic component
+		public List<double> Frequency { get; set; } // Natural frequencies of the structure
+		public List<double> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
+
+		#endregion Dynamics
 
 		///// Results informations /////
 

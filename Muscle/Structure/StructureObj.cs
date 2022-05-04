@@ -4,6 +4,7 @@ using Muscle.Elements;
 using Muscle.Nodes;
 using Muscle.PythonLink;
 using Muscle.Solvers;
+using Muscle.Dynamics;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
@@ -62,6 +63,7 @@ namespace Muscle.Structure
 
 		public DRMethod DR { get; set; }
 
+		///public DynMethod DS { get; set; }
 
 		#endregion Properties
 
