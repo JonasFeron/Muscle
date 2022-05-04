@@ -60,6 +60,14 @@ namespace Muscle.PythonLink
 
 		#endregion SolverInputs
 
+		#region Dynamics
+
+		public double DynamicMass { get; set; }
+
+
+		#endregion Dynamics 
+
+
 		#endregion Properties
 
 		#region Constructors
@@ -73,7 +81,6 @@ namespace Muscle.PythonLink
 			n_steps = 1;
 			ElementsType = new List<int>();
 			NodesCoord = new List<List<double>>();
-			///DynMasses = new int();
 			LoadsInit = new List<List<double>>();
 			LoadsToApply = new List<List<double>>();
 			ElementsEndNodes = new List<List<int>>();
@@ -85,6 +92,7 @@ namespace Muscle.PythonLink
 			IsDOFfree = new List<bool>();
 			ReactionsInit = new List<double>();
 			Residual0Threshold = 0.0001;
+			DynamicMass = 1;
 		}
 
 
@@ -111,7 +119,6 @@ namespace Muscle.PythonLink
 			RegisterNodes(structObj);
 			n_steps = number_steps;
 		}
-
 
 
 		#endregion Constructors
