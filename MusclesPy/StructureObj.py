@@ -1000,8 +1000,9 @@ class StructureObj():
         Self.n_steps = 1
 
         #Part Dynamics
-        Self.DynMasses = np.zeros((Self.NodesCount,), dtype=float)  # Mass used for the dynamics computation  - vector containing the masses [Kg] at each node [#Nodes]
-
+        Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
+        Self.freq = np.zeros((Self.IsDOFfree,))
+        Self.mode = np.zeros((Self.IsDOFfree,Self.IsDOFfree))
 
 
     # endregion
@@ -1793,6 +1794,7 @@ class StructureObj():
     # region DYNAMICS
 
     def test_ModuleDynamics(Self, PrestrainLevel,DynMasses):
+        #Test via python
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
         Input:
@@ -1887,12 +1889,13 @@ class StructureObj():
         return w, PHI
 
     def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
+        #Used via Python & base of the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
         Input:
             :param NodesCoord : coordinates of the nodes
             :param prestrainLevel : Applied prestress in [kN] - constant
-            :param Masses : Masses at each node [Kg] - [ # of nodes ]
+            :param Masses : Masses at each node [Kg] - [ integer ]
             :param Applied Prestress
 
             :return omega : array containing the natural frequencies of the structure
@@ -1900,7 +1903,7 @@ class StructureObj():
             #The returns are sorted from small to large frequencies
 
         """
-        assert Data.DynMasses.shape == (Self.NodesCount, )
+        #assert Data.DynMasses.shape == (Self.NodesCount, )
 
         Self.C = Self.ConnectivityMatrix( Data.NodesCount, Data.ElementsCount, Data.ElementsEndNodes)
         Data.DOFfreeCount = 3 * Data.NodesCount - Data.FixationsCount
@@ -1979,9 +1982,8 @@ class StructureObj():
         w = w[idx]
         PHI = PHI[:, idx]
 
-        Data.freq = w/(2*np.pi)
-        Data.mode = PHI
-
+        Self.freq = w/(2*np.pi)
+        Self.mode = PHI
 
 
     #endregion

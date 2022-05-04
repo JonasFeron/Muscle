@@ -74,6 +74,8 @@ namespace Muscle.PythonLink
 			Reactions = new List<double>();
 			nTimeStep = 0;
 			nKEReset = 0;
+			Frequency = new List<double>();
+			Modes = new List<double>();
 		}
 
 
