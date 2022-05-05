@@ -18,12 +18,13 @@ def main(): # START READING FROM HERE
     if (key  == keyInTxtFile):
         try:
             output_str = core(DataString[0]) # See method core here below
+
         except Exception as e:
             output_str = str(e)
     else:
         output_str = "Keys from command prompt and Data text file did not match"
 
-    resultPath = r.WriteResultFile(dataPath,r.FileDRResult,key,output_str)
+    resultPath = r.WriteResultFile(dataPath,r.FileDynamicResult,key,output_str)
     print(key + ":" + resultPath)  #Send the results to C#
 
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
@@ -129,7 +130,7 @@ namespace Muscle.Dynamics
                 string Data_str = JsonConvert.SerializeObject(data, Formatting.None); /// Json is formatting the data for the transfert to Python
                 log.Info("Dynamic computation: ask Python to execute a command");
 
-                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.DynSolve, Data_str); 
+                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.DynSolve, Data_str);
                 ///AccessToAll launch a Python file who contains the steps of computations
 
                 log.Info("Dynamic computation: received results");
@@ -151,8 +152,11 @@ namespace Muscle.Dynamics
             DA.SetData(0, result.Frequency); //Don't use PopulateWithSolverResult
             DA.SetData(1, result.Modes);
 
+
+
             log.Info("Dynamic computation: END SOLVE INSTANCE");
         }
        
     }
 }
+*/

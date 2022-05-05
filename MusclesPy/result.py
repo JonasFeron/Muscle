@@ -114,6 +114,8 @@ class SharedSolverResult():
         Answ.nTimeStep = 0
         Answ.nKEReset = 0
 
+        #Answ.Frequency = []
+        #Answ.Modes =  []
 
     def PopulateWith(Answ, Struct):
         if isinstance(Struct, StructureObj):
@@ -129,10 +131,17 @@ class SharedSolverResult():
             Answ.nTimeStep = Struct.DR.nTimeStep
             Answ.nKEReset = Struct.DR.nKEReset 
 
-    def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
-        if isinstance(Struct, StructureObj):
-            Answ.freq = Struct.freq.round(5).tolist() #Frequencies [Hz] who are ranked
-            Answ.mode = Struct.mode.round(5).tolist() #Modes ranked as the frequencies
+    #def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
+     #   if isinstance(Struct, StructureObj):
+      #      freq = np.array([1,2])
+       #     mode = np.array([[1,2],[1,2]])
+        #    Answ.Frequency = freq.reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
+         #   Answ.Modes = mode.reshape((2,2)).tolist() #Modes ranked as the frequencies
+            #Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
+            #Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #Modes ranked as the frequencies
+            #Both reshape are working --> tested in python
+            #Round : number of digit after the comma
+            #Reshape also work : obtain a list containing DOFfreeCount lists of arrays containint DOFfreeCount elements
 
 class SharedSolverResultEncoder(json.JSONEncoder):
     """
