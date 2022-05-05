@@ -23,7 +23,7 @@ def main(): # START READING FROM HERE
     else:
         output_str = "Keys from command prompt and Data text file did not match"
 
-    resultPath = r.WriteResultFile(dataPath,r.FileDRResult,key,output_str)
+    resultPath = r.WriteResultFile(dataPath,r.FileDynamicResult,key,output_str)
     print(key + ":" + resultPath)  #Send the results to C#
 
 
