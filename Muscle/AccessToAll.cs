@@ -73,8 +73,8 @@ namespace Muscle
         {
             get
             {
-                if (user_mode == true) return "ModuleDynamics.pyc";
-                else return "ModuleDynamics.py";
+                if (user_mode == true) return "MainModuleDynamics.pyc";
+                else return "MainModuleDynamics.py";
             }
         }
 

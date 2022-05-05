@@ -39,7 +39,7 @@ def core(DataString):
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
         Struct = StructureObj() #initial empty structure
         Struct.ModuleDynamics(data) #do some calculations
-        result.PopulateWith_Dyn(Struct) #register the results
+        result.PopulateWith_Dynamics(Struct) #register the results
         # print("I finished calculation")
 
     output_dct = json.dumps(result, cls=r.SharedSolverResultEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
