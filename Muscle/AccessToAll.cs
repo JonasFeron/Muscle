@@ -88,7 +88,7 @@ namespace Muscle
         //public const string File_NonLinearSolve_Result = "NonLinearSolveResult.txt";
         public const string FileDRSolveData = "DynamicRelaxationData.txt";
 
-        //public const string File_Dynamic_Result = "DynamicResult.txt";
+        public const string FileDynamicData = "DynamicData.txt";
 
         public static Vector3d g = new Vector3d(0, 0, -9.81);
 

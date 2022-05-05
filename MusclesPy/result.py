@@ -127,10 +127,12 @@ class SharedSolverResult():
             Answ.IsInEquilibrium = bool(Struct.Final.IsInEquilibrium)
 
             Answ.nTimeStep = Struct.DR.nTimeStep
-            Answ.nKEReset = Struct.DR.nKEReset
+            Answ.nKEReset = Struct.DR.nKEReset 
 
-    #def PopulateWith_Dynamics(Answ,Struct):#to do
-
+    def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
+        if isinstance(Struct, StructureObj):
+            Answ.freq = Struct.freq #Frequencies [Hz] who are ranked
+            Answ.mode = Struct.mode #Modes ranked as the frequencies
 
 class SharedSolverResultEncoder(json.JSONEncoder):
     """
