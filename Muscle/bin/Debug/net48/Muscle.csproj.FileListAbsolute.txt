@@ -1,6 +1,0 @@
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.csproj.AssemblyReference.cache
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.AssemblyInfoInputs.cache
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.AssemblyInfo.cs
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.csproj.CoreCompileInputs.cache
-C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.pdb

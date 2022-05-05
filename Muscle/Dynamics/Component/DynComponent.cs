@@ -25,7 +25,7 @@ namespace Muscle.Dynamics
         /// </summary>
         public DynComponent()
           : base("Dynamic Solver", "DS",
-                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node.BIS BIS",
+                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node.",
               "Muscles", "Dynamics")
         {
         }
