@@ -47,7 +47,7 @@ namespace Muscle.PythonLink
 		#region Dynamics
 		// Results of the dynamic component
 		public List<double> Frequency { get; set; } // Natural frequencies of the structure
-		public List<List<double>> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
+		public List<double> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
 		#endregion Dynamics
 
 		///// Results informations /////
@@ -74,7 +74,7 @@ namespace Muscle.PythonLink
 			nTimeStep = 0;
 			nKEReset = 0;
 			Frequency = new List<double>();
-			Modes = new List<List<double>>();
+			Modes = new List<double>();
 		}
 
 

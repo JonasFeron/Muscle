@@ -1,2 +1,2 @@
-e4fb5b8e-d051-4326-816d-c1879921e2ac
-{"TypeName": "SharedSolverResult", "NodesCoord": [], "Loads": [], "Tension": [], "Reactions": [], "ElementsLFree": [], "Residual": [], "IsInEquilibrium": false, "nTimeStep": 0, "nKEReset": 0, "Frequency": [1, 2], "Modes": [[3, 4], [5, 6]]}
+08b02a87-939b-4d00-bdc3-901623ef45f6
+{"TypeName": "SharedSolverResult", "NodesCoord": [], "Loads": [], "Tension": [], "Reactions": [], "ElementsLFree": [], "Residual": [], "IsInEquilibrium": false, "nTimeStep": 0, "nKEReset": 0, "Frequency": [1, 2], "Modes": [3.0, 4.0]}
