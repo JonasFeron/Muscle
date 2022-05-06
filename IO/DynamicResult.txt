@@ -1,2 +1,2 @@
-4c925fda-d363-47e4-9217-893e4a1b65dc
+d47978ed-2df1-4bd6-a7d8-ad765af20953
 {"TypeName": "SharedSolverResult", "NodesCoord": [], "Loads": [], "Tension": [], "Reactions": [], "ElementsLFree": [], "Residual": [], "IsInEquilibrium": false, "nTimeStep": 0, "nKEReset": 0, "Frequency": [1, 2], "Modes": [[3, 4], [5, 6]]}
