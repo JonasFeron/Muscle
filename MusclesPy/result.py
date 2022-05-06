@@ -134,9 +134,9 @@ class SharedSolverResult():
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
             freq = np.array([1,2])
-            mode = np.array([3,4])
+            mode = np.array([[3,4],[5,6]])
             Answ.Frequency = freq.reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
-            Answ.Modes = mode.reshape((-1,)).tolist() #reshape((2,2)).tolist() #Modes ranked as the frequencies
+            Answ.Modes = mode.reshape((-1,2)).tolist() #reshape((2,2)).tolist() #Modes ranked as the frequencies
             #Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
             #Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #Modes ranked as the frequencies
             #Both reshape are working --> tested in python
