@@ -151,6 +151,8 @@ namespace Muscle.Dynamics
             DA.SetData(0, result.Frequency); //Don't use PopulateWithSolverResult
             DA.SetData(1, result.Modes);
 
+
+
             log.Info("Dynamic computation: END SOLVE INSTANCE");
         }
        

@@ -1925,7 +1925,7 @@ class StructureObj():
         PrestressMode = Self.Initial.SVD.SS.T  # prestress modes in the initial shape [ # of modes , # of elements in the structure]
 
             #2 - Compute the internal forces in the members due to the PrestrainLevel
-
+        '''''
         PrestressIntForces = Data.PrestrainLevel * PrestressMode
 
 
@@ -1984,7 +1984,9 @@ class StructureObj():
 
         Self.freq = w/(2*np.pi)
         Self.mode = PHI
-
+        '''''
+        Self.freq = np.array([1.0,2.0])
+        Self.mode = np.array([1.0,2.0],[1.0,2.0])
 
     #endregion
 

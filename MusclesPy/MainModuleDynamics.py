@@ -18,6 +18,7 @@ def main(): # START READING FROM HERE
     if (key  == keyInTxtFile):
         try:
             output_str = core(DataString[0]) # See method core here below
+
         except Exception as e:
             output_str = str(e)
     else:
