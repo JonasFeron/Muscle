@@ -148,9 +148,9 @@ namespace Muscle.Dynamics
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
 
-            DA.SetData(0, result.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetData(1, result.Modes);
-
+            DA.SetDataList(0, result.Frequency); //Don't use PopulateWithSolverResult
+            DA.SetDataList(1, result.Modes);
+            // Before it was SetData
 
 
             log.Info("Dynamic computation: END SOLVE INSTANCE");
