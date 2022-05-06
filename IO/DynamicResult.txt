@@ -1,2 +1,2 @@
-4a0243ed-c6af-4c7c-8113-7d1a4db6be1d
-only integer scalar arrays can be converted to a scalar index
+a764b3d7-acaa-498a-b60b-4b5f2e684fe4
+{"TypeName": "SharedSolverResultDynamics", "Frequency": [423.21307, 1254.00177], "Modes": [[-0.04423, 0.99902], [0.99902, 0.04423]]}

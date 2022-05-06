@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Grasshopper.Kernel.Data;
+using Grasshopper.Kernel.Types;
 
 namespace Muscle.PythonLink
 {
@@ -46,9 +48,8 @@ namespace Muscle.PythonLink
 
 		#region Dynamics
 		// Results of the dynamic component
-		//public List<double> Frequency { get; set; } // Natural frequencies of the structure
-		//public List<double> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
-
+		public List<double> Frequency { get; set; } // Natural frequencies of the structure
+		public List<List<double>> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
 		#endregion Dynamics
 
 		///// Results informations /////
@@ -74,8 +75,8 @@ namespace Muscle.PythonLink
 			Reactions = new List<double>();
 			nTimeStep = 0;
 			nKEReset = 0;
-			//Frequency = new List<double>();
-			//Modes = new List<double>();
+			Frequency = new List<double>();
+			Modes = new List<List<double>>();
 		}
 
 
@@ -91,7 +92,19 @@ namespace Muscle.PythonLink
 		#endregion Constructors
 
 		#region Methods
-
+		public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
+		{
+			GH_Path path;
+			int i = 0;
+			GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
+			foreach (List<double> datalist in datalistlist)
+			{
+				path = new GH_Path(i);
+				res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
+				i++;
+			}
+			return res;
+		}
 		#endregion Methods
 
 	}

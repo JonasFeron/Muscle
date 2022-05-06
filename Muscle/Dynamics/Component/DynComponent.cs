@@ -1,5 +1,4 @@
-﻿/*
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
@@ -70,9 +69,9 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
-            
+            pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
+            //AddNumberParameter
         }
 
         /// <summary>
@@ -149,9 +148,9 @@ namespace Muscle.Dynamics
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
 
-            DA.SetData(0, result.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetData(1, result.Modes);
-
+            DA.SetDataList(0, result.Frequency); //Don't use PopulateWithSolverResult
+            DA.SetDataTree(1, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
+            // Before it was SetData
 
 
             log.Info("Dynamic computation: END SOLVE INSTANCE");
@@ -159,4 +158,3 @@ namespace Muscle.Dynamics
        
     }
 }
-*/

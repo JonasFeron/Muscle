@@ -1152,12 +1152,12 @@ class StructureObj_Tests(unittest.TestCase):
 
         Struct.ElementsE = 0.21 * np.ones((Struct.ElementsCount, 2)) * 10 ** 6  # MPa
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
-        Struct.DynMasses = 1 * np.array([1, 1])  # kg
+        Struct.DynMasses = 1 #* np.array([1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
-        print(w)
+        Struct.ModuleDynamicsPython(PrestrainLevel)
+        print(Struct.freq)
         wScia = np.array([79370])  # Data coming from the SCIA model
-        self.assertEqual(np.allclose(w, wScia, atol=3), True)
+        self.assertEqual(np.allclose(Struct.freq, wScia, atol=3), True)
         #self.assertEqual(True, True)
 
 
@@ -1190,9 +1190,9 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = 1 * np.array([1, 1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print(w)
-        wScia = np.array([81741 , 81741])  # Data coming from the SCIA model
+        wScia = np.array([81741, 81741])  # Data coming from the SCIA model
         self.assertEqual(np.allclose(w, wScia, atol=3), True)
 
 
@@ -1234,7 +1234,7 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = np.array([1, 1, 1, 1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print('w', w)
         wScia = np.array([25810.53 , 36157.38 , 53325.3 , 68567.28 , 89122.83 , 102607.29 , 108948.17])  # Data coming from the SCIA model
         self.assertEqual(np.allclose(w, wScia, atol=3), True)
@@ -1274,7 +1274,7 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = np.array([1, 1, 1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print('w', w)
         wScia = np.array(
             [12795.77, 34470.83, 62397.29, 101845.22, 141015.39])  # Data coming from the SCIA model
@@ -1309,7 +1309,7 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = 1 * np.array([1, 1, 1])  # kg
         PrestrainLevel = 0.000001  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print(w)
         #wScia = np.array([79370])  # Data coming from the SCIA model
         #self.assertEqual(np.allclose(w, wScia, atol=3), True)
@@ -1419,6 +1419,46 @@ class StructureObj_Tests(unittest.TestCase):
         KmatFree = Kmat[Struct.IsDOFfree].T[Struct.IsDOFfree].T  # methode 2
 
         self.assertEqual(False, True)
+
+
+    def test_dyn_doublebar_CSharp(self):
+        """
+        See if the code is working and that there is no error / bug
+        TEST of a cable on two supports
+        Works if the part about pretension is put in comment in SructureObj
+        :return:
+        """
+
+        NodesCoord = np.array([[0.00, 0.00, 0.00],
+                                      [2.00, 0.00, 0.00],
+                                      [4.00, 0.00, 0.00]])
+
+
+        IsDOFfree = np.array([False, False, False,
+                                     True, True, False,
+                                     False, False, False])
+
+        ElementsType = np.array([1, 1])
+        NodeCount = 3
+        ElementsCount = 2
+        FixationsCount = 7
+        #DOFfreeCount = 3 * NodesCount - FixationsCount
+        ElementsEndNodes = np.array([[0, 1], [1, 2]])
+
+        ElementsE = 0.21 * np.ones((ElementsCount, 2)) * 10 ** 6  # MPa
+        ElementsA = 90000 * np.ones((ElementsCount, 2))  # mm2
+        print('E', ElementsE)
+        DynamicMass = 1   # kg
+        TensionInit = 5*np.array([1, 1]) #Newtons
+        Struct = StructureObj()
+        freq, mode = Struct.test_ModuleDynamics(NodeCount, ElementsCount, ElementsEndNodes, FixationsCount, NodesCoord,
+                                   ElementsType, ElementsE, ElementsA, TensionInit, IsDOFfree, DynamicMass)
+
+        print('freq', freq)
+        print('mode', mode)
+        #self.assertEqual(np.allclose(wtest, wtest, atol=3), True)
+
+        self.assertEqual(True, True)
 
     # endregion
 

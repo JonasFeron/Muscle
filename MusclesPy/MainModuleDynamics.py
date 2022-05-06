@@ -34,16 +34,17 @@ def core(DataString):
     :return: print key:output
     """
     # print("input in python is\n",DataString)
-    result = r.SharedSolverResult() #initialize empty results
+    result = r.SharedSolverResult_dynamics() #initialize empty results for the dynamics
     data = json.loads(DataString, object_hook = d.ToSharedDataObject)  #Data are stored in SharedData object
 
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
-        Struct = StructureObj() #initial empty structure
+        Struct = StructureObj() #initial empty structure 
+        Struct.MainAssembleDyn(data)
         Struct.ModuleDynamics(data) #do some calculations
         result.PopulateWith_Dynamics(Struct) #register the results
         # print("I finished calculation")
 
-    output_dct = json.dumps(result, cls=r.SharedSolverResultEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
+    output_dct = json.dumps(result, cls=r.SharedSolverResult_dynamicsEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
     return output_dct
 
 if __name__ == '__main__': #what happens if called from C#

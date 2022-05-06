@@ -7,7 +7,7 @@
     <Description>Description of Muscle</Description>
     <TargetExt>.gha</TargetExt>
     <BaseOutputPath>bin\</BaseOutputPath>
-    <BaseIntermediateOutputPath>C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
 	  
   </PropertyGroup>
   
