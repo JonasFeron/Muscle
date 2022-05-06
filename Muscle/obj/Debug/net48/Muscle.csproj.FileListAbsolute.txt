@@ -1,0 +1,15 @@
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.gha
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\log4net.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Newtonsoft.Json.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\System.Reactive.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\System.Reactive.Windows.Forms.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\System.Threading.Tasks.Extensions.dll
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj.AssemblyReference.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.AssemblyInfoInputs.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.AssemblyInfo.cs
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj.CoreCompileInputs.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj.CopyComplete
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.gha
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.pdb
