@@ -1,7 +1,6 @@
 import json
 from StructureObj import StructureObj
 import os
-import numpy as np
 
 FileTestResult = "TestResult.txt"
 FileDRResult = "DynamicRelaxationResult.txt"
@@ -115,8 +114,8 @@ class SharedSolverResult():
         Answ.nTimeStep = 0
         Answ.nKEReset = 0
 
-        Answ.Frequency = []
-        Answ.Modes =  []
+        #Answ.Frequency = []
+        #Answ.Modes =  []
 
     def PopulateWith(Answ, Struct):
         if isinstance(Struct, StructureObj):
