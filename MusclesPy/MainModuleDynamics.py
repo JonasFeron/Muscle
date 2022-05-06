@@ -38,8 +38,8 @@ def core(DataString):
     data = json.loads(DataString, object_hook = d.ToSharedDataObject)  #Data are stored in SharedData object
 
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
-        Struct = StructureObj() #initial empty structure
-        Struct.ModuleDynamics(data) #do some calculations
+        Struct = StructureObj() #initial empty structure 
+        #Struct.ModuleDynamics(data) #do some calculations
         result.PopulateWith_Dynamics(Struct) #register the results
         # print("I finished calculation")
 

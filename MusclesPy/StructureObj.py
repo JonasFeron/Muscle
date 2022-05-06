@@ -1000,9 +1000,9 @@ class StructureObj():
         Self.n_steps = 1
 
         #Part Dynamics
-        #Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
-        #Self.freq = np.zeros((Self.DOFfreeCount,))
-        #Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
+        Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
+        Self.freq = np.zeros((Self.DOFfreeCount,))
+        Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
 
 
     # endregion
@@ -1793,7 +1793,7 @@ class StructureObj():
 
     # region DYNAMICS
    
-    #def test_ModuleDynamics(Self, PrestrainLevel,DynMasses):
+    def test_ModuleDynamics(Self, PrestrainLevel,DynMasses):
         #Test via python
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -1888,7 +1888,7 @@ class StructureObj():
 
         return w, PHI
 
-    #def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
+#    def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
         #Used via Python & base of the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -1906,7 +1906,7 @@ class StructureObj():
         #assert Data.DynMasses.shape == (Self.NodesCount, )
 
         Self.C = Self.ConnectivityMatrix( Data.NodesCount, Data.ElementsCount, Data.ElementsEndNodes)
-        Data.DOFfreeCount = 3 * Data.NodesCount - Data.FixationsCount
+        Data.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
 
         #We consider here the initial shape of the structure : underformed due to prestress or external loads
         (l, ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self, Data.NodesCoord) # Compute the length and the cosinus director in the initial geomety of the struture

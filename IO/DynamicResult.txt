@@ -1,2 +1,2 @@
-4a0243ed-c6af-4c7c-8113-7d1a4db6be1d
-only integer scalar arrays can be converted to a scalar index
+bc7236a2-d9fb-48f4-879a-7a9e877400a1
+{"TypeName": "SharedSolverResult", "NodesCoord": [], "Loads": [], "Tension": [], "Reactions": [], "ElementsLFree": [], "Residual": [], "IsInEquilibrium": false, "nTimeStep": 0, "nKEReset": 0, "Frequency": [1, 2], "Modes": [[1, 2], [1, 2]]}

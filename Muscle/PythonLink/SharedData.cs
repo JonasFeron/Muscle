@@ -62,7 +62,7 @@ namespace Muscle.PythonLink
 
 		#region Dynamics
 
-		//public double DynamicMass { get; set; }
+		public double DynamicMass { get; set; }
 
 
 		#endregion Dynamics 
@@ -92,7 +92,7 @@ namespace Muscle.PythonLink
 			IsDOFfree = new List<bool>();
 			ReactionsInit = new List<double>();
 			Residual0Threshold = 0.0001;
-			//DynamicMass = 1;
+			DynamicMass = 1;
 		}
 
 
@@ -119,7 +119,7 @@ namespace Muscle.PythonLink
 			RegisterNodes(structObj);
 			n_steps = number_steps;
 		}
-	/*
+
 		public SharedData(StructureObj structObj, double DynMass) //For the dynamic computation
 		{
 			Init();
@@ -127,7 +127,7 @@ namespace Muscle.PythonLink
 			RegisterNodes(structObj);
 			DynamicMass = DynMass;
 		}
-		*/
+
 		#endregion Constructors
 
 
