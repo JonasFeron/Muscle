@@ -1000,9 +1000,9 @@ class StructureObj():
         Self.n_steps = 1
 
         #Part Dynamics
-        Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
-        Self.freq = np.zeros((Self.IsDOFfree,))
-        Self.mode = np.zeros((Self.IsDOFfree,Self.IsDOFfree))
+        #Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
+        #Self.freq = np.zeros((Self.DOFfreeCount,))
+        #Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
 
 
     # endregion
@@ -1792,8 +1792,8 @@ class StructureObj():
     #endregion WORK IN PROGRESS
 
     # region DYNAMICS
-
-    def test_ModuleDynamics(Self, PrestrainLevel,DynMasses):
+   
+    #def test_ModuleDynamics(Self, PrestrainLevel,DynMasses):
         #Test via python
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -1888,7 +1888,7 @@ class StructureObj():
 
         return w, PHI
 
-    def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
+    #def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
         #Used via Python & base of the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
