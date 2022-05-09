@@ -1152,12 +1152,12 @@ class StructureObj_Tests(unittest.TestCase):
 
         Struct.ElementsE = 0.21 * np.ones((Struct.ElementsCount, 2)) * 10 ** 6  # MPa
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
-        Struct.DynMasses = 1 * np.array([1, 1])  # kg
+        Struct.DynMasses = 1 #* np.array([1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
-        print(w)
+        Struct.ModuleDynamicsPython(PrestrainLevel)
+        print(Struct.freq)
         wScia = np.array([79370])  # Data coming from the SCIA model
-        self.assertEqual(np.allclose(w, wScia, atol=3), True)
+        self.assertEqual(np.allclose(Struct.freq, wScia, atol=3), True)
         #self.assertEqual(True, True)
 
 
@@ -1190,9 +1190,9 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = 1 * np.array([1, 1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print(w)
-        wScia = np.array([81741 , 81741])  # Data coming from the SCIA model
+        wScia = np.array([81741, 81741])  # Data coming from the SCIA model
         self.assertEqual(np.allclose(w, wScia, atol=3), True)
 
 
@@ -1234,7 +1234,7 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = np.array([1, 1, 1, 1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print('w', w)
         wScia = np.array([25810.53 , 36157.38 , 53325.3 , 68567.28 , 89122.83 , 102607.29 , 108948.17])  # Data coming from the SCIA model
         self.assertEqual(np.allclose(w, wScia, atol=3), True)
@@ -1274,7 +1274,7 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = np.array([1, 1, 1, 1])  # kg
         PrestrainLevel = 0  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print('w', w)
         wScia = np.array(
             [12795.77, 34470.83, 62397.29, 101845.22, 141015.39])  # Data coming from the SCIA model
@@ -1309,7 +1309,7 @@ class StructureObj_Tests(unittest.TestCase):
         Struct.ElementsA = 90000 * np.ones((Struct.ElementsCount, 2))  # mm2
         Struct.DynMasses = 1 * np.array([1, 1, 1])  # kg
         PrestrainLevel = 0.000001  # [kN]
-        w, PHI = Struct.Module_dynamics_initial(PrestrainLevel)
+        w, PHI = Struct.ModuleDynamicsPython(PrestrainLevel)
         print(w)
         #wScia = np.array([79370])  # Data coming from the SCIA model
         #self.assertEqual(np.allclose(w, wScia, atol=3), True)

@@ -33,7 +33,7 @@
       <recent name="C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed">
+  <component name="RunManager" selected="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar">
     <configuration name="Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_truss" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="MusclesPy" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -106,11 +106,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar" />
+        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_doublebar" />
         <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar_prestressed" />
         <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_Simplex_NaturalFrequencies" />
-        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_bar" />
         <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_Dyn_truss" />
-        <item itemvalue="Python tests.Python tests for StructureObj_Tests.StructureObj_Tests.test_dyn_doublebar" />
       </list>
     </recent_temporary>
   </component>
