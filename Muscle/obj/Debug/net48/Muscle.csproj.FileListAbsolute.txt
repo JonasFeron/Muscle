@@ -1,4 +1,5 @@
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.gha
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Muscle.pdb
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\log4net.dll
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Newtonsoft.Json.dll
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\System.Reactive.dll

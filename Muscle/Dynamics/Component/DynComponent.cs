@@ -149,7 +149,7 @@ namespace Muscle.Dynamics
             //Obtain the results from "result"
 
             DA.SetDataList(0, result.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetDataList(1, result.Modes);
+            DA.SetDataTree(1, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
             // Before it was SetData
 
 
