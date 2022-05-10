@@ -154,7 +154,7 @@ class SharedSolverResult_dynamics():
             #freq = np.array([1,2])
             #mode = np.array(([[3.0,4.0],[3.0,4.0]]))
             Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
-            Answ.Modes = Struct.mode.round(5).reshape((2,2)).tolist() #reshape((2,2)).tolist() #Modes ranked as the frequencies
+            Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #reshape((2,2)).tolist() #Modes ranked as the frequencies
             #Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
             #Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #Modes ranked as the frequencies
             #Both reshape are working --> tested in python

@@ -1,2 +1,2 @@
-573b7a5c-b95e-46de-8937-3c24fe5fc723
-Please check the shape of the connectivity matrix C
+a764b3d7-acaa-498a-b60b-4b5f2e684fe4
+{"TypeName": "SharedSolverResultDynamics", "Frequency": [423.21307, 1254.00177], "Modes": [[-0.04423, 0.99902], [0.99902, 0.04423]]}
