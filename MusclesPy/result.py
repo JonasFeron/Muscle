@@ -151,12 +151,10 @@ class SharedSolverResult_dynamics():
 
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
-            #freq = np.array([1,2])
-            #mode = np.array(([[3.0,4.0],[3.0,4.0]]))
+
             Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
+            Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
             Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #reshape((2,2)).tolist() #Modes ranked as the frequencies
-            #Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
-            #Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #Modes ranked as the frequencies
             #Both reshape are working --> tested in python
             #Round : number of digit after the comma
             #Reshape also work : obtain a list containing DOFfreeCount lists of arrays containint DOFfreeCount elements

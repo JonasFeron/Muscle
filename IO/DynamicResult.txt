@@ -1,2 +1,2 @@
-a764b3d7-acaa-498a-b60b-4b5f2e684fe4
-{"TypeName": "SharedSolverResultDynamics", "Frequency": [423.21307, 1254.00177], "Modes": [[-0.04423, 0.99902], [0.99902, 0.04423]]}
+770688c7-1098-477d-b137-104cdc039b57
+{"TypeName": "SharedSolverResultDynamics", "Frequency": [1.07082, 173.74908], "Modes": [[-0.01594, 0.99987], [0.99987, 0.01594]]}
