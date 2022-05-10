@@ -114,9 +114,6 @@ class SharedSolverResult():
         Answ.nTimeStep = 0
         Answ.nKEReset = 0
 
-        Answ.Frequency = []
-        Answ.Modes =  []
-
     def PopulateWith(Answ, Struct):
         if isinstance(Struct, StructureObj):
             Answ.NodesCoord = Struct.Final.NodesCoord.round(8).reshape((-1,3)).tolist() #[m] - shape (NodesCount,3)

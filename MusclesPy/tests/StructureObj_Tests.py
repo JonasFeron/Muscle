@@ -1420,6 +1420,46 @@ class StructureObj_Tests(unittest.TestCase):
 
         self.assertEqual(False, True)
 
+
+    def test_dyn_doublebar_CSharp(self):
+        """
+        See if the code is working and that there is no error / bug
+        TEST of a cable on two supports
+        Works if the part about pretension is put in comment in SructureObj
+        :return:
+        """
+
+        NodesCoord = np.array([[0.00, 0.00, 0.00],
+                                      [2.00, 0.00, 0.00],
+                                      [4.00, 0.00, 0.00]])
+
+
+        IsDOFfree = np.array([False, False, False,
+                                     True, True, False,
+                                     False, False, False])
+
+        ElementsType = np.array([1, 1])
+        NodeCount = 3
+        ElementsCount = 2
+        FixationsCount = 7
+        #DOFfreeCount = 3 * NodesCount - FixationsCount
+        ElementsEndNodes = np.array([[0, 1], [1, 2]])
+
+        ElementsE = 0.21 * np.ones((ElementsCount, 2)) * 10 ** 6  # MPa
+        ElementsA = 90000 * np.ones((ElementsCount, 2))  # mm2
+        print('E', ElementsE)
+        DynamicMass = 1   # kg
+        TensionInit = 5*np.array([1, 1]) #Newtons
+        Struct = StructureObj()
+        freq, mode = Struct.test_ModuleDynamics(NodeCount, ElementsCount, ElementsEndNodes, FixationsCount, NodesCoord,
+                                   ElementsType, ElementsE, ElementsA, TensionInit, IsDOFfree, DynamicMass)
+
+        print('freq', freq)
+        print('mode', mode)
+        #self.assertEqual(np.allclose(wtest, wtest, atol=3), True)
+
+        self.assertEqual(True, True)
+
     # endregion
 
 if __name__ == '__main__':

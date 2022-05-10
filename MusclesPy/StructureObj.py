@@ -1990,7 +1990,7 @@ class StructureObj():
         Self.mode = PHI
         
 
-    def ModuleDynamics(Self, Data): # PrestrainLevel,DynMasses
+    def ModuleDynamics(Self, data): # PrestrainLevel,DynMasses
         #Used via Python & base of the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2006,34 +2006,26 @@ class StructureObj():
 
         """
         #assert Data.DynMasses.shape == (Self.NodesCount, )
-        '''''
-        Self.C = Self.ConnectivityMatrix( Data.NodesCount, Data.ElementsCount, Data.ElementsEndNodes)
-        Data.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
+        
+        Self.C = Self.ConnectivityMatrix( Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
+        Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
 
         #We consider here the initial shape of the structure : underformed due to prestress or external loads
-        (l, ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self, Data.NodesCoord) # Compute the length and the cosinus director in the initial geomety of the struture
+        (l, ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self, data.NodesCoord) # Compute the length and the cosinus director in the initial geomety of the struture
         (A, AFree, AFixed) = Self.Initial.EquilibriumMatrix(Self, ElementsCos) # Compute the equilibrium matrix in the initial state [All dof, free dof, fixed dof]
 
         #Retrive the Young Modulus and areas in function of the caracter of the internal forces of the members : tension or compression
-        Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Data.ElementsType, Data.ElementsE)
-        Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Data.ElementsType, Data.ElementsA)
+        Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsE)
+        Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsA)
 
-        # We apply a prestress force on the prestress shape of the structure ( = mode of prestress) thanks to the PrestrainLevel
-
-            #1 - Compute the prestress modes of the structure in the initial shape
-
-        Self.Initial.SVD.SVDEquilibriumMatrix(Self, AFree)
-
-        PrestressMode = Self.Initial.SVD.SS.T  # prestress modes in the initial shape [ # of modes , # of elements in the structure]
-
-            #2 - Compute the internal forces in the members due to the PrestrainLevel
-        
-        PrestressIntForces = Data.PrestrainLevel * PrestressMode
+        #The tension in the structure contain already the influence of the load and the pretension due to Lfree < L
 
 
         # Compute the K_geo - the rigidity matrix due to the Prestress
             #1 - Compute the force densities for each member  - Q [ #member] = F/l [N/m]
-        Q = Self.Initial.ForceDensities(PrestressIntForces, l)
+            #The forces can come from the pretension (Lfree) or the applied load
+
+        Q = Self.Initial.ForceDensities(data.TensionInit , l)
 
             # 2 - Obtain a list containing the local rigidity matrix for each member
         kgLocList = Self.Initial.GeometricLocalStiffnessList(Self, Q)
@@ -2067,8 +2059,8 @@ class StructureObj():
         # MassesDOF is made the most general : 3 dimensions
         # The masses for each DOF is obtained by decreasing the size of the MassesDiag size
         ##MassesDiag = np.diag(MassesDirection) # Contain all the directions
-        MassesDiag = Data.DynMasses*np.diag(np.ones(3*Data.NodesCount))
-        MassesDiagFree = MassesDiag[Data.IsDOFfree].T[Data.IsDOFfree].T #Retrieve the masses linked to free direction, DOF
+        MassesDiag = Self.DynamicMass*np.diag(np.ones(3*Self.NodesCount))
+        MassesDiagFree = MassesDiag[Self.IsDOFfree].T[Self.IsDOFfree].T #Retrieve the masses linked to free direction, DOF
 
 
         # Compute the eigen values of the problem - natural frequencies
@@ -2086,11 +2078,98 @@ class StructureObj():
 
         Self.freq = w/(2*np.pi)
         Self.mode = PHI
-        '''''
-        
-        Self.freq = np.array([1.0,2.0])
-        Self.mode = np.array(([1.0,2.0],[1.0,2.0]))
 
+    def test_ModuleDynamics(Self,NodesCount,ElementsCount,ElementsEndNodes,FixationsCount,NodesCoord,ElementsType,ElementsE,ElementsA,TensionInit,IsDOFfree,DynamicMass): 
+        
+        """
+        Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
+
+        """
+        #assert Data.DynMasses.shape == (Self.NodesCount, )
+        #Initialize all the data
+        Self.NodesCount = NodesCount
+        Self.ElementsCount = ElementsCount
+        Self.ElementsEndNodes = ElementsEndNodes
+        Self.FixationsCount = FixationsCount
+        Self.ElementsA = ElementsA
+        Self.ElementsE = ElementsE
+        Self.ElementsType = ElementsType
+        Self.IsDOFfree = IsDOFfree
+        
+
+        Self.C = Self.ConnectivityMatrix(Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
+        Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
+        print('1',Self.C)
+        #We consider here the initial shape of the structure : underformed due to prestress or external loads
+        (l, ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self,NodesCoord) # Compute the length and the cosinus director in the initial geomety of the struture
+        #(A, AFree, AFixed) = Self.Initial.EquilibriumMatrix(Self,ElementsCos) # Compute the equilibrium matrix in the initial state [All dof, free dof, fixed dof]
+        print('2')
+        #Retrive the Young Modulus and areas in function of the caracter of the internal forces of the members : tension or compression
+        Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsE)
+        Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.ElementsType, Self.ElementsA)
+        print('3')
+        #The tension in the structure contain already the influence of the load and the pretension due to Lfree < L
+
+
+        # Compute the K_geo - the rigidity matrix due to the Prestress
+            #1 - Compute the force densities for each member  - Q [ #member] = F/l [N/m]
+            #The forces can come from the pretension (Lfree) or the applied load
+
+        Q = Self.Initial.ForceDensities(TensionInit , l)
+
+            # 2 - Obtain a list containing the local rigidity matrix for each member
+        kgLocList = Self.Initial.GeometricLocalStiffnessList(Self, Q)
+            #3 - Construct the global stiffness matrix of the structure
+        Kgeo = Self.LocalToGlobalStiffnessMatrix(kgLocList)
+        KgeoFree = Kgeo[Self.IsDOFfree].T[Self.IsDOFfree].T # Obtain the Final matrix with only the free DOF
+
+        # Compute the K_mat - the rigidity matrix linked to the material rigidity
+        # The material rigidity is only axial
+        # Consider that each node is hinged
+
+            # 1 - obtain the list of the local K_mat of each member
+        kmatLocList = Self.Initial.MaterialLocalStiffnessList(Self, l, ElementsCos, Self.Initial.ElementsA,
+                                                                Self.Initial.ElementsE)
+            # 2 - Obtain the global stiffness matrix of the structure
+        Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
+        KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
+
+        KFree = KgeoFree*1000 + KmatFree # [N/m]
+
+        # Used units
+        # K_geo = [kN/m]
+        # K_mat = [N/m]
+        #*1000 to have N/m
+
+        # Mass matrix used for the dynamics part
+        # Need to use Masses from "DynMasses" variable
+        # "DynMasses" [ # of nodes]
+
+        ##MassesDirection = np.repeat(Data.DynMasses,3) # Vector [3* # Nodes] containing in each direction the dynamic mass
+        # MassesDOF is made the most general : 3 dimensions
+        # The masses for each DOF is obtained by decreasing the size of the MassesDiag size
+        ##MassesDiag = np.diag(MassesDirection) # Contain all the directions
+        MassesDiag = DynamicMass*np.diag(np.ones(3*NodesCount))
+        MassesDiagFree = MassesDiag[Self.IsDOFfree].T[Self.IsDOFfree].T #Retrieve the masses linked to free direction, DOF
+
+
+        # Compute the eigen values of the problem - natural frequencies
+        # Made via the characteristic equation : det ( K - \omega_i M ) = 0
+
+        w2, PHI = np.linalg.eig(np.linalg.inv(MassesDiagFree)@KFree) #squared natural frequencies and the modes
+        w = np.sqrt(w2)
+
+        # Sort the frequencies and the modes from small to high frequencies
+        # Convention
+
+        idx = w.argsort()[::1]
+        w = w[idx]
+        PHI = PHI[:, idx]
+
+        freq = w/(2*np.pi)
+        mode = PHI
+
+        return freq,mode
     #endregion
 
 
