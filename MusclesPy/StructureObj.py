@@ -1999,7 +1999,7 @@ class StructureObj():
         Self.mode = PHI
         
 
-    def ModuleDynamics(Self, Data):
+    def ModuleDynamics(Self,DynamicMass): #Data ?
         #Used via C# for the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2023,7 +2023,7 @@ class StructureObj():
         #We consider here the initial shape of the structure : underformed due to prestress or external loads
     
         #Self.Initial.NodesCoord
-        (l, ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self, Data.NodesCoord) # Compute the length and the cosinus director in the initial geomety of the struture
+        (l, ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self, Self.Initial.NodesCoord) # Compute the length and the cosinus director in the initial geomety of the struture
         #(A, AFree, AFixed) = Self.Initial.EquilibriumMatrix(Self, ElementsCos) # Compute the equilibrium matrix in the initial state [All dof, free dof, fixed dof]
         
         #Retrive the Young Modulus and areas in function of the caracter of the internal forces of the members : tension or compression
@@ -2039,8 +2039,8 @@ class StructureObj():
         # Compute the K_geo - the rigidity matrix due to the Prestress
             #1 - Compute the force densities for each member  - Q [ #member] = F/l [N/m]
             #The forces can come from the pretension (Lfree) or the applied load
-        #TensionInit = np.array([3,3])
-        Q = Self.Initial.ForceDensities(Data.TensionInit , l)
+
+        Q = Self.Initial.ForceDensities(Self.Initial.Tension , l) #take the initial tension
 
             # 2 - Obtain a list containing the local rigidity matrix for each member
         kgLocList = Self.Initial.GeometricLocalStiffnessList(Self, Q)
@@ -2074,7 +2074,7 @@ class StructureObj():
         # MassesDOF is made the most general : 3 dimensions
         # The masses for each DOF is obtained by decreasing the size of the MassesDiag size
         ##MassesDiag = np.diag(MassesDirection) # Contain all the directions
-        MassesDiag = Self.DynMasses*np.diag(np.ones(3*Self.NodesCount))
+        MassesDiag = DynamicMass*np.diag(np.ones(3*Self.NodesCount))
         MassesDiagFree = MassesDiag[Self.IsDOFfree].T[Self.IsDOFfree].T #Retrieve the masses linked to free direction, DOF
 
 
