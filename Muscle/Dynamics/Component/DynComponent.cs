@@ -25,7 +25,7 @@ namespace Muscle.Dynamics
         /// </summary>
         public DynComponent()
           : base("Dynamic Solver", "DS",
-                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node.",
+                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node. The computation is done on the state of the structure. It includes the influence of Lfree (pretension) and the possible applied load.",
               "Muscles", "Dynamics")
         {
         }
@@ -58,9 +58,8 @@ namespace Muscle.Dynamics
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Number of frequencies wanted", "Num. freq. wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
 
-            //pManager[1].Optional = true; /A mettre ? 
-            //pManager[2].Optional = true;
 
         }
 
@@ -69,8 +68,11 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
+            pManager.AddGenericParameter("Structure", "struct", "A structure containing the total results.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Number of frequency(ies)", "#freq", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mode(s)", "Mode(s)", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mode(s) Global", "Mode(s) Global", "All modes of the structure ranked as the returned frequencies.(containing also the zero displacement is blocked directions.", GH_ParamAccess.list);
             //AddNumberParameter
         }
 
@@ -84,14 +86,15 @@ namespace Muscle.Dynamics
             //1) Collect Data
             StructureObj structure = new StructureObj();
             double DynMass = 1; // Default value
-
+            int MaxFreqWtd = 0;
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetData(1, ref DynMass)) { } ///problemn
+            if (!DA.GetData(1, ref DynMass)) { } 
+            if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
 
 
             //2) Format data before sending and solving in python
-            //StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
+            StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
 
             //bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData()); // new_structure.LoadsToApply was filled with the loads
@@ -119,7 +122,7 @@ namespace Muscle.Dynamics
                 return;
             }
 
-            SharedData data = new SharedData(structure,DynMass) ; //Object data contains all the essential informations of structure + the dynMass considered
+            SharedData data = new SharedData(structure,DynMass, MaxFreqWtd) ; //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
@@ -144,12 +147,19 @@ namespace Muscle.Dynamics
                     result = null;
                 }
             }
-
+            new_structure.PopulateWithSolverResult_dyn(result);
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
-
-            DA.SetDataList(0, result.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetDataTree(1, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
+            GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
+            DA.SetData(0, gh_structure);
+            DA.SetData(1, new_structure.NumberOfFrequency);
+            DA.SetDataList(2, new_structure.Frequency); //Don't use PopulateWithSolverResult
+            DA.SetDataTree(3, new_structure.ListListToGH_Struct(new_structure.Mode));//result.ListListToGH_Struct(result.Modes)
+            DA.SetDataTree(4, new_structure.ListListToGH_Struct(new_structure.TotMode));
+            //DA.SetData(0, new_structure.NumberOfFrequency);
+            //DA.SetDataList(1, new_structure.Frequency); //Don't use PopulateWithSolverResult
+            //DA.SetData(2, new_structure.Mode);
+            //DA.SetDataTree(2, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
             // Before it was SetData
 
 

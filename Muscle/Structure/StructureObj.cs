@@ -64,7 +64,24 @@ namespace Muscle.Structure
 		public DRMethod DR { get; set; }
 
 		///public DynMethod DS { get; set; }
+		///
+		
 
+
+		///Data from the dynamics computation
+		///
+		public int NumberOfFrequency { get; set; } 
+		//Contains the number of frequency/mode of the structure
+
+		///Before Using the Dynamic data element
+		public List<double> Frequency { get; set; }
+		public List<List<double>> Mode { get; set; }
+
+		public List<List<double>> TotMode { get; set; }
+
+
+		//If I create a DynamicsData element
+		//public List<DynData > DynamicsData { get; set; }
 		#endregion Properties
 
 		#region Constructors
@@ -92,6 +109,11 @@ namespace Muscle.Structure
 
 			DR = new DRMethod();
 
+			NumberOfFrequency = 0;
+			Frequency = new List<double>();	
+			Mode = new List<List<double>>();
+			//DynamicsData = new List<DynData>();
+			TotMode = new List<List<double>>();
 		}
 
 
@@ -119,6 +141,8 @@ namespace Muscle.Structure
 
 			//4) check validity of supports inputs
 			RegisterSupports(GH_supports_input);
+
+			//5) Fill the dynamics data ?
 
 		}
 
@@ -149,6 +173,13 @@ namespace Muscle.Structure
 
 
 			DR = other.DR.Duplicate();
+
+			//Dynamics
+			this.NumberOfFrequency = other.NumberOfFrequency;
+			
+			//DynamicsData = other.DynamicsData;
+			//DynamicsData = new List<DynData>();
+			//foreach (DynData D in other.DynamicsData) DynamicsData.Add(D.Duplicate());
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -163,7 +194,7 @@ namespace Muscle.Structure
 
 		public override string ToString()
 		{
-			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements.";
+			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {NumberOfFrequency} frequency(ies)";
 		}
 
 		#region 1)RegisterElements
@@ -376,6 +407,36 @@ namespace Muscle.Structure
 		}
 		#endregion 4)RegisterSupports
 
+		#region 5)RegisterDynamics
+
+		/// <summary>
+		/// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
+		/// </summary>
+		
+		/*
+		private void RegisterDynamics(GH_Structure<IGH_Goo> GH_elements_input)
+		{
+			int index = 0;
+			foreach (var data in GH_elements_input.FlattenData())
+			{
+				if (data is DynData)
+				{
+					DynData DynamicData = data as DynData;
+					DynamicsData.Add(gh_elem.Value);
+					gh_elem.Value.Ind = index;
+					LengtheningsToApply.Add(0.0);
+					index++;
+				}
+			}
+			NumberOfFrequency = index;
+
+		}
+
+		#endregion 5)RegisterDynamics
+		*/
+
+
+
 		#region PopulateWithSolverResult
 		public void PopulateWithSolverResult(SharedSolverResult answ)
 		{
@@ -446,6 +507,44 @@ namespace Muscle.Structure
 		}
 
 		#endregion PopulateWithSolverResult
+
+		public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
+		{
+			if (answ == null)
+			{
+				log.Warn("Structure: FAILED to populate with Dynamics RESULTS");
+				return;
+			}
+			NumberOfFrequency = answ.NumberOfFrequency;
+			Frequency = answ.Frequency;
+			Mode = answ.Modes;
+			TotMode = answ.TotMode;
+
+
+			log.Info("Structure: Is well populated with Dynamics RESULTS");
+		}
+
+		#endregion PopulateWithSolverResult
+
+
+		public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
+		{
+			GH_Path path;
+			int i = 0;
+			GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
+			if(datalistlist ==null)
+            {
+				return res;
+            }
+			foreach (List<double> datalist in datalistlist)
+			{
+				path = new GH_Path(i);
+				res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
+				i++;
+			}
+			return res;
+		}
+
 
 
 		#endregion Methods

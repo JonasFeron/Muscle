@@ -1451,11 +1451,13 @@ class StructureObj_Tests(unittest.TestCase):
         DynamicMass = 1   # kg
         TensionInit = 5*np.array([1, 1]) #Newtons
         Struct = StructureObj()
-        freq, mode = Struct.test_ModuleDynamics(NodeCount, ElementsCount, ElementsEndNodes, FixationsCount, NodesCoord,
-                                   ElementsType, ElementsE, ElementsA, TensionInit, IsDOFfree, DynamicMass)
+        NumberOfFreqWanted = 1
+        freq, mode,TotMode = Struct.test_ModuleDynamics(NodeCount, ElementsCount, ElementsEndNodes, FixationsCount, NodesCoord,
+                                   ElementsType, ElementsE, ElementsA, TensionInit, IsDOFfree, DynamicMass, NumberOfFreqWanted)
 
         print('freq', freq)
         print('mode', mode)
+        print('totMode',TotMode) #Insert in the mode matrix the non-dof. It is adding zero displacements.
         #self.assertEqual(np.allclose(wtest, wtest, atol=3), True)
 
         self.assertEqual(True, True)
