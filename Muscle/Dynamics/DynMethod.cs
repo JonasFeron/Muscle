@@ -23,29 +23,40 @@ namespace Muscle.Dynamics
 
         public double DynamicMass { get; set; } //[kg] - scalar - mass used for the dynamic computation
 
+        
         #endregion DynamicsComputation
 
         #endregion Properties
 
         #region Constructors
-        public DynMethod()
+        private void Init ()
         {
 
             DynamicMass = 1; //[kg]
 
         }
-        
-        public DynMethod(double dynamicmass)
-        {
 
-            DynamicMass = dynamicmass; //[kg]
+        public DynMethod()
+        {
+            Init();
+        }
+
+        public DynMethod(double dynamicMass) 
+        {
+            Init ();
+            DynamicMass = dynamicMass;
 
         }
-        /*
+        public DynMethod(DynMethod other)
+        {
+            DynamicMass = other.DynamicMass;
+
+        }
+
         public DynMethod Duplicate() //Duplication method calling the copy constructor
         {
             return new DynMethod(this);
-        } */
+        } 
         #endregion Constructors
        
     }

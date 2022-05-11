@@ -2091,6 +2091,7 @@ class StructureObj():
         w = w[idx]
         PHI = PHI[:, idx]
 
+        Self.NFreq = len(w)
         Self.freq = w/(2*np.pi)
         Self.mode = PHI
         

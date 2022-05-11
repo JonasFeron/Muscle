@@ -146,12 +146,13 @@ class SharedSolverResult_dynamics():
         Answ.TypeName = "SharedSolverResultDynamics"
 
         # ##### Solve informations #####
+        Answ.NumberOfFrequency = 0
         Answ.Frequency = []
         Answ.Modes =  []
 
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
-
+            Answ.NumberOfFrequency = Struct.NFreq
             Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
             Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
             Answ.Modes = Struct.mode.round(5).reshape((Struct.DOFfreeCount,Struct.DOFfreeCount)).tolist() #reshape((2,2)).tolist() #Modes ranked as the frequencies

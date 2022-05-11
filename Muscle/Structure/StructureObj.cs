@@ -64,7 +64,16 @@ namespace Muscle.Structure
 		public DRMethod DR { get; set; }
 
 		///public DynMethod DS { get; set; }
+		///
+		
 
+
+		///Data from the dynamics computation
+		///
+		public int NumberOfFrequency { get; set; } 
+		//Contains the number of frequency/mode of the structure
+
+		public List<DynData > DynamicsData { get; set; }
 		#endregion Properties
 
 		#region Constructors
@@ -91,6 +100,9 @@ namespace Muscle.Structure
 
 
 			DR = new DRMethod();
+
+			NumberOfFrequency = 0;
+			DynamicsData = new List<DynData>();
 
 		}
 
@@ -119,6 +131,8 @@ namespace Muscle.Structure
 
 			//4) check validity of supports inputs
 			RegisterSupports(GH_supports_input);
+
+			//5) Fill the dynamics data
 
 		}
 
@@ -149,6 +163,13 @@ namespace Muscle.Structure
 
 
 			DR = other.DR.Duplicate();
+
+			//Dynamics
+			this.NumberOfFrequency = other.NumberOfFrequency;
+			
+			DynamicsData = other.DynamicsData;
+			DynamicsData = new List<DynData>();
+			foreach (DynData D in other.DynamicsData ) DynamicsData.Add(D.Duplicate());
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -163,7 +184,7 @@ namespace Muscle.Structure
 
 		public override string ToString()
 		{
-			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements.";
+			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {NumberOfFrequency} computed frequency(ies)";
 		}
 
 		#region 1)RegisterElements
@@ -376,6 +397,36 @@ namespace Muscle.Structure
 		}
 		#endregion 4)RegisterSupports
 
+		#region 5)RegisterDynamics
+
+		/// <summary>
+		/// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
+		/// </summary>
+		
+		/*
+		private void RegisterDynamics(GH_Structure<IGH_Goo> GH_elements_input)
+		{
+			int index = 0;
+			foreach (var data in GH_elements_input.FlattenData())
+			{
+				if (data is DynData)
+				{
+					DynData DynamicData = data as DynData;
+					DynamicsData.Add(gh_elem.Value);
+					gh_elem.Value.Ind = index;
+					LengtheningsToApply.Add(0.0);
+					index++;
+				}
+			}
+			NumberOfFrequency = index;
+
+		}
+
+		#endregion 5)RegisterDynamics
+		*/
+
+
+
 		#region PopulateWithSolverResult
 		public void PopulateWithSolverResult(SharedSolverResult answ)
 		{
@@ -447,7 +498,75 @@ namespace Muscle.Structure
 
 		#endregion PopulateWithSolverResult
 
+		public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
+		{
+			if (answ == null)
+			{
+				log.Warn("Structure: FAILED to populate with RESULTS");
+				return;
+			}
+			IsInEquilibrium = answ.IsInEquilibrium;
+			DR.nTimeStep = answ.nTimeStep;
+			DR.nKEReset = answ.nKEReset;
 
+
+			for (int n = 0; n < StructuralNodes.Count; n++)
+			{
+				Node node = StructuralNodes[n]; // lets give a nickname to the current node from the list. 
+
+				// 1) Register the loads, the new nodescoordinates, the reactions results from the solver
+
+				//Coordinates. 
+				double X = answ.NodesCoord[n][0];
+				double Y = answ.NodesCoord[n][1];
+				double Z = answ.NodesCoord[n][2];
+				node.Point = new Point3d(X, Y, Z);
+				// NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
+
+
+				//Loads
+				double FX = answ.Loads[n][0];
+				double FY = answ.Loads[n][1];
+				double FZ = answ.Loads[n][2];
+				node.Load = new Vector3d(FX, FY, FZ);
+
+				//Residual
+				double ResX = answ.Residual[n][0];
+				double ResY = answ.Residual[n][1];
+				double ResZ = answ.Residual[n][2];
+				node.Residual = new Vector3d(ResX, ResY, ResZ);
+
+				//Reactions 
+				double ReactX = 0;
+				double ReactY = 0;
+				double ReactZ = 0;
+				if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
+				if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
+				if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
+				node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
+			}
+
+
+			for (int e = 0; e < StructuralElements.Count; e++)
+			{
+				Element elem = StructuralElements[e];
+
+				//1) axialforce results
+				elem.Tension = answ.Tension[e];
+				elem.LFree = answ.ElementsLFree[e];
+
+				//update the lines end points
+				int n0 = elem.EndNodes[0];
+				int n1 = elem.EndNodes[1];
+				Point3d p0 = StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
+				Point3d p1 = StructuralNodes[n1].Point;
+				elem.Line = new Line(p0, p1);
+			}
+
+			log.Info("Structure: Is well populated with RESULTS");
+		}
+
+		#endregion PopulateWithSolverResult
 		#endregion Methods
 	}
 }
