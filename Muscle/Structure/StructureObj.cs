@@ -73,6 +73,10 @@ namespace Muscle.Structure
 		public int NumberOfFrequency { get; set; } 
 		//Contains the number of frequency/mode of the structure
 
+		///Before Using the Dynamic data element
+		public List<double> Frequency { get; set; }
+		public List<List<double>> Mode { get; set; }
+		//If I create a DynamicsData element
 		public List<DynData > DynamicsData { get; set; }
 		#endregion Properties
 
@@ -102,6 +106,8 @@ namespace Muscle.Structure
 			DR = new DRMethod();
 
 			NumberOfFrequency = 0;
+			Frequency = new List<double>();	
+			Mode = new List<List<double>>();
 			DynamicsData = new List<DynData>();
 
 		}
@@ -502,71 +508,36 @@ namespace Muscle.Structure
 		{
 			if (answ == null)
 			{
-				log.Warn("Structure: FAILED to populate with RESULTS");
+				log.Warn("Structure: FAILED to populate with Dynamics RESULTS");
 				return;
 			}
-			IsInEquilibrium = answ.IsInEquilibrium;
-			DR.nTimeStep = answ.nTimeStep;
-			DR.nKEReset = answ.nKEReset;
+			NumberOfFrequency = answ.NumberOfFrequency;
+			Frequency = answ.Frequency;
+			Mode = answ.Modes;
 
 
-			for (int n = 0; n < StructuralNodes.Count; n++)
-			{
-				Node node = StructuralNodes[n]; // lets give a nickname to the current node from the list. 
-
-				// 1) Register the loads, the new nodescoordinates, the reactions results from the solver
-
-				//Coordinates. 
-				double X = answ.NodesCoord[n][0];
-				double Y = answ.NodesCoord[n][1];
-				double Z = answ.NodesCoord[n][2];
-				node.Point = new Point3d(X, Y, Z);
-				// NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
-
-
-				//Loads
-				double FX = answ.Loads[n][0];
-				double FY = answ.Loads[n][1];
-				double FZ = answ.Loads[n][2];
-				node.Load = new Vector3d(FX, FY, FZ);
-
-				//Residual
-				double ResX = answ.Residual[n][0];
-				double ResY = answ.Residual[n][1];
-				double ResZ = answ.Residual[n][2];
-				node.Residual = new Vector3d(ResX, ResY, ResZ);
-
-				//Reactions 
-				double ReactX = 0;
-				double ReactY = 0;
-				double ReactZ = 0;
-				if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
-				if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
-				if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
-				node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
-			}
-
-
-			for (int e = 0; e < StructuralElements.Count; e++)
-			{
-				Element elem = StructuralElements[e];
-
-				//1) axialforce results
-				elem.Tension = answ.Tension[e];
-				elem.LFree = answ.ElementsLFree[e];
-
-				//update the lines end points
-				int n0 = elem.EndNodes[0];
-				int n1 = elem.EndNodes[1];
-				Point3d p0 = StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
-				Point3d p1 = StructuralNodes[n1].Point;
-				elem.Line = new Line(p0, p1);
-			}
-
-			log.Info("Structure: Is well populated with RESULTS");
+			log.Info("Structure: Is well populated with Dynamics RESULTS");
 		}
 
 		#endregion PopulateWithSolverResult
+
+
+		public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
+		{
+			GH_Path path;
+			int i = 0;
+			GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
+			foreach (List<double> datalist in datalistlist)
+			{
+				path = new GH_Path(i);
+				res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
+				i++;
+			}
+			return res;
+		}
+
+
+
 		#endregion Methods
 	}
 }

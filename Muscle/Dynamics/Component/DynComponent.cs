@@ -59,8 +59,6 @@ namespace Muscle.Dynamics
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.item);
 
-            //pManager[1].Optional = true; /A mettre ? 
-            //pManager[2].Optional = true;
 
         }
 
@@ -69,9 +67,9 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Number of frequency(ies)", "#freq", "", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Number of frequency(ies)", "#freq", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mode", "Mode", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mode(s)", "Mode(s)", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
             //AddNumberParameter
         }
 
@@ -92,7 +90,7 @@ namespace Muscle.Dynamics
 
 
             //2) Format data before sending and solving in python
-            //StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
+            StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
 
             //bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData()); // new_structure.LoadsToApply was filled with the loads
@@ -145,12 +143,23 @@ namespace Muscle.Dynamics
                     result = null;
                 }
             }
-
+            new_structure.PopulateWithSolverResult_dyn(result);
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
-            DA.SetData(0, result.NumberOfFrequency);
-            DA.SetDataList(1, result.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetDataTree(2, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
+            DA.SetData(0, new_structure.NumberOfFrequency);
+            DA.SetDataList(1, new_structure.Frequency); //Don't use PopulateWithSolverResult
+            //DA.SetDataTree(2, structure.ListListToGH_Struct(structure.Mode));//result.ListListToGH_Struct(result.Modes)
+            if (structure.Mode == null)
+            {
+                log.Warn("Structure: Has no computed mode");
+                DA.SetData(2, "Has no computed mode");
+                return;
+            }
+            else DA.SetDataTree(2, structure.ListListToGH_Struct(structure.Mode));
+            //DA.SetData(0, new_structure.NumberOfFrequency);
+            //DA.SetDataList(1, new_structure.Frequency); //Don't use PopulateWithSolverResult
+            //DA.SetData(2, new_structure.Mode);
+            //DA.SetDataTree(2, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
             // Before it was SetData
 
 
