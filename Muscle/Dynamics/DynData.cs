@@ -5,7 +5,7 @@ using Muscle.Dynamics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Muscle.Dynamics
+namespace Muscle
 {
     public class DynData
     {

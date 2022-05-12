@@ -175,7 +175,7 @@ namespace Muscle.Structure
 			
 			DynamicsData = other.DynamicsData;
 			DynamicsData = new List<DynData>();
-			foreach (DynData D in other.DynamicsData ) DynamicsData.Add(D.Duplicate());
+			foreach (DynData D in other.DynamicsData) DynamicsData.Add(D.Duplicate());
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -527,6 +527,10 @@ namespace Muscle.Structure
 			GH_Path path;
 			int i = 0;
 			GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
+			if(datalistlist ==null)
+            {
+				return res;
+            }
 			foreach (List<double> datalist in datalistlist)
 			{
 				path = new GH_Path(i);
