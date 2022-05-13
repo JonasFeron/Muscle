@@ -154,9 +154,10 @@ class SharedSolverResult_dynamics():
 
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
-            Answ.NumberOfFrequency = Struct.NFreq
+            Answ.NumberOfFrequency = 2 #Struct.NFreq
             #Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
             Answ.Frequency = np.array([1,2,3])
+            Answ.Frequency = Answ.Frequency.round(5).reshape((-1,)).tolist()
             
             
             #Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
@@ -168,8 +169,8 @@ class SharedSolverResult_dynamics():
             #Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
             
             Struct.TotMode = np.array([[1,2,3],[1,4,5],[6,7,8]])
-            Struct.TotMode = Struct.mode.T
-            Answ.TotMode = Struct.mode.round(5).reshape((3,3)).tolist()
+            Struct.TotMode = Struct.TotMode.T
+            Answ.TotMode = Struct.TotMode.round(5).reshape((3,3)).tolist()
             #Struct.TotMode = Struct.TotMode.T
             #Shape = Struct.TotMode.shape
             #Answ.TotMode = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
