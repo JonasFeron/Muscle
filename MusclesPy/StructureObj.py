@@ -1003,7 +1003,7 @@ class StructureObj():
         Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
         Self.freq = np.zeros((Self.DOFfreeCount,))
         Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
-        Self.TotMode = np.zeros((len(Self.IsDOFfree),len(Self.freq)))
+        Self.TotMode = np.zeros((len(Self.IsDOFfree),len(Self.DOFfreeCount)))
 
     # endregion
 

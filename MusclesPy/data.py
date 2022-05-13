@@ -69,7 +69,7 @@ class SharedData():
 
         #Data for the dynamics module
         Data.DynamicMass = DynamicMass
-        Data.MaxFreqWanted = MaxFreqWanted #Put at -1 as default value (if nothing is inputed. It will send all the frequencies and modes.)
+        Data.MaxFreqWanted = MaxFreqWanted #Put at 0 as default value (if nothing is inputed. It will send all the frequencies and modes.)
 
 def ToSharedDataObject(dct):
     """

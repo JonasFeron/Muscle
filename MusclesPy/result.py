@@ -149,9 +149,9 @@ class SharedSolverResult_dynamics():
         Answ.NumberOfFrequency = 0
         Answ.Frequency = []
         Answ.Modes =  []
-        #Answ.TotMode = []
+        Answ.TotMode = []
 
-    def PopulateWith_Dynamics(Answ,Struct,MaxFreqWanted): #For the dynamics part
+    def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
             Answ.NumberOfFrequency = Struct.NFreq
             Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
@@ -159,7 +159,9 @@ class SharedSolverResult_dynamics():
             #The reshape depends on the number of frequency asked by the user
             Shape = Struct.mode.shape
             Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
-            #Struct.TotMode = Struct.TotMode.T
+            Struct.TotMode = Struct.TotMode.T
+            Shape = Struct.TotMode.shape
+            Answ.TotMode = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
 
             #Answ.TotMode = Struct.TotMode.round(5).reshape((Struct.DOFfreeCount,3*Struct.NodesCount)).tolist()
             #Both reshape are working --> tested in python

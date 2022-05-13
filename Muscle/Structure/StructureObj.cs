@@ -76,6 +76,10 @@ namespace Muscle.Structure
 		///Before Using the Dynamic data element
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
+
+		public List<List<double>> TotModes { get; set; }
+
+
 		//If I create a DynamicsData element
 		//public List<DynData > DynamicsData { get; set; }
 		#endregion Properties
@@ -109,7 +113,7 @@ namespace Muscle.Structure
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
 			//DynamicsData = new List<DynData>();
-
+			TotModes = new List<List<double>>();
 		}
 
 
@@ -514,6 +518,7 @@ namespace Muscle.Structure
 			NumberOfFrequency = answ.NumberOfFrequency;
 			Frequency = answ.Frequency;
 			Mode = answ.Modes;
+			TotModes = answ.TotModes;
 
 
 			log.Info("Structure: Is well populated with Dynamics RESULTS");

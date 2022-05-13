@@ -51,6 +51,7 @@ namespace Muscle.PythonLink
 		public int NumberOfFrequency { get; set; }
 		public List<double> Frequency { get; set; } // Natural frequencies of the structure
 		public List<List<double>> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
+		public List<List<double>> TotModes { get; set; } //Contains the modes with all direction in the vector (include blocked direction -->0 displacement)
 		#endregion Dynamics
 
 		///// Results informations /////
@@ -79,6 +80,8 @@ namespace Muscle.PythonLink
 			NumberOfFrequency = 0;
 			Frequency = new List<double>();
 			Modes = new List<List<double>>();
+			TotModes = new List<List<double>>();
+
 		}
 
 
