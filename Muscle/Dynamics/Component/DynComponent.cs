@@ -58,6 +58,7 @@ namespace Muscle.Dynamics
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Number of frequencies wanted", "Num. freq. wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
 
 
         }
@@ -84,11 +85,11 @@ namespace Muscle.Dynamics
             //1) Collect Data
             StructureObj structure = new StructureObj();
             double DynMass = 1; // Default value
-
+            int MaxFreqWanted = 0;
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetData(1, ref DynMass)) { } ///problemn
-
+            if (!DA.GetData(1, ref DynMass)) { } 
+            if (!DA.GetData(2, ref MaxFreqWanted)) { } 
 
             //2) Format data before sending and solving in python
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
@@ -119,7 +120,7 @@ namespace Muscle.Dynamics
                 return;
             }
 
-            SharedData data = new SharedData(structure,DynMass) ; //Object data contains all the essential informations of structure + the dynMass considered
+            SharedData data = new SharedData(structure,DynMass,MaxFreqWanted) ; //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 

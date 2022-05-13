@@ -77,7 +77,7 @@ namespace Muscle.Structure
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
 		//If I create a DynamicsData element
-		public List<DynData > DynamicsData { get; set; }
+		//public List<DynData > DynamicsData { get; set; }
 		#endregion Properties
 
 		#region Constructors
@@ -108,7 +108,7 @@ namespace Muscle.Structure
 			NumberOfFrequency = 0;
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
-			DynamicsData = new List<DynData>();
+			//DynamicsData = new List<DynData>();
 
 		}
 
@@ -138,7 +138,7 @@ namespace Muscle.Structure
 			//4) check validity of supports inputs
 			RegisterSupports(GH_supports_input);
 
-			//5) Fill the dynamics data
+			//5) Fill the dynamics data ?
 
 		}
 
@@ -173,9 +173,9 @@ namespace Muscle.Structure
 			//Dynamics
 			this.NumberOfFrequency = other.NumberOfFrequency;
 			
-			DynamicsData = other.DynamicsData;
-			DynamicsData = new List<DynData>();
-			foreach (DynData D in other.DynamicsData) DynamicsData.Add(D.Duplicate());
+			//DynamicsData = other.DynamicsData;
+			//DynamicsData = new List<DynData>();
+			//foreach (DynData D in other.DynamicsData) DynamicsData.Add(D.Duplicate());
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -190,7 +190,7 @@ namespace Muscle.Structure
 
 		public override string ToString()
 		{
-			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {NumberOfFrequency} computed frequency(ies)";
+			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {NumberOfFrequency} frequency(ies)";
 		}
 
 		#region 1)RegisterElements

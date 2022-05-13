@@ -62,8 +62,9 @@ namespace Muscle.PythonLink
 
 		#region Dynamics
 
-		public double DynamicMass { get; set; }
+		public double DynamicMass { get; set; } //Mass applied at each node for the dynamics computation
 
+		public int MaxFreqWanted { get; set; } //Maximum frequencies and modes that the user want to obtain
 
 		#endregion Dynamics 
 
@@ -93,6 +94,7 @@ namespace Muscle.PythonLink
 			ReactionsInit = new List<double>();
 			Residual0Threshold = 0.0001;
 			DynamicMass = 1;
+			MaxFreqWanted = 0;
 		}
 
 
@@ -120,12 +122,13 @@ namespace Muscle.PythonLink
 			n_steps = number_steps;
 		}
 
-		public SharedData(StructureObj structObj, double DynMass) //For the dynamic computation
+		public SharedData(StructureObj structObj, double DynMass, int MaxFreqWtd) //For the dynamic computation
 		{
 			Init();
 			RegisterElements(structObj);
 			RegisterNodes(structObj);
 			DynamicMass = DynMass;
+			MaxFreqWanted = MaxFreqWtd;
 		}
 
 		#endregion Constructors

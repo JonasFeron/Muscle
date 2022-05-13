@@ -1,2 +1,2 @@
-ebf98781-43ce-425a-9db7-b9fa849786cc
-{"TypeName": "SharedSolverResultDynamics", "NumberOfFrequency": 2, "Frequency": [19.83956, 3682.49071], "Modes": [[-0.01393, 0.9999], [0.9999, 0.01393]]}
+b46e4c6a-33a0-4efa-966a-789084f217b0
+could not broadcast input array from shape (2) into shape (0)

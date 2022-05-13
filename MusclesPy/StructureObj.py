@@ -1003,7 +1003,7 @@ class StructureObj():
         Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
         Self.freq = np.zeros((Self.DOFfreeCount,))
         Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
-
+        Self.TotMode = np.zeros((len(Self.IsDOFfree),len(Self.freq)))
 
     # endregion
 
@@ -1999,7 +1999,7 @@ class StructureObj():
         Self.mode = PHI
         
 
-    def ModuleDynamics(Self,DynamicMass): #Data ?
+    def ModuleDynamics(Self,DynamicMass,MaxFreqWanted): #Data ?
         #Used via C# for the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2090,11 +2090,31 @@ class StructureObj():
         idx = w.argsort()[::1]
         w = w[idx]
         PHI = PHI[:, idx]
-
-        Self.NFreq = len(w)
-        Self.freq = w/(2*np.pi)
-        Self.mode = PHI
         
+        Self.NFreq = len(w)
+        Self.mode = PHI
+
+
+        #TotMode : insert all the displacement of the mode considering that for the Non DOF, the displacement is zero
+        Self.TotMode = np.zeros((len(Self.IsDOFfree),len(Self.freq)))
+        k = 0
+
+        for i in range(len(Self.IsDOFfree)):
+            if Self.IsDOFfree[i] == True:
+                Self.TotMode[i,:] = PHI[k,:]
+                k += 1
+
+        
+        if MaxFreqWanted == 0 or MaxFreqWanted > Self.NFreq:
+            Self.freq = w/(2*np.pi)
+            Self.mode = PHI
+        else:
+            Self.freq = Self.freq[:MaxFreqWanted]
+            Self.mode = Self.mode[:,:MaxFreqWanted]
+            Self.TotMode = Self.TotMode[:,:MaxFreqWanted]
+
+
+
 
     def test_ModuleDynamics(Self,NodesCount,ElementsCount,ElementsEndNodes,FixationsCount,NodesCoord,ElementsType,ElementsE,ElementsA,TensionInit,IsDOFfree,DynamicMass): 
         
@@ -2185,8 +2205,17 @@ class StructureObj():
 
         freq = w/(2*np.pi)
         mode = PHI
+        print('4')
+        #TotMode : insert all the displacement of the mode considering that for the Non DOF, the displacement is zero
+        TotMode = np.zeros((len(Self.IsDOFfree),len(freq)))
+        k = 0
 
-        return freq,mode
+        for i in range(len(Self.IsDOFfree)):
+            if Self.IsDOFfree[i] == True:
+                TotMode[i,:] = PHI[k,:]
+                k += 1
+
+        return freq,mode,TotMode
     #endregion
 
 
