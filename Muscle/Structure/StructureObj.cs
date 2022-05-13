@@ -77,7 +77,7 @@ namespace Muscle.Structure
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
 
-		public List<List<double>> TotModes { get; set; }
+		public List<List<double>> TotMode { get; set; }
 
 
 		//If I create a DynamicsData element
@@ -113,7 +113,7 @@ namespace Muscle.Structure
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
 			//DynamicsData = new List<DynData>();
-			TotModes = new List<List<double>>();
+			TotMode = new List<List<double>>();
 		}
 
 
@@ -518,7 +518,7 @@ namespace Muscle.Structure
 			NumberOfFrequency = answ.NumberOfFrequency;
 			Frequency = answ.Frequency;
 			Mode = answ.Modes;
-			TotModes = answ.TotModes;
+			TotMode = answ.TotMode;
 
 
 			log.Info("Structure: Is well populated with Dynamics RESULTS");

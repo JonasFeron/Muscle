@@ -2091,12 +2091,12 @@ class StructureObj():
         w = w[idx]
         PHI = PHI[:, idx]
         
-        Self.NFreq = len(w)
+        Self.freq = w/(2*np.pi) 
         Self.mode = PHI
 
 
         #TotMode : insert all the displacement of the mode considering that for the Non DOF, the displacement is zero
-        Self.TotMode = np.zeros((len(Self.IsDOFfree),len(Self.freq)))
+        Self.TotMode = np.zeros((len(Self.IsDOFfree),Self.DOFfreeCount))
         k = 0
 
         for i in range(len(Self.IsDOFfree)):
@@ -2105,18 +2105,16 @@ class StructureObj():
                 k += 1
 
         
-        if MaxFreqWanted == 0 or MaxFreqWanted > Self.NFreq:
-            Self.freq = w/(2*np.pi)
-            Self.mode = PHI
-        else:
-            Self.freq = Self.freq[:MaxFreqWanted]
-            Self.mode = Self.mode[:,:MaxFreqWanted]
-            Self.TotMode = Self.TotMode[:,:MaxFreqWanted]
+        if MaxFreqWanted != 0:
+            if MaxFreqWanted < Self.DOFfreeCount:
+                Self.freq = Self.freq[:MaxFreqWanted]
+                Self.mode = Self.mode[:,:MaxFreqWanted]
+                Self.TotMode = Self.TotMode[:,:MaxFreqWanted]
+        
 
 
 
-
-    def test_ModuleDynamics(Self,NodesCount,ElementsCount,ElementsEndNodes,FixationsCount,NodesCoord,ElementsType,ElementsE,ElementsA,TensionInit,IsDOFfree,DynamicMass): 
+    def test_ModuleDynamics(Self,NodesCount,ElementsCount,ElementsEndNodes,FixationsCount,NodesCoord,ElementsType,ElementsE,ElementsA,TensionInit,IsDOFfree,DynamicMass,NumberOfFreqWanted): 
         
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2214,6 +2212,11 @@ class StructureObj():
             if Self.IsDOFfree[i] == True:
                 TotMode[i,:] = PHI[k,:]
                 k += 1
+        if NumberOfFreqWanted != 0:
+            if NumberOfFreqWanted < Self.DOFfreeCount:
+                freq = freq[:NumberOfFreqWanted]
+                mode = mode[:,:NumberOfFreqWanted]
+                TotMode = TotMode[:,:NumberOfFreqWanted]
 
         return freq,mode,TotMode
     #endregion

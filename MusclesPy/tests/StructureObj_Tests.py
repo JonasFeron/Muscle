@@ -1451,8 +1451,9 @@ class StructureObj_Tests(unittest.TestCase):
         DynamicMass = 1   # kg
         TensionInit = 5*np.array([1, 1]) #Newtons
         Struct = StructureObj()
+        NumberOfFreqWanted = 1
         freq, mode,TotMode = Struct.test_ModuleDynamics(NodeCount, ElementsCount, ElementsEndNodes, FixationsCount, NodesCoord,
-                                   ElementsType, ElementsE, ElementsA, TensionInit, IsDOFfree, DynamicMass)
+                                   ElementsType, ElementsE, ElementsA, TensionInit, IsDOFfree, DynamicMass, NumberOfFreqWanted)
 
         print('freq', freq)
         print('mode', mode)

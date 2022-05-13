@@ -154,19 +154,19 @@ class SharedSolverResult_dynamics():
 
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
-            Answ.NumberOfFrequency = 2 #Struct.NFreq
-            #Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
-            Answ.Frequency = np.array([1,2,3])
-            Answ.Frequency = Answ.Frequency.round(5).reshape((-1,)).tolist()
+            Answ.NumberOfFrequency = int(Struct.DOFfreeCount)
+            Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
+            #Answ.Frequency = np.array([1,2,3])
+            #Answ.Frequency = Answ.Frequency.round(5).reshape((-1,)).tolist()
             
             
-            #Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
+            Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
             #The reshape depends on the number of frequency asked by the user
-            Struct.mode = np.array([[1,2,3],[1,4,5],[6,7,8]])
-            Struct.mode = Struct.mode.T
-            Answ.Modes = Struct.mode.round(5).reshape((3,3)).tolist()
-            #Shape = Struct.mode.shape
-            #Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
+            #Struct.mode = np.array([[1,2,3],[1,4,5],[6,7,8]])
+            #Struct.mode = Struct.mode.T
+            #Answ.Modes = Struct.mode.round(5).reshape((3,3)).tolist()
+            Shape = Struct.mode.shape
+            Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
             
             Struct.TotMode = np.array([[1,2,3],[1,4,5],[6,7,8]])
             Struct.TotMode = Struct.TotMode.T
