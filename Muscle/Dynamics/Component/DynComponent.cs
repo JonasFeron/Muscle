@@ -85,11 +85,12 @@ namespace Muscle.Dynamics
             //1) Collect Data
             StructureObj structure = new StructureObj();
             double DynMass = 1; // Default value
-            int MaxFreqWanted = 0;
+            int MaxFreqWtd = 0;
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
             if (!DA.GetData(1, ref DynMass)) { } 
-            if (!DA.GetData(2, ref MaxFreqWanted)) { } 
+            if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
+
 
             //2) Format data before sending and solving in python
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
@@ -120,7 +121,7 @@ namespace Muscle.Dynamics
                 return;
             }
 
-            SharedData data = new SharedData(structure,DynMass,MaxFreqWanted) ; //Object data contains all the essential informations of structure + the dynMass considered
+            SharedData data = new SharedData(structure,DynMass, MaxFreqWtd) ; //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
