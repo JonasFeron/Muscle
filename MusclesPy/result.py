@@ -168,12 +168,12 @@ class SharedSolverResult_dynamics():
             Shape = Struct.mode.shape
             Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
             
-            Struct.TotMode = np.array([[1,2,3],[1,4,5],[6,7,8]])
-            Struct.TotMode = Struct.TotMode.T
-            Answ.TotMode = Struct.TotMode.round(5).reshape((3,3)).tolist()
+            #Struct.TotMode = np.array([[1,2,3],[1,4,5],[6,7,8]])
             #Struct.TotMode = Struct.TotMode.T
-            #Shape = Struct.TotMode.shape
-            #Answ.TotMode = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
+            #Answ.TotMode = Struct.TotMode.round(5).reshape((3,3)).tolist()
+            Struct.TotMode = Struct.TotMode.T
+            Shape = Struct.TotMode.shape
+            Answ.TotMode = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
 
             #Answ.TotMode = Struct.TotMode.round(5).reshape((Struct.DOFfreeCount,3*Struct.NodesCount)).tolist()
             #Both reshape are working --> tested in python
