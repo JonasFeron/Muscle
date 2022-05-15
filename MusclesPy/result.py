@@ -149,36 +149,24 @@ class SharedSolverResult_dynamics():
         # ##### Solve informations #####
         Answ.NumberOfFrequency = 0
         Answ.Frequency = []
-        Answ.Modes =  []
-        Answ.TotMode = []
+        Answ.Modes = []
+        Answ.DynMasses = []
 
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
-            Answ.NumberOfFrequency = int(Struct.DOFfreeCount)
-            Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked 
-            #Answ.Frequency = np.array([1,2,3])
-            #Answ.Frequency = Answ.Frequency.round(5).reshape((-1,)).tolist()
+            Answ.NumberOfFrequency = int(Struct.MaxFreqWanted) #Number of frequencies realeased by python
+            Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked
             
-            
-            Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
-            #The reshape depends on the number of frequency asked by the user
-            #Struct.mode = np.array([[1,2,3],[1,4,5],[6,7,8]])
-            #Struct.mode = Struct.mode.T
-            #Answ.Modes = Struct.mode.round(5).reshape((3,3)).tolist()
-            Shape = Struct.mode.shape
-            Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
-            
-            #Struct.TotMode = np.array([[1,2,3],[1,4,5],[6,7,8]])
-            #Struct.TotMode = Struct.TotMode.T
-            #Answ.TotMode = Struct.TotMode.round(5).reshape((3,3)).tolist()
+            #Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
+            #Shape = Struct.mode.shape
+            #Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
+
             Struct.TotMode = Struct.TotMode.T
             Shape = Struct.TotMode.shape
-            Answ.TotMode = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
+            Answ.Modes = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
+ 
+            Answ.DynMasses = Struct.DynMasses.round(5).reshape((-1,)).tolist()
 
-            #Answ.TotMode = Struct.TotMode.round(5).reshape((Struct.DOFfreeCount,3*Struct.NodesCount)).tolist()
-            #Both reshape are working --> tested in python
-            #Round : number of digit after the comma
-            #Reshape also work : obtain a list containing DOFfreeCount lists of arrays containint DOFfreeCount elements
 
 class SharedSolverResult_dynamicsEncoder(json.JSONEncoder):
     """

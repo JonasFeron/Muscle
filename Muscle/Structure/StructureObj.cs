@@ -76,8 +76,9 @@ namespace Muscle.Structure
 		///Before Using the Dynamic data element
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
+		public List<List<Vector3d>> ModeVector { get; set; }
+		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
 
-		public List<List<double>> TotMode { get; set; }
 
 
 		//If I create a DynamicsData element
@@ -109,11 +110,11 @@ namespace Muscle.Structure
 
 			DR = new DRMethod();
 
-			NumberOfFrequency = 0;
+			NumberOfFrequency = 0; 
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
-			//DynamicsData = new List<DynData>();
-			TotMode = new List<List<double>>();
+			ModeVector = new List<List<Vector3d>> ();
+			DynMass = new List<double>();
 		}
 
 
@@ -142,7 +143,6 @@ namespace Muscle.Structure
 			//4) check validity of supports inputs
 			RegisterSupports(GH_supports_input);
 
-			//5) Fill the dynamics data ?
 
 		}
 
@@ -174,12 +174,12 @@ namespace Muscle.Structure
 
 			DR = other.DR.Duplicate();
 
-			//Dynamics
-			this.NumberOfFrequency = other.NumberOfFrequency;
+			//Dynamics 
+			// The data are not duplicated because if can cause problem if the structure is recomputed
+			// For example, the tension can change and the rigidity also. This affect the dynamic computation.
+
+			//this.NumberOfFrequency = other.NumberOfFrequency;  
 			
-			//DynamicsData = other.DynamicsData;
-			//DynamicsData = new List<DynData>();
-			//foreach (DynData D in other.DynamicsData) DynamicsData.Add(D.Duplicate());
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -194,7 +194,7 @@ namespace Muscle.Structure
 
 		public override string ToString()
 		{
-			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {NumberOfFrequency} frequency(ies)";
+			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and the {NumberOfFrequency} first frequency(ies)(on {DOFfreeCount}).";
 		}
 
 		#region 1)RegisterElements
@@ -518,7 +518,7 @@ namespace Muscle.Structure
 			NumberOfFrequency = answ.NumberOfFrequency;
 			Frequency = answ.Frequency;
 			Mode = answ.Modes;
-			TotMode = answ.TotMode;
+			DynMass = answ.DynMasses;
 
 
 			log.Info("Structure: Is well populated with Dynamics RESULTS");
@@ -544,6 +544,29 @@ namespace Muscle.Structure
 			}
 			return res;
 		}
+		public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist) //Display the List of List of Vector3D
+		{
+			GH_Path path;
+			int i = 0;
+
+			GH_Structure<GH_Vector> res = new GH_Structure<GH_Vector>();
+			
+			if (datalistlist == null)
+			{
+				return res;
+			}
+			foreach (List<Vector3d> datalist in datalistlist)
+			{
+
+				path = new GH_Path(i);
+				res.AppendRange(datalist.Select(data => new GH_Vector(data)), path);
+				i++;
+
+			}
+			return res;
+		}
+
+
 
 
 
