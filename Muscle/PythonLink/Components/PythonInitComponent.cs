@@ -164,7 +164,7 @@ namespace Muscle.PythonLink.Component
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("d693493d-1db4-40f4-a32c-26f118e991db"); }
+            get { return new Guid("ee9c0d81-1f1e-4279-9421-a286949a869b"); }
         }
 
         /// <summary>

@@ -96,7 +96,7 @@ namespace Muscle.Elements
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("cbacd291-da18-428c-89ae-32569804d5f9"); }
+            get { return new Guid("83c5746d-d54d-4f88-b553-0d4cbe86bac8"); }
         }
     }
 }

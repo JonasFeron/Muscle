@@ -12,7 +12,7 @@ namespace Muscle.Loads
     {
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("0ad64607-0a74-4d68-b4ff-83a52615782e"); } }
+        public override Guid ComponentGuid { get { return new Guid("e932fb12-0cf3-45d5-ae98-94c2ac38300d"); } }
 
         #endregion Properties
 

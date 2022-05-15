@@ -33,7 +33,7 @@ namespace Muscle
         {
             get
             {
-                return new Guid("d9fc1187-525a-4d50-a5ee-eb604cd90f33");
+                return new Guid("9c0e7385-99b5-4995-b45a-a77fc0a2b1df");
             }
         }
 

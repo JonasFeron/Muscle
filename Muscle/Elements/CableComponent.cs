@@ -13,7 +13,7 @@ namespace Muscle.Elements
         public CableComponent() : base("Element - Cable", "C", "A Cable is a linear elastic structural element working only in Tension.\nCompression force can be allowed in the numerical analysis or not.\nIf compression is not allowed, one shall run the analysis non-linearly to consider slacked cables.\nIf compression is allowed for the sake of simplified analysis, the compressed cables will have negative unity check and IsValid==False property.", "Muscles", "Elements") { displayIn3d = true; }
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("701f886a-3aee-4ae1-b1cc-90a824e44cc9"); } }
+        public override Guid ComponentGuid { get { return new Guid("0640f59d-323c-4483-9461-6e7cd9d5c58a"); } }
 
         public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
         {

@@ -29,7 +29,7 @@ namespace Muscle.Display
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("3ee8f0d0-720a-4f7c-b6d3-f2738a16701f"); }
+            get { return new Guid("b921cf0d-fcdf-48a2-8d1e-b35c8a995251"); }
         }
 
         /// <summary>

@@ -20,7 +20,7 @@ namespace Muscle.Materials
         /// <summary>
         /// This is the Global Unique IDentifier (GUID) of the component. It's a unique value that allow to identify the component as itself. DO NOT change it.
         /// </summary>
-        public override Guid ComponentGuid { get { return new Guid("34996462-ee16-409a-9198-3d2399e7c1e6"); } }
+        public override Guid ComponentGuid { get { return new Guid("21757eac-e06b-4f2f-9fe3-56c00c4e23aa"); } }
 
         /// <summary>
         /// Property to access component icon.

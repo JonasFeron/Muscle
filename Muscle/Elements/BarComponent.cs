@@ -14,7 +14,7 @@ namespace Muscle.Elements
         public BarComponent() : base("Element - Bar", "B", "A Bar is a linear elastic structural element working both in Tension and compression with the same stiffness. In compression, a bar may or may not be sensitive to buckling.", "Muscles", "Elements") { displayIn3d = true; }
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("f4b9b4d1-d09b-4f5c-864c-4b2f179f4d0e"); } }
+        public override Guid ComponentGuid { get { return new Guid("54b274d4-a68d-4171-ac14-8eff54a2c28c"); } }
 
         public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
         {

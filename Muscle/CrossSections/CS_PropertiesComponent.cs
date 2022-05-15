@@ -8,7 +8,7 @@ namespace Muscle.CrossSections
     {
         public CS_PropertiesComponent() : base("Cross Section - Properties", "CS Prop", "Get the properties of a Cross Section", "Muscles", "Elements") { }
 
-        public override Guid ComponentGuid { get { return new Guid("876a1be4-c20d-4a2c-8667-b7e44c82ad9c"); } }
+        public override Guid ComponentGuid { get { return new Guid("f78a23a7-1eb7-4b2c-8b0b-e88af4e0ebea"); } }
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {

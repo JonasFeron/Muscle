@@ -45,7 +45,7 @@ namespace Muscle.Structure
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("a9ca4b75-9812-4df4-9d9e-dc176afa61f4"); }
+            get { return new Guid("5c5fcced-06a7-42ce-ba8d-ed9884722981"); }
         }
 
         /// <summary>
