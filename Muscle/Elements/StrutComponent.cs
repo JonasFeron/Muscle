@@ -13,7 +13,7 @@ namespace Muscle.Elements
         public StrutComponent() : base("Element - Strut", "E", "A Strut is a linear elastic structural element working only in compression. a Strut may or may not be sensitive to buckling.", "Muscles", "Elements") { displayIn3d = true; }
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("9de0139f-cf4a-4043-8b1c-25aa726f9dfe"); } }
+        public override Guid ComponentGuid { get { return new Guid("c746a92b-b2a5-4847-b6f3-2428e286a092"); } }
 
         public override void AppendAdditionalMenuItems(ToolStripDropDown menu)
         {

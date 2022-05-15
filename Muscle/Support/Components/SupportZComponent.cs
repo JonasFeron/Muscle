@@ -10,7 +10,7 @@ namespace Muscle
 
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("bcf0f3c9-c427-4b01-b9c3-9b8cf2a268ac"); } }
+        public override Guid ComponentGuid { get { return new Guid("eb860698-c0c1-473a-9bb2-b15243a2125c"); } }
 
         #endregion Properties
 

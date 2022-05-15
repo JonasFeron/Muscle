@@ -21,7 +21,7 @@ namespace Muscle.Materials
         /// <summary>
         /// This is the Global Unique IDentifier (GUID) of the parameter. It's a unique value that allow to identify the parameter as itself. DO NOT change it.
         /// </summary>
-        public override Guid ComponentGuid { get { return new Guid("a2a51ffe-b074-48f7-96ac-24053b5251b1"); } }
+        public override Guid ComponentGuid { get { return new Guid("b3b4aef8-a88d-4f0d-ba64-84bf72bed615"); } }
 
         #endregion Constructors
 

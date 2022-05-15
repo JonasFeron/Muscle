@@ -78,7 +78,7 @@ namespace Muscle.Nodes
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("27077155-791f-4f85-95de-6e44c70734ee"); }
+            get { return new Guid("bc912541-fc77-4981-b929-928a11688784"); }
         }
     }
 }

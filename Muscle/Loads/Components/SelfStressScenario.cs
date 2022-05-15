@@ -42,7 +42,7 @@ namespace Muscle.Loads
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("85cd2e82-e0ff-4b2a-be77-3c4a3fad816d"); }
+            get { return new Guid("690dae2a-6632-49a6-9e84-54251b1569f5"); }
         }
 
 

@@ -49,7 +49,7 @@ namespace Muscle.CrossSections
         #region Constructors
 
         public CS_SquareComponent() : base("Cross Section - Square", "Square", "Define a (hollow) square section", "Muscles", "Elements") { }
-        public override Guid ComponentGuid { get { return new Guid("b4727dd1-e16c-462c-8ce5-59ce6606b28e"); } }
+        public override Guid ComponentGuid { get { return new Guid("097eef62-fba6-4949-b39a-8d2abf8a5f6d"); } }
 
         #endregion Constructors
 

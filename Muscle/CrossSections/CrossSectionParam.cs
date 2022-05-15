@@ -17,7 +17,7 @@ namespace Muscle.CrossSections
         #region Constructors
 
         public ElementParam() : base("Cross Section", "CS", "Contains a collection of cross sections", "Muscles", "Params") { }
-        public override Guid ComponentGuid { get { return new Guid("0497193f-8cb3-4f59-9059-bd83016a378f"); } }
+        public override Guid ComponentGuid { get { return new Guid("96b876dc-49b2-43c4-97d8-f200720e57a2"); } }
 
 
         #endregion Constructors

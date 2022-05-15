@@ -11,7 +11,7 @@ namespace Muscle.Loads
         {
         }
 
-        public override Guid ComponentGuid { get { return new Guid("8f9096b4-a3d5-48de-a1f5-561d5707c2eb"); } }
+        public override Guid ComponentGuid { get { return new Guid("144cad6c-d557-4792-ada9-ae6cad8ec5c2"); } }
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {

@@ -16,7 +16,7 @@ namespace Muscle.Elements
         #region Constructors
 
         public ElementParam() : base("Element", "E", "Contains a collection of finite elements", "Muscles", "Params") { }
-        public override Guid ComponentGuid { get { return new Guid("176cdec4-1b1e-4426-87dc-260aed5b56b2"); } }
+        public override Guid ComponentGuid { get { return new Guid("0306bdf1-a106-48cf-a838-a472c2dd44f7"); } }
 
 
         #endregion Constructors

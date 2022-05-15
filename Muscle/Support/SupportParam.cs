@@ -27,7 +27,7 @@ namespace Muscle
                 return Bbox;
             }
         }
-        public override Guid ComponentGuid { get { return new Guid("f58ba5bc-47b9-4436-aeeb-cfbb078d5405"); } }
+        public override Guid ComponentGuid { get { return new Guid("cafa0cb0-b40c-493d-87e3-cce41331ba71"); } }
         public bool Hidden { get; set; }
         public bool IsPreviewCapable { get { return true; } }
         protected override Bitmap Icon { get { return null; } }
