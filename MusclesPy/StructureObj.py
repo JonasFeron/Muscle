@@ -2017,7 +2017,7 @@ class StructureObj():
         #assert Data.DynMasses.shape == (Self.NodesCount, )
         
         Self.C = Self.ConnectivityMatrix( Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
-        
+        Self.DynMasses = DynamicMass
         Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
 
         #We consider here the initial shape of the structure : underformed due to prestress or external loads
@@ -2082,7 +2082,7 @@ class StructureObj():
             Self.DynMasses = np.ones(Self.NodesCount)
 
         
-        if np.any(Self.DynMasses,0) == True: #No mass equal to zero in the vector
+        if np.any(Self.DynMasses,0) == False: #No mass equal to zero in the vector
             Self.DynMasses = np.ones(Self.NodesCount)
 
         MassesDiag = np.diag(np.repeat(Self.DynMasses,3))
@@ -2195,8 +2195,9 @@ class StructureObj():
             Self.DynMasses = np.ones(Self.NodesCount)
         print('6')
         
-        if np.any(Self.DynMasses,0) == True: #No mass equal to zero in the vector
+        if np.any(Self.DynMasses,0) == False: #No mass equal to zero in the vector
             Self.DynMasses = np.ones(Self.NodesCount)
+            print('in')
         print('7')
         MassesDiag = np.diag(np.repeat(Self.DynMasses,3))
         MassesDiagFree = MassesDiag[Self.IsDOFfree].T[Self.IsDOFfree].T #Retrieve the masses linked to free direction, DOF

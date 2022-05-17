@@ -1448,7 +1448,7 @@ class StructureObj_Tests(unittest.TestCase):
         ElementsE = 0.21 * np.ones((ElementsCount, 2)) * 10 ** 6  # MPa
         ElementsA = 90000 * np.ones((ElementsCount, 2))  # mm2
         print('E', ElementsE)
-        DynamicMass = np.array([1,0,1])   # kg #Possibility to test if use a vector with a len < or > % Number of nodes
+        DynamicMass = np.array([1,1,1])   # kg #Possibility to test if use a vector with a len < or > % Number of nodes
         TensionInit = 5*np.array([1, 1]) #Newtons
         Struct = StructureObj()
         NumberOfFreqWanted = 2
