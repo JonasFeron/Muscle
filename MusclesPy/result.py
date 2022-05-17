@@ -174,7 +174,8 @@ class SharedSolverResult_dynamics():
             Struct.TotMode = Struct.TotMode.T
             Shape = Struct.TotMode.shape
             Answ.TotMode = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
-
+ 
+            Answ.DynMass = Struct.DynMasses.round(5).reshape((-1,)).tolist()
             #Answ.TotMode = Struct.TotMode.round(5).reshape((Struct.DOFfreeCount,3*Struct.NodesCount)).tolist()
             #Both reshape are working --> tested in python
             #Round : number of digit after the comma

@@ -32,7 +32,7 @@ class SharedData():
                  MaxTimeStep=10000,
                  MaxKEReset=1000,
                  n_steps=1,
-                 DynamicMass=1,
+                 DynamicMass=[],
                  MaxFreqWanted = 0):
         """
         Initialize all the properties of a SharedData Object. A SharedData Object is an object that contains the same data in C# than in Python in order to communicate between the two languages via a file.txt encrypted in json format.

@@ -1000,7 +1000,7 @@ class StructureObj():
         Self.n_steps = 1
 
         #Part Dynamics
-        Self.DynMasses = 1  # Mass [kg] used for the dynamics computation  - scalar
+        Self.DynMasses = np.zeros((Self.NodesCount,))  # Mass [kg] used for the dynamics computation  - scalar
         Self.freq = np.zeros((Self.DOFfreeCount,))
         Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
         Self.TotMode = np.zeros((len(Self.IsDOFfree),Self.DOFfreeCount))
@@ -2074,7 +2074,18 @@ class StructureObj():
         # MassesDOF is made the most general : 3 dimensions
         # The masses for each DOF is obtained by decreasing the size of the MassesDiag size
         ##MassesDiag = np.diag(MassesDirection) # Contain all the directions
-        MassesDiag = DynamicMass*np.diag(np.ones(3*Self.NodesCount))
+
+
+        Self.DynMasses = np.abs(Self.DynMasses)
+
+        if len(Self.DynMasses) != Self.NodesCount: #The length need to be equal to the number of nodes
+            Self.DynMasses = np.ones(Self.NodesCount)
+
+        
+        if np.any(Self.DynMasses,0) == True: #No mass equal to zero in the vector
+            Self.DynMasses = np.ones(Self.NodesCount)
+
+        MassesDiag = np.diag(np.repeat(Self.DynMasses,3))
         MassesDiagFree = MassesDiag[Self.IsDOFfree].T[Self.IsDOFfree].T #Retrieve the masses linked to free direction, DOF
 
 
@@ -2095,22 +2106,15 @@ class StructureObj():
         Self.mode = PHI
 
 
-        #TotMode : insert all the displacement of the mode considering that for the Non DOF, the displacement is zero
+        #TotMode : insert all the displacement of the mode considering that for the Non DOF that the displacement is zero
         Self.TotMode = np.zeros((len(Self.IsDOFfree),Self.DOFfreeCount))
-        k = 0
-
-        for i in range(len(Self.IsDOFfree)):
-            if Self.IsDOFfree[i] == True:
-                Self.TotMode[i,:] = PHI[k,:]
-                k += 1
-
+        Self.TotMode[Self.IsDOFfree] = Self.mode
         
         if MaxFreqWanted != 0:
             if MaxFreqWanted < Self.DOFfreeCount:
                 Self.freq = Self.freq[:MaxFreqWanted]
                 Self.mode = Self.mode[:,:MaxFreqWanted]
                 Self.TotMode = Self.TotMode[:,:MaxFreqWanted]
-        
 
 
 
@@ -2184,9 +2188,19 @@ class StructureObj():
         # MassesDOF is made the most general : 3 dimensions
         # The masses for each DOF is obtained by decreasing the size of the MassesDiag size
         ##MassesDiag = np.diag(MassesDirection) # Contain all the directions
-        MassesDiag = Self.DynMasses*np.diag(np.ones(3*NodesCount))
+        print('4')
+        Self.DynMasses = np.abs(Self.DynMasses)
+        print('5')
+        if len(Self.DynMasses) != Self.NodesCount: #The length need to be equal to the number of nodes
+            Self.DynMasses = np.ones(Self.NodesCount)
+        print('6')
+        
+        if np.any(Self.DynMasses,0) == True: #No mass equal to zero in the vector
+            Self.DynMasses = np.ones(Self.NodesCount)
+        print('7')
+        MassesDiag = np.diag(np.repeat(Self.DynMasses,3))
         MassesDiagFree = MassesDiag[Self.IsDOFfree].T[Self.IsDOFfree].T #Retrieve the masses linked to free direction, DOF
-
+        print('8')
 
         # Compute the eigen values of the problem - natural frequencies
         # Made via the characteristic equation : det ( K - \omega_i M ) = 0
@@ -2203,21 +2217,17 @@ class StructureObj():
 
         freq = w/(2*np.pi)
         mode = PHI
-        print('4')
+  
         #TotMode : insert all the displacement of the mode considering that for the Non DOF, the displacement is zero
         TotMode = np.zeros((len(Self.IsDOFfree),len(freq)))
-        k = 0
+        TotMode[Self.IsDOFfree] = mode
 
-        for i in range(len(Self.IsDOFfree)):
-            if Self.IsDOFfree[i] == True:
-                TotMode[i,:] = PHI[k,:]
-                k += 1
         if NumberOfFreqWanted != 0:
             if NumberOfFreqWanted < Self.DOFfreeCount:
                 freq = freq[:NumberOfFreqWanted]
                 mode = mode[:,:NumberOfFreqWanted]
                 TotMode = TotMode[:,:NumberOfFreqWanted]
-
+ 
         return freq,mode,TotMode
     #endregion
 

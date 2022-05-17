@@ -57,7 +57,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Number of frequencies wanted", "Num. freq. wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
 
 
@@ -85,11 +85,11 @@ namespace Muscle.Dynamics
             log.Info("Dynamic computation: NEW SOLVE INSTANCE");
             //1) Collect Data
             StructureObj structure = new StructureObj();
-            double DynMass = 1; // Default value
+            List<double> DynMassIN = new List<double>(); // Default value
             int MaxFreqWtd = 0;
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetData(1, ref DynMass)) { } 
+            if (!DA.GetDataList(1, DynMassIN)) { } 
             if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
 
 
@@ -122,7 +122,7 @@ namespace Muscle.Dynamics
                 return;
             }
 
-            SharedData data = new SharedData(structure,DynMass, MaxFreqWtd) ; //Object data contains all the essential informations of structure + the dynMass considered
+            SharedData data = new SharedData(structure,DynMassIN, MaxFreqWtd) ; //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 

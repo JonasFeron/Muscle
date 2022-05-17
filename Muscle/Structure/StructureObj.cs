@@ -79,6 +79,9 @@ namespace Muscle.Structure
 
 		public List<List<double>> TotMode { get; set; }
 
+		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
+
+
 
 		//If I create a DynamicsData element
 		//public List<DynData > DynamicsData { get; set; }
@@ -109,11 +112,12 @@ namespace Muscle.Structure
 
 			DR = new DRMethod();
 
-			NumberOfFrequency = 0;
+			NumberOfFrequency = 0; 
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
 			//DynamicsData = new List<DynData>();
 			TotMode = new List<List<double>>();
+			DynMass = new List<double>();
 		}
 
 
@@ -174,12 +178,12 @@ namespace Muscle.Structure
 
 			DR = other.DR.Duplicate();
 
-			//Dynamics
-			this.NumberOfFrequency = other.NumberOfFrequency;
+			//Dynamics 
+			// The data are not duplicated because if can cause problem if the structure is recomputed
+			// For example, the tension can change and the rigidity also. This affect the dynamic computation.
+
+			//this.NumberOfFrequency = other.NumberOfFrequency;  
 			
-			//DynamicsData = other.DynamicsData;
-			//DynamicsData = new List<DynData>();
-			//foreach (DynData D in other.DynamicsData) DynamicsData.Add(D.Duplicate());
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -519,6 +523,7 @@ namespace Muscle.Structure
 			Frequency = answ.Frequency;
 			Mode = answ.Modes;
 			TotMode = answ.TotMode;
+			DynMass = answ.DynMasses;
 
 
 			log.Info("Structure: Is well populated with Dynamics RESULTS");
