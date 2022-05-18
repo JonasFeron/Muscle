@@ -16,14 +16,14 @@ using Rhino.Geometry;
 
 namespace Muscle.Dynamics
 {
-    public class DynComponent : GH_Component
+    public class DynSolverComponent : GH_Component
     {
         private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public DynComponent()
+        public DynSolverComponent()
           : base("Dynamic Solver", "DS",
                 "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node. The computation is done on the state of the structure. It includes the influence of Lfree (pretension) and the possible applied load.",
               "Muscles", "Dynamics")
@@ -69,10 +69,7 @@ namespace Muscle.Dynamics
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure containing the total results.", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Number of frequency(ies)", "#freq", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mode(s)", "Mode(s)", "All modes of the structure ranked as the returned frequencies.(containing also the zero displacement is blocked directions.", GH_ParamAccess.list);
-            //AddNumberParameter
+            
         }
 
         /// <summary>
@@ -96,23 +93,6 @@ namespace Muscle.Dynamics
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
 
-            //bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData()); // new_structure.LoadsToApply was filled with the loads
-            //bool success2 = RegisterPrestressLoads(new_structure, gh_loads_prestress.FlattenData()); // new_structure.LengtheningsToApply was filled with the length variations
-
-            //new_structure.Residual0Threshold = residual0Threshold;
-
-            /// Call the method "DynMethod" to make the computation in Python
-            ///new_structure.DR = new DRMethod(dt, amplMass, minMass, maxTimeStep, maxKEReset);
-
-            //Call the method "DynMethod" to make the computation in Python ?
-
-            // // even if both success 1 and 2 failed to collect data, we can still run the analysis because the LengtheningsToApply can also come from direct change of the Free lengths 
-            //if (!success1 && !success2)
-            //{
-            //    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to collect load data");
-            //    return; //abort if both failed
-            //} 
-
             //3) Solve in python
             if (AccessToAll.pythonManager == null)
             {
@@ -123,6 +103,7 @@ namespace Muscle.Dynamics
 
             SharedData data = new SharedData(structure,DynMassIN, MaxFreqWtd) ; //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
+                                                                  
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
             {
@@ -146,20 +127,16 @@ namespace Muscle.Dynamics
                     result = null;
                 }
             }
+
             new_structure.PopulateWithSolverResult_dyn(result);
+            
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
-            DA.SetData(1, new_structure.NumberOfFrequency);
-            DA.SetDataList(2, new_structure.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetDataTree(3, new_structure.ListListToGH_Struct(new_structure.Mode));//result.ListListToGH_Struct(result.Modes)
             
-            //DA.SetData(0, new_structure.NumberOfFrequency);
-            //DA.SetDataList(1, new_structure.Frequency); //Don't use PopulateWithSolverResult
-            //DA.SetData(2, new_structure.Mode);
-            //DA.SetDataTree(2, result.ListListToGH_Struct(result.Modes)); //Need to use this to be able to 
-            // Before it was SetData
+            
+      
 
 
             log.Info("Dynamic computation: END SOLVE INSTANCE");

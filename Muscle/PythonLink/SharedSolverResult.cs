@@ -81,7 +81,7 @@ namespace Muscle.PythonLink
 			NumberOfFrequency = 0;
 			Frequency = new List<double>();
 			Modes = new List<List<double>>();
-			DynMasses = new List<double> { };
+			DynMasses = new List<double>();
 
 		}
 

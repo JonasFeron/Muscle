@@ -150,6 +150,7 @@ class SharedSolverResult_dynamics():
         Answ.NumberOfFrequency = 0
         Answ.Frequency = []
         Answ.Modes = []
+        Answ.DynMasses = []
 
     def PopulateWith_Dynamics(Answ,Struct): #For the dynamics part
         if isinstance(Struct, StructureObj):
@@ -164,7 +165,7 @@ class SharedSolverResult_dynamics():
             Shape = Struct.TotMode.shape
             Answ.Modes = Struct.TotMode.round(5).reshape((Shape[0],Shape[1])).tolist()
  
-            Answ.DynMass = Struct.DynMasses.round(5).reshape((-1,)).tolist()
+            Answ.DynMasses = Struct.DynMasses.round(5).reshape((-1,)).tolist()
 
 
 class SharedSolverResult_dynamicsEncoder(json.JSONEncoder):

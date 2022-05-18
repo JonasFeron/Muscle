@@ -113,7 +113,6 @@ namespace Muscle.Structure
 			NumberOfFrequency = 0; 
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
-			//DynamicsData = new List<DynData>();
 			DynMass = new List<double>();
 		}
 
@@ -143,7 +142,6 @@ namespace Muscle.Structure
 			//4) check validity of supports inputs
 			RegisterSupports(GH_supports_input);
 
-			//5) Fill the dynamics data ?
 
 		}
 

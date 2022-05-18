@@ -51,7 +51,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure who contains already the dynamic computation.", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Mode", "Mode", "The mode that the user want to display.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Mode", "Mode", "The mode that the user want to display.(Begin at 1)", GH_ParamAccess.item);
             pManager.AddNumberParameter("Amplitude", "Ampl.","Amplitude of the displacement of the mode.",GH_ParamAccess.item);
             pManager.AddNumberParameter("Frequency", "Freq.", "Frequency of the displacement of the mode.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Time increment", "Time increment", "Value variating with the time to display the mode.", GH_ParamAccess.item);
@@ -90,6 +90,7 @@ namespace Muscle.Dynamics
             new_structure.NumberOfFrequency = structure.NumberOfFrequency;
             new_structure.Frequency = structure.Frequency;
             new_structure.Mode = structure.Mode;
+            new_structure.DynMass = structure.DynMass;
 
 
             List<double> ModeUsed = new List<double>();
