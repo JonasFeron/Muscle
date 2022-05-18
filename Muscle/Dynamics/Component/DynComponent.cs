@@ -71,8 +71,7 @@ namespace Muscle.Dynamics
             pManager.AddGenericParameter("Structure", "struct", "A structure containing the total results.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Number of frequency(ies)", "#freq", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "All natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mode(s)", "Mode(s)", "All modes of the structure ranked as the returned frequencies.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Mode(s) Global", "Mode(s) Global", "All modes of the structure ranked as the returned frequencies.(containing also the zero displacement is blocked directions.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mode(s)", "Mode(s)", "All modes of the structure ranked as the returned frequencies.(containing also the zero displacement is blocked directions.", GH_ParamAccess.list);
             //AddNumberParameter
         }
 
@@ -155,7 +154,7 @@ namespace Muscle.Dynamics
             DA.SetData(1, new_structure.NumberOfFrequency);
             DA.SetDataList(2, new_structure.Frequency); //Don't use PopulateWithSolverResult
             DA.SetDataTree(3, new_structure.ListListToGH_Struct(new_structure.Mode));//result.ListListToGH_Struct(result.Modes)
-            DA.SetDataTree(4, new_structure.ListListToGH_Struct(new_structure.TotMode));
+            
             //DA.SetData(0, new_structure.NumberOfFrequency);
             //DA.SetDataList(1, new_structure.Frequency); //Don't use PopulateWithSolverResult
             //DA.SetData(2, new_structure.Mode);

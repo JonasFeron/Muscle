@@ -77,8 +77,6 @@ namespace Muscle.Structure
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
 
-		public List<List<double>> TotMode { get; set; }
-
 		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
 
 
@@ -116,7 +114,6 @@ namespace Muscle.Structure
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
 			//DynamicsData = new List<DynData>();
-			TotMode = new List<List<double>>();
 			DynMass = new List<double>();
 		}
 
@@ -198,7 +195,7 @@ namespace Muscle.Structure
 
 		public override string ToString()
 		{
-			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {NumberOfFrequency} frequency(ies)";
+			return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and the {NumberOfFrequency} first frequency(ies)(on {DOFfreeCount}).";
 		}
 
 		#region 1)RegisterElements
@@ -522,7 +519,6 @@ namespace Muscle.Structure
 			NumberOfFrequency = answ.NumberOfFrequency;
 			Frequency = answ.Frequency;
 			Mode = answ.Modes;
-			TotMode = answ.TotMode;
 			DynMass = answ.DynMasses;
 
 
@@ -531,6 +527,65 @@ namespace Muscle.Structure
 
 		#endregion PopulateWithSolverResult
 
+
+		#region PopulateWithSolverResult_Mode
+		/*
+		public void PopulateWithSolverResult_Mode(StructureObj structure, List<Vector3d> ModeUsedVector)
+		{
+			
+
+			for (int n = 0; n < StructuralNodes.Count; n++)
+			{
+				Node node = StructuralNodes[n]; // lets give a nickname to the current node from the list. 
+
+				// 1) Register the loads, the new nodescoordinates, the reactions results from the solver
+
+				//Coordinates. 
+				double X = structure.StructuralNodes.Point +NodesCoord[n][0];
+				double Y = NodesCoord[n][1];
+				double Z = NodesCoord[n][2];
+				node.Point = new Point3d(X, Y, Z);
+				// NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
+
+
+
+				//Residual
+				double ResX = answ.Residual[n][0];
+				double ResY = answ.Residual[n][1];
+				double ResZ = answ.Residual[n][2];
+				node.Residual = new Vector3d(ResX, ResY, ResZ);
+
+				//Reactions 
+				double ReactX = 0;
+				double ReactY = 0;
+				double ReactZ = 0;
+				if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
+				if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
+				if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
+				node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
+			}
+
+
+			for (int e = 0; e < StructuralElements.Count; e++)
+			{
+				Element elem = StructuralElements[e];
+
+				//1) axialforce results
+				elem.Tension = answ.Tension[e];
+				elem.LFree = answ.ElementsLFree[e];
+
+				//update the lines end points
+				int n0 = elem.EndNodes[0];
+				int n1 = elem.EndNodes[1];
+				Point3d p0 = StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
+				Point3d p1 = StructuralNodes[n1].Point;
+				elem.Line = new Line(p0, p1);
+			}
+
+			log.Info("Structure: Is well populated with RESULTS");
+		}
+		*/
+		#endregion PopulateWithSolverResult_Mode
 
 		public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
 		{
@@ -549,6 +604,8 @@ namespace Muscle.Structure
 			}
 			return res;
 		}
+
+		
 
 
 

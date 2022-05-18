@@ -1004,7 +1004,7 @@ class StructureObj():
         Self.freq = np.zeros((Self.DOFfreeCount,))
         Self.mode = np.zeros((Self.DOFfreeCount,Self.DOFfreeCount))
         Self.TotMode = np.zeros((len(Self.IsDOFfree),Self.DOFfreeCount))
-
+        Self.MaxFreqWanted = 0
     # endregion
 
 
@@ -2015,7 +2015,7 @@ class StructureObj():
 
         """
         #assert Data.DynMasses.shape == (Self.NodesCount, )
-        
+        Self.MaxFreqWanted = MaxFreqWanted
         Self.C = Self.ConnectivityMatrix( Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
         Self.DynMasses = DynamicMass
         Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
@@ -2110,11 +2110,16 @@ class StructureObj():
         Self.TotMode = np.zeros((len(Self.IsDOFfree),Self.DOFfreeCount))
         Self.TotMode[Self.IsDOFfree] = Self.mode
         
-        if MaxFreqWanted != 0:
+        if Self.MaxFreqWanted != 0:
             if MaxFreqWanted < Self.DOFfreeCount:
                 Self.freq = Self.freq[:MaxFreqWanted]
                 Self.mode = Self.mode[:,:MaxFreqWanted]
                 Self.TotMode = Self.TotMode[:,:MaxFreqWanted]
+
+            else:
+                Self.MaxFreqWanted = Self.DOFfreeCount
+        else:
+            Self.MaxFreqWanted = Self.DOFfreeCount
 
 
 

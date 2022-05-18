@@ -61,7 +61,7 @@ namespace Muscle.Nodes
         //public Vector3d LoadToApply { get; set; }
 
         public Vector3d Residual { get; set; } // the unbalanced loads = Load - SUM Tension*cos
-        //public Vector3d PrestressLoad_To_Apply { get; set; } // load coming from an initial force
+                                               //public Vector3d PrestressLoad_To_Apply { get; set; } // load coming from an initial force
 
         //public List<Vector3d> Load_Results { get; set; }
         //public List<Vector3d> Load_Total { get; set; }
@@ -109,6 +109,7 @@ namespace Muscle.Nodes
             //Displacement_Already_Applied = new Vector3d();
             //Displacement_Results = new List<Vector3d>();
             //Displacement_Total = new List<Vector3d>();
+
         }
         public Node()
         {
@@ -151,6 +152,7 @@ namespace Muscle.Nodes
             //Displacement_Results = other.Displacement_Results;
             //Displacement_Total = other.Displacement_Total;
         }
+
         public Node Duplicate() //Duplication method calling the copy constructor
         {
             return new Node(this);
@@ -192,7 +194,6 @@ namespace Muscle.Nodes
                 isZFree = isZFree && support.isZFree;
             }
         }
-
 
         /// <summary>
         /// Add the Load to the node (if it is applied on a point closer than ZeroTol of the node otherwise do nothing).

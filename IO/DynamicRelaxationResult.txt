@@ -1,2 +1,2 @@
-3ffde3bc-d510-44ce-9a0c-c41b40b557a3
+78908e8c-784a-47e3-abbe-26c551c6d014
 {"TypeName": "SharedSolverResult", "NodesCoord": [[3.05, 0.0, 0.0], [0.0, 0.0, -0.08843147], [-3.05, 0.0, 0.0]], "Loads": [[0.0, 0.0, 0.0], [0.0, 0.0, -3967.0], [0.0, 0.0, 0.0]], "Tension": [68439.63086, 68439.63086], "Reactions": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "ElementsLFree": [3.05, 3.05], "Residual": [[0.0, 0.0, 0.0], [0.0, 0.0, 6e-05], [0.0, 0.0, 0.0]], "IsInEquilibrium": true, "nTimeStep": 61, "nKEReset": 20}
