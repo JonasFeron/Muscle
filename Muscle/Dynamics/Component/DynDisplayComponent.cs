@@ -155,7 +155,7 @@ namespace Muscle.Dynamics
             }
 			log.Info("Structure: Is well populated with RESULTS");
 
-            for (int e = 0; e < new_structure.StructuralElements.Count; e++)
+            for (int e = 0; e < new_structure.StructuralElements.Count; e++) //Put up to date the element line of the structure
             {
                 Element elem = new_structure.StructuralElements[e];
 

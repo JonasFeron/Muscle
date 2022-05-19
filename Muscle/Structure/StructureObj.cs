@@ -544,7 +544,7 @@ namespace Muscle.Structure
 			}
 			return res;
 		}
-		public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist)
+		public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist) //Display the List of List of Vector3D
 		{
 			GH_Path path;
 			int i = 0;

@@ -57,6 +57,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Self-mass generator", "S-W gen.", "Generate the self-mass at each node of the structure thanks to the self-weight of the structure.", GH_ParamAccess.item, false);
             pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Number of frequencies wanted", "Num. freq. wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
 
@@ -83,15 +84,37 @@ namespace Muscle.Dynamics
             StructureObj structure = new StructureObj();
             List<double> DynMassIN = new List<double>(); // Default value
             int MaxFreqWtd = 0;
+            bool MassGenerator = true;
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetDataList(1, DynMassIN)) { } 
-            if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
+            if (!DA.GetData(1, ref MassGenerator)) { }
+            if (!DA.GetDataList(2, DynMassIN)) { } 
+            if (!DA.GetData(3, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
 
 
             //2) Format data before sending and solving in python
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
+            if (MassGenerator == true) //Compute the self-mass if needed
+            {
+                //Need to create the list before adding the elements
+                for (int i = 0; i < structure.NodesCount; ++i)
+                {
+                    DynMassIN.Add(0f);
+                }
+                    
+                for (int j = 0; j < structure.ElementsCount; j++)
+                {
+                    Element e = structure.StructuralElements[j];
+                    List<int> NodeExtremities = e.EndNodes;
+                    double mass = e.Weight[2] / AccessToAll.g[2]; //Take the values in the z direction
+                    
+                    for(int k = 0; k < NodeExtremities.Count; ++k)
+                    {
+                        DynMassIN[NodeExtremities[k]] = mass;
+                    }
+                }
+            }
 
             //3) Solve in python
             if (AccessToAll.pythonManager == null)
@@ -130,7 +153,7 @@ namespace Muscle.Dynamics
 
             new_structure.PopulateWithSolverResult_dyn(result);
 
-            List<Vector3d> ModeUsedVector = new List<Vector3d>();
+            List<Vector3d> ModeUsedVector = new List<Vector3d>(); //Create the list of mode with a vector shape (dx,dy,dz) with a length equal to the number of nodes.
             int NumberOfNodes = structure.NodesCount;
             List<List<Vector3d>> ModeVect_construction = new List<List<Vector3d>>();
             for(int i = 0; i < new_structure.NumberOfFrequency; i++)
