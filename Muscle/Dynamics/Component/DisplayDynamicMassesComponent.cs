@@ -98,17 +98,17 @@ namespace Muscle.Dynamics
             {
                 Node node = structure.StructuralNodes[i];
 
-                Point3d origin = node.Point;
+                //Point3d origin = node.Point;
+                Point3d origin = new Point3d(0, 5, 0);
                 double r = 10.0;
                 Sphere s = new Sphere(origin, r);
                 //Test
                 //DisplayPipeline.DrawSphere(s,Color.Red);
 
                 sphere.Add(s);
-              
+                
             }
 
-          
 
             //DA.SetData(0, n.Point);
 
@@ -116,6 +116,6 @@ namespace Muscle.Dynamics
 
             log.Info("Dynamic computation: END SOLVE INSTANCE");
         }
-
+    
     }
 }
