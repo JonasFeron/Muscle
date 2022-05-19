@@ -76,7 +76,7 @@ namespace Muscle.Structure
 		///Before Using the Dynamic data element
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
-
+		public List<List<Vector3d>> ModeVector { get; set; }
 		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
 
 
@@ -113,6 +113,7 @@ namespace Muscle.Structure
 			NumberOfFrequency = 0; 
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
+			ModeVector = new List<List<Vector3d>> ();
 			DynMass = new List<double>();
 		}
 
@@ -602,8 +603,29 @@ namespace Muscle.Structure
 			}
 			return res;
 		}
+		public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist)
+		{
+			GH_Path path;
+			int i = 0;
 
-		
+			GH_Structure<GH_Vector> res = new GH_Structure<GH_Vector>();
+			
+			if (datalistlist == null)
+			{
+				return res;
+			}
+			foreach (List<Vector3d> datalist in datalistlist)
+			{
+
+				path = new GH_Path(i);
+				res.AppendRange(datalist.Select(data => new GH_Vector(data)), path);
+				i++;
+
+			}
+			return res;
+		}
+
+
 
 
 

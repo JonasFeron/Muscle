@@ -91,6 +91,7 @@ namespace Muscle.Dynamics
             new_structure.Frequency = structure.Frequency;
             new_structure.Mode = structure.Mode;
             new_structure.DynMass = structure.DynMass;
+            new_structure.ModeVector = structure.ModeVector;
 
 
             List<double> ModeUsed = new List<double>();

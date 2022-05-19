@@ -95,8 +95,8 @@ namespace Muscle.Dynamics
             DA.SetData(1, structure.NumberOfFrequency);
             DA.SetData(2, structure.DOFfreeCount);
             DA.SetDataList(3, structure.Frequency); //Don't use PopulateWithSolverResult
-            DA.SetDataTree(4, structure.ListListToGH_Struct(structure.Mode));//result.ListListToGH_Struct(result.Modes)
-
+            //DA.SetDataTree(4, structure.ListListToGH_Struct(structure.Mode));//result.ListListToGH_Struct(result.Modes)
+            DA.SetDataTree(4, structure.ListListVectToGH_Struct(structure.ModeVector));//result.ListListToGH_Struct(result.Modes)
             //DA.SetData(0, new_structure.NumberOfFrequency);
             //DA.SetDataList(1, new_structure.Frequency); //Don't use PopulateWithSolverResult
             //DA.SetData(2, new_structure.Mode);

@@ -129,7 +129,27 @@ namespace Muscle.Dynamics
             }
 
             new_structure.PopulateWithSolverResult_dyn(result);
-            
+
+            List<Vector3d> ModeUsedVector = new List<Vector3d>();
+            int NumberOfNodes = structure.NodesCount;
+            List<List<Vector3d>> ModeVect_construction = new List<List<Vector3d>>();
+            for(int i = 0; i < new_structure.NumberOfFrequency; i++)
+            {
+                List<Vector3d> ModeIteration3D = new List<Vector3d>();
+                for (int j = 0; j < NumberOfNodes; j++)
+                {
+                    Vector3d ToAdd = new Vector3d();
+                    ToAdd.X = new_structure.Mode[i][j * 3];
+                    ToAdd.Y = new_structure.Mode[i][j * 3 + 1];
+                    ToAdd.Z = new_structure.Mode[i][j * 3 + 2];
+                    ModeIteration3D.Add(ToAdd);
+                }
+                ModeVect_construction.Add(ModeIteration3D);
+            }
+            new_structure.ModeVector = ModeVect_construction;
+
+
+
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
