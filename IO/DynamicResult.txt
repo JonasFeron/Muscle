@@ -1,2 +1,2 @@
-81167c81-23d1-4cdb-9b95-01e774c588dd
-{"TypeName": "SharedSolverResultDynamics", "NumberOfFrequency": 2, "Frequency": [13.64414, 470.58602], "Modes": [[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]], "DynMasses": [8.3, 12.2, 9.9]}
+1b38ba55-4558-49d9-8642-1b6eb644bfc6
+{"TypeName": "SharedSolverResultDynamics", "NumberOfFrequency": 2, "Frequency": [47.81384, 1649.09846], "Modes": [[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]], "DynMasses": [0.49672, 0.99345, 0.49672]}

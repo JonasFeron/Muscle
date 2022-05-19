@@ -57,8 +57,9 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddBooleanParameter("Self-mass generator", "S-W gen.", "Generate the self-mass at each node of the structure thanks to the self-weight of the structure.", GH_ParamAccess.item, false);
-            pManager.AddNumberParameter("Mass", "Mass (kg)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.list);
+            pManager.AddBooleanParameter("Self-mass generator", "S-M gen.", "Generate the self-mass at each node of the structure thanks to the self-weight of the structure.", GH_ParamAccess.item, true);
+            pManager.AddNumberParameter("Nodal Masses (kg)", "Nodal Masses", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.list);
+            pManager[2].Optional = true;
             pManager.AddIntegerParameter("Number of frequencies wanted", "Num. freq. wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
 
 
@@ -88,14 +89,14 @@ namespace Muscle.Dynamics
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
             if (!DA.GetData(1, ref MassGenerator)) { }
-            if (!DA.GetDataList(2, DynMassIN)) { } 
+            if (!DA.GetDataList(2, DynMassIN)) { }
             if (!DA.GetData(3, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
 
 
             //2) Format data before sending and solving in python
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
-            if (MassGenerator == true) //Compute the self-mass if needed
+            if (MassGenerator == true || DynMassIN == null  ) //Compute the self-mass if needed 
             {
                 //Need to create the list before adding the elements
                 for (int i = 0; i < structure.NodesCount; ++i)
@@ -111,7 +112,7 @@ namespace Muscle.Dynamics
                     
                     for(int k = 0; k < NodeExtremities.Count; ++k)
                     {
-                        DynMassIN[NodeExtremities[k]] = mass;
+                        DynMassIN[NodeExtremities[k]] = DynMassIN[NodeExtremities[k]] + mass /2;
                     }
                 }
             }
