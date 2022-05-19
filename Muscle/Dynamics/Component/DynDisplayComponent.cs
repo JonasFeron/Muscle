@@ -11,6 +11,7 @@ using Rhino.Geometry;
 using Muscle.Structure;
 using Newtonsoft.Json;
 using Muscle.PythonLink;
+using Muscle.Elements;
 
 namespace Muscle.Dynamics
 {
@@ -124,7 +125,7 @@ namespace Muscle.Dynamics
 
 
             
-            PopulateWithSolverResult_Mode( new_structure , Coordinates, ModeUsedVector);
+            PopulateWithSolverResult_Mode(new_structure , Coordinates, ModeUsedVector);
 
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             //DA.SetDataList(0, ModeUsedVector);
@@ -153,7 +154,20 @@ namespace Muscle.Dynamics
 
             }
 			log.Info("Structure: Is well populated with RESULTS");
-		}
+
+            for (int e = 0; e < new_structure.StructuralElements.Count; e++)
+            {
+                Element elem = new_structure.StructuralElements[e];
+
+
+                //update the lines end points
+                int n0 = elem.EndNodes[0];
+                int n1 = elem.EndNodes[1];
+                Point3d p0 = new_structure.StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
+                Point3d p1 = new_structure.StructuralNodes[n1].Point;
+                elem.Line = new Line(p0, p1);
+            }
+        }
 		
         #endregion Methods
     }
