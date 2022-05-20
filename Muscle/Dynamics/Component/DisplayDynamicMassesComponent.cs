@@ -102,8 +102,19 @@ namespace Muscle.Dynamics
             double MaxMass = Enumerable.Max(listDynMasses); 
             double MinMass = Enumerable.Min(listDynMasses);
 
-            double MinScale = AccessToAll.DisplaySupportAmpli;
-            double MaxScale = Convert.ToDouble(scale*2)*AccessToAll.DisplaySupportAmpli;
+            if(scale == 0) //Security
+            {
+                scale = 1;
+            }
+
+            if (AccessToAll.DisplayDyn == 0) //Security
+            {
+                AccessToAll.DisplayDyn = 0.05;
+            }
+
+
+            double MinScale = AccessToAll.DisplayDyn;
+            double MaxScale = Convert.ToDouble(scale)*AccessToAll.DisplayDyn;
 
             if(MinScale == MaxScale)
             {
