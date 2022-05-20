@@ -38,11 +38,11 @@ def core(DataString):
     data = json.loads(DataString, object_hook = d.ToSharedDataObject)  #Data are stored in SharedData object
 
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
+
         Struct = StructureObj() #initial empty structure 
-        Struct.MainAssembleDyn(data)
-        Struct.ModuleDynamics(data.DynamicMass,data.MaxFreqWanted) #do some calculations
-        result.PopulateWith_Dynamics(Struct) #register the results
-        # print("I finished calculation")
+        Struct.ModuleDynamics(data) #do some calculations in python
+        result.PopulateWith_Dynamics(Struct) #register the results and return them to C#
+        
 
     output_dct = json.dumps(result, cls=r.SharedSolverResult_dynamicsEncoder, ensure_ascii=False) #Results are saved as dictionnary JSON. # , indent="\t"
     return output_dct

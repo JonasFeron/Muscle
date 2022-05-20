@@ -61,8 +61,10 @@ namespace Muscle.PythonLink
 		#endregion SolverInputs
 
 		#region Dynamics
-
+		//Variables for the dynamic computation
 		public List<double> DynamicMass { get; set; } //Mass applied at each node for the dynamics computation
+
+		public List<double> MassElement { get; set; } //Mass list containting all the masses of the element. Enable the construction of the CONSISTENT MASS matrix.
 
 		public int MaxFreqWanted { get; set; } //Maximum frequencies and modes that the user want to obtain
 
@@ -94,6 +96,7 @@ namespace Muscle.PythonLink
 			ReactionsInit = new List<double>();
 			Residual0Threshold = 0.0001;
 			DynamicMass = new List<double>();
+			MassElement = new List<double>();
 			MaxFreqWanted = 0;
 		}
 
@@ -128,6 +131,16 @@ namespace Muscle.PythonLink
 			RegisterElements(structObj);
 			RegisterNodes(structObj);
 			DynamicMass = DynMass;
+			MaxFreqWanted = MaxFreqWtd;
+		}
+
+		public SharedData(StructureObj structObj, List<double> DynMass, List<double> MassAllElements, int MaxFreqWtd) //For the dynamic CONSISTENT computation
+		{
+			Init();
+			RegisterElements(structObj);
+			RegisterNodes(structObj);
+			DynamicMass = DynMass;
+			MassElement = MassAllElements;
 			MaxFreqWanted = MaxFreqWtd;
 		}
 

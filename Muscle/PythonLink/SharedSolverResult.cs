@@ -48,7 +48,7 @@ namespace Muscle.PythonLink
 
 		#region Dynamics
 		// Results of the dynamic component
-		public int NumberOfFrequency { get; set; }
+		public int NumberOfFrequency { get; set; } //Number of frequency computed
 		public List<double> Frequency { get; set; } // Natural frequencies of the structure
 		public List<List<double>> Modes { get; set; } //Mode of the structure ranked in the same way than the frequencies
 

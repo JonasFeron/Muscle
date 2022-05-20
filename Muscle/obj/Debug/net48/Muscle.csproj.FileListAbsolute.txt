@@ -14,3 +14,9 @@ C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj.CopyComplete
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.gha
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.pdb
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.Properties.Resources.resources
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\obj\Debug\net48\Muscle.csproj.GenerateResource.cache
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\PLAY.PNG
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\Mass_element.PNG
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\SM.png
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\MassDisplay.PNG
