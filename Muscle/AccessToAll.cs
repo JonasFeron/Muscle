@@ -20,6 +20,7 @@ namespace Muscle
         //public static List<double> DisplaySupportAmpli = new List<double>() {1.0};//default value  
         public static double DisplayLoadAmpli = 1.0; //default value
         public static int DisplayDecimals = 1;
+        public static double DisplayDyn = 0.005; //For the size of the masses considered in the dynamic computation
 
         public static PythonManager pythonManager = null; //pythonManager of the current Canvas
         public static bool user_mode = true;
