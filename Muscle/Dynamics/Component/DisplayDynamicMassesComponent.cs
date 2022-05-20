@@ -61,6 +61,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Scale", "Scale", "Scaling of the display of the masses", GH_ParamAccess.item);
             //pManager.AddGenericParameter("Node", "N", "A structural node.", GH_ParamAccess.item); //0
 
         }
@@ -70,7 +71,8 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            //pManager.AddPointParameter("Point", "Pt (m)", "The current node coordinates.", GH_ParamAccess.item); //0
+            pManager.AddPointParameter("Point", "Pt (m)", "The current node coordinates.", GH_ParamAccess.list); //0
+            pManager.AddNumberParameter("Radius", "R", "Radius of the sphere following the masses", GH_ParamAccess.list);
 
         }
 
@@ -86,31 +88,39 @@ namespace Muscle.Dynamics
 
             StructureObj structure = new StructureObj();
             //Node n = new Node();
-
+            double scale = 1.0;
+            List<Point3d> point = new List<Point3d>();
             List<double> listDynMasses = new List<double>();
+            List<double> listScale = new List<double>();
+            
 
             if (!DA.GetData(0, ref structure)) { return; }
-            //if (!DA.GetData(1, ref n)) { return; }
+            if (!DA.GetData(1, ref scale)) { return; }
+            
+            listDynMasses = structure.DynMass;
+            
+            double MaxMass = Enumerable.Max(listDynMasses); 
+            double MinMass = Enumerable.Min(listDynMasses);
 
-            List<Sphere> sphere = new List<Sphere>();
+            double MinScale = AccessToAll.DisplaySupportAmpli;
+            double MaxScale = scale;
 
-            for (int i = 0; i < structure.NodesCount; i++)
+            for(int i = 0; i < listDynMasses.Count; i++)
             {
+
                 Node node = structure.StructuralNodes[i];
+                Point3d PointToUse = node.Point;
+                point.Add(PointToUse);
 
-                //Point3d origin = node.Point;
-                Point3d origin = new Point3d(0, 5, 0);
-                double r = 10.0;
-                Sphere s = new Sphere(origin, r);
-                //Test
-                //DisplayPipeline.DrawSphere(s,Color.Red);
-
-                sphere.Add(s);
-                
+                double MassToUse = listDynMasses[i];
+                double ScaleToAdd = MinScale + (MassToUse-MinMass)/(MaxMass-MinMass)*(MaxScale-MinScale);
+                listScale.Add(ScaleToAdd);
             }
+            
 
 
-            //DA.SetData(0, n.Point);
+            DA.SetDataList(0, point);
+            DA.SetDataList(1, listScale);
 
 
 
