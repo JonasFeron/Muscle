@@ -85,7 +85,7 @@ namespace Muscle.Dynamics
             StructureObj structure = new StructureObj();
             List<double> DynMassIN = new List<double>(); // Default value
             int MaxFreqWtd = 0;
-            bool MassGenerator = true;
+            bool MassGenerator = false;
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
             if (!DA.GetData(1, ref MassGenerator)) { }
@@ -96,8 +96,10 @@ namespace Muscle.Dynamics
             //2) Format data before sending and solving in python
             StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
 
-            if (MassGenerator == true || DynMassIN == null  ) //Compute the self-mass if needed 
+            //if ( ((MassGenerator == true) || (DynMassIN == null)) == true) //Compute the self-mass if needed 
+            if (MassGenerator == true)
             {
+                DynMassIN = new List<double>();
                 //Need to create the list before adding the elements
                 for (int i = 0; i < structure.NodesCount; ++i)
                 {
@@ -112,7 +114,7 @@ namespace Muscle.Dynamics
                     
                     for(int k = 0; k < NodeExtremities.Count; ++k)
                     {
-                        DynMassIN[NodeExtremities[k]] = DynMassIN[NodeExtremities[k]] + mass /2;
+                        DynMassIN[NodeExtremities[k]] = DynMassIN[NodeExtremities[k]] + Math.Round(mass /2,3);
                     }
                 }
             }

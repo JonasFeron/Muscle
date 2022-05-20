@@ -30,7 +30,7 @@ namespace Muscle.Dynamics
         /// </summary>
         public DisplayDynamicMassesComponent()
           : base("Display Dynamic Masses", "DMD",
-                "Display the dynamic masses contained in the structure.", "Muscles", "Dynamics")
+                "Display the dynamic masses contained in the structure. (This component need to be connected directly to the 'Sphere' component of Grasshopper.)", "Muscles", "Dynamics")
         {
         }
 
@@ -61,7 +61,7 @@ namespace Muscle.Dynamics
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Scale", "Scale", "Scaling of the display of the masses", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Scale", "Scale", "Scaling of the display of the masses", GH_ParamAccess.item);
             //pManager.AddGenericParameter("Node", "N", "A structural node.", GH_ParamAccess.item); //0
 
         }
@@ -88,7 +88,7 @@ namespace Muscle.Dynamics
 
             StructureObj structure = new StructureObj();
             //Node n = new Node();
-            double scale = 1.0;
+            int scale = new int();
             List<Point3d> point = new List<Point3d>();
             List<double> listDynMasses = new List<double>();
             List<double> listScale = new List<double>();
@@ -103,18 +103,33 @@ namespace Muscle.Dynamics
             double MinMass = Enumerable.Min(listDynMasses);
 
             double MinScale = AccessToAll.DisplaySupportAmpli;
-            double MaxScale = scale;
+            double MaxScale = Convert.ToDouble(scale*2)*AccessToAll.DisplaySupportAmpli;
 
-            for(int i = 0; i < listDynMasses.Count; i++)
+            if(MinScale == MaxScale)
+            {
+                MaxScale = Convert.ToDouble(2) * MinScale;
+            }
+
+
+            for (int i = 0; i < listDynMasses.Count; i++)
             {
 
                 Node node = structure.StructuralNodes[i];
                 Point3d PointToUse = node.Point;
                 point.Add(PointToUse);
 
-                double MassToUse = listDynMasses[i];
-                double ScaleToAdd = MinScale + (MassToUse-MinMass)/(MaxMass-MinMass)*(MaxScale-MinScale);
-                listScale.Add(ScaleToAdd);
+                if (MinMass == MaxMass)
+                {
+                    double ScaleToAdd = MaxScale;
+                    listScale.Add(ScaleToAdd);
+                }
+                else
+                {
+                    double MassToUse = listDynMasses[i];
+                    double ScaleToAdd = MinScale + (MassToUse-MinMass)/(MaxMass-MinMass)*(MaxScale-MinScale);
+                    listScale.Add(ScaleToAdd);
+                }
+                
             }
             
 
