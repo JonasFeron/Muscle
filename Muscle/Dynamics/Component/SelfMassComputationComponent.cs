@@ -14,14 +14,14 @@ using Rhino.Geometry;
 
 namespace Muscle.Dynamics
 {
-    public class DisplayDynamicMassesComponent : GH_Component
+    public class SelfMassComputationComponent : GH_Component
     {
         private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public DisplayDynamicMassesComponent()
+        public SelfMassComputationComponent()
           : base("Display Dynamic Masses", "DMD",
                 "Display the dynamic masses contained in the structure. (This component need to be connected directly to the 'Sphere' component of Grasshopper.)", "Muscles", "Dynamics")
         {
@@ -45,7 +45,7 @@ namespace Muscle.Dynamics
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("1b8cdcf3-c5fa-4722-a48d-d3b33166c040"); }
+            get { return new Guid("b50368a9-292e-4a65-8dc5-18ca0d3f60ef"); }
         }
 
         /// <summary>
@@ -53,10 +53,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Scale", "Scale", "Scaling of the display of the masses", GH_ParamAccess.item);
-            //pManager.AddGenericParameter("Node", "N", "A structural node.", GH_ParamAccess.item); //0
-
+            pManager.AddGenericParameter("Elements", "E", "Generate self-weight loads applied on the extrimities of the given elements.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -64,9 +61,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddPointParameter("Point", "Pt (m)", "The current node coordinates.", GH_ParamAccess.list); //0
-            pManager.AddNumberParameter("Radius", "R", "Radius of the sphere following the masses", GH_ParamAccess.list);
-
+            pManager.AddGenericParameter("Self-mass", "Self mass (kg)", "", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -85,17 +80,17 @@ namespace Muscle.Dynamics
             List<Point3d> point = new List<Point3d>();
             List<double> listDynMasses = new List<double>();
             List<double> listScale = new List<double>();
-            
+
 
             if (!DA.GetData(0, ref structure)) { return; }
             if (!DA.GetData(1, ref scale)) { return; }
-            
-            listDynMasses = structure.DynMass;
-            
-            double MaxMass =Math.Round( Enumerable.Max(listDynMasses),1); 
-            double MinMass = Math.Round(Enumerable.Min(listDynMasses),1);
 
-            if(scale == 0) //Security
+            listDynMasses = structure.DynMass;
+
+            double MaxMass = Math.Round(Enumerable.Max(listDynMasses), 1);
+            double MinMass = Math.Round(Enumerable.Min(listDynMasses), 1);
+
+            if (scale == 0) //Security
             {
                 scale = 1;
             }
@@ -107,9 +102,9 @@ namespace Muscle.Dynamics
 
 
             double MinScale = AccessToAll.DisplayDyn;
-            double MaxScale = Convert.ToDouble(scale)*AccessToAll.DisplayDyn;
+            double MaxScale = Convert.ToDouble(scale) * AccessToAll.DisplayDyn;
 
-            if(MinScale == MaxScale)
+            if (MinScale == MaxScale)
             {
                 MaxScale = Convert.ToDouble(2) * MinScale;
             }
@@ -129,15 +124,15 @@ namespace Muscle.Dynamics
                 }
                 else
                 {
-                    double MassToUse = Math.Round( listDynMasses[i],1);
-                    double ScaleToAdd = MinScale + (MassToUse-MinMass)/(MaxMass-MinMass)*(MaxScale-MinScale);
+                    double MassToUse = Math.Round(listDynMasses[i], 1);
+                    double ScaleToAdd = MinScale + (MassToUse - MinMass) / (MaxMass - MinMass) * (MaxScale - MinScale);
                     listScale.Add(ScaleToAdd);
                 }
-               
+
             }
 
 
-            
+
 
 
             DA.SetDataList(0, point);
@@ -147,7 +142,7 @@ namespace Muscle.Dynamics
 
             log.Info("Dynamic computation: END SOLVE INSTANCE");
         }
-    
+
     }
 
 }

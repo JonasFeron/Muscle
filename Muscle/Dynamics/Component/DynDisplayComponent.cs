@@ -56,7 +56,7 @@ namespace Muscle.Dynamics
             pManager.AddNumberParameter("Amplitude", "Ampl.","Amplitude of the displacement of the mode.",GH_ParamAccess.item);
             pManager.AddNumberParameter("Frequency", "Freq.", "Frequency of the displacement of the mode.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Time increment", "Time increment", "Value variating with the time to display the mode.", GH_ParamAccess.item);
-
+            pManager[4].Optional = true;
         }
 
 
@@ -74,7 +74,7 @@ namespace Muscle.Dynamics
             //1) Collect Data
             StructureObj structure = new StructureObj();
             int ModeUsedNumber = 1;
-            int TimeIncrement = 1;
+            int TimeIncrement = 0;
             double Amplitude = 1;
             double Freq = 1;
             //Obtain the data if the component is connected
@@ -94,12 +94,15 @@ namespace Muscle.Dynamics
             new_structure.DynMass = structure.DynMass;
             new_structure.ModeVector = structure.ModeVector;
 
-
+            //Mode to display in a list shape
             List<double> ModeUsed = new List<double>();
             ModeUsed = structure.Mode[ModeUsedNumber - 1];
 
+            //Mode to display with a list containing vectors
             List<Vector3d> ModeUsedVector = new List<Vector3d>();
             int NumberOfNodes = structure.NodesCount;
+
+
 
             for (int i = 0; i < NumberOfNodes; i++) 
             {
