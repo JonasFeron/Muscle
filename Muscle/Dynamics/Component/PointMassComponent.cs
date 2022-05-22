@@ -33,9 +33,10 @@ namespace Muscle.Dynamics
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Point", "P", "Point or Node or Index of the node where the mass is applied. Component work in the 3 cases but the preview only work if input is a point.", GH_ParamAccess.item);
+            //pManager.AddGenericParameter("Point", "P", "Node where the mass is applied. Component work in the 3 cases but the preview only work if input is a point.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Point", "P", "Index of the node where the mass is applied.", GH_ParamAccess.item);
             pManager.HideParameter(0);
-            //pManager.AddVectorParameter("Vector", "V (kN)", "Vector representing the load in kN.", GH_ParamAccess.item);
+            
             pManager.AddNumberParameter("Mass", "M (kg)", "Number representing the mass in kg.", GH_ParamAccess.item);
         }
 
@@ -55,34 +56,36 @@ namespace Muscle.Dynamics
             if (!DA.GetData(0, ref obj)) { return; }
 
             Vector3d vector = new Vector3d();
-            if (!DA.GetData(1, ref vector)) { return; }
+            double mass = new double(); //Value of the mass
+            if (!DA.GetData(1, ref mass)) { return; }
 
-
+            vector.Z = mass;
+            /*
             if (obj.Value is Node) //input is a node
             {
                 ind = (obj.Value as Node).Ind;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
                 return;
             }
 
             if (obj.Value is GH_Point) //input is a node
             {
                 point = (obj.Value as GH_Point).Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
                 return;
             }
             if (obj.Value is Point3d) //input is a node
             {
                 point = (Point3d)obj.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
                 return;
             }
-
+            */
             GH_Integer gh_ind = new GH_Integer();
             if (gh_ind.CastFrom(obj.Value))
             {
                 ind = gh_ind.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
                 return;
             }
         }

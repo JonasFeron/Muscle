@@ -5,10 +5,12 @@ using System.Drawing;
 using GH_IO.Serialization;
 using System;
 using Muscle.Loads;
+using Muscle.Dynamics;
+
 
 namespace Muscle.Dynamics
 {
-    public class GH_PointLoad : GH_GeometricGoo<PointLoad>, IGH_PreviewData
+    public class GH_PointLoad : GH_GeometricGoo<PointLoad>
     {
         public GH_PointLoad() : base()
         {
@@ -24,7 +26,7 @@ namespace Muscle.Dynamics
         {
             Value = other.Value.Duplicate();
         }
-
+        
         public override BoundingBox Boundingbox
         {
             get
@@ -32,14 +34,15 @@ namespace Muscle.Dynamics
                 BoundingBox bBox = new Line(Value.Point, -10.0 * Value.Vector / Value.Vector.Length, 10.0).BoundingBox;
                 bBox.Inflate(1.0);
                 return bBox;
+                
             }
         }
-
+        
         public override string TypeName { get { return "Point mass"; } }
 
         public override string TypeDescription { get { return "Point mass to apply on the node of a structure."; } }
 
-        private Color green = Color.Green;
+        private Color red = Color.Red;
 
         public BoundingBox ClippingBox { get { return Boundingbox; } }
 
@@ -47,75 +50,18 @@ namespace Muscle.Dynamics
         {
             double DisplayMassAmpli = AccessToAll.DisplayDyn;
 
-            Vector3d v_display = Value.Vector * DisplayMassAmpli / 10000.0;             //scale x [m] = x[kg]/10kg * LoadAmpliFactor
+            Vector3d v_display = Value.Vector * DisplayMassAmpli; //scale x [m] = x[kg]/10kg * LoadAmpliFactor
 
-            if (Math.Abs(v_display.X / v_display.Length) >= 0.001)
-            {
-                double height = Math.Abs(v_display.X / 4);
-                double radius = height / 2.5;
-                args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(1.0, 0.0, 0.0)), height, radius), green);
-            }
-            if (Math.Abs(v_display.Y / v_display.Length) >= 0.001)
-            {
-                double height = Math.Abs(v_display.Y / 4);
-                double radius = height / 2.5;
-                args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, 1.0, 0.0)), height, radius), green);
-            }
-            if (Math.Abs(v_display.Z / v_display.Length) >= 0.001)
-            {
-                double height = Math.Abs(v_display.Z / 4);
-                double radius = height / 2.5;
-                args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, 0.0, 1.0)), height, radius), green);
-            }
+
+
+            double height = Math.Abs(v_display.Z / 4);
+            double radius = height / 2.5;
+            //args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, 0.0, 1.0)), height, radius), red);
+            Sphere Sph = new Sphere(Value.Point, radius);
+            args.Pipeline.DrawSphere(Sph,red);
         }
 
-        public void DrawViewportWires(GH_PreviewWireArgs args)
-        {
-
-            double DisplayLoadAmpli = AccessToAll.DisplayLoadAmpli;
-            int _decimal = AccessToAll.DisplayDecimals;
-
-
-            Point3d node = Value.Point;
-
-            Plane plane;
-            args.Viewport.GetCameraFrame(out plane);
-
-            double pixelsPerUnit;
-            args.Viewport.GetWorldToScreenScale(node, out pixelsPerUnit);
-
-            Vector3d v_display = Value.Vector * DisplayLoadAmpli / 10000.0;             //scale x [m] = x[kg]/10kg * LoadAmpliFactor
-
-            string load_X = String.Format("{0}", Math.Round(Value.Vector.X / 1000, _decimal, MidpointRounding.AwayFromZero));
-            string load_Y = String.Format("{0}", Math.Round(Value.Vector.Y / 1000, _decimal, MidpointRounding.AwayFromZero));
-            string load_Z = String.Format("{0}", Math.Round(Value.Vector.Z / 1000, _decimal, MidpointRounding.AwayFromZero));
-
-
-            if (Math.Abs(v_display.X / v_display.Length) >= 0.001)
-            {
-                Vector3d V = new Vector3d(v_display.X, 0, 0);
-                Point3d start = node - V;
-                plane.Origin = start;
-                args.Pipeline.DrawLine(new Line(start, V), green, 2);
-                args.Pipeline.Draw3dText(load_X, green, plane, 14 / pixelsPerUnit, "Lucida Console");
-            }
-            if (Math.Abs(v_display.Y / v_display.Length) >= 0.001)
-            {
-                Vector3d V = new Vector3d(0, v_display.Y, 0);
-                Point3d start = node - V;
-                plane.Origin = start;
-                args.Pipeline.DrawLine(new Line(start, V), green, 2);
-                args.Pipeline.Draw3dText(load_Y, green, plane, 14 / pixelsPerUnit, "Lucida Console");
-            }
-            if (Math.Abs(v_display.Z / v_display.Length) >= 0.001)
-            {
-                Vector3d V = new Vector3d(0, 0, v_display.Z);
-                Point3d start = node - V;
-                plane.Origin = start;
-                args.Pipeline.DrawLine(new Line(start, V), green, 2);
-                args.Pipeline.Draw3dText(load_Z, green, plane, 14 / pixelsPerUnit, "Lucida Console");
-            }
-        }
+        
 
         public override IGH_GeometricGoo DuplicateGeometry()
         {
