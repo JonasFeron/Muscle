@@ -56,9 +56,9 @@ namespace Muscle.Dynamics
 
             double height = Math.Abs(v_display.Z / 4);
             double radius = height / 2.5;
-            //args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, 0.0, 1.0)), height, radius), red);
-            Sphere Sph = new Sphere(Value.Point, radius);
-            args.Pipeline.DrawSphere(Sph,red);
+            args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, 0.0, 1.0)), height, radius), red);
+            //Sphere Sph = new Sphere(Value.Point, radius);
+            //args.Pipeline.DrawSphere(Sph,red);
         }
 
         
