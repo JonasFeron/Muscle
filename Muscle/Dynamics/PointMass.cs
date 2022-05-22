@@ -82,8 +82,11 @@ namespace Muscle.Dynamics
 
         public override string ToString()
         {
-            if (NodeInd == -1) return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node [{Point.ToString()}].";
-            else return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node {NodeInd}.";
+            if (NodeInd == -1) return $"Point mass of {Vector.Z.ToString()}kg applied on node [{Point.ToString()}].";
+            else return $"Point mass of {Vector.Z.ToString()}kg applied on node {NodeInd}.";
+
+            //if (NodeInd == -1) return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node [{Point.ToString()}].";
+            //else return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node {NodeInd}.";
 
         }
 

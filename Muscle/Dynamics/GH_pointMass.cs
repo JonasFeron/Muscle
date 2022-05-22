@@ -47,7 +47,7 @@ namespace Muscle.Dynamics
         {
             double DisplayMassAmpli = AccessToAll.DisplayDyn;
 
-            Vector3d v_display = Value.Vector * DisplayMassAmpli / 10000.0;             //scale x [m] = x[kN]/10kN * LoadAmpliFactor
+            Vector3d v_display = Value.Vector * DisplayMassAmpli / 10000.0;             //scale x [m] = x[kg]/10kg * LoadAmpliFactor
 
             if (Math.Abs(v_display.X / v_display.Length) >= 0.001)
             {
@@ -84,7 +84,7 @@ namespace Muscle.Dynamics
             double pixelsPerUnit;
             args.Viewport.GetWorldToScreenScale(node, out pixelsPerUnit);
 
-            Vector3d v_display = Value.Vector * DisplayLoadAmpli / 10000.0;             //scale x [m] = x[kN]/10kN * LoadAmpliFactor
+            Vector3d v_display = Value.Vector * DisplayLoadAmpli / 10000.0;             //scale x [m] = x[kg]/10kg * LoadAmpliFactor
 
             string load_X = String.Format("{0}", Math.Round(Value.Vector.X / 1000, _decimal, MidpointRounding.AwayFromZero));
             string load_Y = String.Format("{0}", Math.Round(Value.Vector.Y / 1000, _decimal, MidpointRounding.AwayFromZero));

@@ -36,7 +36,7 @@ namespace Muscle.Dynamics
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("SelfMass", "Mass (kg)", "Point mass due to self-mass. Half of the element's self weight is applied on each of both extremities. ", GH_ParamAccess.list);
+            pManager.AddGenericParameter("SelfMass", "SelfMass (kg)", "Point mass due to self-mass. Half of the element's self weight is applied on each of both extremities. ", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -46,8 +46,8 @@ namespace Muscle.Dynamics
 
             List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
             double acc = AccessToAll.g.Z;
-            GH_PointLoad p0 = new GH_PointLoad(new PointLoad(e.EndNodes[0], 1000*e.Weight / (2*acc))); //Because the weight is in kN : *1000
-            GH_PointLoad p1 = new GH_PointLoad(new PointLoad(e.EndNodes[1], 1000*e.Weight / (2*acc)));
+            GH_PointLoad p0 = new GH_PointLoad(new PointLoad(e.EndNodes[0], e.Weight / (2*acc))); //Because the weight is in N
+            GH_PointLoad p1 = new GH_PointLoad(new PointLoad(e.EndNodes[1], e.Weight / (2*acc)));
             selfmass.Add(p0);
             selfmass.Add(p1);
 
