@@ -22,7 +22,7 @@ namespace Muscle.Dynamics
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public SelfMassComputationComponent()
-          : base("Display Dynamic Masses", "DMD",
+          : base("Display Dynamic Masses/Loads", "DMD",
                 "Display the dynamic masses contained in the structure. (This component need to be connected directly to the 'Sphere' component of Grasshopper.)", "Muscles", "Dynamics")
         {
         }
