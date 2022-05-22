@@ -21,7 +21,7 @@ namespace Muscle.Dynamics
 
         #region Constructors
 
-        public PointLoad()
+        public PointLoad() //Contain a mass in kg 
         {
             Point = new Point3d();
             Vector = new Vector3d();
@@ -66,7 +66,7 @@ namespace Muscle.Dynamics
 
         public static PointLoad operator +(PointLoad load1, PointLoad load2)
         {
-            if (load1.Point.EpsilonEquals(load2.Point, 1e-5)) { throw new System.Exception("Loads must have the same application point"); }
+            if (load1.Point.EpsilonEquals(load2.Point, 1e-5)) { throw new System.Exception("Mass must have the same application point"); }
 
             return new PointLoad()
             {

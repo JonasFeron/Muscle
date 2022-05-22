@@ -15,9 +15,9 @@ namespace Muscle.Dynamics
             Value = new PointLoad();
         }
 
-        public GH_PointLoad(PointLoad load) : base(load)
+        public GH_PointLoad(PointLoad mass) : base(mass)
         {
-            Value = load;
+            Value = mass;
         }
 
         public GH_PointLoad(GH_PointLoad other)
@@ -35,7 +35,7 @@ namespace Muscle.Dynamics
             }
         }
 
-        public override string TypeName { get { return "Point load mass"; } }
+        public override string TypeName { get { return "Point mass"; } }
 
         public override string TypeDescription { get { return "Point mass to apply on the node of a structure."; } }
 
