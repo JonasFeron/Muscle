@@ -19,7 +19,7 @@ namespace Muscle.Dynamics
         #region Constructors
 
         public SelfMassComponent() :
-                    base("Self Mass", "SM", "Creates Points loads due to self-mass of the elements", "Muscles", "Dynamics")
+                    base("Self Mass", "SM", "Creates Points loads due to self-mass of the elements. Define the mass who is used for the dynamic computation.", "Muscles", "Dynamics")
         {
         }
 

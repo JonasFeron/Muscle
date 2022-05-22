@@ -7,7 +7,7 @@ using Grasshopper.Kernel;
 using Rhino.Geometry;
 
 
-namespace Muscle.Dynamics.Component
+namespace Muscle.Dynamics
 {
         public class MassPropertiesComponent : GH_Component
         {
