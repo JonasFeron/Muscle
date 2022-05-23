@@ -24,7 +24,7 @@ namespace Muscle.Dynamics
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public MassDisplayComponent()
-          : base("Dynamic Masses Display TEST", "DMDTEST",
+          : base("Dynamic Masses Display", "DMD",
                 "Display the dynamic masses contained in the structure. (This component need to be connected directly to the 'Sphere' component of Grasshopper.)",
               "Muscles", "Dynamics")
         {

@@ -24,7 +24,7 @@ namespace Muscle.Dynamics
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public DynamicSolverComponent()
-          : base("Dynamic Solver TEST", "DSTEST",
+          : base("Dynamic Solver", "DS",
                 "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node. The computation is done on the state of the structure. It includes the influence of Lfree (pretension) and the possible applied load.",
               "Muscles", "Dynamics")
         {
