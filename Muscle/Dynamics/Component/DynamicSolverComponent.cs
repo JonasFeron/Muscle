@@ -171,10 +171,7 @@ namespace Muscle.Dynamics
                 Point3d Coord = new Point3d();
                 Mass.Z = structure.DynMass[i];
                 Coord = NodesCoord[i].Point;
-                PointLoad Display = new PointLoad();
-                Display.NodeInd = i;
-                Display.Vector = Mass;
-
+                PointLoad Display = new PointLoad(i, Coord, Mass) ;
 
 
                 GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N

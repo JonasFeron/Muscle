@@ -54,7 +54,9 @@ namespace Muscle.Dynamics
             pManager.AddGenericParameter("Structure", "struct", "A structure who contains already the dynamic computation.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Mode", "Mode", "The mode that the user want to display.(Begin at 1)", GH_ParamAccess.item);
             pManager.AddNumberParameter("Amplitude", "Ampl.","Amplitude of the displacement of the mode.",GH_ParamAccess.item);
+            pManager[2].Optional = true;
             pManager.AddNumberParameter("Frequency", "Freq.", "Frequency of the displacement of the mode.", GH_ParamAccess.item);
+            pManager[3].Optional = true;
             pManager.AddIntegerParameter("Time increment", "Time increment", "Value variating with the time to display the mode.", GH_ParamAccess.item);
             pManager[4].Optional = true;
         }
@@ -94,6 +96,7 @@ namespace Muscle.Dynamics
             new_structure.Mode = structure.Mode;
             new_structure.DynMass = structure.DynMass;
             new_structure.ModeVector = structure.ModeVector;
+            //new_structure.PointMasses = structure.PointMasses;
 
             //Mode to display in a list shape
             List<double> ModeUsed = new List<double>();
@@ -114,20 +117,6 @@ namespace Muscle.Dynamics
                 ToAdd.Z = Amplitude*Math.Cos(Freq*TimeIncrement)*ModeUsed[i*3+2];
                 ModeUsedVector.Add(ToAdd);
 
-
-                //Masses
-                Vector3d Mass = new Vector3d();
-                Point3d Coord = new Point3d();
-                Mass.Z = structure.DynMass[i];
-                Coord = NodesCoord[i].Point;
-                PointLoad Display = new PointLoad();
-                Display.Point = Coord;
-                Display.Vector = Mass;
-
-
-
-                GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N
-                selfmass.Add(p0);
             }
             
 
@@ -144,11 +133,32 @@ namespace Muscle.Dynamics
 
             }
 
+            //Update of the mass elements
 
-            
+
+
             PopulateWithSolverResult_Mode(new_structure , Coordinates, ModeUsedVector);
 
 
+
+            foreach (GH_PointLoad mass in structure.PointMasses)
+            {
+                int NodeIndex = mass.Value.NodeInd;
+                Point3d NewPoint = new_structure.StructuralNodes[NodeIndex].Point;
+
+
+                Vector3d Mass = new Vector3d();
+
+
+                Mass = mass.Value.Vector;
+
+                PointLoad Display = new PointLoad(NodeIndex, NewPoint, Mass);
+
+                GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N
+                selfmass.Add(p0);
+
+            }
+            new_structure.PointMasses = selfmass;
 
 
             /*

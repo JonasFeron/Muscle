@@ -32,11 +32,12 @@ namespace Muscle.Nodes
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddPointParameter("Point", "Pt (m)", "The current node coordinates.", GH_ParamAccess.item); //0
-            pManager.AddIntegerParameter("Fixations Count", "n Fix", "number of fixed translations.", GH_ParamAccess.item);//1)
-            pManager.AddBooleanParameter("Is Free", "Is Free", "Is it free to move in [X, Y, Z] directions ?", GH_ParamAccess.list); //2
-            pManager.AddVectorParameter("Load", "Load (kN)", "Sum of all loads applied on each node.", GH_ParamAccess.item); //3
-            pManager.AddVectorParameter("Unbalanced Load", "Res (kN)", "The residual loads that are not in equilibrium with the internal axial forces.", GH_ParamAccess.item); //4
-            pManager.AddVectorParameter("Reactions", "React (kN)", "Reaction forces of the supports.", GH_ParamAccess.item); //5
+            pManager.AddIntegerParameter("Index of the points", "Index", "The current node index.", GH_ParamAccess.item);//1)
+            pManager.AddIntegerParameter("Fixations Count", "n Fix", "number of fixed translations.", GH_ParamAccess.item);//2)
+            pManager.AddBooleanParameter("Is Free", "Is Free", "Is it free to move in [X, Y, Z] directions ?", GH_ParamAccess.list); //3
+            pManager.AddVectorParameter("Load", "Load (kN)", "Sum of all loads applied on each node.", GH_ParamAccess.item); //4
+            pManager.AddVectorParameter("Unbalanced Load", "Res (kN)", "The residual loads that are not in equilibrium with the internal axial forces.", GH_ParamAccess.item); //5
+            pManager.AddVectorParameter("Reactions", "React (kN)", "Reaction forces of the supports.", GH_ParamAccess.item); //6
             //pManager.AddBooleanParameter("IsValid", "IsValid", "True", GH_ParamAccess.item); //9
         }
 
@@ -51,13 +52,14 @@ namespace Muscle.Nodes
             if (!DA.GetData(0, ref n)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
 
             DA.SetData(0, n.Point);
-            DA.SetData(1, n.FixationsCount);
+            DA.SetData(1, n.Ind);
+            DA.SetData(2, n.FixationsCount);
 
             List<bool> IsFree = new List<bool> { n.isXFree, n.isYFree, n.isZFree };
-            DA.SetDataList(2, IsFree);
-            DA.SetData(3, n.Load / 1000);
-            DA.SetData(4, n.Residual / 1000);
-            DA.SetData(5, n.Reaction / 1000);
+            DA.SetDataList(3, IsFree);
+            DA.SetData(4, n.Load / 1000);
+            DA.SetData(5, n.Residual / 1000);
+            DA.SetData(6, n.Reaction / 1000);
         }
 
         /// <summary>

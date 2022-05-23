@@ -41,7 +41,6 @@ namespace Muscle
         }
 
         #endregion Constructors
-
         #region Methods
 
         public void DrawViewportMeshes(IGH_PreviewArgs args)

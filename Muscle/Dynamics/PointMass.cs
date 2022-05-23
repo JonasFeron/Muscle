@@ -44,6 +44,12 @@ namespace Muscle.Dynamics
             Vector = aVector;
         }
 
+        public PointLoad(int ind, Point3d point, Vector3d aVector)
+        {
+            NodeInd = ind;
+            Point = point;
+            Vector = aVector;
+        }
 
         public PointLoad(PointLoad aPointLoad)
         {
