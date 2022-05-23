@@ -33,61 +33,45 @@ namespace Muscle.Dynamics
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            //pManager.AddGenericParameter("Point", "P", "Node where the mass is applied. Component work in the 3 cases but the preview only work if input is a point.", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Point", "P", "Index of the node where the mass is applied.", GH_ParamAccess.item);
-            pManager.HideParameter(0);
-            
-            pManager.AddNumberParameter("Mass", "M (kg)", "Number representing the mass in kg.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Node Index", "Node", "Index of the node where the mass is applied.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Mass", "M (kg)", "Number representing the mass in kg.", GH_ParamAccess.list);
+        
         }
 
 
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Point mass", "Mass (kg)", "Dynamic Mass applied on a point.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point mass", "Mass (kg)", "Dynamic Mass applied on a point.", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Point3d point = new Point3d();
+            
             int ind = -1;
-            //Node node = new Node();
-            GH_ObjectWrapper obj = new GH_ObjectWrapper();
-            if (!DA.GetData(0, ref obj)) { return; }
+            
+            List<int> PointIndex = new List<int>();
+            if (!DA.GetDataList(0, PointIndex)) { return; }
 
-            Vector3d vector = new Vector3d();
-            double mass = new double(); //Value of the mass
-            if (!DA.GetData(1, ref mass)) { return; }
+            
+            List<double> mass = new List<double>(); //Value of the mass
+            if (!DA.GetDataList(1, mass)) { return; }
 
-            vector.Z = mass;
-            /*
-            if (obj.Value is Node) //input is a node
+            
+            List<GH_PointLoad> Return = new List<GH_PointLoad>();
+
+            if (mass.Count != PointIndex.Count)
             {
-                ind = (obj.Value as Node).Ind;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
-                return;
+                DA.SetData(0, null);
             }
 
-            if (obj.Value is GH_Point) //input is a node
+            for (int i = 0; i < mass.Count; i++)
             {
-                point = (obj.Value as GH_Point).Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
-                return;
+                Vector3d vector = new Vector3d();
+                vector.Z = mass[i];
+                Return.Add(new GH_PointLoad(new PointLoad(PointIndex[i], vector)));
             }
-            if (obj.Value is Point3d) //input is a node
-            {
-                point = (Point3d)obj.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
-                return;
-            }
-            */
-            GH_Integer gh_ind = new GH_Integer();
-            if (gh_ind.CastFrom(obj.Value))
-            {
-                ind = gh_ind.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
-                return;
-            }
+            DA.SetDataList(0, Return);
         }
 
         #endregion Methods

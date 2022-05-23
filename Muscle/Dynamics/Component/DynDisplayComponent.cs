@@ -64,6 +64,7 @@ namespace Muscle.Dynamics
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A modal deformed structure containing the total results.", GH_ParamAccess.item);
+           
             //First return a list
             //pManager.AddGenericParameter("Wanted Mode", "Mode", "Mode who is asked by the user.", GH_ParamAccess.list);
         }
@@ -102,7 +103,8 @@ namespace Muscle.Dynamics
             List<Vector3d> ModeUsedVector = new List<Vector3d>();
             int NumberOfNodes = structure.NodesCount;
 
-
+            List<Node> NodesCoord = structure.StructuralNodes;
+            List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
 
             for (int i = 0; i < NumberOfNodes; i++) 
             {
@@ -111,7 +113,23 @@ namespace Muscle.Dynamics
                 ToAdd.Y = Amplitude*Math.Cos(Freq*TimeIncrement)*ModeUsed[i*3+1];
                 ToAdd.Z = Amplitude*Math.Cos(Freq*TimeIncrement)*ModeUsed[i*3+2];
                 ModeUsedVector.Add(ToAdd);
+
+
+                //Masses
+                Vector3d Mass = new Vector3d();
+                Point3d Coord = new Point3d();
+                Mass.Z = structure.DynMass[i];
+                Coord = NodesCoord[i].Point;
+                PointLoad Display = new PointLoad();
+                Display.Point = Coord;
+                Display.Vector = Mass;
+
+
+
+                GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N
+                selfmass.Add(p0);
             }
+            
 
             List<Vector3d> Coordinates = new List<Vector3d>();
 
@@ -130,9 +148,44 @@ namespace Muscle.Dynamics
             
             PopulateWithSolverResult_Mode(new_structure , Coordinates, ModeUsedVector);
 
+
+
+
+            /*
+            //Display the masses
+
+            //1) Collect Data
+            List<double> DynMassIN = new List<double>(); // Default value
+            int NumNode = 0;
+
+            //Obtain the data if the component is connected
+            NumNode = structure.NodesCount;
+            DynMassIN = structure.DynMass;
+            List<Node> NodesCoord = structure.StructuralNodes;
+            List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
+
+
+            for (int i = 0; i < NumNode; i++)
+            {
+                Vector3d ToAdd = new Vector3d();
+                Point3d Coord = new Point3d();
+                ToAdd.Z = DynMassIN[i];
+                Coord = NodesCoord[i].Point;
+                PointLoad Display = new PointLoad();
+                Display.Point = Coord;
+                Display.Vector = ToAdd;
+
+
+
+                GH_PointLoad p0 = new GH_PointLoad(new PointLoad(Coord, ToAdd)); //Because the weight is in N
+                selfmass.Add(p0);
+                //new_structure.PointMasses.Add(new PointLoad(Coord, ToAdd));
+
+            }
+            */
+            //Return
+            new_structure.PointMasses = selfmass;
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
-            //DA.SetDataList(0, ModeUsedVector);
-            //DA.SetDataList(0, new_structure.StructuralNodes);
             DA.SetData(0, gh_structure);
         }
 

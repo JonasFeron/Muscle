@@ -16,14 +16,14 @@ using Rhino.Geometry;
 
 namespace Muscle.Dynamics
 {
-    public class DisassembleDyn : GH_Component
+    public class DisassembleDynComponent : GH_Component
     {
         private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public DisassembleDyn()
+        public DisassembleDynComponent()
           : base("Disassemble Dynamic", "DS","Give the dynamic parameter and result of the dynamic computation who is stored in the structure.",
               "Muscles", "Dynamics")
         {
@@ -64,7 +64,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Nodal masses", "Mass (kg/node)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.list); 
+            pManager.AddGenericParameter("Nodal masses", "Mass (kg/node)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.list); 
             pManager.AddIntegerParameter("Number of frequency(ies) computed", "Num. of freq. computed", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Total number of frequencies", "Tot. Num. freq.", "Total number of the frequencies that the structure has.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "Natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
@@ -91,7 +91,7 @@ namespace Muscle.Dynamics
 
             //Return the infos
 
-            DA.SetDataList(0, structure.DynMass);
+            DA.SetDataList(0, structure.PointMasses);
             DA.SetData(1, structure.NumberOfFrequency);
             DA.SetData(2, structure.DOFfreeCount);
             DA.SetDataList(3, structure.Frequency); //Don't use PopulateWithSolverResult

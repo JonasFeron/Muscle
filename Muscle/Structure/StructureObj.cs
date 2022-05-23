@@ -79,6 +79,8 @@ namespace Muscle.Structure
 		public List<List<Vector3d>> ModeVector { get; set; }
 		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
 
+		public List<GH_PointLoad> PointMasses { get; set; } //Masses used for the dynamic computation in objects
+
 
 
 		//If I create a DynamicsData element
@@ -115,6 +117,7 @@ namespace Muscle.Structure
 			Mode = new List<List<double>>();
 			ModeVector = new List<List<Vector3d>> ();
 			DynMass = new List<double>();
+			PointMasses = new List<GH_PointLoad> ();
 		}
 
 

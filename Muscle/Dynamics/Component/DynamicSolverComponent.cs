@@ -160,16 +160,31 @@ namespace Muscle.Dynamics
             }
             new_structure.ModeVector = ModeVect_construction;
 
+            //Dynamic info save
+            List<Node> NodesCoord = structure.StructuralNodes;
+            List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
+            for (int i = 0; i < NumberOfNodes; i++)
+            {
+                
+                //Masses
+                Vector3d Mass = new Vector3d();
+                Point3d Coord = new Point3d();
+                Mass.Z = structure.DynMass[i];
+                Coord = NodesCoord[i].Point;
+                PointLoad Display = new PointLoad();
+                Display.NodeInd = i;
+                Display.Vector = Mass;
 
 
+
+                GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N
+                selfmass.Add(p0);
+            }
+            new_structure.PointMasses = selfmass;
             //Not need to create a new structure because the computation is not changing the structure
             //Obtain the results from "result"
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
-
-        
-
-
 
             log.Info("Dynamic computation: END SOLVE INSTANCE");
 
@@ -181,28 +196,21 @@ namespace Muscle.Dynamics
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            //new_structure.LoadsToApply = new List<Vector3d>(); //this is already done in Duplicate
-            //foreach (var node in new_structure.StructuralNodes) new_structure.LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
-
-
-            
-
-            
-            
             PointLoad load;
             foreach (var data in datas) //Go trough the data
             {
                 if (data is GH_PointLoad)
                 {
                     load = ((GH_PointLoad)data).Value; //retrieve the pointload inputted by the user
-                    int Index = load.NodeInd;
                     // we need to know on which point or node the load will have to be applied
                     int ind = -1;
-                    if ((load.NodeInd != -1) || (load.NodeInd <= structure.NodesCount)) //PointsLoad can be defined on a point or on a node index
-                    {
+                    if ((load.NodeInd != -1) || (load.NodeInd < structure.NodesCount)) //PointsLoad can be defined on a point or on a node index
+                    {   
+                        
                         ind = load.NodeInd;
                         structure.DynMass[ind] += load.Vector.Z; //If Point mass is applied on a node of the str
                     }
+        
                     success = true;
                 }
             }

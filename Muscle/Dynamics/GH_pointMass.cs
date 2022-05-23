@@ -54,18 +54,17 @@ namespace Muscle.Dynamics
 
             if (Math.Abs(v_display.Z / v_display.Length) >= 0.001)
             {
-                double height = Math.Abs(v_display.Z / 4);
-                double radius = height / 2.5;
-                args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, 0.0, 1.0)), height, radius), red);
+                double radius = Math.Abs(v_display.Z / 10);
                 Sphere sph = new Sphere(Value.Point,radius);
                 args.Pipeline.DrawSphere(sph, red);
+
             }
         }
-
+        
         public void DrawViewportWires(GH_PreviewWireArgs args)
         {
 
-            double DisplayLoadAmpli = AccessToAll.DisplayDyn;
+            double DisplayMassAmpli = AccessToAll.DisplayDyn;
             int _decimal = AccessToAll.DisplayDecimals;
 
 
@@ -76,23 +75,6 @@ namespace Muscle.Dynamics
 
             double pixelsPerUnit;
             args.Viewport.GetWorldToScreenScale(node, out pixelsPerUnit);
-
-            Vector3d v_display = Value.Vector * DisplayLoadAmpli / 10000.0;             //scale x [m] = x[kN]/10kN * LoadAmpliFactor
-
-            string load_X = String.Format("{0}", Math.Round(Value.Vector.X / 1000, _decimal, MidpointRounding.AwayFromZero));
-            string load_Y = String.Format("{0}", Math.Round(Value.Vector.Y / 1000, _decimal, MidpointRounding.AwayFromZero));
-            string load_Z = String.Format("{0}", Math.Round(Value.Vector.Z / 1000, _decimal, MidpointRounding.AwayFromZero));
-
-
-
-            if (Math.Abs(v_display.Z / v_display.Length) >= 0.001)
-            {
-                Vector3d V = new Vector3d(0, 0, v_display.Z);
-                Point3d start = node - V;
-                plane.Origin = start;
-                args.Pipeline.DrawLine(new Line(start, V), red, 2);
-                //args.Pipeline.Draw3dText(load_Z, red, plane, 14 / pixelsPerUnit, "Lucida Console");
-            }
         }
 
         public override IGH_GeometricGoo DuplicateGeometry()

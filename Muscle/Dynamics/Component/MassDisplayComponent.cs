@@ -68,7 +68,7 @@ namespace Muscle.Dynamics
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("SelfMass", "SelfMass (kg)", "Point mass due to self-mass. Half of the element's self weight is applied on each of both extremities. ", GH_ParamAccess.list);
-
+            
         }
 
         /// <summary>
@@ -80,35 +80,11 @@ namespace Muscle.Dynamics
             
             //1) Collect Data
             StructureObj structure = new StructureObj();
-            List<double> DynMassIN = new List<double>(); // Default value
-            int NumNode = 0;
             
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
-            NumNode = structure.NodesCount;
-            DynMassIN = structure.DynMass;
-            List<Node> NodesCoord = structure.StructuralNodes;
-            List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
-            
-            
-            for (int i = 0; i < NumNode; i++)
-            {
-                Vector3d ToAdd = new Vector3d();
-                Point3d Coord = new Point3d();
-                ToAdd.Z = DynMassIN[i];
-                Coord = NodesCoord[i].Point;
-                PointLoad Display = new PointLoad();
-                Display.Point = Coord;
-                Display.Vector = ToAdd;
 
-
-                
-                GH_PointLoad p0 = new GH_PointLoad(new PointLoad( Coord, ToAdd )); //Because the weight is in N
-                selfmass.Add(p0);
-
-            }
-
-            DA.SetDataList(0, selfmass);
+            DA.SetDataList(0, structure.PointMasses);
 
         }
        
