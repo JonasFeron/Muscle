@@ -26,7 +26,7 @@ namespace Muscle.Dynamics
             protected override void RegisterOutputParams(GH_OutputParamManager pManager)
             {
                 pManager.AddIntegerParameter("Node", "N", "Node of application of the mass.", GH_ParamAccess.item);
-                pManager.AddNumberParameter("Vector", "V (kg)", "Vector representing the mass in kg.", GH_ParamAccess.item);
+                pManager.AddNumberParameter("Mass", "M (kg)", "Mass in kg.", GH_ParamAccess.item);
             }
 
             protected override void SolveInstance(IGH_DataAccess DA)
