@@ -201,11 +201,14 @@ namespace Muscle.Dynamics
                     load = ((GH_PointLoad)data).Value; //retrieve the pointload inputted by the user
                     // we need to know on which point or node the load will have to be applied
                     int ind = -1;
-                    if ((load.NodeInd != -1) || (load.NodeInd < structure.NodesCount)) //PointsLoad can be defined on a point or on a node index
-                    {   
+                    if (load.NodeInd > -1) //PointsLoad can be defined on a point or on a node index
+                    {
+                        if (load.NodeInd < structure.NodesCount)
+                        {
+                            ind = load.NodeInd;
+                            structure.DynMass[ind] += load.Vector.Z; //If Point mass is applied on a node of the str
+                        }
                         
-                        ind = load.NodeInd;
-                        structure.DynMass[ind] += load.Vector.Z; //If Point mass is applied on a node of the str
                     }
         
                     success = true;
