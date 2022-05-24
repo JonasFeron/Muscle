@@ -1409,11 +1409,10 @@ class StructureObj():
     # endregion
 
     # region Private Methods : Retrieve the inputs
-
     def InitialData(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType=np.zeros((0,)), ElementsA=np.zeros((0, 2)),
                     ElementsE=np.zeros((0, 2)), ElementsLfreeInit = -1, LoadsInit=np.zeros((0,)),
                     TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)), LoadsToApply=np.zeros((0,)),
-                    LengtheningsToApply=np.zeros((0,)), Residual0Threshold=0.00001, n_steps=1,DynamicMass =1):
+                    LengtheningsToApply=np.zeros((0,)), Residual0Threshold=0.00001, n_steps=1, DynamicMass =np.zeros((0,)), MaxFreqWanted = 0):
 
         ### Initialize fundamental datas ###
         if isinstance(NodesCoord, np.ndarray):
@@ -1441,6 +1440,8 @@ class StructureObj():
 
         ### Initialize optional datas ###
         Self.C = Self.ConnectivityMatrix(Self.NodesCount,Self.ElementsCount,Self.ElementsEndNodes)
+        (Self.Initial.ElementsL, Self.Initial.ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord)  # thus calculate the free lengths based on the nodes coordinates
+
 
         if isinstance(ElementsType, np.ndarray) and ElementsType.size == Self.ElementsCount:
             Self.ElementsType = ElementsType.reshape((-1,)).astype(int) #-1 if struts, +1 if cables
@@ -1455,7 +1456,6 @@ class StructureObj():
         else:
             Self.ElementsA = None
 
-
         if isinstance(ElementsE, np.ndarray) and ElementsE.size == 2*Self.ElementsCount:
             Self.ElementsE = ElementsE.reshape((-1, 2)) #[EinCompression,EinTension]
         elif isinstance(ElementsE, np.ndarray) and ElementsE.size == 1*Self.ElementsCount:
@@ -1465,13 +1465,6 @@ class StructureObj():
             Self.ElementsE = None
 
 
-        if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount :
-            Self.Initial.ElementsLFree = ElementsLfreeInit.reshape((-1,))
-        else:
-            Self.Initial.ElementsLFree = -np.ones((Self.ElementsCount,))
-
-        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).any() or np.any(ElementsLfreeInit==-1) : #if the free lengths are smaller than 0, it means they have not been calculated yet.
-            (Self.Initial.ElementsLFree,cos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
 
 
         if isinstance(LoadsInit, np.ndarray) and LoadsInit.size == 3 * Self.NodesCount:
@@ -1490,6 +1483,31 @@ class StructureObj():
             Self.Initial.Reactions = ReactionsInit.reshape(-1, )
         else:
             Self.Initial.Reactions = np.zeros((Self.FixationsCount,))
+
+
+
+
+        if Self.ElementsE.shape == (Self.ElementsCount,2):
+            Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.Initial.Tension,Self.ElementsE)
+        if Self.ElementsA.shape == (Self.ElementsCount,2):
+            Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.Initial.Tension,Self.ElementsA)
+
+
+        if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount:
+            Self.Initial.ElementsLFree = ElementsLfreeInit.reshape((-1,))
+        else:
+            Self.Initial.ElementsLFree = -np.ones((Self.ElementsCount,))
+
+        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).any() or np.any(ElementsLfreeInit == -1):  # if the free lengths are smaller than 0, it means they have not been calculated yet.
+            if np.count_nonzero(np.around(Self.Initial.Tension,decimals = 6))>0 : # if some elements are pre-tensionned, make sure the free lengths take it into account
+                F = Self.Flexibility(Self.Initial.ElementsE, Self.Initial.ElementsA, Self.Initial.ElementsL) #flexibility with initial length (considered infinite if EA is close to 0)
+                EA = Self.Initial.ElementsL/F # stiffness EA of the elements (with zeros replaced by 1e-9)
+                Init_strain = Self.Initial.Tension/EA
+                Self.Initial.ElementsLFree = Self.Initial.ElementsL/(1+Init_strain)
+            else : #there are no initial tension
+                Self.Initial.ElementsLFree = Self.Initial.ElementsL.copy()  # thus calculate the free lengths based on the nodes coordinates
+
+
 
 
         if isinstance(LoadsToApply, np.ndarray) and LoadsToApply.size == 3 * Self.NodesCount:
@@ -1513,12 +1531,16 @@ class StructureObj():
         else:
             Self.n_steps=1
 
-        if DynamicMass >=1:
-            Self.DynamicMass=DynamicMass
+
+        if isinstance(DynamicMass, np.ndarray) and DynamicMass.size == Self.NodesCount:
+            Self.DynamicMass = DynamicMass
         else:
             Self.DynamicMass=1
-
-
+        
+        if MaxFreqWanted >=1:
+            Self.MaxFreqWanted = MaxFreqWanted
+        else:
+            Self.MaxFreqWanted = 0
     # endregion
 
 
@@ -1999,7 +2021,7 @@ class StructureObj():
         Self.mode = PHI
         
 
-    def ModuleDynamics(Self,DynamicMass,MaxFreqWanted): #Data ?
+    def ModuleDynamics(Self,Data): #Data ? DynamicMass,MaxFreqWanted
         #Used via C# for the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2015,9 +2037,10 @@ class StructureObj():
 
         """
         #assert Data.DynMasses.shape == (Self.NodesCount, )
-        Self.MaxFreqWanted = MaxFreqWanted
+        #Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes,Data.ElementsType,Data.ElementsA, Data.ElementsE, Data.TensionInit, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.DynamicMass,Data.MaxFreqWanted)
+        Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE, Data.TensionInit, Data.DynamicMass,Data.MaxFreqWanted)
+        #Self.MaxFreqWanted = MaxFreqWanted
         Self.C = Self.ConnectivityMatrix( Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
-        Self.DynMasses = DynamicMass
         Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
 
         #We consider here the initial shape of the structure : underformed due to prestress or external loads
@@ -2053,8 +2076,8 @@ class StructureObj():
         # Consider that each node is hinged
 
             # 1 - obtain the list of the local K_mat of each member
-        kmatLocList = Self.Initial.MaterialLocalStiffnessList(Self, l, ElementsCos, Self.Initial.ElementsA,
-                                                                Self.Initial.ElementsE)
+        kmatLocList = Self.Initial.MaterialLocalStiffnessList(Self, l, ElementsCos, Self.ElementsA,
+                                                                Self.ElementsE)
             # 2 - Obtain the global stiffness matrix of the structure
         Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
         KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
@@ -2111,10 +2134,10 @@ class StructureObj():
         Self.TotMode[Self.IsDOFfree] = Self.mode
         
         if Self.MaxFreqWanted != 0:
-            if MaxFreqWanted < Self.DOFfreeCount:
-                Self.freq = Self.freq[:MaxFreqWanted]
-                Self.mode = Self.mode[:,:MaxFreqWanted]
-                Self.TotMode = Self.TotMode[:,:MaxFreqWanted]
+            if Self.MaxFreqWanted < Self.DOFfreeCount:
+                Self.freq = Self.freq[:Self.MaxFreqWanted]
+                Self.mode = Self.mode[:,:Self.MaxFreqWanted]
+                Self.TotMode = Self.TotMode[:,:Self.MaxFreqWanted]
 
             else:
                 Self.MaxFreqWanted = Self.DOFfreeCount
