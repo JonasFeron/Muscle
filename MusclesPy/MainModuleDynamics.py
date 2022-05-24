@@ -40,7 +40,7 @@ def core(DataString):
     if isinstance(data, d.SharedData):#check that data is a SharedData object !
         Struct = StructureObj() #initial empty structure 
         Struct.MainAssembleDyn(data)
-        Struct.ModuleDynamics(data.DynamicMass,data.MaxFreqWanted) #do some calculations
+        Struct.ModuleDynamics(data.DynamicMass,data.MaxFreqWanted) #do some calculations .DynamicMass,data.MaxFreqWanted
         result.PopulateWith_Dynamics(Struct) #register the results
         # print("I finished calculation")
 
