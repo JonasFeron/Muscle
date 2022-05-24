@@ -1991,7 +1991,7 @@ class StructureObj():
         Self.mode = PHI
         
 
-    def ModuleDynamics(Self,DynamicMass,MaxFreqWanted): #Data ? DynamicMass,MaxFreqWanted
+    def ModuleDynamics(Self,Data): #Data ? DynamicMass,MaxFreqWanted
         #Used via C# for the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2009,8 +2009,24 @@ class StructureObj():
         #assert Data.DynMasses.shape == (Self.NodesCount, )
         #Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes,Data.ElementsType,Data.ElementsA, Data.ElementsE, Data.TensionInit, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.DynamicMass,Data.MaxFreqWanted)
         #Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE, Data.TensionInit, Data.DynamicMass,Data.MaxFreqWanted)
-        
-        Self.MaxFreqWanted = MaxFreqWanted
+        Self.Initial.NodesCoord = Data.NodesCoord
+        Self.ElementsType = Data.ElementsType
+        Self.ElementsEndNodes = Data.ElementsEndNodes
+        Self.ElementsA = Data.ElementsA
+        Self.ElementsE = Data.ElementsE
+        Self.MaxFreqWanted = Data.MaxFreqWanted
+        Self.NodesCount = Data.NodesCoord.reshape(-1, 3).shape[0]
+        Self.ElementsCount = Self.ElementsEndNodes.shape[0]
+        Self.IsDOFfree = Data.IsDOFfree
+        Self.Initial.Tension = Data.TensionInit
+        Self.DOFfreeCount = np.sum(np.ones(3 * Self.NodesCount, dtype=int)[Self.IsDOFfree])
+        Self.FixationsCount = 3 * Self.NodesCount - Self.DOFfreeCount
+
+        Self.DynMasses = Data.DynamicMass
+        Self.MaxFreqWanted = Data.MaxFreqWanted
+
+
+   
         Self.C = Self.ConnectivityMatrix( Self.NodesCount, Self.ElementsCount, Self.ElementsEndNodes)
         Self.DOFfreeCount = 3 * Self.NodesCount - Self.FixationsCount
 
@@ -2053,12 +2069,11 @@ class StructureObj():
         Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
         KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
 
-        KFree = KgeoFree*1000 + KmatFree # [N/m]
+        KFree = KgeoFree + KmatFree # [N/m]
 
         # Used units
-        # K_geo = [kN/m]
+        # K_geo = [N/m]
         # K_mat = [N/m]
-        #*1000 to have N/m
 
         # Mass matrix used for the dynamics part
         # Need to use Masses from "DynMasses" variable
@@ -2152,7 +2167,7 @@ class StructureObj():
         # Compute the K_geo - the rigidity matrix due to the Prestress
             #1 - Compute the force densities for each member  - Q [ #member] = F/l [N/m]
             #The forces can come from the pretension (Lfree) or the applied load
-
+        #TensionInit in N
         Q = Self.Initial.ForceDensities(TensionInit , l)
 
             # 2 - Obtain a list containing the local rigidity matrix for each member
@@ -2172,12 +2187,11 @@ class StructureObj():
         Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
         KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
 
-        KFree = KgeoFree*1000 + KmatFree # [N/m]
+        KFree = KgeoFree + KmatFree # [N/m]
 
         # Used units
-        # K_geo = [kN/m]
+        # K_geo = [N/m]
         # K_mat = [N/m]
-        #*1000 to have N/m
 
         # Mass matrix used for the dynamics part
         # Need to use Masses from "DynMasses" variable
