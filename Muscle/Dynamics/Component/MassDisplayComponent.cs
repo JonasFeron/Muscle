@@ -67,7 +67,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("SelfMass", "SelfMass (kg)", "Point mass due to self-mass. Half of the element's self weight is applied on each of both extremities. ", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Mass", "Mass (kg)", "Mass used for the dynamic computation.", GH_ParamAccess.list);
             
         }
 
