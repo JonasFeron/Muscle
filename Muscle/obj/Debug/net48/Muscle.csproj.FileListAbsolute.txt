@@ -22,3 +22,4 @@ C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\pro
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\masse.PNG
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\Mass_element.PNG
 C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\SM.png
+C:\Users\desme\Documents\GitHub\Muscles_ADE\Muscle\bin\Debug\net48\Resources\MassDisplay.PNG
