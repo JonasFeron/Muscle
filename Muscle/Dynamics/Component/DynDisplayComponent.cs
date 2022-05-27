@@ -26,8 +26,8 @@ namespace Muscle.Dynamics
             get
             {
                 //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                return Properties.Resources.PLAY;
+                //return null;
             }
         }
 
@@ -51,13 +51,13 @@ namespace Muscle.Dynamics
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure who contains already the dynamic computation.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "Struct.", "A structure who contains already the dynamic computation.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Mode", "Mode", "The mode that the user want to display.(Begin at 1)", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Amplitude", "Ampl.","Amplitude of the displacement of the mode.",GH_ParamAccess.item);
+            pManager.AddNumberParameter("Amplitude of the displayed displacement", "Displ. Ampl.","Amplitude of the displacement of the mode.",GH_ParamAccess.item);
             pManager[2].Optional = true;
-            pManager.AddNumberParameter("Frequency", "Freq.", "Frequency of the displacement of the mode.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Amplitude of the displayed frequency", "Freq. Factor", "Factor who enable to adjust the frequency of display.", GH_ParamAccess.item);
             pManager[3].Optional = true;
-            pManager.AddIntegerParameter("Time increment", "Time increment", "Value variating with the time to display the mode.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Time increment", "Time Increment", "Value variating with the time to display the mode.", GH_ParamAccess.item);
             pManager[4].Optional = true;
         }
 
@@ -65,7 +65,7 @@ namespace Muscle.Dynamics
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A modal deformed structure containing the total results.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "Struct.", "A modal deformed structure containing the total results.", GH_ParamAccess.item);
            
             //First return a list
             //pManager.AddGenericParameter("Wanted Mode", "Mode", "Mode who is asked by the user.", GH_ParamAccess.list);

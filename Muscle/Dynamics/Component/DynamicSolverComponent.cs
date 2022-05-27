@@ -38,8 +38,9 @@ namespace Muscle.Dynamics
             get
             {
                 //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                //return Resources.IconForThisComponent;
+                return Properties.Resources.Calcul;
+                //return null;
             }
         }
 
@@ -56,9 +57,9 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Point Mass (kg)", "Point Mass (kg)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.tree);
-            pManager.AddIntegerParameter("Number of frequencies wanted", "Num. freq. wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "Struct.", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point mass (kg/node)", "Point Mass (kg/node)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Number of frequencies wanted", "Num. Freq. Wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
 
 
         }

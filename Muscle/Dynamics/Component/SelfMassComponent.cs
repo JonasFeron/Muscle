@@ -19,7 +19,7 @@ namespace Muscle.Dynamics
         #region Constructors
 
         public SelfMassComponent() :
-                    base("Self Mass", "SM", "Creates Points loads due to self-mass of the elements. Define the mass who is used for the dynamic computation.", "Muscles", "Dynamics")
+                    base("Self Mass", "SM", "Creates point masses due to self-mass of the elements who are put as input of the component.", "Muscles", "Dynamics")
         {
         }
 
@@ -29,14 +29,14 @@ namespace Muscle.Dynamics
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Elements", "E", "Generate self-weight loads applied on the extrimities of the given elements.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Elements", "E", "Generate the self-mass applied on the extremities of the given elements.", GH_ParamAccess.item);
         }
 
 
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("SelfMass", "SelfMass (kg)", "Point mass due to self-mass. Half of the element's self weight is applied on each of both extremities. ", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Point mass", "Point Mass (kg/node)", "Point mass due to self-mass. Half of the element's self weight is applied on each of both extremities. ", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

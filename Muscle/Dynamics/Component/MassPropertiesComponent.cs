@@ -20,13 +20,13 @@ namespace Muscle.Dynamics
 
             protected override void RegisterInputParams(GH_InputParamManager pManager)
             {
-                pManager.AddGenericParameter("Point Mass", "Mass (kg)", "Mass", GH_ParamAccess.item);
+                pManager.AddGenericParameter("Point Mass", "Point Mass (kg/node)", "Point mass who is used for the dynamic computation.", GH_ParamAccess.item);
             }
 
             protected override void RegisterOutputParams(GH_OutputParamManager pManager)
             {
-                pManager.AddIntegerParameter("Node", "N", "Node of application of the mass.", GH_ParamAccess.item);
-                pManager.AddNumberParameter("Mass", "M (kg)", "Mass in kg.", GH_ParamAccess.item);
+                pManager.AddIntegerParameter("Node index", "Node Index", "Index of the node(s) on wich the point masses are applied. This list is sorted in the same way than the one of the output 'Mass' of this component.", GH_ParamAccess.item);
+                pManager.AddNumberParameter("Mass", "M (kg/node)", "Mass in kg applied on the node.", GH_ParamAccess.item);
             }
 
             protected override void SolveInstance(IGH_DataAccess DA)

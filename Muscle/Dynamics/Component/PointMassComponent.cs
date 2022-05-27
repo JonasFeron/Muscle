@@ -23,7 +23,7 @@ namespace Muscle.Dynamics
         #region Constructors
 
         public PointMassComponent() :
-                    base("Point mass", "Mass", "Create a Point mass by defining a vector", "Muscles", "Dynamics")
+                    base("Point mass", "PM", "Create a Point mass.", "Muscles", "Dynamics")
         {
         }
 
@@ -33,8 +33,8 @@ namespace Muscle.Dynamics
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddIntegerParameter("Node Index", "Node", "Index of the node where the mass is applied.", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Mass", "M (kg)", "Number representing the mass in kg.", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Node index", "Node Index", "Index of the node on wich the mass is applied.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Mass", "M (kg)", "Value representing the mass in kg applied on the corresponding node index.", GH_ParamAccess.list);
         
         }
 
@@ -42,7 +42,7 @@ namespace Muscle.Dynamics
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Point mass", "Mass (kg)", "Dynamic Mass applied on a point.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Point mass", "Point Mass (kg/node)", "Dynamic Mass applied on a node.", GH_ParamAccess.list);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)

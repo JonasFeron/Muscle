@@ -56,7 +56,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "Struct.", "A structure which may already be subjected to a dynamic computation.", GH_ParamAccess.item);
          
 
 
@@ -67,7 +67,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Mass", "Mass (kg)", "Mass used for the dynamic computation.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Point Mass", "Point Mass (kg/node)", "Point masses used for the dynamic computation.", GH_ParamAccess.list);
             
         }
 

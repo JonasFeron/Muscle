@@ -37,7 +37,7 @@ namespace Muscle.Dynamics
             get
             {
                 //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
+                return Properties.Resources.propriete;
                 return null;
             }
         }
@@ -55,7 +55,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "Struct.", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
 
         }
 
@@ -64,9 +64,9 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Nodal masses", "Mass (kg/node)", "The mass who is considered at each node for the dynamic computation.", GH_ParamAccess.list); 
-            pManager.AddIntegerParameter("Number of frequency(ies) computed", "Num. of freq. computed", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Total number of frequencies", "Tot. Num. freq.", "Total number of the frequencies that the structure has.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point mass", "Point Mass (kg/node)", "The masses who are considered at each node for the dynamic computation.", GH_ParamAccess.list); 
+            pManager.AddIntegerParameter("Number of frequency(ies) computed", "Num. of Freq. Computed", "Number of natural frequencies of the structure. It is equal to the number of DOF of the structure.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Total number of frequencies", "Tot. Num. Freq.", "Total number of the frequencies that the structure has.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Frequency(ies)", "Freq. (Hz)", "Natural frequencies of the structure ranked from the smallest to the biggest.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Mode(s)", "Mode(s)", "Modes of the structure ranked as the returned frequencies.(containing also the zero displacement is blocked directions.)", GH_ParamAccess.list);
             //pManager.AddGenericParameter("Structure", "struct", "A structure containing the total results.", GH_ParamAccess.item);
