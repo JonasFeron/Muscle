@@ -56,30 +56,34 @@ namespace Muscle.Dynamics
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            
+
             int ind = -1;
-            
+
             List<int> PointIndex = new List<int>();
             if (!DA.GetDataList(0, PointIndex)) { return; }
 
-            
+
             List<double> mass = new List<double>(); //Value of the mass
             if (!DA.GetDataList(1, mass)) { return; }
 
-            
+
             List<GH_PointLoad> Return = new List<GH_PointLoad>();
 
             if (mass.Count != PointIndex.Count)
             {
                 DA.SetData(0, null);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please check the input length.");
             }
-
-            for (int i = 0; i < mass.Count; i++)
+            else
             {
-                Vector3d vector = new Vector3d();
-                vector.Z = mass[i];
-                Return.Add(new GH_PointLoad(new PointLoad(PointIndex[i], vector)));
+                for (int i = 0; i < mass.Count; i++)
+                {
+                    Vector3d vector = new Vector3d();
+                    vector.Z = mass[i];
+                    Return.Add(new GH_PointLoad(new PointLoad(PointIndex[i], vector)));
+                }
             }
+            
             DA.SetDataList(0, Return);
         }
 

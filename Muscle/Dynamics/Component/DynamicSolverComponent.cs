@@ -38,9 +38,8 @@ namespace Muscle.Dynamics
             get
             {
                 //You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
                 return Properties.Resources.Calcul;
-                //return null;
+
             }
         }
 
@@ -82,17 +81,18 @@ namespace Muscle.Dynamics
             log.Info("Dynamic computation: NEW SOLVE INSTANCE");
             //1) Collect Data
             StructureObj structure = new StructureObj();
-            List<double> DynMassIN = new List<double>(); // Default value
-            int MaxFreqWtd = 0;
+            List<double> DynMassIN = new List<double>();
+            int MaxFreqWtd = 0; //Default value
             GH_Structure<IGH_Goo> gh_mass = new GH_Structure<IGH_Goo>();
+            
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
             if (!DA.GetDataTree(1, out gh_mass)) { }
-            if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies /mode that the user want to display
+            if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies/mode that the user want to compute
 
 
             //2) Format data before sending and solving in python
-            StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
+            StructureObj new_structure = structure.Duplicate(); //Duplicate the structure. Use the function Duplicate from StructureObj
 
             //Create a list with a length = Number of nodes
             for (int i = 0; i < structure.NodesCount; i++)
@@ -101,19 +101,23 @@ namespace Muscle.Dynamics
             }
 
             structure.DynMass = DynMassIN;
-            //Save the data of dynamic masses in the Structure
-            bool success1 = RegisterPointMass(structure, gh_mass.FlattenData()); // structure.DynMass was filled with the loads
+
+            //Save the data from the list of Point Mass object inside the list DynMass of the 'Structure' variable 
+            bool success1 = RegisterPointMass(structure, gh_mass.FlattenData()); // structure.DynMass filled with the loads
 
 
 
             //3) Solve in python
-            if (AccessToAll.pythonManager == null)
+            if (AccessToAll.pythonManager == null) //Python need to be initialized
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please restart the \"Initialize Python\" Component.");
                 DA.SetData(0, null);
                 return;
             }
 
+
+
+            //4) Create the variable data & result to transfer data from c# to python thanks to JSON
             SharedData data = new SharedData(structure, DynMassIN, MaxFreqWtd); //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
@@ -141,9 +145,13 @@ namespace Muscle.Dynamics
                 }
             }
 
-            new_structure.PopulateWithSolverResult_dyn(result);
+            new_structure.PopulateWithSolverResult_dyn(result); // Set all result from the dynamic computation inside the new_structure
 
+
+
+            //5) Create the variable ModeUsedVector
             List<Vector3d> ModeUsedVector = new List<Vector3d>(); //Create the list of mode with a vector shape (dx,dy,dz) with a length equal to the number of nodes.
+            //ModeUsedVector has a special format more readable for the user
             int NumberOfNodes = structure.NodesCount;
             List<List<Vector3d>> ModeVect_construction = new List<List<Vector3d>>();
             for (int i = 0; i < new_structure.NumberOfFrequency; i++)
@@ -161,7 +169,8 @@ namespace Muscle.Dynamics
             }
             new_structure.ModeVector = ModeVect_construction;
 
-            //Dynamic info save
+
+            //6) Create list of object 'point masses'
             List<Node> NodesCoord = structure.StructuralNodes;
             List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
             for (int i = 0; i < NumberOfNodes; i++)
@@ -172,15 +181,25 @@ namespace Muscle.Dynamics
                 Point3d Coord = new Point3d();
                 Mass.Z = structure.DynMass[i];
                 Coord = NodesCoord[i].Point;
-                PointLoad Display = new PointLoad(i, Coord, Mass) ;
-
+                PointLoad Display = new PointLoad(i, Coord, Mass);
 
                 GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N
                 selfmass.Add(p0);
             }
+
+
+
+            //Send a message error concerning the frequency
+            if ((MaxFreqWtd != 0) && (MaxFreqWtd != new_structure.NumberOfFrequency))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "The number of asked frequencies is too high.");
+            }
+
+
+            //Insert the data inside the new_structure
             new_structure.PointMasses = selfmass;
-            //Not need to create a new structure because the computation is not changing the structure
-            //Obtain the results from "result"
+
+            //Send the data
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
 
@@ -188,9 +207,12 @@ namespace Muscle.Dynamics
 
             
         }
+
+
+
         private bool RegisterPointMass(StructureObj structure, List<IGH_Goo> datas)
         {
-            //return true if at least one load is added on the structure
+            //return true if at least one point mass is added on the structure
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
@@ -199,23 +221,31 @@ namespace Muscle.Dynamics
             {
                 if (data is GH_PointLoad)
                 {
-                    load = ((GH_PointLoad)data).Value; //retrieve the pointload inputted by the user
+                    load = ((GH_PointLoad)data).Value; //retrieve the pointload (=point mass in this case) inputted by the user
                     // we need to know on which point or node the load will have to be applied
                     int ind = -1;
-                    if (load.NodeInd > -1) //PointsLoad can be defined on a point or on a node index
+                    if (load.NodeInd > -1) //PointsLoad is defined on a node index
                     {
-                        if (load.NodeInd < structure.NodesCount)
+                        if (load.NodeInd < structure.NodesCount) //The index need to b part of the structure
                         {
                             ind = load.NodeInd;
-                            structure.DynMass[ind] += load.Vector.Z; //If Point mass is applied on a node of the str
+                            structure.DynMass[ind] += load.Vector.Z; //If Point mass is applied on a node of the structure. 
+                            //Take the value of the mass who is stored in the Z direction of the load vector
                         }
-                        
+                        else
+                        {
+                            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please check the node index of the point masses. The index {load.NodeInd} is too big. ");
+                        }
+                    }
+                    else
+                    {
+                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please check the node index of the point masses. The index {load.NodeInd} is negative.");
                     }
         
                     success = true;
                 }
             }
-
+            log.Info("Dynamic computation: register of the point masses is done");
             return success;
         }
     }
