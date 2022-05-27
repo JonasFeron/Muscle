@@ -24,7 +24,15 @@ namespace Muscle.Dynamics
         }
 
         #endregion Constructors
-
+        protected override System.Drawing.Bitmap Icon
+        {
+            get
+            {
+                //You can add image files to your project resources and access them like this:
+                return Properties.Resources.SM;
+                //return null;
+            }
+        }
         #region Methods
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)

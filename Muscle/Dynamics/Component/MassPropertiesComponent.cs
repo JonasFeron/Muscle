@@ -18,7 +18,18 @@ namespace Muscle.Dynamics
 
             public override Guid ComponentGuid { get { return new Guid("d1c67c01-cfa2-4b09-a1bf-2e33a4272aea"); } }
 
-            protected override void RegisterInputParams(GH_InputParamManager pManager)
+            protected override System.Drawing.Bitmap Icon
+            {
+                get
+                {
+                //You can add image files to your project resources and access them like this:
+                return Properties.Resources.MassDisplay;
+                //return null;
+                }
+            }
+
+
+        protected override void RegisterInputParams(GH_InputParamManager pManager)
             {
                 pManager.AddGenericParameter("Point Mass", "Point Mass (kg/node)", "Point mass who is used for the dynamic computation.", GH_ParamAccess.item);
             }
