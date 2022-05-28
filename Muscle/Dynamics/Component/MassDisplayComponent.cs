@@ -25,8 +25,7 @@ namespace Muscle.Dynamics
         /// </summary>
         public MassDisplayComponent()
           : base("Dynamic Masses Display", "DMD",
-                "Display the dynamic masses contained in the structure. (This component need to be connected directly to the 'Sphere' component of Grasshopper.)",
-              "Muscles", "Dynamics")
+                "Display the dynamic masses contained in the structure.","Muscles", "Dynamics")
         {
         }
 
@@ -37,9 +36,7 @@ namespace Muscle.Dynamics
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
                 return Properties.Resources.masse;
-                //return null;
             }
         }
 
@@ -56,7 +53,7 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "Struct.", "A structure which may already be subjected to a dynamic computation.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "Struct.", "A structure which has already been dynamically calculated.", GH_ParamAccess.item);
          
 
 
@@ -84,6 +81,7 @@ namespace Muscle.Dynamics
             //Obtain the data if the component is connected
             if (!DA.GetData(0, ref structure)) { return; }
 
+            //Return the list containing the point masses objects
             DA.SetDataList(0, structure.PointMasses);
 
         }

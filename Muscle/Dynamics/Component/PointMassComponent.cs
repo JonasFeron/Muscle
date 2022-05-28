@@ -23,7 +23,7 @@ namespace Muscle.Dynamics
         #region Constructors
 
         public PointMassComponent() :
-                    base("Point mass", "PM", "Create a Point mass.", "Muscles", "Dynamics")
+                    base("Point mass", "PM", "Create one or more point mass(es). Those point masses are used for the dynamic computation.", "Muscles", "Dynamics")
         {
         }
 
@@ -31,9 +31,7 @@ namespace Muscle.Dynamics
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
                 return Properties.Resources.Mass_element;
-                //return null;
             }
         }
         #endregion Constructors
@@ -59,6 +57,7 @@ namespace Muscle.Dynamics
 
             int ind = -1;
 
+            //Get the inputs
             List<int> PointIndex = new List<int>();
             if (!DA.GetDataList(0, PointIndex)) { return; }
 
@@ -69,21 +68,22 @@ namespace Muscle.Dynamics
 
             List<GH_PointLoad> Return = new List<GH_PointLoad>();
 
-            if (mass.Count != PointIndex.Count)
+            if (mass.Count != PointIndex.Count) //Verify the length of the inputed lists
             {
                 DA.SetData(0, null);
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please check the input length.");
             }
             else
             {
-                for (int i = 0; i < mass.Count; i++)
+                for (int i = 0; i < mass.Count; i++)//For each element, create a  GH pointLoad element who is used for the dynamic computation as "point mass" 
                 {
                     Vector3d vector = new Vector3d();
-                    vector.Z = mass[i];
-                    Return.Add(new GH_PointLoad(new PointLoad(PointIndex[i], vector)));
+                    vector.Z = mass[i]; //Only the z direction has a value
+                    Return.Add(new GH_PointLoad(new PointLoad(PointIndex[i], vector))); //Add the elements to the list of GH point load element that will be returned
                 }
             }
             
+            //return the list 
             DA.SetDataList(0, Return);
         }
 

@@ -12,7 +12,7 @@ namespace Muscle.Dynamics
         public class MassPropertiesComponent : GH_Component
         {
             public MassPropertiesComponent() :
-                base("Point mass properties", "Mass Prop", "Get the properties of a point mass", "Muscles", "Dynamics")
+                base("Point mass properties", "Mass Prop", "Get the properties of one or more point mass(es).", "Muscles", "Dynamics")
             {
             }
 
@@ -22,9 +22,7 @@ namespace Muscle.Dynamics
             {
                 get
                 {
-                //You can add image files to your project resources and access them like this:
-                return Properties.Resources.MassDisplay;
-                //return null;
+                    return Properties.Resources.MassDisplay;
                 }
             }
 
@@ -43,10 +41,11 @@ namespace Muscle.Dynamics
             protected override void SolveInstance(IGH_DataAccess DA)
             {
                 GH_PointLoad ghPointLoad = new GH_PointLoad();
-
+                
+                //Obtain the data
                 if (!DA.GetData(0, ref ghPointLoad)) { return; }
 
-
+                //Return the data linked to the point masses put as input 
                 DA.SetData(0, ghPointLoad.Value.NodeInd);
                 DA.SetData(1, ghPointLoad.Value.Vector.Z);
             }
