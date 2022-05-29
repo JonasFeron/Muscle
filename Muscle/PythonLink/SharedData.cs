@@ -61,7 +61,7 @@ namespace Muscle.PythonLink
 		#endregion SolverInputs
 
 		#region Dynamics
-
+		//Variables for the dynamic computation
 		public List<double> DynamicMass { get; set; } //Mass applied at each node for the dynamics computation
 
 		public int MaxFreqWanted { get; set; } //Maximum frequencies and modes that the user want to obtain

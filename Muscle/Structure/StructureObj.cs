@@ -68,23 +68,19 @@ namespace Muscle.Structure
 		
 
 
-		///Data from the dynamics computation
-		///
+		///Data used the dynamics computation
 		public int NumberOfFrequency { get; set; } 
-		//Contains the number of frequency/mode of the structure
+		//Contains the number of frequency/mode of the structure who are computed
 
-		///Before Using the Dynamic data element
+
 		public List<double> Frequency { get; set; }
 		public List<List<double>> Mode { get; set; }
-		public List<List<Vector3d>> ModeVector { get; set; }
+		public List<List<Vector3d>> ModeVector { get; set; } //Modes written in a vector form
 		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
-
+		//List containing on each position the mass [kg]. The position in the list is equal to the node index of the node on wich the mass is applied.
 		public List<GH_PointLoad> PointMasses { get; set; } //Masses used for the dynamic computation in objects
+		//The mass written in a list of point masses
 
-
-
-		//If I create a DynamicsData element
-		//public List<DynData > DynamicsData { get; set; }
 		#endregion Properties
 
 		#region Constructors
@@ -112,6 +108,7 @@ namespace Muscle.Structure
 
 			DR = new DRMethod();
 
+			//DYN
 			NumberOfFrequency = 0; 
 			Frequency = new List<double>();	
 			Mode = new List<List<double>>();
@@ -146,7 +143,6 @@ namespace Muscle.Structure
 			//4) check validity of supports inputs
 			RegisterSupports(GH_supports_input);
 
-
 		}
 
 		public StructureObj(StructureObj other)
@@ -176,12 +172,6 @@ namespace Muscle.Structure
 
 
 			DR = other.DR.Duplicate();
-
-			//Dynamics 
-			// The data are not duplicated because if can cause problem if the structure is recomputed
-			// For example, the tension can change and the rigidity also. This affect the dynamic computation.
-
-			//this.NumberOfFrequency = other.NumberOfFrequency;  
 			
 		}
 
@@ -415,30 +405,6 @@ namespace Muscle.Structure
 		/// <summary>
 		/// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
 		/// </summary>
-		
-		/*
-		private void RegisterDynamics(GH_Structure<IGH_Goo> GH_elements_input)
-		{
-			int index = 0;
-			foreach (var data in GH_elements_input.FlattenData())
-			{
-				if (data is DynData)
-				{
-					DynData DynamicData = data as DynData;
-					DynamicsData.Add(gh_elem.Value);
-					gh_elem.Value.Ind = index;
-					LengtheningsToApply.Add(0.0);
-					index++;
-				}
-			}
-			NumberOfFrequency = index;
-
-		}
-
-		#endregion 5)RegisterDynamics
-		*/
-
-
 
 		#region PopulateWithSolverResult
 		public void PopulateWithSolverResult(SharedSolverResult answ)
@@ -510,7 +476,7 @@ namespace Muscle.Structure
 		}
 
 		#endregion PopulateWithSolverResult
-
+		//Use the result from the dynamic computation and set them in a structure object
 		public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
 		{
 			if (answ == null)
@@ -547,7 +513,9 @@ namespace Muscle.Structure
 			}
 			return res;
 		}
-		public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist) //Display the List of List of Vector3D
+
+		//Display the List of List of Vector3D
+		public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist) 
 		{
 			GH_Path path;
 			int i = 0;
@@ -568,10 +536,6 @@ namespace Muscle.Structure
 			}
 			return res;
 		}
-
-
-
-
 
 		#endregion Methods
 	}

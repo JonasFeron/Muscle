@@ -57,7 +57,7 @@ namespace Muscle.Dynamics
             pManager.AddGenericParameter("Structure", "Struct.", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Point mass (kg/node)", "Point Mass (kg/node)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Number of frequencies wanted", "Num. Freq. Wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
-
+            pManager[2].Optional = true;
 
         }
 
