@@ -36,7 +36,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <None Update="Resources\Calcul.PNG">
+    <None Update="Resources\Computation.PNG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\MassDisplay.PNG">

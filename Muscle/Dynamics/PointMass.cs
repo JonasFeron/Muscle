@@ -11,16 +11,19 @@ namespace Muscle.Dynamics
 
         #region Properties
 
-        //there are 3 ways to input a point Load. On a point, on a NodeIndex or on the Node. 
+        //there is 1 ways to input a point mass:  on a NodeIndex 
+        //During the dynamic computation, this point mass is linked to a node with his coordinates 'Poind3d Point'
+
         public Point3d Point { set; get; }
         public int NodeInd { set; get; }
 
-        public Vector3d Vector { set; get; }
+        public Vector3d Vector { set; get; } //Will contain in the z direction the mass in [kg]
 
         #endregion Properties
 
         #region Constructors
 
+        //Different way to initialize a point mass
         public PointLoad() //Contain a mass in kg 
         {
             Point = new Point3d();
@@ -59,8 +62,9 @@ namespace Muscle.Dynamics
 
         #endregion Constructors
 
-        #region Methods
 
+
+        #region Methods
         public static PointLoad operator *(PointLoad load, double factor)
         {
             return new PointLoad()
@@ -86,19 +90,12 @@ namespace Muscle.Dynamics
             return new PointLoad(this);
         }
 
-        public override string ToString()
+        public override string ToString() //Text description
         {
             if (NodeInd == -1) return $"Point mass of {Vector.Z.ToString()}kg applied on node [{Point.ToString()}].";
             else return $"Point mass of {Vector.Z.ToString()}kg applied on node {NodeInd}.";
 
-            //if (NodeInd == -1) return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node [{Point.ToString()}].";
-            //else return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node {NodeInd}.";
-
         }
-
-
-
         #endregion Methods
-
     }
 }

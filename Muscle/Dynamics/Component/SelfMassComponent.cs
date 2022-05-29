@@ -48,15 +48,18 @@ namespace Muscle.Dynamics
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             Element e = new Element();
+            //Input list of element(s)
             if (!DA.GetData(0, ref e)) { return; }
 
             List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
             double acc = AccessToAll.g.Z;
+            //Point mass at each extremity
             GH_PointLoad p0 = new GH_PointLoad(new PointLoad(e.EndNodes[0], e.Weight / (2*acc))); //Because the weight is in N
             GH_PointLoad p1 = new GH_PointLoad(new PointLoad(e.EndNodes[1], e.Weight / (2*acc)));
             selfmass.Add(p0);
             selfmass.Add(p1);
 
+            //Return the list containing all point masses due to the self-weight
             DA.SetDataList(0, selfmass);
         }
 

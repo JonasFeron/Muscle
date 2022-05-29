@@ -36,7 +36,7 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.propriete;
+                return Properties.Resources.Properties;
             }
         }
 

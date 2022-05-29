@@ -63,9 +63,19 @@ namespace Muscle.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Calcul {
+        internal static System.Drawing.Bitmap Computation {
             get {
-                object obj = ResourceManager.GetObject("Calcul", resourceCulture);
+                object obj = ResourceManager.GetObject("Computation", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Mass {
+            get {
+                object obj = ResourceManager.GetObject("Mass", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,16 +103,6 @@ namespace Muscle.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap masse {
-            get {
-                object obj = ResourceManager.GetObject("masse", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap PLAY {
             get {
                 object obj = ResourceManager.GetObject("PLAY", resourceCulture);
@@ -113,9 +113,9 @@ namespace Muscle.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap propriete {
+        internal static System.Drawing.Bitmap Properties {
             get {
-                object obj = ResourceManager.GetObject("propriete", resourceCulture);
+                object obj = ResourceManager.GetObject("Properties", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -9,7 +9,10 @@ using Muscle.Dynamics;
 
 
 namespace Muscle.Dynamics
-{
+{   
+
+
+    //Create a GH element for the masses used for the dynamic computation
     public class GH_PointLoad : GH_GeometricGoo<PointLoad>, IGH_PreviewData 
     {
         public GH_PointLoad() : base()
@@ -34,6 +37,7 @@ namespace Muscle.Dynamics
                 BoundingBox bBox = new Line(Value.Point, -10.0 * Value.Vector / Value.Vector.Length, 10.0).BoundingBox;
                 bBox.Inflate(1.0);
                 return bBox;
+               
                 
             }
         }
@@ -48,12 +52,14 @@ namespace Muscle.Dynamics
 
         public void DrawViewportMeshes(GH_PreviewMeshArgs args)
         {
+            //Take the value of 'DisplayDyn' in the AccessToAll file to adapt the size of the displayed masses (sphere)
             double DisplayMassAmpli = AccessToAll.DisplayDyn;
 
             Vector3d v_display = Value.Vector * DisplayMassAmpli; //scale x [m] = x[kg]/10kg * LoadAmpliFactor
 
             if (Math.Abs(v_display.Z / v_display.Length) >= 0.001)
             {
+                //Sphere to display at each node
                 double radius = Math.Abs(v_display.Z / 10);
                 Sphere sph = new Sphere(Value.Point,radius);
                 args.Pipeline.DrawSphere(sph, red);
