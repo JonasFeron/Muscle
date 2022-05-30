@@ -156,10 +156,6 @@ class SharedSolverResult_dynamics():
         if isinstance(Struct, StructureObj):
             Answ.NumberOfFrequency = int(Struct.MaxFreqWanted) #Number of frequencies realeased by python
             Answ.Frequency = Struct.freq.round(5).reshape((-1,)).tolist() #Frequencies [Hz] who are ranked
-            
-            #Struct.mode = Struct.mode.T #Need to transpose because the \Phi matrix has each mode writen vertically
-            #Shape = Struct.mode.shape
-            #Answ.Modes = Struct.mode.round(5).reshape((Shape[0],Shape[1])).tolist() #Modes ranked as the frequencies
 
             Struct.TotMode = Struct.TotMode.T
             Shape = Struct.TotMode.shape

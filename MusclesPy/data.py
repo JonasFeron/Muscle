@@ -67,7 +67,7 @@ class SharedData():
         #Data for the Non-Linear displacement method
         Data.n_steps = n_steps
 
-        #Data for the dynamics module
+        #Data for the dynamic computation module
         Data.DynamicMass = DynamicMass
         Data.MaxFreqWanted = MaxFreqWanted #Put at 0 as default value (if nothing is inputed. It will send all the frequencies and modes.)
 
