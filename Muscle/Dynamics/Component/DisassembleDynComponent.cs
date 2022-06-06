@@ -24,7 +24,7 @@ namespace Muscle.Dynamics
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public DisassembleDynComponent()
-          : base("Disassemble Dynamic", "DS","Give the dynamic parameter and result of the dynamic computation who is stored in the structure.",
+          : base("Disassemble Dynamics", "DS","Give the dynamic parameter and result of the dynamic computation who is stored in the structure.",
               "Muscles", "Dynamics")
         {
         }

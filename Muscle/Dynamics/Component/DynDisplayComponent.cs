@@ -39,7 +39,7 @@ namespace Muscle.Dynamics
         #region Constructors
 
         public DynDisplayComponent() :
-                    base("Dynamic Display", "DD", "Create the modal deformed structure considering the mode wanted by the user. The structure is deforming following the wanted node during the time.", "Muscles", "Dynamics")
+                    base("Dynamics Display", "DD", "Create the modal deformed structure considering the mode wanted by the user. The structure is deforming following the wanted node during the time.", "Muscles", "Dynamics")
         {
         }
 

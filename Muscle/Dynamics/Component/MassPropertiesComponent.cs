@@ -12,7 +12,7 @@ namespace Muscle.Dynamics
         public class MassPropertiesComponent : GH_Component
         {
             public MassPropertiesComponent() :
-                base("Point mass properties", "Mass Prop", "Get the properties of one or more point mass(es).", "Muscles", "Dynamics")
+                base("Point Mass Properties", "Mass Prop", "Get the properties of one or more point mass(es).", "Muscles", "Dynamics")
             {
             }
 

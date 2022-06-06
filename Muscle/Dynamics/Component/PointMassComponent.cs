@@ -23,7 +23,7 @@ namespace Muscle.Dynamics
         #region Constructors
 
         public PointMassComponent() :
-                    base("Point mass", "PM", "Create one or more point mass(es). Those point masses are used for the dynamic computation.", "Muscles", "Dynamics")
+                    base("Point Mass", "PM", "Create one or more point mass(es). Those point masses are used for the dynamic computation.", "Muscles", "Dynamics")
         {
         }
 
