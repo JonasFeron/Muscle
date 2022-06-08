@@ -9,6 +9,7 @@ FileAssembleResult = "AssembleResult.txt"
 FileLinearSolveResult = "LinearSolveResult.txt"
 FileNonLinearSolveResult = "NonLinearSolveResult.txt"
 FileDynamicResult = "DynamicResult.txt"
+FileDynamicCONSISTENTResult = "DynamicCONSISTENTResult.txt"
 
 def WriteResultFile(dataPath,resultFileName,key,result):
     dir = os.path.dirname(dataPath)

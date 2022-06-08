@@ -33,6 +33,7 @@ namespace Muscle.PythonLink
             else if (PythonFileName == AccessToAll.MainDRSolve) file = AccessToAll.FileDRSolveData;
             else if (PythonFileName == AccessToAll.MainDRSolve) file = AccessToAll.FileDRSolveData;
             else if (PythonFileName == AccessToAll.DynSolve) file = AccessToAll.FileDynamicData;
+            else if (PythonFileName == AccessToAll.DynSolveCONSISTENT) file = AccessToAll.FileDynamicCONSISTENTData;
             else file = "error_Data.txt";
 
             string IOPath = Path.Combine(AccessToAll.Main_Folder, "IO");

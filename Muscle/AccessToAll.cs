@@ -83,6 +83,16 @@ namespace Muscle
             }
         }
 
+        public static string DynSolveCONSISTENT
+        {
+            get
+            {
+                if (user_mode == true) return "MainModuleDynamicsCONSISTENT.pyc";
+                else return "MainModuleDynamicsCONSISTENT.py";
+            }
+        }
+
+
         public const string FileTestData = "TestData.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python
         public const string FileAssembleData = "AssembleData.txt";
@@ -95,7 +105,9 @@ namespace Muscle
 
         public const string FileDynamicData = "DynamicData.txt";
 
-       
+        public const string FileDynamicCONSISTENTData = "DynamicCONSISTENTData.txt";
+
+
 
 
         #endregion Properties
