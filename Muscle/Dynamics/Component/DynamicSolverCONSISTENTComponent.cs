@@ -24,8 +24,8 @@ namespace Muscle.Dynamics
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public DynamicSolverCONSISTENTComponent()
-          : base("Dynamics Solver CONSISTENT", "DSC",
-                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node. The computation is done on the state of the structure. It includes the influence of Lfree (pretension) and the possible applied load.Consistent Mass matrix is used",
+          : base("Dynamics Solver CONSISTENT", "DS-C",
+                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node. The computation is done on the state of the structure. Consistent Mass matrix is used.",
               "Muscles", "Dynamics")
         {
         }
