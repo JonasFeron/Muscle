@@ -63,9 +63,19 @@ namespace Muscle.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Computation {
+        internal static System.Drawing.Bitmap Consistent {
             get {
-                object obj = ResourceManager.GetObject("Computation", resourceCulture);
+                object obj = ResourceManager.GetObject("Consistent", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Lumped {
+            get {
+                object obj = ResourceManager.GetObject("Lumped", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

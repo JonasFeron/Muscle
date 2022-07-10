@@ -37,7 +37,7 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return null;
+                return Properties.Resources.Consistent;
             }
         }
 

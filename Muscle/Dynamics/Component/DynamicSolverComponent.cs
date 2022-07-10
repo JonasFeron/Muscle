@@ -37,7 +37,7 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.Computation;
+                return Properties.Resources.Lumped;
             }
         }
 
