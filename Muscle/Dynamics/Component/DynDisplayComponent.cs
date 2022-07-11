@@ -53,7 +53,7 @@ namespace Muscle.Dynamics
             pManager.AddIntegerParameter("Mode", "Mode", "The mode that the user want to display.(Begin at 1)", GH_ParamAccess.item);
             pManager.AddNumberParameter("Amplitude of the displayed displacement", "Displ. Ampl. Factor","Amplitude of the displacement of the mode.",GH_ParamAccess.item);
             pManager[2].Optional = true;
-            pManager.AddNumberParameter("Amplitude of the displayed frequency", "Freq. Ampl. Factor", "Factor who enable to adjust the frequency of display.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Circular frequency of the display", "Freq. ", "Circular frequency of the display. The display follows a cosine function as : cos(freq*Time increment)", GH_ParamAccess.item);
             pManager[3].Optional = true;
             pManager.AddIntegerParameter("Time increment", "Time Increment", "Value variating with the time to display the mode.", GH_ParamAccess.item);
             pManager[4].Optional = true;
