@@ -1817,6 +1817,7 @@ class StructureObj():
         Self.MaxFreqWanted = Data.MaxFreqWanted
 
     def ModuleDynamics(Self,Data): #Data ? DynamicMass,MaxFreqWanted
+        #LUMPED MASS MATRIX
         #Used via C# for the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -1875,7 +1876,7 @@ class StructureObj():
         Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
         KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
 
-        KFree = KgeoFree + KmatFree # [N/m]
+        KFree = KmatFree + KgeoFree # [N/m]
 
         # Used units
         # K_geo = [N/m]
@@ -1960,6 +1961,7 @@ class StructureObj():
 
 
     def ModuleDynamics_CONSISTENT(Self,Data): #Data ? DynamicMass,MaxFreqWanted
+        #CONSISTENT MASS MATRIX
         #Used via C# for the dynamic computation
         """
         Test the function before using the module that compute the natural frequency for a certain prestress and mass on the given geometry
@@ -2018,7 +2020,7 @@ class StructureObj():
         Kmat = Self.LocalToGlobalStiffnessMatrix(kmatLocList)
         KmatFree = Kmat[Self.IsDOFfree].T[Self.IsDOFfree].T
 
-        KFree = KgeoFree + KmatFree # [N/m]
+        KFree = KmatFree + KgeoFree  # [N/m]
 
         # Used units
         # K_geo = [N/m]
