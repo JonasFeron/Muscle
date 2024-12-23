@@ -1,1 +1,1 @@
-C:\Users\Jferon\Anaconda3\Scripts\activate.bat
+C:\Users\jferon\Anaconda3\Scripts\activate.bat

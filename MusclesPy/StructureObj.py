@@ -114,10 +114,7 @@ class ResultsSVD():
 
         if s != 0: #rescale the eigen vectors Vs_row such that the highest value = -1 (compression) and store the results in the DR-Stress mode matrix SS.
             Vs_row = V_row[-s:,:]  # s Vecteurs (lignes) propres (associés aux VaP nulles) de longueur ElementsCount. Interprétations : DR-stress modes (sol of A@t=0) (=Bar tensions in equilibrium without external loads) OR incompatible Bar elongations (=bar elongations which can't be obtained in this geometry)
-            Vs_row_sorted = SVD.SortSelfStressModes(Struct,Vs_row)
-            bool = -Vs_row_sorted.min(axis=1) > Vs_row_sorted.max(axis=1)  # true if |compression max| > tension max
-            max = np.where(bool, Vs_row_sorted.min(axis=1), Vs_row_sorted.max(axis=1))
-            SS = (Vs_row_sorted.transpose() / -max).transpose()  # self-stress modes Matrix. we made sure the max value is always equal to 1 in compression whatever the modes
+            SS = SVD.SortSelfStressModes(Struct,Vs_row)
 
         # NB : Vr_t est orthogonal à Vs_t.  check : print(Vr_row.transpose()@Vs_row) return matrix zeros
 
@@ -157,38 +154,57 @@ class ResultsSVD():
         L = np.diag(Struct.Initial.ElementsL)
         Linv = np.diag(1/Struct.Initial.ElementsL)
         qs_row = Vs_row @ Linv # [1/m] - shape (s,ElementsCount) - force densities associated to each self-stress mode. One row = one mode. One column = one element.
-        qs_row_sorted = SVD.RecursiveSelfStressReduction(qs_row)
-        Vs_row_sorted = qs_row_sorted @ L
-        return Vs_row_sorted
+        qs_row_sorted1 = SVD.RecursiveSelfStressReduction(Struct, qs_row)
+        qs_row_sorted2 = SVD.SortReducedSSModes(qs_row_sorted1)
+        Vs_row_sorted = qs_row_sorted2 @ L
+
+        # unitize the max value of each mode
+        SS = np.zeros((s, b))
+        ZeroTol = 1e-6
+        for i in range(s):
+            mode = Vs_row_sorted[i]
+            CompressionMax = mode.min()
+            TensionMax = mode.max()
+            bool = -CompressionMax > TensionMax  # true if |compression max| > tension max
+            max = np.where(bool, CompressionMax, TensionMax)
+            SS[i] = -mode/max # self-stress modes Matrix. we made sure the max value is always equal to -1 in compression whatever the mode
+
+            # if the mode activates some elements only in compression, i.e. no element is in tension, then reverse the sign
+            # -> then the mode activates some elements only in tension but there are no element in compression
+            if SS[i].max()<= +ZeroTol: #if the highest force is smaller than or equal to 0, then the mode activates only element in compression
+                SS[i] *= -1 #then reverse the sign
+
+        return SS
 
 
-    def RecursiveSelfStressReduction(SVD, modes_brut):
+
+
+    def RecursiveSelfStressReduction(SVD, Struct, modesBrut):
 
         # Part 1 : sort the modes (=row) per number of elements involved in the modes.
         # The modes with the less elements (the more localized modes) are placed first.
         # The modes with the more elements (the more generalized modes) are placed last.
-        (s, b) = modes_brut.shape
+        (s, b) = modesBrut.shape
         if s<= 1 :
-            return modes_brut
+            return modesBrut
 
-        ZeroTol = 1e-12
-        numberElementsPerMode = np.sum(np.where(~np.isclose(modes_brut, np.zeros((s, b)), atol=ZeroTol), True, False), axis=1)
+        ZeroTol = 1e-6
+        numberElementsPerMode = np.sum(np.where(~np.isclose(modesBrut, np.zeros((s, b)), atol=ZeroTol), True, False), axis=1)
         # numberElementsperMode = np.array([1,0])
 
         ind = np.argsort(numberElementsPerMode)  # sort from the smallest to the biggest
-        modes_sorted = modes_brut[ind]
+        modesSorted = modesBrut[ind]
         numberElementsPerMode_sorted = numberElementsPerMode[ind]
 
         # Part 2: Seek to perform a reduction Lj -> Lj - Li * Lj[k]/Li[k]
         performReduction = False
-        mode = modes_sorted  # simplify the word. one mode = one row L
+        mode = modesSorted  # simplify the word. one mode = one row L
         # i = 0  # the row of the mode with the less elements
         # j = 1  # the row of the mode with more elements where we seek to reduce the number of elements thanks to row i.
         # k  # the pivot (column number) where the reduction may be performed
-
-        for j in range(1, s):
+        for j in range(s-1, 0,-1):
             for i in range(0, j):
-                for k in range(0, b):
+                for k in range(b-1, -1,-1):
                     if (np.isclose(mode[i][k],0,atol=ZeroTol) or np.isclose(mode[j][k],0,atol=ZeroTol)): #if mode[i][k]==0 or mode[j][k]==0
                         continue  # go to k++
                     # if mode[i][k]!=0 AND mode[j][k]!=0 then DO
@@ -197,13 +213,37 @@ class ResultsSVD():
                     modeI = mode[i][:].copy()
                     modeJ = mode[j][:].copy()
                     modeJ -= modeI * (modeJ[k] / modeI[k])
-
-                    numberElementsInModeJ = np.sum(np.where(~np.isclose(modeJ,np.zeros((b,)),atol=ZeroTol), True, False))
+                    modeJ = np.where(np.isclose(modeJ, np.zeros((b,)), atol=ZeroTol), 0, modeJ)
+                    numberElementsInModeJ = np.sum(np.where(modeJ!=0,1,0))
                     # test if the numberElementsInModeJ has reduced
                     performReduction = numberElementsInModeJ < numberElementsPerMode_sorted[j]
 
+                    if numberElementsInModeJ == numberElementsPerMode_sorted[j]: #if the reduction keeps the same number of elements
+                        # then perform the reduction if it allows to put cables in tension or struts in compression
+
+                        numberElementsConformBefore = np.sum(np.sign(mode[j])==Struct.ElementsType)
+                        numberElementsConformAfter = np.sum(np.sign(modeJ) == Struct.ElementsType)
+                        performReduction = numberElementsConformAfter > numberElementsConformBefore
+
+
+
                     if performReduction:  # truly perform the reduction if the numberElementsInModeJ has reduced
                         mode[j][:] -= mode[i][:] * (mode[j][k] / mode[i][k])
+                        mode[j] = np.where(np.isclose(mode[j], np.zeros((b,)), atol=ZeroTol), 0, mode[j])
+
+                        #unitize the pivot
+                        CompressionMax = mode[j].min()
+                        TensionMax = mode[j].max()
+                        bool = -CompressionMax > TensionMax  # true if |compression max| > tension max
+                        max = np.where(bool, CompressionMax, TensionMax)
+                        mode[j] = -mode[j] / max  # self-stress modes Matrix. we made sure the max value is always equal to -1 in compression whatever the mode
+
+                        #check that the sign of the force respects the type of the elements
+                        numberElementsConform = np.sum(np.sign(mode[j])==Struct.ElementsType)
+                        numberElementsAntiConform = np.sum(np.sign(-mode[j]) == Struct.ElementsType)
+
+                        if numberElementsAntiConform > numberElementsConform:
+                            mode[j] = -mode[j]
                         # restart at part 1.
                         break
 
@@ -216,9 +256,56 @@ class ResultsSVD():
                 break
 
         if performReduction:
-            mode = SVD.RecursiveSelfStressReduction(mode)
+            mode = SVD.RecursiveSelfStressReduction(Struct, mode)
 
         return mode
+
+    def SortReducedSSModes(SVD, reducedModes):
+        """
+        Sort the reduced modes (coming out of the RecursiveSelfStressReduction method) such that the first self-stress mode correspond to the first module
+        :param reducedModes:
+        :return: sortedModes
+        """
+        (s, b) = reducedModes.shape
+        if s <= 1:
+            return reducedModes
+
+        ZeroTol = 1e-6
+        numberElementsPerMode = np.sum(np.where(~np.isclose(reducedModes, np.zeros((s, b)), atol=ZeroTol), True, False),axis=1)
+        # 1) The reducedmodes are sorted from the smallest numberElementsPerMode to the biggest.
+        #    But if two or more modes have the same numberElementsPerMode, they are not sorted.
+        #    So, find which modes have the same numberElementsPerMode, and sort them.
+
+        # 2) find which modes have the same numberElementsPerMode
+        #    for instance, if 1 self-stress mode activates 2 elements and 3 self-stress modes activate 6 elements
+        #    then  numberElementsPerMode = [2, 6, 6, 6]
+        uniqueSet = np.unique(numberElementsPerMode) # and  uniqueSet = [2, 6]
+        sortedModes = np.zeros((s, b))
+        for numberElements in uniqueSet:
+            group = np.where(numberElementsPerMode == numberElements)
+            sortedModes[group] = SVD.SortGroupOfModes(reducedModes[group])
+        return sortedModes
+
+    def SortGroupOfModes(SVD, groupOfModes):
+        """
+        Sort each group of self-stress modes. Each mode of the group activates the same number of elements.
+        :param groupOfModes:
+        :return: sortedModes: the first mode correspond to the first module.
+        """
+        (sub_s, b) = groupOfModes.shape
+        ZeroTol = 1e-6
+        if sub_s <= 1:
+            return groupOfModes
+
+        #1) find the position of the first element being activated for each mode
+        IndexFirstOccurence = np.zeros((sub_s,)) #the index of the first element being activated
+        for groupI in range(sub_s):
+            modeI = groupOfModes[groupI]
+            IndexFirstOccurence[groupI] = np.argwhere(~np.isclose(modeI, np.zeros((b,)), atol=ZeroTol))[0][0]
+
+        sort = np.argsort(IndexFirstOccurence) #the first mode of the group correspond to the first module
+        sortedGroupOfModes = groupOfModes[sort]
+        return sortedGroupOfModes
 
 
     def SensitivityMatrix(SVD, Struct):
@@ -490,8 +577,7 @@ class State():
         :param AFree: The Equilibrium Matrix with shape (DOFfreeCount, ElementsCount)
         :return: the ResultsSVD object in the current state is filled with the results of the singular value decomposition of AFree
         """
-        Cur.SVD.SVDEquilibriumMatrix(Struct,
-                                     AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
+        Cur.SVD.SVDEquilibriumMatrix(Struct, AFree)  # Compute and store the results of the singular value decompositon of AFree in the current state
         return Cur.SVD
 
     def TensionForces(Cur, Struct, ElementsLCur, ElementsLFree, ElementsE, ElementsA):
@@ -1283,7 +1369,7 @@ class StructureObj():
 
         # 2) Compute the flexibility
         F = L / (E * A)
-        F[NoStiffnessElementsIndex] = 1e6  # [m/N] elements with 0 stiffness have an infinite flexibility
+        F[NoStiffnessElementsIndex] = 1e9  # [m/N] elements with 0 stiffness have an infinite flexibility
         return F
 
     def LocalToGlobalStiffnessMatrix(Self, klocList):
@@ -1630,6 +1716,8 @@ class StructureObj():
 
         ### Initialize optional datas ###
         Self.C = Self.ConnectivityMatrix(Self.NodesCount,Self.ElementsCount,Self.ElementsEndNodes)
+        (Self.Initial.ElementsL, Self.Initial.ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord)  # thus calculate the free lengths based on the nodes coordinates
+
 
         if isinstance(ElementsType, np.ndarray) and ElementsType.size == Self.ElementsCount:
             Self.ElementsType = ElementsType.reshape((-1,)).astype(int) #-1 if struts, +1 if cables
@@ -1644,7 +1732,6 @@ class StructureObj():
         else:
             Self.ElementsA = None
 
-
         if isinstance(ElementsE, np.ndarray) and ElementsE.size == 2*Self.ElementsCount:
             Self.ElementsE = ElementsE.reshape((-1, 2)) #[EinCompression,EinTension]
         elif isinstance(ElementsE, np.ndarray) and ElementsE.size == 1*Self.ElementsCount:
@@ -1653,19 +1740,7 @@ class StructureObj():
         else:
             Self.ElementsE = None
 
-        if Self.ElementsE.shape == (Self.ElementsCount,2):
-            Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.ElementsType,Self.ElementsE)
-        if Self.ElementsA.shape == (Self.ElementsCount,2):
-            Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.ElementsType,Self.ElementsA)
 
-
-        if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount :
-            Self.Initial.ElementsLFree = ElementsLfreeInit.reshape((-1,))
-        else:
-            Self.Initial.ElementsLFree = -np.ones((Self.ElementsCount,))
-
-        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).any() or np.any(ElementsLfreeInit==-1) : #if the free lengths are smaller than 0, it means they have not been calculated yet.
-            (Self.Initial.ElementsLFree,cos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord) #hence we calculate them
 
 
         if isinstance(LoadsInit, np.ndarray) and LoadsInit.size == 3 * Self.NodesCount:
@@ -1684,6 +1759,31 @@ class StructureObj():
             Self.Initial.Reactions = ReactionsInit.reshape(-1, )
         else:
             Self.Initial.Reactions = np.zeros((Self.FixationsCount,))
+
+
+
+
+        if Self.ElementsE.shape == (Self.ElementsCount,2):
+            Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.Initial.Tension,Self.ElementsE)
+        if Self.ElementsA.shape == (Self.ElementsCount,2):
+            Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.Initial.Tension,Self.ElementsA)
+
+
+        if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount:
+            Self.Initial.ElementsLFree = ElementsLfreeInit.reshape((-1,))
+        else:
+            Self.Initial.ElementsLFree = -np.ones((Self.ElementsCount,))
+
+        if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).any() or np.any(ElementsLfreeInit == -1):  # if the free lengths are smaller than 0, it means they have not been calculated yet.
+            if np.count_nonzero(np.around(Self.Initial.Tension,decimals = 6))>0 : # if some elements are pre-tensionned, make sure the free lengths take it into account
+                F = Self.Flexibility(Self.Initial.ElementsE, Self.Initial.ElementsA, Self.Initial.ElementsL) #flexibility with initial length (considered infinite if EA is close to 0)
+                EA = Self.Initial.ElementsL/F # stiffness EA of the elements (with zeros replaced by 1e-9)
+                Init_strain = Self.Initial.Tension/EA
+                Self.Initial.ElementsLFree = Self.Initial.ElementsL/(1+Init_strain)
+            else : #there are no initial tension
+                Self.Initial.ElementsLFree = Self.Initial.ElementsL.copy()  # thus calculate the free lengths based on the nodes coordinates
+
+
 
 
         if isinstance(LoadsToApply, np.ndarray) and LoadsToApply.size == 3 * Self.NodesCount:
@@ -1763,12 +1863,12 @@ class StructureObj():
         for i in np.arange(SVD.m):
 
             Um_i = (SVD.Um_row[i, :]).transpose() #(3nodes,1)  Mechanism i is actionned by a unit displacement
-            Elements_Cos_Displ = S0.Compute_Elements_Reorientation(Um_i, S0.C, S0.ElementsLFree)
+            Elements_Cos_Displ = S0.Compute_Elements_Reorientation(Um_i, S0.C, S0.Initial.ElementsLFree)
             (A_nl, A_nl_free, A_nl_fixed) = S0.Compute_NL_Equilibrium_Matrix(Elements_Cos_Displ, S0.C, S0.IsDOFfree)
             G_i = A_nl_free @ t0
             G[:,i] = G_i
 
-        # DR.Kg_mod = DR.Um_t @ G
+        Kg_mod = SVD.Um_free_row @ G
         # DR.Kg = G @ DR.Um_t
         # print(G)
         return G

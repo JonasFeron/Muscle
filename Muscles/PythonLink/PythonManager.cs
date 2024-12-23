@@ -41,8 +41,8 @@ namespace Muscles.PythonLink
         private static int timeout = 20000; //ms
         private const string AnacondaActivatedFeedback = "AnacondaActivatedFeedback";
 
-        public static string ActivateCondaBat; // =  @"C:\Users\Jferon\Anaconda3\Scripts\activate.bat";
-        public static string WorkingDirectory; // @"C:\Users\Jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\MusclesPy";
+        public static string ActivateCondaBat; // =  @"C:\Users\jferon\Anaconda3\Scripts\activate.bat";
+        public static string WorkingDirectory; // @"C:\Users\jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\MusclesPy";
 
         private static readonly object Locker = new object();
         private static PythonManager _instance;

@@ -50,7 +50,7 @@ namespace Muscles.Loads
         {
             pManager.AddGenericParameter("Structure to self-stress","struct","The structure to apply a self-stress scenario on",GH_ParamAccess.item);
             pManager.AddNumberParameter("Self-Stress modes", "Modes", "All modes (One mode per branch) will be linearly combined with their associated levels to form a self-stress state.", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Prestress levels", "Levels (kN)", "Define one level in kN per self-stress mode.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Self-stress levels", "Levels (kN)", "Define one level in kN per self-stress mode.", GH_ParamAccess.tree);
         }
 
 

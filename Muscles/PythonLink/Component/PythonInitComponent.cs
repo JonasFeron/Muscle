@@ -89,7 +89,7 @@ namespace Muscles.PythonLink.Component
                 }
                 else // in case of working in debug/developer mode
                 {
-                    activateCondaBat = @"C:\Users\Jferon\Anaconda3\Scripts\activate.bat";
+                    activateCondaBat = @"C:\Users\jferon\Anaconda3\Scripts\activate.bat";
 
                     var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); // return bin folder
                     AccessToAll.Main_Folder = directory.Parent.Parent.FullName;
