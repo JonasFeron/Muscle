@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyDescriptionAttribute("Description of Muscle")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+d44a31daf7fc7f5949ec93d4e5ba3fed292c9d47")]
 [assembly: System.Reflection.AssemblyProductAttribute("Muscle")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Muscle")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

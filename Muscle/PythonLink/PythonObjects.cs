@@ -38,7 +38,7 @@ namespace Muscle.PythonLink
 
             string IOPath = Path.Combine(AccessToAll.Main_Folder, "IO");
             DirectoryInfo IO = Directory.CreateDirectory(IOPath);
-            string txtFilePath = Path.Combine(IO.FullName, file); // for instance: "...\Muscles\IO\Assemble_Data.txt"
+            string txtFilePath = Path.Combine(IO.FullName, file); // for instance: "...\Muscle\IO\Assemble_Data.txt"
 
             using (StreamWriter outputFile = new StreamWriter(txtFilePath, false))
             {

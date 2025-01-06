@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Muscles.PythonLink;
+using Muscle.PythonLink;
 using Rhino.Geometry;
 
-namespace Muscles
+namespace Muscle
 {
     /// <summary>
     /// A Class containing Properties and Methods accessible to All components
@@ -16,14 +16,19 @@ namespace Muscles
 
 
         #region Properties
-        public static double DisplaySupportAmpli = 1.0; 
+        public static double DisplaySupportAmpli = 1.0;
         //public static List<double> DisplaySupportAmpli = new List<double>() {1.0};//default value  
         public static double DisplayLoadAmpli = 1.0; //default value
         public static int DisplayDecimals = 1;
 
+        public static Vector3d g = new Vector3d(0, 0, -9.81);
+
+        public static double DisplayDyn = 0.005; //For the size of the masses considered in the dynamic computation
+        
+
         public static PythonManager pythonManager = null; //pythonManager of the current Canvas
         public static bool user_mode = true;
-        public static string Main_Folder = @"C:\Users\jferon\OneDrive - UCL\Doctorat\GitHub\Muscles";
+        public static string Main_Folder = @"C:\Users\Jonas\Documents\GitHub\Muscle"; 
         public static string assemblyTitle = "Muscles v0.5";
 
         public static string MainTest
@@ -67,6 +72,26 @@ namespace Muscles
             }
         }
 
+
+        public static string DynSolve
+        {
+            get
+            {
+                if (user_mode == true) return "MainModuleDynamics.pyc";
+                else return "MainModuleDynamics.py";
+            }
+        }
+
+        public static string DynSolveCONSISTENT
+        {
+            get
+            {
+                if (user_mode == true) return "MainModuleDynamicsCONSISTENT.pyc";
+                else return "MainModuleDynamicsCONSISTENT.py";
+            }
+        }
+
+
         public const string FileTestData = "TestData.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python
         public const string FileAssembleData = "AssembleData.txt";
@@ -77,12 +102,15 @@ namespace Muscles
         //public const string File_NonLinearSolve_Result = "NonLinearSolveResult.txt";
         public const string FileDRSolveData = "DynamicRelaxationData.txt";
 
+        public const string FileDynamicData = "DynamicData.txt";
+
+        public const string FileDynamicCONSISTENTData = "DynamicCONSISTENTData.txt";
 
 
-        public static Vector3d g = new Vector3d(0, 0, -9.81);
 
 
         #endregion Properties
 
     }
 }
+

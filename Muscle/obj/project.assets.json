@@ -8,11 +8,17 @@
           "RhinoCommon": "[7.17.22102.5001]"
         },
         "compile": {
-          "lib/net48/GH_IO.dll": {},
-          "lib/net48/Grasshopper.dll": {}
+          "lib/net48/GH_IO.dll": {
+            "related": ".XML"
+          },
+          "lib/net48/Grasshopper.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net48/_._": {}
+          "lib/net48/_._": {
+            "related": ".XML"
+          }
         },
         "build": {
           "build/Grasshopper.targets": {}
@@ -25,10 +31,14 @@
           "System.Web"
         ],
         "compile": {
-          "lib/net45/log4net.dll": {}
+          "lib/net45/log4net.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net45/log4net.dll": {}
+          "lib/net45/log4net.dll": {
+            "related": ".xml"
+          }
         }
       },
       "Microsoft.CSharp/4.7.0": {
@@ -46,23 +56,35 @@
       "Newtonsoft.Json/13.0.1": {
         "type": "package",
         "compile": {
-          "lib/net45/Newtonsoft.Json.dll": {}
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net45/Newtonsoft.Json.dll": {}
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
         }
       },
       "RhinoCommon/7.17.22102.5001": {
         "type": "package",
         "compile": {
-          "lib/net48/Eto.dll": {},
+          "lib/net48/Eto.dll": {
+            "related": ".xml"
+          },
           "lib/net48/Rhino.UI.dll": {},
-          "lib/net48/RhinoCommon.dll": {}
+          "lib/net48/RhinoCommon.dll": {
+            "related": ".XML"
+          }
         },
         "runtime": {
-          "lib/net48/Eto.dll": {},
+          "lib/net48/Eto.dll": {
+            "related": ".xml"
+          },
           "lib/net48/Rhino.UI.dll": {},
-          "lib/net48/RhinoCommon.dll": {}
+          "lib/net48/RhinoCommon.dll": {
+            "related": ".XML"
+          }
         },
         "build": {
           "build/RhinoCommon.targets": {}
@@ -79,10 +101,14 @@
           "WindowsBase"
         ],
         "compile": {
-          "lib/net472/System.Reactive.dll": {}
+          "lib/net472/System.Reactive.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net472/System.Reactive.dll": {}
+          "lib/net472/System.Reactive.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Reactive.Windows.Forms/5.0.0": {
@@ -92,10 +118,14 @@
           "System.Threading.Tasks.Extensions": "4.5.4"
         },
         "compile": {
-          "lib/net472/System.Reactive.Windows.Forms.dll": {}
+          "lib/net472/System.Reactive.Windows.Forms.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net472/System.Reactive.Windows.Forms.dll": {}
+          "lib/net472/System.Reactive.Windows.Forms.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Runtime.CompilerServices.Unsafe/4.5.3": {
@@ -104,10 +134,14 @@
           "mscorlib"
         ],
         "compile": {
-          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {}
+          "ref/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {}
+          "lib/net461/System.Runtime.CompilerServices.Unsafe.dll": {
+            "related": ".xml"
+          }
         }
       },
       "System.Threading.Tasks.Extensions/4.5.4": {
@@ -119,10 +153,14 @@
           "mscorlib"
         ],
         "compile": {
-          "lib/net461/System.Threading.Tasks.Extensions.dll": {}
+          "lib/net461/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net461/System.Threading.Tasks.Extensions.dll": {}
+          "lib/net461/System.Threading.Tasks.Extensions.dll": {
+            "related": ".xml"
+          }
         }
       }
     }
@@ -408,23 +446,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\desme\\.nuget\\packages\\": {},
+    "C:\\Users\\Jonas\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\desme\\Documents\\GitHub\\Muscles_ADE\\Muscle\\Muscle.csproj",
+      "projectUniqueName": "C:\\Users\\Jonas\\Documents\\GitHub\\Muscle\\Muscle\\Muscle.csproj",
       "projectName": "Muscle",
-      "projectPath": "C:\\Users\\desme\\Documents\\GitHub\\Muscles_ADE\\Muscle\\Muscle.csproj",
-      "packagesPath": "C:\\Users\\desme\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\desme\\Documents\\GitHub\\Muscles_ADE\\Muscle\\obj\\",
+      "projectPath": "C:\\Users\\Jonas\\Documents\\GitHub\\Muscle\\Muscle\\Muscle.csproj",
+      "packagesPath": "C:\\Users\\Jonas\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Jonas\\Documents\\GitHub\\Muscle\\Muscle\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\desme\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Jonas\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -445,7 +483,13 @@
         "warnAsError": [
           "NU1605"
         ]
-      }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net48": {
@@ -477,7 +521,7 @@
             "version": "[2.0.14, )"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.201\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   }

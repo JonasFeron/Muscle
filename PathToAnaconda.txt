@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-C:\Users\jferon\Anaconda3\Scripts\activate.bat
-=======
-C:\Users\desme\anaconda3\Scripts\activate.bat
->>>>>>> DynamicFork-AntoineDesmet
+C:\Users\Jonas\anaconda3\pkgs\conda-24.11.2-py312haa95532_0\Scripts\activate.bat

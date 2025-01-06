@@ -89,17 +89,13 @@ namespace Muscle.PythonLink.Component
                 }
                 else // in case of working in debug/developer mode
                 {
-<<<<<<< HEAD:Muscles/PythonLink/Component/PythonInitComponent.cs
-                    activateCondaBat = @"C:\Users\jferon\Anaconda3\Scripts\activate.bat";
-=======
-                    activateCondaBat = @"C:\Users\desme\anaconda3\Scripts\activate.bat";
->>>>>>> DynamicFork-AntoineDesmet:Muscle/PythonLink/Components/PythonInitComponent.cs
+                    activateCondaBat = @"C:\Users\Jonas\anaconda3\pkgs\conda-24.11.2-py312haa95532_0\Scripts\activate.bat";
 
                     var directory = new DirectoryInfo(Directory.GetCurrentDirectory()); // return bin folder
                     ///AccessToAll.Main_Folder = directory.Parent.Parent.FullName;
-                    AccessToAll.Main_Folder = @"C:\Users\desme\Documents\GitHub\Muscles_ADE";
-                    workingDirectory = Path.Combine(AccessToAll.Main_Folder, "MusclesPy");   //  @"C:\Users\Jferon\OneDrive - UCL\Doctorat\recherche\code\5 - logiciel CS\Muscles\MusclesPy";
-                    ///workingDirectory = @"C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy";
+                    AccessToAll.Main_Folder = @"C:\Users\Jonas\Documents\GitHub\Muscle";
+                    workingDirectory = Path.Combine(AccessToAll.Main_Folder, "MusclesPy");   
+                    ///workingDirectory = @"C:\Users\Jonas\Documents\GitHub\Muscle\MusclesPy";
                 }
                 if (workingDirectory == null)
                 {
@@ -196,7 +192,7 @@ namespace Muscle.PythonLink.Component
                 string[] lines = System.IO.File.ReadAllLines(full_path_to_file);
                 foreach (var line in lines)
                 {
-                    if (line.Contains("Users\\desme")) //Jferon était mis
+                    if (line.Contains("Users\\Jonas")) 
                     {
                         AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Please configure the path to anaconda in your special folder: \\AppData\\Roaming\\Grasshopper\\Libraries\\Muscles vx.x\\PathToAnaconda.txt");
                     }

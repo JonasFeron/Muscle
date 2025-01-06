@@ -41,13 +41,9 @@ namespace Muscle.PythonLink
         private static int timeout = 20000; //ms
         private const string AnacondaActivatedFeedback = "AnacondaActivatedFeedback";
 
-<<<<<<< HEAD:Muscles/PythonLink/PythonManager.cs
-        public static string ActivateCondaBat; // =  @"C:\Users\jferon\Anaconda3\Scripts\activate.bat";
-        public static string WorkingDirectory; // @"C:\Users\jferon\OneDrive - UCL\Doctorat\GitHub\Muscles\MusclesPy";
-=======
-        public static string ActivateCondaBat; // =  @"C:\Users\desme\anaconda3\Scripts\activate.bat";
-        public static string WorkingDirectory; // @"C:\Users\desme\Documents\GitHub\Muscles_ADE\MusclesPy";
->>>>>>> DynamicFork-AntoineDesmet:Muscle/PythonLink/PythonManager.cs
+        public static string ActivateCondaBat; // =  @"C:\Users\Jonas\anaconda3\pkgs\conda-24.11.2-py312haa95532_0\Scripts\activate.bat";
+        public static string WorkingDirectory; // @"C:\Users\Jonas\Documents\GitHub\Muscle\MusclesPy";
+
 
         private static readonly object Locker = new object();
         private static PythonManager _instance;
