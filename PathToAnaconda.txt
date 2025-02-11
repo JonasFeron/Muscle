@@ -1,5 +1,0 @@
-<<<<<<< HEAD
-C:\Users\jferon\Anaconda3\Scripts\activate.bat
-=======
-C:\Users\desme\anaconda3\Scripts\activate.bat
->>>>>>> TryMergingTheDynamicForkFromADE
