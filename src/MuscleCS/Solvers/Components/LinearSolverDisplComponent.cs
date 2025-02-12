@@ -1,5 +1,29 @@
-﻿using System;
+﻿
+//this file is based on the template https://github.com/JonasFeron/PythonConnectedGrasshopperTemplate 
+//------------------------------------------------------------------------------------------------------------
+
+
+//Copyright < 2021 - 2025 > < Université catholique de Louvain (UCLouvain)>
+
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+
+//    http://www.apache.org/licenses/LICENSE-2.0
+
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+
+//List of the contributors to the development of PythonConnectedGrasshopperTemplate: see NOTICE file.
+//Description and complete License: see NOTICE file.
+//------------------------------------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
@@ -10,6 +34,7 @@ using Muscle.Nodes;
 using Muscle.PythonLink;
 using Muscle.Structure;
 using Newtonsoft.Json;
+using PythonConnect;
 using Rhino.Geometry;
 
 namespace Muscle.Solvers
@@ -77,7 +102,21 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Main Linear Solver: NEW SOLVE INSTANCE");
+            string dataPath = Path.Combine(AccessToAll.tempDirectory, "linearSolve_data.txt"); // The main C# thread will write the data to the file, and the python thread will read it.
+            string resultPath = Path.Combine(AccessToAll.tempDirectory, "linearSolve_result.txt"); // The python thread will write the results to the file, and the main C# thread will read it.
+            string pythonScript = AccessToAll.MainLinearSolve; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
+            if (AccessToAll.pythonManager == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Restart the \"StartPythonComponent\".");
+                DA.SetData(0, null);
+                return;
+            }
+            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript)))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
+                DA.SetData(0, null);
+                return;
+            }
 
             //1) Collect Data
             StructureObj structure = new StructureObj();
@@ -104,45 +143,36 @@ namespace Muscle.Solvers
             }
             //3) Solve in python
 
-            if (AccessToAll.pythonManager == null)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please restart one \"Initialize Python\" Component.");
-                DA.SetData(0, null);
-                return;
-            }
+
 
             SharedData data = new SharedData(new_structure); //Object data contains all the essential informations of structure
             SharedSolverResult result = new SharedSolverResult();
 
-            if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
+            string dataString = JsonConvert.SerializeObject(data, Formatting.None);
+
+            string resultString = AccessToAll.pythonManager.ExecuteCommand(pythonScript, dataPath, resultPath, dataString);
+            foreach (string errorMessage in PythonManager.GetErrorMessages())
             {
-                log.Debug("pythonManager exists");
-                string resultString = null;
-                string dataString = JsonConvert.SerializeObject(data, Formatting.None);
-                log.Info("Main Linear Solver: ask Python to execute a command");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, errorMessage);
+            }
 
-                resultString = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainLinearSolve, dataString);
-
-                log.Info("Main Linear Solver: received results");
-                log.Debug(resultString);
-                try
-                {
-                    JsonConvert.PopulateObject(resultString, result);
-                }
-                catch
-                {
-
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + resultString);
-                    log.Warn("Main NonLinear Solver: Something went wrong while solving:" + resultString);
-                    result = null;
-                }
+            //convert the result (contained in a string) into a TwinResult object
+            try
+            {
+                JsonConvert.PopulateObject(resultString, result);
+            }
+            catch (Exception e)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"python result= {resultString}");
+                result = null;
+                return;
             }
 
             new_structure.PopulateWithSolverResult(result);
 
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
-            log.Info("Main Linear Solver: END SOLVE INSTANCE");
         }
 
         private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)

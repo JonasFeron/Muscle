@@ -2,7 +2,7 @@
 using Grasshopper.Kernel.Types;
 using Muscle.Elements;
 using Muscle.Nodes;
-//using Muscle.Solvers;
+using Muscle.Solvers;
 //using Muscle.Dynamics;
 using Rhino.Geometry;
 using System;
@@ -60,11 +60,11 @@ namespace Muscle.Structure
 
 		public bool IsInEquilibrium { get; set; }
 
-		//public DRMethod DR { get; set; }
+		public DRMethod DR { get; set; }
 
 		///public DynMethod DS { get; set; }
 		///
-		
+
 
 
 		///Data used the dynamics computation
@@ -105,7 +105,7 @@ namespace Muscle.Structure
 			LengtheningsToApply = new List<double>();
 
 
-			//DR = new DRMethod();
+			DR = new DRMethod();
 
 			////DYN
 			//NumberOfFrequency = 0; 
@@ -170,8 +170,8 @@ namespace Muscle.Structure
 			foreach (var elem in StructuralElements) LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
 
 
-			//DR = other.DR.Duplicate();
-			
+			DR = other.DR.Duplicate();
+
 		}
 
 		public StructureObj Duplicate() //Duplication method calling the copy constructor
@@ -401,78 +401,78 @@ namespace Muscle.Structure
 
 		//#region 5)RegisterDynamics
 
-		///// <summary>
-		///// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
-		///// </summary>
+		/// <summary>
+		/// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
+		/// </summary>
 
-		//#region PopulateWithSolverResult
-		//public void PopulateWithSolverResult(SharedSolverResult answ)
-		//{
-		//	if (answ == null)
-		//	{
-		//		return;
-		//	}
-		//	IsInEquilibrium = answ.IsInEquilibrium;
-		//	DR.nTimeStep = answ.nTimeStep;
-		//	DR.nKEReset = answ.nKEReset;
-
-
-		//	for (int n = 0; n < StructuralNodes.Count; n++)
-		//	{
-		//		Node node = StructuralNodes[n]; // lets give a nickname to the current node from the list. 
-
-		//		// 1) Register the loads, the new nodescoordinates, the reactions results from the solver
-
-		//		//Coordinates. 
-		//		double X = answ.NodesCoord[n][0];
-		//		double Y = answ.NodesCoord[n][1];
-		//		double Z = answ.NodesCoord[n][2];
-		//		node.Point = new Point3d(X, Y, Z);
-		//		// NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
+		#region PopulateWithSolverResult
+		public void PopulateWithSolverResult(SharedSolverResult answ)
+		{
+			if (answ == null)
+			{
+				return;
+			}
+			IsInEquilibrium = answ.IsInEquilibrium;
+			DR.nTimeStep = answ.nTimeStep;
+			DR.nKEReset = answ.nKEReset;
 
 
-		//		//Loads
-		//		double FX = answ.Loads[n][0];
-		//		double FY = answ.Loads[n][1];
-		//		double FZ = answ.Loads[n][2];
-		//		node.Load = new Vector3d(FX, FY, FZ);
+			for (int n = 0; n < StructuralNodes.Count; n++)
+			{
+				Node node = StructuralNodes[n]; // lets give a nickname to the current node from the list. 
 
-		//		//Residual
-		//		double ResX = answ.Residual[n][0];
-		//		double ResY = answ.Residual[n][1];
-		//		double ResZ = answ.Residual[n][2];
-		//		node.Residual = new Vector3d(ResX, ResY, ResZ);
+				// 1) Register the loads, the new nodescoordinates, the reactions results from the solver
 
-		//		//Reactions 
-		//		double ReactX = 0;
-		//		double ReactY = 0;
-		//		double ReactZ = 0;
-		//		if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
-		//		if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
-		//		if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
-		//		node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
-		//	}
+				//Coordinates. 
+				double X = answ.NodesCoord[n][0];
+				double Y = answ.NodesCoord[n][1];
+				double Z = answ.NodesCoord[n][2];
+				node.Point = new Point3d(X, Y, Z);
+				// NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
 
 
-		//	for (int e = 0; e < StructuralElements.Count; e++)
-		//	{
-		//		Element elem = StructuralElements[e];
+				//Loads
+				double FX = answ.Loads[n][0];
+				double FY = answ.Loads[n][1];
+				double FZ = answ.Loads[n][2];
+				node.Load = new Vector3d(FX, FY, FZ);
 
-		//		//1) axialforce results
-		//		elem.Tension = answ.Tension[e];
-		//		elem.LFree = answ.ElementsLFree[e];
+				//Residual
+				double ResX = answ.Residual[n][0];
+				double ResY = answ.Residual[n][1];
+				double ResZ = answ.Residual[n][2];
+				node.Residual = new Vector3d(ResX, ResY, ResZ);
 
-		//		//update the lines end points
-		//		int n0 = elem.EndNodes[0];
-		//		int n1 = elem.EndNodes[1];
-		//		Point3d p0 = StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
-		//		Point3d p1 = StructuralNodes[n1].Point;
-		//		elem.Line = new Line(p0, p1);
-		//	}
+				//Reactions 
+				double ReactX = 0;
+				double ReactY = 0;
+				double ReactZ = 0;
+				if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
+				if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
+				if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
+				node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
+			}
 
-		//}
 
-		//#endregion PopulateWithSolverResult
+			for (int e = 0; e < StructuralElements.Count; e++)
+			{
+				Element elem = StructuralElements[e];
+
+				//1) axialforce results
+				elem.Tension = answ.Tension[e];
+				elem.LFree = answ.ElementsLFree[e];
+
+				//update the lines end points
+				int n0 = elem.EndNodes[0];
+				int n1 = elem.EndNodes[1];
+				Point3d p0 = StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
+				Point3d p1 = StructuralNodes[n1].Point;
+				elem.Line = new Line(p0, p1);
+			}
+
+		}
+
+		#endregion PopulateWithSolverResult
 		////Use the result from the dynamic computation and set them in a structure object
 		//public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
 		//{

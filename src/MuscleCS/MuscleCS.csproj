@@ -24,19 +24,16 @@
   
   <ItemGroup>
     <Compile Remove="Dynamics\**" />
-    <Compile Remove="Loads\Components\**" />
     <Compile Remove="Resources\**" />
     <Compile Remove="Solvers\**" />
     <Compile Remove="Supports\**" />
     <Compile Remove="Util\**" />
     <EmbeddedResource Remove="Dynamics\**" />
-    <EmbeddedResource Remove="Loads\Components\**" />
     <EmbeddedResource Remove="Resources\**" />
     <EmbeddedResource Remove="Solvers\**" />
     <EmbeddedResource Remove="Supports\**" />
     <EmbeddedResource Remove="Util\**" />
     <None Remove="Dynamics\**" />
-    <None Remove="Loads\Components\**" />
     <None Remove="Resources\**" />
     <None Remove="Solvers\**" />
     <None Remove="Supports\**" />
@@ -46,9 +43,12 @@
   <ItemGroup>
     <Compile Remove="PythonInitComponents\StartPythonNETComponent.cs" />
     <Compile Remove="PythonInitComponents\TestPythonNETComponent.cs" />
+    <Compile Remove="PythonNETComponents\aPythonNETGHComponent.cs" />
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Include="Solvers\Components\LinearSolverDisplComponent.cs" />
+    <Compile Include="Solvers\DRMethod.cs" />
     <Compile Include="Supports\Components\SupportComponent.cs" />
     <Compile Include="Supports\Components\SupportXComponent.cs" />
     <Compile Include="Supports\Components\SupportYComponent.cs" />

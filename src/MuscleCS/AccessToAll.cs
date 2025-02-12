@@ -302,7 +302,7 @@ namespace Muscle
         /// </summary>
         public static string pythonProjectDirectory
         {
-            get { return Path.Combine(rootDirectory, "MyPythonScripts"); }
+            get { return Path.Combine(rootDirectory, "MusclePy"); }
         }
 
         /// <summary>
@@ -535,7 +535,7 @@ namespace Muscle
         ///// </summary>
         //public static string pythonProjectDirectory
         //{
-        //    get { return Path.Combine(rootDirectory, "MyPythonScripts"); }
+        //    get { return Path.Combine(rootDirectory, "MusclePy"); }
         //}
 
         //public static string csharpProjectDirectory
