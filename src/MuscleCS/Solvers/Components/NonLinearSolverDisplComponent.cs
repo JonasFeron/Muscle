@@ -8,24 +8,22 @@ using Muscle.Elements;
 using Muscle.Loads;
 using Muscle.Nodes;
 using Muscle.PythonLink;
-using Muscle.PythonLink.Component;
 using Muscle.Structure;
 using Newtonsoft.Json;
 using Rhino.Geometry;
 
 namespace Muscle.Solvers
 {
-    public class LinearSolverDisplComponent : GH_Component
+    public class NonLinearSolverDisplComponent : GH_Component
     {
-        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public LinearSolverDisplComponent()
-          : base("Solver - Linear - Displacements Meth.", "Linear D",
-                "Solve truss.\n" +
-                "  Displacement method is used (solve K.U=L then post-process to find axial forces)",
+        public NonLinearSolverDisplComponent()
+          : base("Solver - Non Linear - Displacements Meth.", "Non Linear D",
+                "Solve truss with geometric non linearities.\n" +
+                "  Displacement method is used (solve K.U=L then post-process to find axial forces). Loads are splitted in n_it increments and are applied one after the other. Length variations are turned into equivalent loads.",
               "Muscles", "Solvers")
         {
         }
@@ -48,7 +46,7 @@ namespace Muscle.Solvers
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("2ec0d860-6029-4346-8925-49f2c69e132c"); }
+            get { return new Guid("91c4f69c-748a-4ef7-b1d4-a16c6455f1f8"); }
         }
 
         /// <summary>
@@ -58,9 +56,11 @@ namespace Muscle.Solvers
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may contain previous results (forces and displacements).", GH_ParamAccess.item);
             pManager.AddGenericParameter("External Point Loads", "Le (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Length Variation", "DL (m)", "Lengthening (+) or shortening (-) to apply on the elements.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Length Variations", "DL (mm)", "Lengthening (+) or shortening (-) to apply on the elements.", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Number of iterations", "n_it", "Solve non-linearly the structure in +- n_it linear steps", GH_ParamAccess.item, 50);
             pManager[1].Optional = true;
             pManager[2].Optional = true;
+            pManager[3].Optional = true;
 
         }
 
@@ -79,22 +79,21 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Main Linear Solver: NEW SOLVE INSTANCE");
-
+            log.Info("Main NONLinear Solver: NEW SOLVE INSTANCE");
             //1) Collect Data
             StructureObj structure = new StructureObj();
             GH_Structure<IGH_Goo> gh_loads_ext = new GH_Structure<IGH_Goo>();
             GH_Structure<IGH_Goo> gh_loads_prestress = new GH_Structure<IGH_Goo>();
-            //int n_it = -1;
+            int n_it = -1;
 
             if (!DA.GetData(0, ref structure)) { return; }
             if (!DA.GetDataTree(1, out gh_loads_ext)) { }
             if (!DA.GetDataTree(2, out gh_loads_prestress)) { }
-            //if (!DA.GetData(3, ref n_it)) { return; }
+            if (!DA.GetData(3, ref n_it)) { }
 
 
             //2) Transform datas before solving in python
-            StructureObj new_structure = structure.Duplicate(); //a) Duplicate structure to not alter the original
+            StructureObj new_structure = structure.Duplicate(); //a) Duplicate structure and update its nodes coordinates with results from previous solve
 
             bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData());
             bool success2 = RegisterPrestressLoads(new_structure, gh_loads_prestress.FlattenData());
@@ -105,15 +104,14 @@ namespace Muscle.Solvers
                 return; //abort if both failed
             }
             //3) Solve in python
-
             if (AccessToAll.pythonManager == null)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please restart one \"Initialize Python\" Component.");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please restart the \"Initialize Python\" Component.");
                 DA.SetData(0, null);
                 return;
             }
 
-            SharedData data = new SharedData(new_structure); //Object data contains all the essential informations of structure
+            SharedData data = new SharedData(new_structure, n_it); //Object data contains all the essential informations of structure
             SharedSolverResult result = new SharedSolverResult();
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
@@ -121,19 +119,17 @@ namespace Muscle.Solvers
                 log.Debug("pythonManager exists");
                 string resultString = null;
                 string dataString = JsonConvert.SerializeObject(data, Formatting.None);
-                log.Info("Main Linear Solver: ask Python to execute a command");
+                log.Info("Main NonLinear Solver: ask Python to execute a command");
 
-                resultString = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainLinearSolve, dataString);
+                resultString = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainNonLinearSolve, dataString);
 
-                log.Info("Main Linear Solver: received results");
-                log.Debug(resultString);
+                log.Info("Main NonLinear Solver: received results");
                 try
                 {
                     JsonConvert.PopulateObject(resultString, result);
                 }
                 catch
                 {
-
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + resultString);
                     log.Warn("Main NonLinear Solver: Something went wrong while solving:" + resultString);
                     result = null;
@@ -144,8 +140,9 @@ namespace Muscle.Solvers
 
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
-            log.Info("Main Linear Solver: END SOLVE INSTANCE");
+            log.Info("Main NONLinear Solver: END SOLVE INSTANCE");
         }
+
 
         private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)
         {

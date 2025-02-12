@@ -9,7 +9,6 @@ using Muscle.Loads;
 using Muscle.Nodes;
 using Muscle.PythonLink;
 using Muscle.Dynamics;
-using Muscle.PythonLink.Component;
 using Muscle.Structure;
 using Newtonsoft.Json;
 using Rhino.Geometry;
@@ -18,7 +17,6 @@ namespace Muscle.Dynamics
 {
     public class DynamicSolverComponent : GH_Component
     {
-        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -37,7 +35,8 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.Lumped;
+                //return Properties.Resources.Lumped;
+                return null;
             }
         }
 
@@ -76,7 +75,6 @@ namespace Muscle.Dynamics
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Dynamic computation: NEW SOLVE INSTANCE");
             //1) Collect Data
             StructureObj structure = new StructureObj();
             List<double> DynMassIN = new List<double>();
@@ -122,15 +120,12 @@ namespace Muscle.Dynamics
 
             if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
             {
-                log.Debug("pythonManager exists");
                 string result_str = null;
                 string Data_str = JsonConvert.SerializeObject(data, Formatting.None); /// Json is formatting the data for the transfert to Python
-                log.Info("Dynamic computation: ask Python to execute a command");
 
                 result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.DynSolve, Data_str);
                 ///AccessToAll launch a Python file who contains the steps of computations
 
-                log.Info("Dynamic computation: received results");
                 try
                 {
                     JsonConvert.PopulateObject(result_str, result); //Obtain all the results
@@ -201,7 +196,6 @@ namespace Muscle.Dynamics
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
 
-            log.Info("Dynamic computation: END SOLVE INSTANCE");
 
             
         }

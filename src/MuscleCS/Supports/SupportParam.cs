@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace Muscle
+namespace Muscle.Supports
 {
     public class SupportParam : GH_PersistentGeometryParam<GH_Support>, IGH_PreviewObject
     {

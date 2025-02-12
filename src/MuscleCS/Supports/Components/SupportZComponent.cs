@@ -3,21 +3,21 @@ using Rhino.Geometry;
 using System;
 
 
-namespace Muscle
+namespace Muscle.Supports
 {
-    public class SupportYComponent : GH_Component
+    public class SupportZComponent : GH_Component
     {
 
         #region Properties
 
-        public override Guid ComponentGuid { get { return new Guid("ebf75adf-4742-4a6c-9fff-adb7797d3cca"); } }
+        public override Guid ComponentGuid { get { return new Guid("eb860698-c0c1-473a-9bb2-b15243a2125c"); } }
 
         #endregion Properties
 
         #region Constructors
 
-        public SupportYComponent() : base("Support Y", "SptY",
-                                                  "Set the Y support condition of a point",
+        public SupportZComponent() : base("Support Z", "SptZ",
+                                                  "Set the Z support condition of a point",
                                           "Muscles", "Model")
         {
         }
@@ -33,7 +33,7 @@ namespace Muscle
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Support", "Spt", "The given point can not move in the Y direction", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Support", "Spt", "The given point can not move in the Z direction", GH_ParamAccess.item);
         }
 
         protected override void SolveInstance(IGH_DataAccess DA)
@@ -42,7 +42,7 @@ namespace Muscle
 
             if (!DA.GetData(0, ref point)) { return; }
 
-            DA.SetData(0, new GH_Support(new Support(point, true, false, true)));
+            DA.SetData(0, new GH_Support(new Support(point, true, true, false)));
         }
 
         #endregion Methods

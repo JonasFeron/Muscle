@@ -23,9 +23,43 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Remove="Structure\**" />
-    <EmbeddedResource Remove="Structure\**" />
-    <None Remove="Structure\**" />
+    <Compile Remove="Dynamics\**" />
+    <Compile Remove="Loads\Components\**" />
+    <Compile Remove="Resources\**" />
+    <Compile Remove="Solvers\**" />
+    <Compile Remove="Supports\**" />
+    <Compile Remove="Util\**" />
+    <EmbeddedResource Remove="Dynamics\**" />
+    <EmbeddedResource Remove="Loads\Components\**" />
+    <EmbeddedResource Remove="Resources\**" />
+    <EmbeddedResource Remove="Solvers\**" />
+    <EmbeddedResource Remove="Supports\**" />
+    <EmbeddedResource Remove="Util\**" />
+    <None Remove="Dynamics\**" />
+    <None Remove="Loads\Components\**" />
+    <None Remove="Resources\**" />
+    <None Remove="Solvers\**" />
+    <None Remove="Supports\**" />
+    <None Remove="Util\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="PythonInitComponents\StartPythonComponent.cs" />
+    <Compile Remove="PythonInitComponents\TestPythonComponent.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Include="Supports\Components\SupportComponent.cs" />
+    <Compile Include="Supports\Components\SupportXComponent.cs" />
+    <Compile Include="Supports\Components\SupportYComponent.cs" />
+    <Compile Include="Supports\Components\SupportZComponent.cs" />
+    <Compile Include="Supports\GH_Support.cs" />
+    <Compile Include="Supports\Support.cs" />
+    <Compile Include="Supports\SupportParam.cs" />
+    <Compile Include="Util\BoolGateListComponent.cs" />
+    <Compile Include="Util\GH_Gradient_Forces.cs" />
+    <Compile Include="Util\ToMatrixInput.cs" />
+    <Compile Include="Util\Util.cs" />
   </ItemGroup>
   
   <ItemGroup>

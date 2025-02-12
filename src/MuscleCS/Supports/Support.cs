@@ -1,11 +1,10 @@
 ﻿using Muscle.Nodes;
-using Muscle.Structure;
 using Rhino.Geometry;
 
 using System;
 using System.Collections.Generic;
 
-namespace Muscle
+namespace Muscle.Supports
 {
 
     public class Support

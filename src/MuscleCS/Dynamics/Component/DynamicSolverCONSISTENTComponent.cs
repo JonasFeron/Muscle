@@ -9,7 +9,6 @@ using Muscle.Loads;
 using Muscle.Nodes;
 using Muscle.PythonLink;
 using Muscle.Dynamics;
-using Muscle.PythonLink.Component;
 using Muscle.Structure;
 using Newtonsoft.Json;
 using Rhino.Geometry;
@@ -18,7 +17,6 @@ namespace Muscle.Dynamics
 {
     public class DynamicSolverCONSISTENTComponent : GH_Component
     {
-        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.

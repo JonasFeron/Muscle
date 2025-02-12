@@ -2,7 +2,7 @@
 using Rhino.Geometry;
 using System;
 
-namespace Muscle
+namespace Muscle.Supports
 {
     public class SupportComponent : GH_Component
     {

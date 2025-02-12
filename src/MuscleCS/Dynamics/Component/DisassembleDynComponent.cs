@@ -9,7 +9,6 @@ using Muscle.Loads;
 using Muscle.Nodes;
 using Muscle.PythonLink;
 using Muscle.Dynamics;
-using Muscle.PythonLink.Component;
 using Muscle.Structure;
 using Newtonsoft.Json;
 using Rhino.Geometry;
@@ -18,7 +17,6 @@ namespace Muscle.Dynamics
 {
     public class DisassembleDynComponent : GH_Component
     {
-        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -36,7 +34,8 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.Properties;
+                //return Resources.Properties;
+                return null;
             }
         }
 
@@ -76,7 +75,6 @@ namespace Muscle.Dynamics
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Dissassemble dynamics : BEGIN");
 
             //1) Collect Data
             StructureObj structure = new StructureObj();
@@ -94,7 +92,6 @@ namespace Muscle.Dynamics
 
 
 
-            log.Info("Dissassemble dynamics : END");
         }
 
     }

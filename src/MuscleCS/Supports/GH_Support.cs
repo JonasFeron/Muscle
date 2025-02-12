@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel.Data;
 using System.IO;
 
-namespace Muscle
+namespace Muscle.Supports
 {
     public class GH_Support : GH_GeometricGoo<Support>, IGH_PreviewData
     {

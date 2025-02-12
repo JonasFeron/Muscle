@@ -1,6 +1,5 @@
 ﻿using Grasshopper.Kernel.Types;
 using Muscle.Nodes;
-using Muscle.Structure;
 using Rhino.Geometry;
 using System.Collections.Generic;
 
