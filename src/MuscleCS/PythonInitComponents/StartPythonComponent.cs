@@ -22,7 +22,7 @@ using PythonConnect;
 using log4net.Core;
 using System.IO;
 
-namespace MyGrasshopperPlugIn.PythonInitComponents
+namespace Muscle.PythonInitComponents
 {
     public class StartPythonComponent : GH_Component
     {

@@ -44,8 +44,8 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Compile Remove="PythonInitComponents\StartPythonComponent.cs" />
-    <Compile Remove="PythonInitComponents\TestPythonComponent.cs" />
+    <Compile Remove="PythonInitComponents\StartPythonNETComponent.cs" />
+    <Compile Remove="PythonInitComponents\TestPythonNETComponent.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -66,6 +66,7 @@
     <PackageReference Include="Grasshopper" Version="7.0.20314.3001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
     <PackageReference Include="Grasshopper" Version="8.0.23304.9001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="PythonConnect" Version="1.1.0" />
     <PackageReference Include="pythonnet" Version="3.0.5" />
   </ItemGroup>
   

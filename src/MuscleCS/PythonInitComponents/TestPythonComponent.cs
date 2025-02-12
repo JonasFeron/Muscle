@@ -23,7 +23,7 @@ using Grasshopper.Kernel;
 using PythonConnect;
 using Rhino.Geometry;
 
-namespace MyGrasshopperPlugIn.PythonInitComponents
+namespace Muscle.PythonInitComponents
 {
     public class TestPythonComponent : GH_Component
     {
