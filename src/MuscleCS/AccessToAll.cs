@@ -343,7 +343,7 @@ namespace Muscle
 
         public static string csharpProjectDirectory
         {
-            get { return Path.Combine(rootDirectory, GHAssemblyName); }
+            get { return Path.Combine(rootDirectory, "MuscleCS"); }
         }
         public static string tempDirectory
         {

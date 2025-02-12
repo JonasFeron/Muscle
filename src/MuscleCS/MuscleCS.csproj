@@ -8,7 +8,7 @@
         Rhino 8 Mac: net7.0, net7.0-macos, net7.0-macos12.0, etc
     -->
     <!-- <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks> -->
-    <TargetFrameworks>net48</TargetFrameworks>
+    <TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <TargetExt>.gha</TargetExt>
     <NoWarn>NU1701;NETSDK1086</NoWarn>
@@ -42,12 +42,6 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Compile Remove="PythonInitComponents\StartPythonNETComponent.cs" />
-    <Compile Remove="PythonInitComponents\TestPythonNETComponent.cs" />
-    <Compile Remove="PythonNETComponents\aPythonNETGHComponent.cs" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <Compile Include="Solvers\Components\LinearSolverDisplComponent.cs" />
     <Compile Include="Solvers\DRMethod.cs" />
     <Compile Include="Supports\Components\SupportComponent.cs" />
@@ -67,7 +61,6 @@
     <PackageReference Include="Grasshopper" Version="7.35.23346.11001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
     <PackageReference Include="Grasshopper" Version="8.10.24228.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="PythonConnect" Version="1.1.0" />
     <PackageReference Include="pythonnet" Version="3.0.5" />
   </ItemGroup>
   
