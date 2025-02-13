@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
@@ -10,7 +11,9 @@ using Muscle.Nodes;
 using Muscle.PythonLink;
 using Muscle.Structure;
 using Newtonsoft.Json;
+using Python.Runtime;
 using Rhino.Geometry;
+using Rhino.Runtime;
 
 namespace Muscle.Solvers
 {
@@ -90,7 +93,19 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Main NONLinear Solver: NEW SOLVE INSTANCE");
+            string pythonScript = AccessToAll.MainNonLinearSolve; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
+
+            if (!AccessToAll.hasPythonStarted)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
+                return;
+            }
+            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript + ".py")))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
+                return;
+            }
+
             //1) Collect Data
             StructureObj structure = new StructureObj();
             GH_Structure<IGH_Goo> gh_loads_ext = new GH_Structure<IGH_Goo>();
@@ -130,37 +145,40 @@ namespace Muscle.Solvers
             //} 
 
             //3) Solve in python
-            if (AccessToAll.pythonManager == null)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please restart the \"Initialize Python\" Component.");
-                DA.SetData(0, null);
-                return;
-            }
 
             SharedData data = new SharedData(new_structure); //Object data contains all the essential informations of structure
             SharedSolverResult result = new SharedSolverResult();
 
-            if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
+            string jsonData = JsonConvert.SerializeObject(data, Formatting.None);
+            dynamic jsonResult = null;
+
+            //2) Solve in python
+            var m_threadState = PythonEngine.BeginAllowThreads();
+
+            using (Py.GIL())
             {
-                log.Debug("pythonManager exists");
-                string result_str = null;
-                string Data_str = JsonConvert.SerializeObject(data, Formatting.None);
-                log.Info("Main NonLinear Solver: ask Python to execute a command");
-
-                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.MainDRSolve, Data_str);
-
-                log.Info("Main NonLinear Solver: received results");
+                // Safe to access Python here.
                 try
                 {
-                    JsonConvert.PopulateObject(result_str, result);
+                    dynamic script = PyModule.Import(pythonScript);
+                    dynamic mainFunction = script.main;
+                    jsonResult = mainFunction(jsonData);
+                    JsonConvert.PopulateObject((string)jsonResult, result);
                 }
-                catch
+                catch (PythonException ex)
                 {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while solving: " + result_str);
-                    log.Warn("Main NonLinear Solver: Something went wrong while solving:" + result_str);
-                    result = null;
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+                }
+                catch (Exception e)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"python result= {jsonResult}");
+                    return;
                 }
             }
+
+            PythonEngine.EndAllowThreads(m_threadState);
+          
 
             new_structure.PopulateWithSolverResult(result); // Update the new structure, the elements and the nodes with the results of python. 
 
@@ -170,7 +188,6 @@ namespace Muscle.Solvers
             DA.SetData(2, new_structure.DR.nTimeStep);
             DA.SetData(3, new_structure.DR.nKEReset);
 
-            log.Info("Main NONLinear Solver: END SOLVE INSTANCE");
         }
 
         private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)

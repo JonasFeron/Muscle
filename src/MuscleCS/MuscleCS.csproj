@@ -42,7 +42,10 @@
   </ItemGroup>
   
   <ItemGroup>
+    <Compile Include="Solvers\Components\DRSolverComponent.cs" />
     <Compile Include="Solvers\Components\LinearSolverDisplComponent.cs" />
+    <Compile Include="Solvers\Components\NonLinearSolverDisplComponent.cs" />
+    <Compile Include="Solvers\Components\SVDSolverComponent.cs" />
     <Compile Include="Solvers\DRMethod.cs" />
     <Compile Include="Supports\Components\SupportComponent.cs" />
     <Compile Include="Supports\Components\SupportXComponent.cs" />
