@@ -1613,16 +1613,13 @@ class StructureObj():
                          ElementsLFreeInit, LoadsInit, TensionInit, ReactionsInit,
                          LoadsToApply, LengtheningsToApply, Residual0Threshold)
         Self.Initial.ComputeState(Self,False,False)
-<<<<<<< HEAD
         Self.Initial.SVD.SVDEquilibriumMatrix(Self, Self.Initial.AFree, Self.Residual0Threshold)
         Self.Initial.SVD.SensitivityMatrix(Self)
-=======
-        Self.Initial.SVD.SVDEquilibriumMatrix(Self, Self.Initial.AFree)
     
     def MainAssembleDyn(Self, Data):
         Self.InitialData(Data.NodesCoord, Data.ElementsEndNodes, Data.IsDOFfree, Data.ElementsType, Data.ElementsA, Data.ElementsE, Data.TensionInit, Data.DynamicMass)
 
->>>>>>> TryMergingTheDynamicForkFromADE
+
 
     def MainDynamicRelaxation(Self, Data):
 
@@ -2084,9 +2081,6 @@ class StructureObj():
 
         if k == kmax:
             # print('nbr iterations du solveur non linéaire : {}/{}  progression Stage: {} %'.format(k, Max_n_steps,np.around(Stage * 100,decimals=2)))
-<<<<<<< HEAD
-            return (np.array([[]]),np.array([[]]))
-=======
             return (np.array([[]]),np.array([[]]))
         else:
             # print('nbr iterations du solveur non linéaire :', k)
@@ -2528,5 +2522,3 @@ class StructureObj():
         return freq,mode,TotMode
     #endregion
 
-
->>>>>>> TryMergingTheDynamicForkFromADE
