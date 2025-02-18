@@ -24,18 +24,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Remove="Dynamics\**" />
-    <Compile Remove="Resources\**" />
     <Compile Remove="Solvers\**" />
     <Compile Remove="Supports\**" />
     <Compile Remove="Util\**" />
-    <EmbeddedResource Remove="Dynamics\**" />
-    <EmbeddedResource Remove="Resources\**" />
     <EmbeddedResource Remove="Solvers\**" />
     <EmbeddedResource Remove="Supports\**" />
     <EmbeddedResource Remove="Util\**" />
-    <None Remove="Dynamics\**" />
-    <None Remove="Resources\**" />
     <None Remove="Solvers\**" />
     <None Remove="Supports\**" />
     <None Remove="Util\**" />

@@ -22,7 +22,8 @@ namespace Muscle.Dynamics
             {
                 get
                 {
-                    return Properties.Resources.MassDisplay;
+                    //return Properties.Resources.MassDisplay;
+                    return null;
                 }
             }
 
@@ -40,14 +41,14 @@ namespace Muscle.Dynamics
 
             protected override void SolveInstance(IGH_DataAccess DA)
             {
-                GH_PointLoad ghPointLoad = new GH_PointLoad();
+                GH_PointMass ghPointMass = new GH_PointMass();
                 
                 //Obtain the data
-                if (!DA.GetData(0, ref ghPointLoad)) { return; }
+                if (!DA.GetData(0, ref ghPointMass)) { return; }
 
                 //Return the data linked to the point masses put as input 
-                DA.SetData(0, ghPointLoad.Value.NodeInd);
-                DA.SetData(1, ghPointLoad.Value.Vector.Z);
+                DA.SetData(0, ghPointMass.Value.NodeInd);
+                DA.SetData(1, ghPointMass.Value.Vector.Z);
             }
         }
     }

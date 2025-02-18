@@ -3,7 +3,7 @@ using Grasshopper.Kernel.Types;
 using Muscle.Elements;
 using Muscle.Nodes;
 using Muscle.Solvers;
-//using Muscle.Dynamics;
+using Muscle.Dynamics;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
@@ -77,7 +77,7 @@ namespace Muscle.Structure
 		public List<List<Vector3d>> ModeVector { get; set; } //Modes written in a vector form
 		public List<double> DynMass { get; set; } //Masses used for the dynamic computation
 		//List containing on each position the mass [kg]. The position in the list is equal to the node index of the node on wich the mass is applied.
-		public List<GH_PointLoad> PointMasses { get; set; } //Masses used for the dynamic computation in objects
+		public List<GH_PointMass> PointMasses { get; set; } //Masses used for the dynamic computation in objects
 		//The mass written in a list of point masses
 
 		#endregion Properties
@@ -473,19 +473,19 @@ namespace Muscle.Structure
 		}
 
 		#endregion PopulateWithSolverResult
-		////Use the result from the dynamic computation and set them in a structure object
-		//public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
-		//{
-		//	if (answ == null)
-		//	{
-		//		return;
-		//	}
-		//	NumberOfFrequency = answ.NumberOfFrequency;
-		//	Frequency = answ.Frequency;
-		//	Mode = answ.Modes;
-		//	DynMass = answ.DynMasses;
+		//Use the result from the dynamic computation and set them in a structure object
+		public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
+		{
+			if (answ == null)
+			{
+				return;
+			}
+			NumberOfFrequency = answ.NumberOfFrequency;
+			Frequency = answ.Frequency;
+			Mode = answ.Modes;
+			DynMass = answ.DynMasses;
 
-		//}
+		}
 
 		//#endregion PopulateWithSolverResult
 

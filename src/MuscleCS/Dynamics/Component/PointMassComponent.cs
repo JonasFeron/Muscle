@@ -31,7 +31,8 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.Mass_element;
+                //return Properties.Resources.Mass_element;
+                return null;
             }
         }
         #endregion Constructors
@@ -66,7 +67,7 @@ namespace Muscle.Dynamics
             if (!DA.GetDataList(1, mass)) { return; }
 
 
-            List<GH_PointLoad> Return = new List<GH_PointLoad>();
+            List<GH_PointMass> Return = new List<GH_PointMass>();
 
             if (mass.Count != PointIndex.Count) //Verify the length of the inputed lists
             {
@@ -75,11 +76,11 @@ namespace Muscle.Dynamics
             }
             else
             {
-                for (int i = 0; i < mass.Count; i++)//For each element, create a  GH pointLoad element who is used for the dynamic computation as "point mass" 
+                for (int i = 0; i < mass.Count; i++)//For each element, create a  GH PointMass element who is used for the dynamic computation as "point mass" 
                 {
                     Vector3d vector = new Vector3d();
                     vector.Z = mass[i]; //Only the z direction has a value
-                    Return.Add(new GH_PointLoad(new PointLoad(PointIndex[i], vector))); //Add the elements to the list of GH point load element that will be returned
+                    Return.Add(new GH_PointMass(new PointMass(PointIndex[i], vector))); //Add the elements to the list of GH point load element that will be returned
                 }
             }
             

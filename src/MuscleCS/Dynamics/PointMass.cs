@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Muscle.Dynamics
 {
-    public class PointLoad
+    public class PointMass
     {
 
         #region Properties
@@ -24,40 +24,40 @@ namespace Muscle.Dynamics
         #region Constructors
 
         //Different way to initialize a point mass
-        public PointLoad() //Contain a mass in kg 
+        public PointMass() //Contain a mass in kg 
         {
             Point = new Point3d();
             Vector = new Vector3d();
         }
 
-        public PointLoad(Point3d aPoint, Vector3d aVector)
+        public PointMass(Point3d aPoint, Vector3d aVector)
         {
             Point = aPoint;
             Vector = aVector;
             NodeInd = -1;
         }
-        public PointLoad(Node aNode, Vector3d aVector)
+        public PointMass(Node aNode, Vector3d aVector)
         {
             NodeInd = aNode.Ind;
             Vector = aVector;
         }
-        public PointLoad(int ind, Vector3d aVector)
+        public PointMass(int ind, Vector3d aVector)
         {
             NodeInd = ind;
             Vector = aVector;
         }
 
-        public PointLoad(int ind, Point3d point, Vector3d aVector)
+        public PointMass(int ind, Point3d point, Vector3d aVector)
         {
             NodeInd = ind;
             Point = point;
             Vector = aVector;
         }
 
-        public PointLoad(PointLoad aPointLoad)
+        public PointMass(PointMass aPointMass)
         {
-            Point = aPointLoad.Point;
-            Vector = aPointLoad.Vector;
+            Point = aPointMass.Point;
+            Vector = aPointMass.Vector;
         }
 
         #endregion Constructors
@@ -65,29 +65,29 @@ namespace Muscle.Dynamics
 
 
         #region Methods
-        public static PointLoad operator *(PointLoad load, double factor)
+        public static PointMass operator *(PointMass load, double factor)
         {
-            return new PointLoad()
+            return new PointMass()
             {
                 Point = load.Point,
                 Vector = load.Vector * factor
             };
         }
 
-        public static PointLoad operator +(PointLoad load1, PointLoad load2)
+        public static PointMass operator +(PointMass load1, PointMass load2)
         {
             if (load1.Point.EpsilonEquals(load2.Point, 1e-5)) { throw new System.Exception("Mass must have the same application point"); }
 
-            return new PointLoad()
+            return new PointMass()
             {
                 Point = load1.Point,
                 Vector = load1.Vector + load2.Vector,
             };
         }
 
-        public PointLoad Duplicate()
+        public PointMass Duplicate()
         {
-            return new PointLoad(this);
+            return new PointMass(this);
         }
 
         public override string ToString() //Text description

@@ -12,6 +12,9 @@ using Muscle.Dynamics;
 using Muscle.Structure;
 using Newtonsoft.Json;
 using Rhino.Geometry;
+using Python.Runtime;
+using Rhino.Runtime;
+using System.IO;
 
 namespace Muscle.Dynamics
 {
@@ -35,7 +38,8 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.Consistent;
+                return null;
+                //return Properties.Resources.Consistent;
             }
         }
 
@@ -75,7 +79,18 @@ namespace Muscle.Dynamics
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Dynamic computation: NEW SOLVE INSTANCE");
+            string pythonScript = AccessToAll.DynSolveCONSISTENT; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
+            if (!AccessToAll.hasPythonStarted)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
+                return;
+            }
+            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript)))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
+                DA.SetData(0, null);
+                return;
+            }
             //1) Collect Data
             StructureObj structure = new StructureObj();
             List<double> DynMassIN = new List<double>();
@@ -107,12 +122,7 @@ namespace Muscle.Dynamics
 
 
             //3) Solve in python
-            if (AccessToAll.pythonManager == null) //Python need to be initialized
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Please restart the \"Initialize Python\" Component.");
-                DA.SetData(0, null);
-                return;
-            }
+
 
 
 
@@ -120,29 +130,35 @@ namespace Muscle.Dynamics
             SharedData data = new SharedData(structure, DynMassIN, MassAllElements, MaxFreqWtd); //Object data contains all the essential informations of structure + the dynMass considered
             SharedSolverResult result = new SharedSolverResult(); //create the file with the results
 
+            string jsonData = JsonConvert.SerializeObject(data, Formatting.None);
+            dynamic jsonResult = null;
 
-            if (AccessToAll.pythonManager != null) // run calculation in python by transfering the data base as a string. 
+            //2) Solve in python
+            var m_threadState = PythonEngine.BeginAllowThreads();
+
+            // following code is inspired by https://github.com/pythonnet/pythonnet/wiki/Threading
+            using (Py.GIL())
             {
-                log.Debug("pythonManager exists");
-                string result_str = null;
-                string Data_str = JsonConvert.SerializeObject(data, Formatting.None); /// Json is formatting the data for the transfert to Python
-                log.Info("Dynamic computation: ask Python to execute a command");
-
-                result_str = AccessToAll.pythonManager.ExecuteCommand(AccessToAll.DynSolveCONSISTENT, Data_str);
-                ///AccessToAll launch a Python file who contains the steps of computations
-
-                log.Info("Dynamic computation: received results");
                 try
                 {
-                    JsonConvert.PopulateObject(result_str, result); //Obtain all the results
+                    dynamic script = PyModule.Import(pythonScript);
+                    dynamic mainFunction = script.main;
+                    jsonResult = mainFunction(jsonData);
+                    JsonConvert.PopulateObject((string)jsonResult, result);
                 }
-                catch
+                catch (PythonException ex)
                 {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Something went wrong while computing: " + result_str);
-                    log.Warn("Dynamic computation: Something went wrong while solving:" + result_str);
-                    result = null;
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+                }
+                catch (Exception e)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"python result= {jsonResult}");
+                    return;
                 }
             }
+            PythonEngine.EndAllowThreads(m_threadState);
+
 
             new_structure.PopulateWithSolverResult_dyn(result); // Set all result from the dynamic computation inside the new_structure
 
@@ -171,7 +187,7 @@ namespace Muscle.Dynamics
 
             //6) Create list of object 'point masses'
             List<Node> NodesCoord = structure.StructuralNodes;
-            List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
+            List<GH_PointMass> selfmass = new List<GH_PointMass>();
             for (int i = 0; i < NumberOfNodes; i++)
             {
 
@@ -180,9 +196,9 @@ namespace Muscle.Dynamics
                 Point3d Coord = new Point3d();
                 Mass.Z = structure.DynMass[i];
                 Coord = NodesCoord[i].Point;
-                PointLoad Display = new PointLoad(i, Coord, Mass);
+                PointMass Display = new PointMass(i, Coord, Mass);
 
-                GH_PointLoad p0 = new GH_PointLoad(Display); //Because the weight is in N
+                GH_PointMass p0 = new GH_PointMass(Display); //Because the weight is in N
                 selfmass.Add(p0);
             }
 
@@ -202,7 +218,7 @@ namespace Muscle.Dynamics
             GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
             DA.SetData(0, gh_structure);
 
-            log.Info("Dynamic computation: END SOLVE INSTANCE");
+            //log.Info("Dynamic computation: END SOLVE INSTANCE");
 
 
         }
@@ -215,12 +231,12 @@ namespace Muscle.Dynamics
             bool success = false;
             if (datas.Count == 0 || datas == null) return false; //failure and abort
 
-            PointLoad load;
+            PointMass load;
             foreach (var data in datas) //Go trough the data
             {
-                if (data is GH_PointLoad)
+                if (data is GH_PointMass)
                 {
-                    load = ((GH_PointLoad)data).Value; //retrieve the pointload (=point mass in this case) inputted by the user
+                    load = ((GH_PointMass)data).Value; //retrieve the pointload (=point mass in this case) inputted by the user
                     // we need to know on which point or node the load will have to be applied
                     int ind = -1;
                     if (load.NodeInd > -1) //PointsLoad is defined on a node index
@@ -244,7 +260,7 @@ namespace Muscle.Dynamics
                     success = true;
                 }
             }
-            log.Info("Dynamic computation: register of the point masses is done");
+            //log.Info("Dynamic computation: register of the point masses is done");
             return success;
         }
     }

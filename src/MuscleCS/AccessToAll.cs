@@ -68,6 +68,8 @@ namespace Muscle
         public static string assemblyTitle = "Muscles v0.5";
 
         public static string DynSolve = null;
+        public static string DynSolveCONSISTENT = null;
+
         public static string MainTest
         {
             get

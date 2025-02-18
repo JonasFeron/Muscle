@@ -34,7 +34,7 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.Mass;
+                return null;
             }
         }
 

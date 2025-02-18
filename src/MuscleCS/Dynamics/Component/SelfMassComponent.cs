@@ -28,7 +28,8 @@ namespace Muscle.Dynamics
         {
             get
             {
-                return Properties.Resources.SM;
+                //return Properties.Resources.SM;
+                return null;
             }
         }
         #region Methods
@@ -51,11 +52,11 @@ namespace Muscle.Dynamics
             //Input list of element(s)
             if (!DA.GetData(0, ref e)) { return; }
 
-            List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
+            List<GH_PointMass> selfmass = new List<GH_PointMass>();
             double acc = AccessToAll.g.Z;
             //Point mass at each extremity
-            GH_PointLoad p0 = new GH_PointLoad(new PointLoad(e.EndNodes[0], e.Weight / (2*acc))); //Because the weight is in N
-            GH_PointLoad p1 = new GH_PointLoad(new PointLoad(e.EndNodes[1], e.Weight / (2*acc)));
+            GH_PointMass p0 = new GH_PointMass(new PointMass(e.EndNodes[0], e.Weight / (2*acc))); //Because the weight is in N
+            GH_PointMass p1 = new GH_PointMass(new PointMass(e.EndNodes[1], e.Weight / (2*acc)));
             selfmass.Add(p0);
             selfmass.Add(p1);
 

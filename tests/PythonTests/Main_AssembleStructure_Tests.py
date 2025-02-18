@@ -1,4 +1,8 @@
 import unittest
+import os
+import sys
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src/MusclePy'))
+sys.path.append(base_dir)
 from MainAssembleStructure import core
 import sys
 

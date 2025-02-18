@@ -5,7 +5,6 @@ using System.Drawing;
 using GH_IO.Serialization;
 using System;
 using Muscle.Loads;
-using Muscle.Dynamics;
 
 
 namespace Muscle.Dynamics
@@ -13,19 +12,19 @@ namespace Muscle.Dynamics
 
 
     //Create a GH element for the masses used for the dynamic computation
-    public class GH_PointLoad : GH_GeometricGoo<PointLoad>, IGH_PreviewData 
+    public class GH_PointMass : GH_GeometricGoo<PointMass>, IGH_PreviewData 
     {
-        public GH_PointLoad() : base()
+        public GH_PointMass() : base()
         {
-            Value = new PointLoad();
+            Value = new PointMass();
         }
 
-        public GH_PointLoad(PointLoad mass) : base(mass)
+        public GH_PointMass(PointMass mass) : base(mass)
         {
             Value = mass;
         }
 
-        public GH_PointLoad(GH_PointLoad other)
+        public GH_PointMass(GH_PointMass other)
         {
             Value = other.Value.Duplicate();
         }
@@ -85,7 +84,7 @@ namespace Muscle.Dynamics
 
         public override IGH_GeometricGoo DuplicateGeometry()
         {
-            return new GH_PointLoad(this);
+            return new GH_PointMass(this);
         }
 
         public override BoundingBox GetBoundingBox(Transform xform)
@@ -95,11 +94,11 @@ namespace Muscle.Dynamics
 
         public override IGH_GeometricGoo Morph(SpaceMorph xmorph)
         {
-            GH_PointLoad nGHPointLoad = new GH_PointLoad(this);
-            nGHPointLoad.Value.Point = xmorph.MorphPoint(Value.Point);
-            nGHPointLoad.Value.Vector = new Vector3d(xmorph.MorphPoint(new Point3d(Value.Vector)));
+            GH_PointMass nGHPointMass = new GH_PointMass(this);
+            nGHPointMass.Value.Point = xmorph.MorphPoint(Value.Point);
+            nGHPointMass.Value.Vector = new Vector3d(xmorph.MorphPoint(new Point3d(Value.Vector)));
 
-            return nGHPointLoad;
+            return nGHPointMass;
         }
 
         public override string ToString()
@@ -109,11 +108,11 @@ namespace Muscle.Dynamics
 
         public override IGH_GeometricGoo Transform(Transform xform)
         {
-            GH_PointLoad nGHPointLoad = new GH_PointLoad(this);
-            nGHPointLoad.Value.Point.Transform(xform);
-            nGHPointLoad.Value.Vector.Transform(xform);
+            GH_PointMass nGHPointMass = new GH_PointMass(this);
+            nGHPointMass.Value.Point.Transform(xform);
+            nGHPointMass.Value.Vector.Transform(xform);
 
-            return nGHPointLoad;
+            return nGHPointMass;
         }
     }
 }

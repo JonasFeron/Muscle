@@ -18,14 +18,15 @@ namespace Muscle.Dynamics
     public class DynDisplayComponent : GH_Component
     {
 
-        private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        //private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #region Properties
 
         protected override System.Drawing.Bitmap Icon
         {
             get
             {
-                return Properties.Resources.PLAY;
+                //return Properties.Resources.PLAY;
+                return null;
             }
         }
 
@@ -69,7 +70,7 @@ namespace Muscle.Dynamics
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            log.Info("Dynamic display : obtaining the data");
+            //log.Info("Dynamic display : obtaining the data");
 
             //1) Collect Data
             StructureObj structure = new StructureObj();
@@ -137,7 +138,7 @@ namespace Muscle.Dynamics
                         int NumberOfNodes = structure.NodesCount;
 
                         List<Node> NodesCoord = structure.StructuralNodes;
-                        List<GH_PointLoad> selfmass = new List<GH_PointLoad>();
+                        List<GH_PointMass> selfmass = new List<GH_PointMass>();
 
                         //For all nodes compute the variation of displacement due to the mode
                         for (int i = 0; i < NumberOfNodes; i++)
@@ -173,7 +174,7 @@ namespace Muscle.Dynamics
 
 
                         //Adapt the coordinates of the point masses with the moving structure
-                        foreach (GH_PointLoad mass in structure.PointMasses)
+                        foreach (GH_PointMass mass in structure.PointMasses)
                         {
                             int NodeIndex = mass.Value.NodeInd;
                             Point3d NewPoint = new_structure.StructuralNodes[NodeIndex].Point;
@@ -184,9 +185,9 @@ namespace Muscle.Dynamics
 
                             Mass = mass.Value.Vector; //The 'mass' is saved in a point load element (vector shape)
 
-                            PointLoad DisplayMass = new PointLoad(NodeIndex, NewPoint, Mass); //Point mass containing the new  coordinates
+                            PointMass DisplayMass = new PointMass(NodeIndex, NewPoint, Mass); //Point mass containing the new  coordinates
 
-                            GH_PointLoad p0 = new GH_PointLoad(DisplayMass);
+                            GH_PointMass p0 = new GH_PointMass(DisplayMass);
                             selfmass.Add(p0); //make a list
 
                         }
@@ -198,7 +199,6 @@ namespace Muscle.Dynamics
                         new_structure.PointMasses = selfmass;
 
                         DA.SetData(0, gh_structure);
-                        log.Info("Dynamic display : structure is adapted");
                     }
                 }
             }
@@ -226,7 +226,7 @@ namespace Muscle.Dynamics
 
 
             }
-			log.Info("Dynamic display: new coordinates");
+			//log.Info("Dynamic display: new coordinates");
 
 
             // 2) Register the end-element node : Put up to date the element line of the structure
@@ -242,7 +242,7 @@ namespace Muscle.Dynamics
                 Point3d p1 = new_structure.StructuralNodes[n1].Point;
                 elem.Line = new Line(p0, p1);
             }
-            log.Info("Dynamic display: adapt the elements extremities");
+            //log.Info("Dynamic display: adapt the elements extremities");
         }
 		
         #endregion Methods
