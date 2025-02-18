@@ -93,7 +93,7 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = AccessToAll.MainNonLinearSolve; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
+            string pythonScript = "MainDynamicRelaxation"; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
 
             if (!AccessToAll.hasPythonStarted)
             {

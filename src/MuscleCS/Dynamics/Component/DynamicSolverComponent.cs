@@ -77,7 +77,7 @@ namespace Muscle.Dynamics
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = AccessToAll.DynSolve; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
+            string pythonScript = "MainModuleDynamics"; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
             if (!AccessToAll.hasPythonStarted)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");

@@ -67,49 +67,49 @@ namespace Muscle
         public static string Main_Folder = @"C:\Users\jferon\OneDrive - UCL\Doctorat\GitHub\Muscles";
         public static string assemblyTitle = "Muscles v0.5";
 
-        public static string DynSolve = null;
-        public static string DynSolveCONSISTENT = null;
+        //public static string DynSolve = null;
+        //public static string DynSolveCONSISTENT = null;
 
-        public static string MainTest
-        {
-            get
-            {
-                if (user_mode == true) return "DoStuffInPython.pyc";
-                else return "DoStuffInPython.py";
-            }
-        }
-        public static string MainAssemble
-        {
-            get
-            {
-                if (user_mode == true) return "MainAssembleStructure.pyc";
-                else return "MainAssembleStructure.py";
-            }
-        }
-        public static string MainLinearSolve
-        {
-            get
-            {
-                if (user_mode == true) return "MainLinearSolveStructure.pyc";
-                else return "MainLinearSolveStructure.py";
-            }
-        }
-        public static string MainNonLinearSolve
-        {
-            get
-            {
-                if (user_mode == true) return "MainNonLinearSolveStructure.pyc";
-                else return "MainNonLinearSolveStructure.py";
-            }
-        }
-        public static string MainDRSolve
-        {
-            get
-            {
-                if (user_mode == true) return "MainDynamicRelaxation.pyc";
-                else return "MainDynamicRelaxation.py";
-            }
-        }
+        //public static string MainTest
+        //{
+        //    get
+        //    {
+        //        if (user_mode == true) return "DoStuffInPython.pyc";
+        //        else return "DoStuffInPython.py";
+        //    }
+        //}
+        //public static string MainAssemble
+        //{
+        //    get
+        //    {
+        //        if (user_mode == true) return "MainAssembleStructure.pyc";
+        //        else return "MainAssembleStructure.py";
+        //    }
+        //}
+        //public static string MainLinearSolve
+        //{
+        //    get
+        //    {
+        //        if (user_mode == true) return "MainLinearSolveStructure.pyc";
+        //        else return "MainLinearSolveStructure.py";
+        //    }
+        //}
+        //public static string MainNonLinearSolve
+        //{
+        //    get
+        //    {
+        //        if (user_mode == true) return "MainNonLinearSolveStructure.pyc";
+        //        else return "MainNonLinearSolveStructure.py";
+        //    }
+        //}
+        //public static string MainDRSolve
+        //{
+        //    get
+        //    {
+        //        if (user_mode == true) return "MainDynamicRelaxation.pyc";
+        //        else return "MainDynamicRelaxation.py";
+        //    }
+        //}
 
         public const string FileTestData = "TestData.txt";
         //public const string File_Test_Result = "Test_Result.txt"; //defined in python

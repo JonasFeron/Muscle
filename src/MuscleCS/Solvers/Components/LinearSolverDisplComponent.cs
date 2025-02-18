@@ -124,13 +124,13 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = AccessToAll.MainLinearSolve; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
+            string pythonScript = "MainLinearSolveStructure"; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
             if (!AccessToAll.hasPythonStarted)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
                 return;
             }
-            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript)))
+            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript + ".py")))
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
                 DA.SetData(0, null);
@@ -168,7 +168,7 @@ namespace Muscle.Solvers
             SharedSolverResult result = new SharedSolverResult();
 
             string jsonData = JsonConvert.SerializeObject(data, Formatting.None);
-            dynamic jsonResult = null;
+            string jsonResult = "";
 
             //2) Solve in python
             var m_threadState = PythonEngine.BeginAllowThreads();
@@ -178,10 +178,12 @@ namespace Muscle.Solvers
             {
                 try
                 {
+                    //string pythonPackagePath = Path.Combine(AccessToAll.pythonProjectDirectory, "MusclePy");
+                    //PythonEngine.Exec($"import sys; sys.path.append('{pythonPackagePath}')");
                     dynamic script = PyModule.Import(pythonScript);
                     dynamic mainFunction = script.main;
-                    jsonResult = mainFunction(jsonData);
-                    JsonConvert.PopulateObject((string)jsonResult, result);
+                    jsonResult = (string)mainFunction(jsonData);
+                    JsonConvert.PopulateObject(jsonResult, result);
                 }
                 catch (PythonException ex)
                 {
