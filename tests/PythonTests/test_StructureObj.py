@@ -10,7 +10,7 @@ import scipy.linalg as lin
 import scipy.optimize as opt
 
 
-class StructureObj_Tests(unittest.TestCase):
+class Test_StructureObj(unittest.TestCase):
 
 
 

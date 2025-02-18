@@ -7,7 +7,7 @@ from StructureObj import *
 import numpy as np
 
 
-class MyTestCase(unittest.TestCase):
+class Test_State(unittest.TestCase):
 
     def test_Simple_ComputeElementsLengthsAndCos(self):
         """

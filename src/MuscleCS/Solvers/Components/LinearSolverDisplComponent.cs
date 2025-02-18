@@ -178,8 +178,6 @@ namespace Muscle.Solvers
             {
                 try
                 {
-                    //string pythonPackagePath = Path.Combine(AccessToAll.pythonProjectDirectory, "MusclePy");
-                    //PythonEngine.Exec($"import sys; sys.path.append('{pythonPackagePath}')");
                     dynamic script = PyModule.Import(pythonScript);
                     dynamic mainFunction = script.main;
                     jsonResult = (string)mainFunction(jsonData);
