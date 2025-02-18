@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
+import os
+import sys
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src/MusclePy'))
+sys.path.append(base_dir)
 from StructureObj import *
 import numpy as np
 import scipy.linalg as lin
