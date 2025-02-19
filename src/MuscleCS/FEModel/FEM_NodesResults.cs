@@ -15,11 +15,16 @@ namespace Muscle.FEModel
 {
 	public class FEM_NodesResults
 	{
-        #region Nodes
-		public double[][] NodesCoord { get; set; }  //[m] - shape (NodesCount,3)
+		public double[,] Displacements { get; set; }  //[m] - shape (NodesCount,3)
 
-		public double[][] Loads { get; set; } //[N] - shape (NodesCount,3)
-		public double[][] Residual { get; set; } //[N] - shape (NodesCount,3)
-		#endregion Nodes
+		public double[,] Residual { get; set; } //[N] - shape (NodesCount,3)
+		public double [,] Reactions { get; set; } //[N] - shape (NodesCount,3)
 
-  
+		public FEM_NodesResults()
+		{
+			Displacements = new double[,] { };
+			Residual = new double[,] { };
+			Reactions = new double[,] { };
+		}
+	}
+}
