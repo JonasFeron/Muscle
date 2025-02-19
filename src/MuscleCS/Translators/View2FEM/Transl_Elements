@@ -1,0 +1,20 @@
+
+		private void RegisterElements(StructureObj structObj)
+		{
+			foreach (Element e in structObj.StructuralElements)
+			{
+				double[] A = new double[] { e.CS_Comp.Area * 1e6, e.CS_Tens.Area * 1e6 }; //Python in [mm^2], C# in [m^2]
+				double[] E = new double[] { e.Mat_Comp.E / 1e6, e.Mat_Tens.E / 1e6 }; //Python in [MPa], C# in [Pa]
+				double Tension = e.Tension;
+				double LFree = e.LFree;
+				double LengtheningToApply = structObj.LengtheningsToApply[e.Ind];
+
+				ElementsType.Add(e.Type);
+				ElementsEndNodes.Add(e.EndNodes);
+				ElementsA.Add(A);
+				ElementsE.Add(E);
+				TensionInit.Add(Tension);
+				ElementsLFreeInit.Add(LFree);
+				LengtheningsToApply.Add(LengtheningToApply);
+			}
+		}
