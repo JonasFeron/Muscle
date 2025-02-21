@@ -1,5 +1,5 @@
 
-namespace Muscle.FEModel
+namespace MuscleCore.FEModel
 {
     public class FEM_StructureResults
     {

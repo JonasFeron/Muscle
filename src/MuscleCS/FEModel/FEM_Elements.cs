@@ -1,14 +1,7 @@
-using Muscle.Elements;
-using Muscle.Nodes;
-//using Muscle.Solvers;
-using Muscle.Structure;
-//using Muscle.Dynamics;
-using Rhino.Geometry;
-using System;
-using System.Collections.Generic;
 
 
-namespace Muscle.FEModel
+
+namespace MuscleCore.FEModel
 {
 	public class FEM_Elements
 	{

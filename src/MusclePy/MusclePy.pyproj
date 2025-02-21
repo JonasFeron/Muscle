@@ -26,7 +26,6 @@
   <ItemGroup>
     <Compile Include="complex_script.py" />
     <Compile Include="data.py" />
-    <Compile Include="DoStuffInPython.py" />
     <Compile Include="MainAssembleStructure.py" />
     <Compile Include="MainDynamicRelaxation.py" />
     <Compile Include="MainLinearSolveStructure.py" />

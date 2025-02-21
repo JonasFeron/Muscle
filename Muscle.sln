@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCS", "src\MuscleCS\MuscleCS.csproj", "{9C5C9254-CC56-4114-81C2-3EDBCEF96815}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Muscle", "src\Muscle\Muscle.csproj", "{9C5C9254-CC56-4114-81C2-3EDBCEF96815}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCS", "src\MuscleCS\MuscleCS.csproj", "{FA523F56-AA22-416D-B68E-63CE60EFDA62}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "MusclePy", "src\MusclePy\MusclePy.pyproj", "{A23289B8-BD98-4335-94F7-9CC74112BFE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,12 @@ Global
 		{9C5C9254-CC56-4114-81C2-3EDBCEF96815}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C5C9254-CC56-4114-81C2-3EDBCEF96815}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C5C9254-CC56-4114-81C2-3EDBCEF96815}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA523F56-AA22-416D-B68E-63CE60EFDA62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA523F56-AA22-416D-B68E-63CE60EFDA62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA523F56-AA22-416D-B68E-63CE60EFDA62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA523F56-AA22-416D-B68E-63CE60EFDA62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A23289B8-BD98-4335-94F7-9CC74112BFE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A23289B8-BD98-4335-94F7-9CC74112BFE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
