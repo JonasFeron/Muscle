@@ -15,5 +15,11 @@ namespace MuscleCore.FEModel
 			Residual = new double[,] { };
 			Reactions = new double[,] { };
 		}
+		public FEM_NodesResults(double[,] displacements, double[,] residual, double[,] reactions)
+		{
+			Displacements = displacements;
+			Residual = residual;
+			Reactions = reactions;
+		}
 	}
 }

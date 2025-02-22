@@ -18,5 +18,34 @@ namespace MuscleCore.FEModel
             InitialNodesResults = new FEM_NodesResults();
             InitialElementsResults = new FEM_ElementsResults();
         }
+        public FEM_Structure(FEM_Nodes nodes, FEM_Elements elements)
+        {
+            Nodes = nodes;
+            Elements = elements;
+            Additional = new FEM_Actions();
+            Applied = new FEM_Actions();
+            InitialNodesResults = new FEM_NodesResults();
+            InitialElementsResults = new FEM_ElementsResults();
+        }
+
+        public FEM_Structure(FEM_Nodes nodes, FEM_Elements elements, FEM_Actions additional)
+        {
+            Nodes = nodes;
+            Elements = elements;
+            Additional = additional;
+            Applied = new FEM_Actions();
+            InitialNodesResults = new FEM_NodesResults();
+            InitialElementsResults = new FEM_ElementsResults();
+        }
+
+        public FEM_Structure(FEM_Nodes nodes, FEM_Elements elements, FEM_Actions additional, FEM_Actions applied, FEM_NodesResults initialNodesResults, FEM_ElementsResults initialElementsResults)
+        {
+            Nodes = nodes;
+            Elements = elements;
+            Additional = additional;
+            Applied = applied;
+            InitialNodesResults = initialNodesResults;
+            InitialElementsResults = initialElementsResults;
+        }
     }
 }

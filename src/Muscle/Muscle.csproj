@@ -24,25 +24,33 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <Compile Remove="Components\**" />
+    <Compile Remove="Converters\**" />
+    <Compile Remove="Dynamics\**" />
+    <Compile Remove="GHModel\**" />
+    <Compile Remove="PythonLink\**" />
     <Compile Remove="PythonNETComponents\**" />
+    <Compile Remove="Resources\**" />
     <Compile Remove="Solvers\**" />
     <Compile Remove="Util\**" />
+    <EmbeddedResource Remove="Components\**" />
+    <EmbeddedResource Remove="Converters\**" />
+    <EmbeddedResource Remove="Dynamics\**" />
+    <EmbeddedResource Remove="GHModel\**" />
+    <EmbeddedResource Remove="PythonLink\**" />
     <EmbeddedResource Remove="PythonNETComponents\**" />
+    <EmbeddedResource Remove="Resources\**" />
     <EmbeddedResource Remove="Solvers\**" />
     <EmbeddedResource Remove="Util\**" />
+    <None Remove="Components\**" />
+    <None Remove="Converters\**" />
+    <None Remove="Dynamics\**" />
+    <None Remove="GHModel\**" />
+    <None Remove="PythonLink\**" />
     <None Remove="PythonNETComponents\**" />
+    <None Remove="Resources\**" />
     <None Remove="Solvers\**" />
     <None Remove="Util\**" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Include="Solvers\Components\DRSolverComponent.cs" />
-    <Compile Include="Solvers\Components\LinearSolverDisplComponent.cs" />
-    <Compile Include="Solvers\Components\LinearSolverDisplComponent_copy.cs" />
-    <Compile Include="Solvers\Components\NonLinearSolverDisplComponent.cs" />
-    <Compile Include="Solvers\Components\SVDSolverComponent.cs" />
-    <Compile Include="Solvers\DRMethod.cs" />
-    <Compile Include="Util\Util.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -66,12 +74,6 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" ExcludeAssets="all" GeneratePathProperty="true" />
     <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\DynamicLoading\" />
-    <Folder Include="Components\DynamicResults\" />
-    <Folder Include="Components\Verifications\" />
-    <Folder Include="Converters\FEM2View\" />
   </ItemGroup>
 
   <Target Name="CopyPdbForMonoDebugging" AfterTargets="AfterBuild">

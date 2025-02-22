@@ -26,12 +26,21 @@
   <ItemGroup>
     <Compile Include="complex_script.py" />
     <Compile Include="data.py" />
+    <Compile Include="femodel\fem_actions.py" />
+    <Compile Include="femodel\fem_elements.py" />
+    <Compile Include="femodel\fem_elements_results.py" />
+    <Compile Include="femodel\fem_nodes.py" />
+    <Compile Include="femodel\fem_nodes_results.py" />
+    <Compile Include="femodel\fem_structure.py" />
+    <Compile Include="femodel\fem_structure_results.py" />
     <Compile Include="MainAssembleStructure.py" />
     <Compile Include="MainDynamicRelaxation.py" />
     <Compile Include="MainLinearSolveStructure.py" />
     <Compile Include="MainModuleDynamics.py" />
     <Compile Include="MainModuleDynamicsCONSISTENT.py" />
     <Compile Include="MainNonLinearSolveStructure.py" />
+    <Compile Include="py_model\py_data.py" />
+    <Compile Include="py_model\py_result.py" />
     <Compile Include="result.py" />
     <Compile Include="StructureObj.py" />
     <Compile Include="test_script.py" />
@@ -40,10 +49,15 @@
     <Compile Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="femodel\" />
+    <Folder Include="py_model\" />
+    <Folder Include="py_model\__pycache__\" />
     <Folder Include="TwinObjects\" />
     <Folder Include="TwinObjects\__pycache__\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="py_model\__pycache__\py_data.cpython-312.pyc" />
+    <Content Include="py_model\__pycache__\py_result.cpython-312.pyc" />
     <Content Include="TwinObjects\__pycache__\TwinData.cpython-312.pyc" />
     <Content Include="TwinObjects\__pycache__\TwinResult.cpython-312.pyc" />
   </ItemGroup>

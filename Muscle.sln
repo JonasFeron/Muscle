@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCS", "src\MuscleCS\Mu
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "MusclePy", "src\MusclePy\MusclePy.pyproj", "{A23289B8-BD98-4335-94F7-9CC74112BFE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCSTests", "tests\MuscleCSTests\MuscleCSTests.csproj", "{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{FA523F56-AA22-416D-B68E-63CE60EFDA62}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A23289B8-BD98-4335-94F7-9CC74112BFE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A23289B8-BD98-4335-94F7-9CC74112BFE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
