@@ -1,8 +1,8 @@
 
 
-namespace MuscleCore.FEModel
+namespace MuscleCore.TwinModel
 {
-	public class FEM_Nodes
+	public class TwinNodes
 	{
 
 		public double[,] Coordinates { get; private set; } //shape (NodesCount, 3)
@@ -10,12 +10,12 @@ namespace MuscleCore.FEModel
 		public bool[] IsDOFfree { get; private set; } // [bool] - shape (3NodesCount,). Each DegreeOfFreedom can be fixed (False) or free (True). Each point i is associated to its X DOF (3i), Y DOF (3i+1), Z DOF (3i+2). .
 
 
-		public FEM_Nodes()
+		public TwinNodes()
 		{
 			Coordinates = new double[0, 0];
 			IsDOFfree = Array.Empty<bool>();
 		}
-		public FEM_Nodes(double[,] coordinates, bool[] isDofFree)
+		public TwinNodes(double[,] coordinates, bool[] isDofFree)
 		{
 			Coordinates = coordinates;
 			IsDOFfree = isDofFree;

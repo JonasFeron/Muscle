@@ -1,21 +1,21 @@
 
 
-namespace MuscleCore.FEModel
+namespace MuscleCore.TwinModel
 {
-	public class FEM_NodesResults
+	public class TwinNodesResults
 	{
 		public double[,] Displacements { get; set; }  //[m] - shape (NodesCount,3)
 
 		public double[,] Residual { get; set; } //[N] - shape (NodesCount,3)
 		public double [,] Reactions { get; set; } //[N] - shape (NodesCount,3)
 
-		public FEM_NodesResults()
+		public TwinNodesResults()
 		{
 			Displacements = new double[,] { };
 			Residual = new double[,] { };
 			Reactions = new double[,] { };
 		}
-		public FEM_NodesResults(double[,] displacements, double[,] residual, double[,] reactions)
+		public TwinNodesResults(double[,] displacements, double[,] residual, double[,] reactions)
 		{
 			Displacements = displacements;
 			Residual = residual;

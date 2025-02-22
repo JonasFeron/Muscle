@@ -1,6 +1,6 @@
-namespace MuscleCore.FEModel
+namespace MuscleCore.TwinModel
 {
-	public class FEM_Actions
+	public class TwinActions
 	{
 		#region Properties
 
@@ -10,12 +10,12 @@ namespace MuscleCore.FEModel
         #endregion Properties
 
         #region Constructors
-        public FEM_Actions()
+        public TwinActions()
 		{
 			Loads = new double[,] { };
 			Delta_FreeLengths = Array.Empty<double>();
 		}
-		public FEM_Actions(double[,] loads, double[] delta_FreeLengths)
+		public TwinActions(double[,] loads, double[] delta_FreeLengths)
         {
             Loads = loads;
             Delta_FreeLengths = delta_FreeLengths;
