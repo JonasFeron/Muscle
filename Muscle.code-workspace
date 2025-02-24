@@ -1,13 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "src/MuscleCS"
-		},
-		{
-			"path": "src/MusclePy"
-		},
-		{
-			"path": "tests/PythonTests"
+			"path": "."
 		}
 	],
 	"settings": {}
