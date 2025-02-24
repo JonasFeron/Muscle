@@ -1,106 +1,191 @@
 import numpy as np
+from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.fem_elements_results import FEM_ElementsResults
+from MusclePy.femodel.fem_actions import FEM_Actions
+from MusclePy.state_model.nodes_state import Nodes_State
 
-from MusclePy.twin_model.twin_elements_results import Twin_ElementsResults
 
-
-class Elements_State (Twin_Elements):
-    def __init__(self, twin_element=None,nodes_state=None, previous_action=None, previous_result=None):
+class Elements_State:
+    def __init__(self, elements: FEM_Elements, nodes_state: Nodes_State, 
+                 applied_action: FEM_Actions = None, initial_results: FEM_ElementsResults = None):
+        """Initialize Elements_State instance to track element properties and state.
         
-        assert twin_element is not None, "impossible to construct an elements_state instance"
-        assert nodes_state is not None, "impossible to construct an elements_state instance without nodes_state"
-
-        super.__init__(twin_element.type, twin_element.end_nodes, twin_element.initial_free_lengths)
-
-        # # [mm²] - shape (ElementsCount, 1) - Areas, depending whether the elements are in Compression or in Tension
-        # self.areas = np.array(areas, dtype=float) if areas is not None else np.array([]) 
-
-        # # [MPa] - shape (ElementsCount, 1) - Young Moduli, depending whether the elements are in Compression or in Tension
-        # self.young_moduli = np.array(young_moduli, dtype=float) if young_moduli is not None else np.array([]) 
-
-        # # # shape (ElementsCount, ) - Free Length of the Elements 
-        # self.free_lengths = np.array(free_lengths, dtype=float) if free_lengths is not None else np.array([])  
-
-        self.result  = previous_result if previous_result is not None else Twin_ElementsResults()
-
-    def get_current_area(previous_result):
-
-
-    def get_current_property(Self, TensionValue, PropertyInCompressionAndTension):
+        Args:
+            elements: FEM_Elements instance containing element properties (type, end_nodes, areas, young_moduli)
+            nodes_state: Nodes_State instance containing node coordinates and their state
+            applied_action: Optional FEM_Actions instance containing delta_free_lengths. If None, creates zero array.
+            initial_results: Optional FEM_ElementsResults instance with initial tensions and elastic_elongations. If None, creates zero arrays.
         """
-        Select the property of the element depending on if it is in tension or in compression
-        :param TensionValue: [any unit] - shape (ElementsCount,) - Any value >= O is considered as tension. It can be force, strain, elongation, stress,...
-        :param PropertyInCompressionAndTension: [any unit] - shape (ElementsCount,2) - The properties [InCompression,InTension] of each element. It can be the Area or Young modulus.
-        :return: Property: [any unit] - shape (ElementsCount,) - The properties of each element depending if the element is in tension or in compression.
-        """
-
-        assert PropertyInCompressionAndTension.shape == (Self.ElementsCount, 2), "Please check the shape of the PropertiesInCompression_Tension"
-
-        # 2) Check the state of the elements (in compression or in tension) and find their associated stiffness
-
-        # For each elements, there is one E value in case of compression and another value in case of tension. Idem for A
-        # For instance, the Young modulus of a cable could be 0 in compression and 100e3 MPa in tension.
-        # In this case, the cable vanish from stiffness matrix if it slacks
-
-        PropertyInCompression = PropertyInCompressionAndTension[:, 0]
-        PropertyInTension = PropertyInCompressionAndTension[:, 1]
-
-        IsElementInTension = TensionValue > 0  # a vector where the entry i is true if the element is in tension, and false if it is in compression
-        Property = np.where(IsElementInTension, PropertyInTension, PropertyInCompression)  # the property of the elements depending if compression or tension
-
-        #IF the tension in the element is 0, then choose the property according to the type (strut or cable) of the element
-        BasedOnType = TensionValue==0 # a vector where the entry i is true if the property of the element is computed based on his type.
-        types = Self.ElementsType[BasedOnType] #-1 if struts, 1 if cables, but only for the elements without tension
-        PropertyCables = PropertyInTension[BasedOnType]
-        PropertyStruts = PropertyInCompression[BasedOnType]
-        Property[BasedOnType] = np.where(types > 0, PropertyCables, PropertyStruts)
-
-        return Property
-
-    def Flexibility(Self, ElementsE, ElementsA, ElementsL):
-        """
-        Returns the flexibility L/EA of the elements (considering a possible infinite flexibility = no stiffness)
-        :param Struct: The StructureObject in the current state
-        :param ElementsE: [N/mm²] - shape (ElementsCount,) - The young modulus of the elements.
-        :param ElementsA: [mm²] - shape (ElementsCount,) - The area of the elements.
-        :param ElementsL: [m] - shape (ElementsCount,) - The lengths (free or current) of the elements.
-        :return: Flex : [m/N] - shape (ElementsCount,) - The flexibility L/EA of the elements.
-        """
-        # 0) Check the inputs
-        assert ElementsE.size == Self.ElementsCount, "Please check the shape of ElementsE"
-        assert ElementsA.size == Self.ElementsCount, "Please check the shape of ElementsA"
-        assert ElementsL.size == Self.ElementsCount, "Please check the shape of ElementsL"
-        E = ElementsE.reshape(-1, ).copy()
-        A = ElementsA.reshape(-1, ).copy()
-        L = ElementsL.reshape(-1, ).copy()
-
-        # 1) Find the slack clables, they have a 0 stiffness, hence infinite flexibility
-
-        NoStiffnessElementsIndex = np.where(np.logical_or(E <= 1e-4, A <= 1e-4))
-
-        A[NoStiffnessElementsIndex] = 1  # to avoid to divide by 0 later
-        E[NoStiffnessElementsIndex] = 1  # to avoid to divide by 0 later
-
-        # 2) Compute the flexibility
-        F = L / (E * A)
-        F[NoStiffnessElementsIndex] = 1e9  # [m/N] elements with 0 stiffness have an infinite flexibility
-        return F
-
+        # Validate inputs
+        if not isinstance(elements, FEM_Elements):
+            raise TypeError("elements must be a FEM_Elements instance")
+        if not isinstance(nodes_state, Nodes_State):
+            raise TypeError("nodes_state must be a Nodes_State instance")
         
-    def ConnectivityMatrix(Self, NodesCount, ElementsCount, ElementsEndNodes):
+        # Initialize attributes
+        self.count = elements.count
+        self.nodes_count = nodes_state.count
+        
+        # Store element properties with validation
+        if elements.type.size > 0:
+            self.type = elements.type.copy()
+            assert self.type.shape == (self.count,), f"type should have shape ({self.count},) but got {self.type.shape}"
+        else:
+            self.type = np.array([], dtype=int)
+            
+        if elements.end_nodes.size > 0:
+            self.end_nodes = elements.end_nodes.copy()
+            assert self.end_nodes.shape == (self.count, 2), f"end_nodes should have shape ({self.count}, 2) but got {self.end_nodes.shape}"
+            assert np.all(self.end_nodes >= 0) and np.all(self.end_nodes < self.nodes_count), "end_nodes indices must be within valid node range"
+        else:
+            self.end_nodes = np.array([], dtype=int).reshape((0, 2))
+        
+        # Create connectivity matrix
+        self.connectivity = self._create_connectivity_matrix(self.nodes_count, self.count, self.end_nodes)
+        
+        # Store applied action data
+        if applied_action is not None:
+            assert isinstance(applied_action, FEM_Actions), "applied_action must be a FEM_Actions instance"
+            self.delta_free_lengths = applied_action.delta_free_lengths
+            assert self.delta_free_lengths.shape == (self.count,), f"delta_free_lengths should have shape ({self.count},) but got {self.delta_free_lengths.shape}"
+        else:
+            self.delta_free_lengths = FEM_Actions(b=self.count).delta_free_lengths
+        
+        # Store initial results
+        if initial_results is not None:
+            assert isinstance(initial_results, FEM_ElementsResults), "initial_results must be a FEM_ElementsResults instance"
+            self.initial = initial_results
+            assert self.initial.tension.shape == (self.count,), f"initial tension should have shape ({self.count},) but got {self.initial.tension.shape}"
+        else:
+            self.initial = FEM_ElementsResults(b=self.count)
+        
+        # Compute lengths
+        self.initial_free_lengths = self._compute_lengths(nodes_state.initial_coordinates)
+        self.free_lengths = self.initial_free_lengths + self.delta_free_lengths
+        self.lengths = self._compute_lengths(nodes_state.coordinates)
+        
+        # Compute direction cosines
+        self.direction_cosines = self._compute_direction_cosines(nodes_state.coordinates)
+        
+        # Store element properties
+        self.areas = self._get_current_property(self.initial.tension, elements.areas)
+        self.young_moduli = self._get_current_property(self.initial.tension, elements.young_moduli)
+        self.flexibilities = self._compute_flexibility(self.young_moduli, self.areas, self.free_lengths)
+
+    def _create_connectivity_matrix(self, nodes_count: int, elements_count: int, end_nodes: np.ndarray) -> np.ndarray:
+        """Create connectivity matrix between nodes and elements.
+        
+        Args:
+            nodes_count: Number of nodes in the model
+            elements_count: Number of elements in the model
+            end_nodes: Array of shape (elements_count, 2) containing indices of element end nodes
+            
+        Returns:
+            Array of shape (nodes_count, elements_count) where entry (i,j) is 1 if node i belongs to element j
         """
-        :return: the connectivity matrix C of shape (ElementsCount, NodesCount). C contains the same info than ElementsEndNodes but presented under a matrix form.
+        if elements_count == 0 or nodes_count == 0:
+            return np.array([], dtype=int).reshape((nodes_count, 0))
+            
+        connectivity = np.zeros((nodes_count, elements_count), dtype=int)
+        for i, (node0, node1) in enumerate(end_nodes):
+            connectivity[node0, i] = 1
+            connectivity[node1, i] = 1
+        return connectivity
+
+    def _compute_lengths(self, coordinates: np.ndarray) -> np.ndarray:
+        """Compute the length of each element given its end nodes' coordinates.
+        
+        Args:
+            coordinates: Array of shape (nodes_count, 3) containing node coordinates
+            
+        Returns:
+            Array of shape (elements_count,) containing element lengths
         """
+        if self.count == 0:
+            return np.array([], dtype=float)
+            
+        assert coordinates.shape == (self.nodes_count, 3), f"coordinates should have shape ({self.nodes_count}, 3) but got {coordinates.shape}"
+        
+        node0_coords = coordinates[self.end_nodes[:, 0]]
+        node1_coords = coordinates[self.end_nodes[:, 1]]
+        return np.linalg.norm(node1_coords - node0_coords, axis=1)
 
-        #Calculation according to references
-        # Vassart, Motro, 1999, Multiparametered Formfinding Method: Application to Tensegrity Systems
-        # Sheck, 1974, The force density method for formfinding and computation of networks
+    def _compute_direction_cosines(self, coordinates: np.ndarray) -> np.ndarray:
+        """Compute direction cosines (unit vectors) for each element.
+        
+        Args:
+            coordinates: Array of shape (nodes_count, 3) containing node coordinates
+            
+        Returns:
+            Array of shape (elements_count, 3) containing direction cosines
+        """
+        if self.count == 0:
+            return np.array([], dtype=float).reshape((0, 3))
+            
+        assert coordinates.shape == (self.nodes_count, 3), f"coordinates should have shape ({self.nodes_count}, 3) but got {coordinates.shape}"
+        
+        node0_coords = coordinates[self.end_nodes[:, 0]]
+        node1_coords = coordinates[self.end_nodes[:, 1]]
+        vectors = node1_coords - node0_coords
+        lengths = np.linalg.norm(vectors, axis=1)
+        
+        # Avoid division by zero for zero-length elements
+        mask = lengths > 0
+        result = np.zeros_like(vectors)
+        result[mask] = vectors[mask] / lengths[mask, np.newaxis]
+        return result
 
-        C = np.zeros((ElementsCount, NodesCount), dtype=int)  # connectivity matrix C
-        for line_ind, line_extremities in enumerate(ElementsEndNodes):
-            n0 = line_extremities[0]
-            n1 = line_extremities[1]
-            C[line_ind, n0] = 1
-            C[line_ind, n1] = -1
+    def _get_current_property(self, tension_value: np.ndarray, property_in_compression_tension: np.ndarray) -> np.ndarray:
+        """Get element properties based on tension state (compression/tension).
+        
+        Args:
+            tension_value: Array of shape (elements_count,) containing element tensions
+            property_in_compression_tension: Array of shape (elements_count, 2) containing property values for compression and tension
+            
+        Returns:
+            Array of shape (elements_count,) containing current property values
+        """
+        if self.count == 0:
+            return np.array([], dtype=float)
+            
+        assert tension_value.shape == (self.count,), f"tension_value should have shape ({self.count},) but got {tension_value.shape}"
+        assert property_in_compression_tension.shape == (self.count, 2), f"property_in_compression_tension should have shape ({self.count}, 2) but got {property_in_compression_tension.shape}"
+        
+        # Get property based on tension state
+        property_values = np.where(tension_value > 0,
+                                 property_in_compression_tension[:, 1],  # Tension
+                                 property_in_compression_tension[:, 0])  # Compression
+        
+        # For zero tension, use element type
+        zero_tension_mask = tension_value == 0
+        if np.any(zero_tension_mask):
+            types = self.type[zero_tension_mask]
+            property_values[zero_tension_mask] = np.where(types > 0,
+                                                        property_in_compression_tension[zero_tension_mask, 1],  # Cables
+                                                        property_in_compression_tension[zero_tension_mask, 0])  # Struts
+        return property_values
 
-        return -C  #- signe because it makes more sense to do n1-n0 (than n0-n1) when computing a cosinus (X1-X0)/L01. But this actually does not change the equilibrum matrix.
-        # print(C)
+    def _compute_flexibility(self, young_moduli: np.ndarray, areas: np.ndarray, lengths: np.ndarray) -> np.ndarray:
+        """Compute element flexibilities (L/EA).
+        
+        Args:
+            young_moduli: Array of shape (elements_count,) containing Young's moduli
+            areas: Array of shape (elements_count,) containing cross-sectional areas
+            lengths: Array of shape (elements_count,) containing element lengths
+            
+        Returns:
+            Array of shape (elements_count,) containing flexibilities
+        """
+        if self.count == 0:
+            return np.array([], dtype=float)
+            
+        assert young_moduli.shape == (self.count,), f"young_moduli should have shape ({self.count},) but got {young_moduli.shape}"
+        assert areas.shape == (self.count,), f"areas should have shape ({self.count},) but got {areas.shape}"
+        assert lengths.shape == (self.count,), f"lengths should have shape ({self.count},) but got {lengths.shape}"
+        
+        # Avoid division by zero
+        ea = young_moduli * areas
+        mask = ea > 0
+        result = np.zeros_like(lengths)
+        result[mask] = lengths[mask] / ea[mask]
+        return result

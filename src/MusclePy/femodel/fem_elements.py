@@ -2,7 +2,7 @@ import numpy as np
 
 
 class FEM_Elements:
-    def __init__(self, type=None, end_nodes=None, areas=None, young_moduli=None, initial_free_lengths=None):
+    def __init__(self, type=None, end_nodes=None, areas=None, young_moduli=None):
         """Python equivalent of FEM_Elements class"""
 
         # inputs from C#
@@ -10,18 +10,18 @@ class FEM_Elements:
         self.end_nodes = np.array([[],[]], dtype=int)  # [-] - shape (ElementsCount, 2) - indices of the end nodes 
         self.areas = np.array([[],[]], dtype=float)  # [mm²] - shape (ElementsCount, 2) - Area in Compression and Area in Tension of the Elements
         self.young_moduli = np.array([[],[]], dtype=float) # [MPa] - shape (ElementsCount, 2) - Young Moduli in Compression and in Tension of the Elements
-        self.initial_free_lengths = np.array([], dtype=float) # shape (ElementsCount, ) - Free Length of the Elements before any analysis
+        # self.initial_free_lengths = np.array([], dtype=float) # shape (ElementsCount, ) - Free Length of the Elements before any analysis
 
         #additionnal deduced attributes
         self.count = 0 # number of elements
 
-        self.initialize(type, end_nodes, areas, young_moduli, initial_free_lengths)
+        self.initialize(type, end_nodes, areas, young_moduli)
 
 
 
 ### private methods ###
 
-    def initialize(self, type, end_nodes, areas, young_moduli, initial_free_lengths):
+    def initialize(self, type, end_nodes, areas, young_moduli):
         """Initialize Twin_Elements with given parameters.
         Args can be either None, Python lists (from C#), or numpy arrays (from Python)
         """
@@ -53,11 +53,11 @@ class FEM_Elements:
         else:
             self.young_moduli = np.array([], dtype=float).reshape((0, 2))
         
-        if initial_free_lengths is not None:
-            self.initial_free_lengths = initial_free_lengths if isinstance(initial_free_lengths, np.ndarray) else np.array(initial_free_lengths, dtype=float)
-            assert len(self.initial_free_lengths) == self.count, f"initial_free_lengths should have length {self.count} but got {len(self.initial_free_lengths)}"
-        else:
-            self.initial_free_lengths = np.array([], dtype=float)
+        # if initial_free_lengths is not None:
+        #     self.initial_free_lengths = initial_free_lengths if isinstance(initial_free_lengths, np.ndarray) else np.array(initial_free_lengths, dtype=float)
+        #     assert len(self.initial_free_lengths) == self.count, f"initial_free_lengths should have length {self.count} but got {len(self.initial_free_lengths)}"
+        # else:
+        #     self.initial_free_lengths = np.array([], dtype=float)
 
 
 
