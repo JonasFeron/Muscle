@@ -1,9 +1,9 @@
 
 
 
-namespace MuscleCore.TwinModel
+namespace MuscleCore.FEModel
 {
-	public class TwinElements
+	public class FEM_Elements
 	{
 		#region Properties
 
@@ -16,7 +16,7 @@ namespace MuscleCore.TwinModel
 		#endregion
 
 		#region Constructors
-		public TwinElements()
+		public FEM_Elements()
 		{
 			Type = Array.Empty<int>();
 			EndNodes = new int[,] { };

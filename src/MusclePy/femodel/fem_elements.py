@@ -1,9 +1,9 @@
 import numpy as np
 
 
-class Twin_Elements:
+class FEM_Elements:
     def __init__(self, type=None, end_nodes=None, areas=None, young_moduli=None, initial_free_lengths=None):
-        """Python equivalent of C# Twin_Elements class"""
+        """Python equivalent of FEM_Elements class"""
 
         # inputs from C#
         self.type = np.array([], dtype=int)   # [-] - shape (ElementsCount, ) - Type of the Elements : -1 for struts, 1 for cables
@@ -185,3 +185,9 @@ class Twin_Elements:
 
 
 
+
+
+    def count(self):
+        return self.areas.shape[0]
+
+    def set_initial_free_lengths(self, initial_free_lengths):

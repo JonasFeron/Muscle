@@ -1,9 +1,9 @@
 import numpy as np
 
 
-class Twin_Nodes:
+class FEM_Nodes:
     def __init__(self, coordinates=None, dof=None):
-        """Python equivalent of C# Twin_Nodes class"""
+        """Python equivalent of C# FEM_Nodes class"""
         self.coordinates = np.array([], dtype=float).reshape((0, 3))        # Nodal coordinates - shape (NodesCount, 3)
 
         # Supports

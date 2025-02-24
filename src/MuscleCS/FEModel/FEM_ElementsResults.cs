@@ -1,8 +1,8 @@
 
 
-namespace MuscleCore.TwinModel
+namespace MuscleCore.FEModel
 {
-	public class TwinElementsResults
+	public class FEM_ElementsResults
 	{
 		#region Properties
 
@@ -12,7 +12,7 @@ namespace MuscleCore.TwinModel
 		#endregion Properties
 
 		#region Constructors
-		public TwinElementsResults()
+		public FEM_ElementsResults()
 		{
 			Tension = new double[] { };
 			ElasticElongation = new double[] { };
