@@ -1,8 +1,10 @@
 from MusclePy.state_model.elements_state import Elements_State
+from MusclePy.state_model.nodes_state import Nodes_State
+
 
 
 class State():
-    def __init__(self, nodes=None, elements=None, additional=None, applied=None, initial_nodes_results=None, initial_elements_results=None):
+    def __init__(self, nodes=None, elements=None, applied=None, initial_nodes_results=None, initial_elements_results=None):
         """
         The current State of a Structure Object is defined by
         :param NodesCoord: The current nodes coordinates of the structure
@@ -44,8 +46,8 @@ class State():
 
         # def __init__(self)):
         # """Python equivalent of C# Twin_Structure class"""
-        self.nodes = (nodes)  
-        self.elements = elements_state(elements) 
+        self.nodes = Nodes_State(nodes,applied,initial_nodes_results)  
+        self.elements = Elements_State(elements,self.nodes,applied,initial_elements_results) 
 
         # # Additional actions (Loads and Prestress) on the structure
         # self.additional = Twin_Actions(additional) if additional is not None else Twin_Actions()
