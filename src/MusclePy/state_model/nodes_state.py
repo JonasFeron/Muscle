@@ -22,7 +22,7 @@ class Nodes_State:
         self.initial_coordinates = np.array([], dtype=float).reshape((0, 3)) # [m] - shape (nodes.count, 3) - Initial coordinates of the nodes
         self.coordinates = np.array([], dtype=float).reshape((0, 3)) # [m] - shape (nodes.count, 3) - Current coordinates of the nodes
         self.dof = np.array([], dtype=bool).reshape((0, 3)) # [-] - shape (nodes.count, 3) - Degrees of freedom of the nodes (True if free, False if fixed)
-        self.dof_fixed_count = 0 # [-] - Number of fixed degrees of freedom
+        self.fixations_count = 0 # [-] - Number of fixed degrees of freedom
         
         self.applied_loads = np.array([], dtype=float).reshape((0, 3)) # [N] - shape (nodes.count, 3) - Current loads applied on the nodes
         
@@ -44,7 +44,7 @@ class Nodes_State:
         if initial_nodes.dof.size > 0:
             self.dof = initial_nodes.dof
             assert self.dof.shape == (self.count, 3), f"dof should have shape ({self.count}, 3) but got {self.dof.shape}"
-            self.dof_fixed_count = np.sum(~self.dof)
+            self.fixations_count = np.sum(~self.dof)
             
         # Store current_action loads
         if current_action is not None:

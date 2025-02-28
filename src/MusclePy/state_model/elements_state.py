@@ -41,7 +41,7 @@ class Elements_State:
 
         self.result = None # FEM_ElementsResults instance containing the current Tension [N] and elastic elongation [m] of the elements
         self.area = np.array([], dtype=float) # [mm²] - shape (elements.count, ) - Area of the elements given the current tension result (considering slack cables)
-        self.young_modulus = np.array([], dtype=float) # [MPa] - shape (elements.count, ) - Young Modulus of the elements given the current tension result
+        self.young = np.array([], dtype=float) # [MPa] - shape (elements.count, ) - Young Modulus of the elements given the current tension result
         self.flexibility = np.array([], dtype=float) # [mm] - shape (elements.count, ) - Flexibility of the elements
 
         # Initialize all attributes with proper validation and computation
@@ -92,8 +92,8 @@ class Elements_State:
         
         # Compute current element properties
         self.area = self._get_current_property(self.result.tension, elements.areas, self.type)
-        self.young_modulus = self._get_current_property(self.result.tension, elements.young_moduli, self.type)
-        self.flexibility = self._compute_flexibility(self.young_modulus, self.area, self.free_length)
+        self.young = self._get_current_property(self.result.tension, elements.young_moduli, self.type)
+        self.flexibility = self._compute_flexibility(self.young, self.area, self.free_length)
 
     def _create_connectivity_matrix(self, nodes_count: int, elements_count: int, end_nodes: np.ndarray) -> np.ndarray:
         """Create connectivity matrix between nodes and elements.

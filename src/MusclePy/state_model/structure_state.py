@@ -3,7 +3,7 @@ from MusclePy.state_model.nodes_state import Nodes_State
 
 
 
-class State():
+class Structure_State():
     def __init__(self, nodes=None, elements=None, applied=None, initial_nodes_results=None, initial_elements_results=None):
         """
         The current State of a Structure Object is defined by
