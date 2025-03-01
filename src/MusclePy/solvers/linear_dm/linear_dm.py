@@ -1,25 +1,25 @@
-from MusclePy.solvers.linear_dm.structure_state_4linear_dm import Structure_State_4Linear_DM
+from MusclePy.solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
 import numpy as np
 
-def linear_displacement_method(current: Structure_State_4Linear_DM, additional_loads: np.ndarray):
+def linear_displacement_method(current: Structure_Linear_DM, loads_increment: np.ndarray):
     """Solve the linear displacement method for the current structure with additional loads.
     
     Args:
-        current: Structure_State_4Linear_DM instance containing the current state
-        additional_loads: [N] - shape (3*nodes.count,) - Additional loads to apply
+        current: Structure_Linear_DM instance containing the current state
+        loads_increment: [N] - shape (3*nodes.count,) - Additional loads to apply
         
     Returns:
         tuple containing:
-        - displacements: [m] - shape (3*nodes.count,) - Nodal displacements
-        - tension: [N] - shape (elements.count,) - Element tensions
-        - reactions: [N] - shape (fixations.count,) - Support reactions
+        - displacements_increment: [m] - shape (3*nodes.count,) - Nodal displacement increments
+        - reactions_increment: [N] - shape (fixations.count,) - Support reaction increments
+        - tension_increment: [N] - shape (elements.count,) - Element tension increments
     """
     # Get structure properties
     nodes_count = current.nodes.count
     fixations_count = current.nodes.fixations_count
 
     # Reshape loads to column vector
-    loads = additional_loads.reshape((-1, 1))
+    loads = loads_increment.reshape((-1, 1))
     
     # Get stiffness matrices
     Km = current.global_material_stiffness_matrix
@@ -38,13 +38,13 @@ def linear_displacement_method(current: Structure_State_4Linear_DM, additional_l
     displacements_reactions = np.linalg.solve(K_constrained, rhs)  # see equation 2.7 page 32 of J.Feron's master thesis.
     
     # Extract displacements and reactions
-    displacements = displacements_reactions[:3*nodes_count]
-    reactions = -displacements_reactions[3*nodes_count:]
+    displacements_increment = displacements_reactions[:3*nodes_count]
+    reactions_increment = -displacements_reactions[3*nodes_count:]  
     
     # Compute tensions using post-processing
-    tension = current.elements.post_process(displacements)
+    (tension_increment, resisting_forces_increment) = current.elements.post_process(displacements_increment)
 
-    return (displacements.reshape((-1,)), tension.reshape((-1,)), reactions.reshape((-1,)))
+    return (displacements_increment.reshape((-1,)), reactions_increment.reshape((-1,)), resisting_forces_increment.reshape((-1,)), tension_increment.reshape((-1,)))
 
 
 def _constrain_stiffness_matrix(dof: np.ndarray, stiffness_matrix: np.ndarray) -> np.ndarray:

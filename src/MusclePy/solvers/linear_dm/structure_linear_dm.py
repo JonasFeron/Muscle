@@ -1,19 +1,20 @@
 from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
+from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 import numpy as np
 
 
-class Structure_Linear_DM(Structure_State):
-    def __init__(self, nodes=None, elements=None, applied=None, initial_nodes_results=None, initial_elements_results=None):
-        """Initialize Structure_State_4Linear_DM, extending Structure_State with stiffness matrices attributes.
+class Structure_Linear_DM(FEM_Structure):
+    def __init__(self, nodes: FEM_Nodes, elements: Elements_Linear_DM):
+        """Initialize Structure_Linear_DM, extending FEM_Structure with stiffness matrices.
         
         Args:
-            Same arguments as Structure_State
+            nodes: FEM_Nodes instance containing nodal data
+            elements: Elements_Linear_DM instance that must reference the same nodes instance
         """
         # Call parent class constructor
-        self.nodes = FEM_Nodes(nodes,applied,initial_nodes_results)  
-        self.elements = Elements_Linear_DM(elements,self.nodes,applied,initial_elements_results) 
-
+        super().__init__(nodes, elements)
+        
         # Initialize stiffness matrices attributes
         self.global_material_stiffness_matrix = None  # [N/m] - shape (3*nodes.count, 3*nodes.count)
         self.global_geometric_stiffness_matrix = None  # [N/m] - shape (3*nodes.count, 3*nodes.count)
@@ -65,6 +66,26 @@ class Structure_Linear_DM(Structure_State):
                     K[idx[j], idx[l]] += k[j, l]
                     
         return K
+
+    def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray,
+                       delta_free_length: np.ndarray, tension: np.ndarray, resisting_forces: np.ndarray) -> 'Structure_Linear_DM':
+        """Create a copy of this structure and update its state."""
+        # Create new nodes with updated state
+        nodes_copy = self._nodes.copy_and_update(loads, displacements, reactions, resisting_forces)
         
-
-
+        # Create new elements with updated state, referencing the new nodes
+        elements_copy = self._elements.copy_and_update(nodes_copy, delta_free_length, tension)
+        
+        return Structure_Linear_DM(nodes_copy, elements_copy)
+        
+    def copy_and_add(self, loads_increment: np.ndarray, displacements_increment: np.ndarray, 
+                     reactions_increment: np.ndarray, delta_free_length_increment: np.ndarray,
+                     tension_increment: np.ndarray, resisting_forces_increment: np.ndarray) -> 'Structure_Linear_DM':
+        """Create a copy of this structure and add increments to its state."""
+        # Create new nodes with incremented state
+        nodes_copy = self._nodes.copy_and_add(loads_increment, displacements_increment, reactions_increment, resisting_forces_increment)
+        
+        # Create new elements with incremented state, referencing the new nodes
+        elements_copy = self._elements.copy_and_add(nodes_copy, delta_free_length_increment, tension_increment)
+        
+        return Structure_Linear_DM(nodes_copy, elements_copy)

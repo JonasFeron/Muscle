@@ -22,6 +22,7 @@ class FEM_Structure:
         
         self._nodes = nodes
         self._elements = elements
+        self._relative_precision = 1e-4
     
     @property
     def nodes(self) -> FEM_Nodes:
@@ -32,9 +33,16 @@ class FEM_Structure:
     def elements(self) -> FEM_Elements:
         """Get the FEM_Elements instance."""
         return self._elements
+
+    @property
+    def is_in_equilibrium(self) -> bool:
+        """Check if the structure is in equilibrium."""
+        # if loads magnitude is 1000N, the structure is considered in equilibrium if the residual is inferior to 1e-4 * 1000N = 0.1 N
+        zero_residual_threshold = self._relative_precision * np.linalg.norm(self.nodes.loads.flatten()) # [N]  
+        return np.linalg.norm(self.nodes.residual.flatten()) <= zero_residual_threshold
     
     def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray,
-                       delta_free_length: np.ndarray, tension: np.ndarray) -> 'FEM_Structure':
+                       delta_free_length: np.ndarray, tension: np.ndarray, resisting_forces: np.ndarray) -> 'FEM_Structure':
         """Create a copy of this structure and update its state.
         
         Args:
@@ -43,9 +51,10 @@ class FEM_Structure:
             reactions: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Support reactions
             delta_free_length: [m] - shape (elements_count,) - Change in free length
             tension: [N] - shape (elements_count,) - Axial forces
+            resisting_forces: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Internal resisting forces
         """
         # Create new nodes with updated state
-        nodes_copy = self._nodes.copy_and_update(loads, displacements, reactions)
+        nodes_copy = self._nodes.copy_and_update(loads, displacements, reactions, resisting_forces)
         
         # Create new elements with updated state, referencing the new nodes
         elements_copy = self._elements.copy_and_update(nodes_copy, delta_free_length, tension)
@@ -54,7 +63,7 @@ class FEM_Structure:
         
     def copy_and_add(self, loads_increment: np.ndarray, displacements_increment: np.ndarray, 
                      reactions_increment: np.ndarray, delta_free_length_increment: np.ndarray,
-                     tension_increment: np.ndarray) -> 'FEM_Structure':
+                     tension_increment: np.ndarray, resisting_forces_increment: np.ndarray) -> 'FEM_Structure':
         """Create a copy of this structure and add increments to its state.
         
         Args:
@@ -63,9 +72,10 @@ class FEM_Structure:
             reactions_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Reaction increments
             delta_free_length_increment: [m] - shape (elements_count,) - Increment in free length
             tension_increment: [N] - shape (elements_count,) - Increment in axial forces
+            resisting_forces_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Increment in resisting forces
         """
         # Create new nodes with incremented state
-        nodes_copy = self._nodes.copy_and_add(loads_increment, displacements_increment, reactions_increment)
+        nodes_copy = self._nodes.copy_and_add(loads_increment, displacements_increment, reactions_increment, resisting_forces_increment)
         
         # Create new elements with incremented state, referencing the new nodes
         elements_copy = self._elements.copy_and_add(nodes_copy, delta_free_length_increment, tension_increment)

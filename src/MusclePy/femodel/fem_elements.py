@@ -105,11 +105,12 @@ class FEM_Elements:
             return result
         return np.zeros((self._count, 2), dtype=dtype)
     
-    def _initialize(self, type, end_nodes, areas, youngs, delta_free_length, tension, elastic_elongation):
+    def _initialize(self, type, end_nodes, areas, youngs, delta_free_length, tension):
         """Initialize all attributes with proper validation."""
         # Handle end_nodes first to establish count
         if end_nodes is not None:
-            self._end_nodes = self._check_array_2d(end_nodes, "end_nodes", dtype=int)
+            self._end_nodes = end_nodes if isinstance(end_nodes, np.ndarray) else np.array(end_nodes, dtype=int)
+            assert self._end_nodes.shape[1] == 2, f"end_nodes should have shape (N, 2) but got {self._end_nodes.shape}"
             self._count = len(self._end_nodes)
         
         # Initialize immutable arrays
@@ -180,16 +181,15 @@ class FEM_Elements:
         """Number of elements"""
         return self._count
 
-    ## NOT PUBLIC   
-    # @property
-    # def areas(self) -> np.ndarray:
-    #     """[mm²] - shape (elements_count, 2) - Areas in compression and tension"""
-    #     return self._areas
+    @property
+    def areas(self) -> np.ndarray:
+        """[mm²] - shape (elements_count, 2) - Areas in compression and tension"""
+        return self._areas
     
-    # @property
-    # def youngs(self) -> np.ndarray:
-    #     """[MPa] - shape (elements_count, 2) - Young's moduli in compression and tension"""
-    #     return self._youngs
+    @property
+    def youngs(self) -> np.ndarray:
+        """[MPa] - shape (elements_count, 2) - Young's moduli in compression and tension"""
+        return self._youngs
 
     @property
     def area(self) -> np.ndarray:
@@ -252,24 +252,16 @@ class FEM_Elements:
                                                         property_in_compression_tension[zero_tension_mask, 0])  # Struts
         return property_values
     
-    # GET-SET properties
+
     @property
     def delta_free_length(self) -> np.ndarray:
         """[m] - shape (elements_count,) - Change in free length due to prestress"""
         return self._delta_free_length
-    
-    @delta_free_length.setter
-    def delta_free_length(self, value: np.ndarray):
-        self._delta_free_length = self._check_array_1d(value, "delta_free_length")
-    
+        
     @property
     def tension(self) -> np.ndarray:
         """[N] - shape (elements_count,) - Current tension in elements"""
         return self._tension
-    
-    @tension.setter
-    def tension(self, value: np.ndarray):
-        self._tension = self._check_array_1d(value, "tension")
     
     
     # Computed properties
