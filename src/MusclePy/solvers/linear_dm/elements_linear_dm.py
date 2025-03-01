@@ -1,9 +1,9 @@
-from MusclePy.state_model.nodes_state import Nodes_State
-from MusclePy.state_model.elements_state import Elements_State
+from MusclePy.femodel.fem_nodes import FEM_Nodes
+from MusclePy.femodel.fem_elements import FEM_Elements
 import numpy as np
 
 
-class Elements_State_4Linear_DM(Elements_State):
+class Elements_Linear_DM(FEM_Elements):
     def __init__(self, elements: FEM_Elements, current_nodes: Nodes_State, 
                  current_action: FEM_Actions = None, current_results: FEM_ElementsResults = None):
         """Initialize Elements_State_4Linear_DM, extending Elements_State with stiffness matrices attributes.

@@ -1,118 +1,213 @@
 import numpy as np
 
-
 class FEM_Nodes:
-    def __init__(self, coordinates=None, dof=None):
-        """Python equivalent of C# FEM_Nodes class"""
-        self.coordinates = np.array([], dtype=float).reshape((0, 3))        # Nodal coordinates - shape (NodesCount, 3)
-
-        # Supports
-        self.dof = np.array([], dtype=bool).reshape((0, 3))   # [bool] - shape (3NodesCount,). Each DegreeOfFreedom can be fixed (False) or free (True). Each point i is associated to its X DOF (3i), Y DOF (3i+1), Z DOF (3i+2). 
+    def __init__(self, initial_coordinates=None, dof=None, loads=None, displacements=None, reactions=None):
+        """Python equivalent of C# FEM_Nodes class, combining nodes state and results.
         
-        #additionnal deduced attributes
-        self.count = 0 # number of elements
-
-        self.initialize(type, coordinates, dof)
-
-
-
-### private methods ###
-
-    def initialize(self, coordinates, dof):
-        """Initialize Twin_Elements with given parameters.
-        Args can be either None, Python lists (from C#), or numpy arrays (from Python)
+        The class has two types of attributes:
+        1. Immutable attributes (initialized once from C#):
+            - initial_coordinates: Initial nodal coordinates
+            - dof: Degrees of freedom (support conditions)
+            - count: Number of nodes
+            - fixations_count: Number of fixed DOFs
+            
+        2. Mutable state attributes:
+            - loads: external loads applied to nodes
+            - displacements: Nodal displacements
+            - reactions: Support reactions
+            - coordinates: Current nodal coordinates (initial_coordinates + displacements)
+            - residual: Out of balance forces
+        
+        Args:
+            initial_coordinates: [m] - shape (nodes_count, 3) - Initial nodal coordinates
+            dof: [-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)
+            loads: [N] - shape (nodes_count, 3) - External loads applied to nodes
+            displacements: [m] - shape (nodes_count, 3) - Nodal displacements
+            reactions: [N] - shape (nodes_count, 3) - Support reactions
         """
-        # Handle coordinates first to establish count
-        if coordinates is not None:
-            self.coordinates = coordinates if isinstance(coordinates, np.ndarray) else np.array(coordinates, dtype=float)
-            self.count = len(self.coordinates)
-            assert self.coordinates.shape == (self.count, 3), f"coordinates should have shape ({self.count}, 3) but got {self.coordinates.shape}"
-        else:
-            self.coordinates = np.array([], dtype=float).reshape((0, 3))
-            self.count = 0
-
-        # Handle other arrays with size assertions
-        if dof is not None:
-            self.dof = dof if isinstance(dof, np.ndarray) else np.array(dof, dtype=bool)
-            assert self.dof.shape == (self.count, 3), f"dof should have shape ({self.count}, 3) but got {self.dof.shape}"
-        else:
-            self.dof = np.array([], dtype=bool).reshape((0, 3))
+        # Initialize immutable attributes (set once from C#)
+        self._initial_coordinates = np.array([], dtype=float).reshape((0, 3))
+        self._dof = np.array([], dtype=bool).reshape((0, 3))
+        self._count = 0
+        self._fixations_count = 0
         
+        # Initialize mutable state attributes
+        self._loads = np.array([], dtype=float).reshape((0, 3))
+        self._displacements = np.array([], dtype=float).reshape((0, 3))
+        self._reactions = np.array([], dtype=float).reshape((0, 3))
+        self._residual = np.array([], dtype=float).reshape((0, 3))
+        
+        # Initialize the instance
+        self._initialize(initial_coordinates, dof, loads, displacements, reactions)
+    
+    def _check_array(self, arr, name):
+        """Check and convert array to proper numpy array with correct shape."""
+        if arr is not None:
+            result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=float)
+            assert result.shape == (self._count, 3), f"{name} should have shape ({self._count}, 3) but got {result.shape}"
+            return result
+        return np.zeros((self._count, 3), dtype=float)
+    
+    def _reshape_array(self, arr, name) -> np.ndarray:
+        """Reshape array to proper shape (nodes_count, 3) if possible.
+        
+        Handles these cases:
+        1. None -> zeros array
+        2. Shape (nodes_count, 3) -> unchanged
+        3. Shape (3*nodes_count,) -> reshaped to (nodes_count, 3)
+        
+        Args:
+            arr: Array to reshape
+            name: Name of array for error messages
+            
+        Returns:
+            Reshaped array of shape (nodes_count, 3)
+            
+        Raises:
+            ValueError: If array cannot be reshaped to correct shape
+        """
+        if arr is None:
+            return np.zeros((self._count, 3), dtype=float)
+            
+        # Convert to numpy array if needed
+        result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=float)
+        
+        # If already correct shape, return as is
+        if result.shape == (self._count, 3):
+            return result
+            
+        # Try to reshape if it's a flat array
+        if result.size == self._count * 3:
+            try:
+                return result.reshape(self._count, 3)
+            except ValueError:
+                pass  # Fall through to error
+                
+        raise ValueError(f"{name} cannot be reshaped to ({self._count}, 3), got shape {result.shape}")
+    
+    def _initialize(self, initial_coordinates, dof, loads, displacements, reactions):
+        """Initialize all attributes with proper validation."""
+        # Handle coordinates first to establish count
+        if initial_coordinates is not None:
+            self._initial_coordinates = self._check_array(initial_coordinates, "initial_coordinates")
+            self._count = len(self._initial_coordinates)
+        
+        # Handle degrees of freedom
+        if dof is not None:
+            self._dof = self._check_array(dof, "dof")
+            self._fixations_count = np.sum(~self._dof.flatten()) # Compute number of fixed DOFs
 
+        # Initialize state arrays
+        self._loads = self._check_array(loads, "loads")
+        self._displacements = self._check_array(displacements, "displacements")
+        self._reactions = self._check_array(reactions, "reactions")
+        self._residual = np.zeros((self._count, 3), dtype=float)
+    
+    # READ Only properties
+    @property
+    def initial_coordinates(self) -> np.ndarray:
+        """[m] - shape (nodes_count, 3) - Initial nodal coordinates"""
+        return self._initial_coordinates
+    
+    @property
+    def coordinates(self) -> np.ndarray:
+        """[m] - shape (nodes_count, 3) - Current nodal coordinates"""
+        return self._initial_coordinates + self._displacements
+    
+    @property
+    def dof(self) -> np.ndarray:
+        """[-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)"""
+        return self._dof
+    
+    @property
+    def count(self) -> int:
+        """Number of nodes"""
+        return self._count
+    
+    @property
+    def fixations_count(self) -> int:
+        """Number of fixed degrees of freedom"""
+        return self._fixations_count
+    
 
+    # GET-SET properties
+    @property
+    def loads(self) -> np.ndarray:
+        """[N] - shape (nodes_count, 3) - External loads applied to nodes"""
+        return self._loads
+    
+    @loads.setter
+    def loads(self, value: np.ndarray):
+        self._loads = self._check_array(value, "loads")
+    
+    @property
+    def displacements(self) -> np.ndarray:
+        """[m] - shape (nodes_count, 3) - Nodal displacements"""
+        return self._displacements
+    
+    @displacements.setter
+    def displacements(self, value: np.ndarray):
+        self._displacements = self._check_array(value, "displacements")
+    
+    @property
+    def reactions(self) -> np.ndarray:
+        """[N] - shape (nodes_count, 3) - Support reactions"""
+        return self._reactions
+    
+    @reactions.setter
+    def reactions(self, value: np.ndarray):
+        self._reactions = self._check_array(value, "reactions")
+    
+    @property
+    def residual(self) -> np.ndarray:
+        """[N] - shape (nodes_count, 3) - Out of balance forces"""
+        return self._residual
+    
+    @residual.setter
+    def residual(self, value: np.ndarray):
+        self._residual = self._check_array(value, "residual")
+    
 
-    # def InitialData(Self, NodesCoord, ElementsEndNodes, IsDOFfree, ElementsType=np.zeros((0,)), ElementsA=np.zeros((0, 2)),
-    #                 ElementsE=np.zeros((0, 2)), ElementsLfreeInit = -1, LoadsInit=np.zeros((0,)),
-    #                 TensionInit=np.zeros((0,)), ReactionsInit=np.zeros((0,)), LoadsToApply=np.zeros((0,)),
-    #                 LengtheningsToApply=np.zeros((0,)), Residual0Threshold=0.00001, n_steps=1):
-
-    #     ### Initialize fundamental datas ###
-    #     if isinstance(NodesCoord, np.ndarray):
-    #         Self.NodesCount = NodesCoord.reshape(-1, 3).shape[0]
-    #         Self.Initial.NodesCoord = NodesCoord.reshape(-1, ) #see StateInitial
-    #     else:
-    #         Self.Initial.NodesCoord = None
-    #         Self.NodesCount = -1
-
-
-    #     if isinstance(IsDOFfree, np.ndarray):
-    #         Self.IsDOFfree = IsDOFfree.reshape((-1,)).astype(bool)
-    #         Self.DOFfreeCount = np.sum(np.ones(3 * Self.NodesCount, dtype=int)[Self.IsDOFfree])
-    #         Self.FixationsCount = 3 * Self.NodesCount - Self.DOFfreeCount
-    #     else:
-    #         Self.IsDOFfree = None
-    #         Self.FixationsCount = -1
-    #         Self.DOFfreeCount = -1
-
-    #     ### Initialize optional datas ###
-    #     Self.C = Self.ConnectivityMatrix(Self.NodesCount,Self.ElementsCount,Self.ElementsEndNodes)
-    #     (Self.Initial.ElementsL, Self.Initial.ElementsCos) = Self.Initial.ElementsLengthsAndCos(Self,Self.Initial.NodesCoord)  # thus calculate the free lengths based on the nodes coordinates
-
-
-
-
-
-    #     if isinstance(LoadsInit, np.ndarray) and LoadsInit.size == 3 * Self.NodesCount:
-    #         Self.Initial.Loads = LoadsInit.reshape(-1, )
-    #     else:
-    #         Self.Initial.Loads = np.zeros((3 * Self.NodesCount,))
-
-
-    #     if isinstance(TensionInit, np.ndarray) and TensionInit.size == Self.ElementsCount:
-    #         Self.Initial.Tension = TensionInit.reshape((-1,))
-    #     else:
-    #         Self.Initial.Tension = np.zeros((Self.ElementsCount,))
-
-
-    #     if isinstance(ReactionsInit, np.ndarray) and ReactionsInit.size == Self.FixationsCount:
-    #         Self.Initial.Reactions = ReactionsInit.reshape(-1, )
-    #     else:
-    #         Self.Initial.Reactions = np.zeros((Self.FixationsCount,))
-
-
-
-
-    #     if Self.ElementsE.shape == (Self.ElementsCount,2):
-    #         Self.Initial.ElementsE = Self.ElementsInTensionOrCompression(Self.Initial.Tension,Self.ElementsE)
-    #     if Self.ElementsA.shape == (Self.ElementsCount,2):
-    #         Self.Initial.ElementsA = Self.ElementsInTensionOrCompression(Self.Initial.Tension,Self.ElementsA)
-
-
-    #     if isinstance(ElementsLfreeInit, np.ndarray) and ElementsLfreeInit.size == Self.ElementsCount:
-    #         Self.Initial.ElementsLFree = ElementsLfreeInit.reshape((-1,))
-    #     else:
-    #         Self.Initial.ElementsLFree = -np.ones((Self.ElementsCount,))
-
-    #     if (Self.Initial.ElementsLFree < np.zeros((Self.ElementsCount,))).any() or np.any(ElementsLfreeInit == -1):  # if the free lengths are smaller than 0, it means they have not been calculated yet.
-    #         if np.count_nonzero(np.around(Self.Initial.Tension,decimals = 6))>0 : # if some elements are pre-tensionned, make sure the free lengths take it into account
-    #             F = Self.Flexibility(Self.Initial.ElementsE, Self.Initial.ElementsA, Self.Initial.ElementsL) #flexibility with initial length (considered infinite if EA is close to 0)
-    #             EA = Self.Initial.ElementsL/F # stiffness EA of the elements (with zeros replaced by 1e-9)
-    #             Init_strain = Self.Initial.Tension/EA
-    #             Self.Initial.ElementsLFree = Self.Initial.ElementsL/(1+Init_strain)
-    #         else : #there are no initial tension
-    #             Self.Initial.ElementsLFree = Self.Initial.ElementsL.copy()  # thus calculate the free lengths based on the nodes coordinates
-
-
-
-
-
+    # Public Methods
+    def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray) -> 'FEM_Nodes':
+        """Create a copy of this instance and update its state.
+        
+        Args:
+            loads: [N] - shape (nodes_count, 3) or (3*nodes_count,) - External loads
+            displacements: [m] - shape (nodes_count, 3) or (3*nodes_count,) - Nodal displacements
+            reactions: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Support reactions
+        """
+        # Reshape inputs if needed
+        loads = self._reshape_array(loads, "loads")
+        displacements = self._reshape_array(displacements, "displacements")
+        reactions = self._reshape_array(reactions, "reactions")
+        
+        return FEM_Nodes(
+            initial_coordinates=self._initial_coordinates.copy(),
+            dof=self._dof.copy(),
+            loads=loads,
+            displacements=displacements,
+            reactions=reactions
+        )
+        
+    def copy_and_add(self, loads_increment: np.ndarray, displacements_increment: np.ndarray, 
+                     reactions_increment: np.ndarray) -> 'FEM_Nodes':
+        """Create a copy of this instance and add increments to its state.
+        
+        Args:
+            loads_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Load increments
+            displacements_increment: [m] - shape (nodes_count, 3) or (3*nodes_count,) - Displacement increments
+            reactions_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Reaction increments
+        """
+        # Reshape inputs if needed
+        loads_inc = self._reshape_array(loads_increment, "loads_increment")
+        displacements_inc = self._reshape_array(displacements_increment, "displacements_increment")
+        reactions_inc = self._reshape_array(reactions_increment, "reactions_increment")
+        
+        return FEM_Nodes(
+            initial_coordinates=self._initial_coordinates.copy(),
+            dof=self._dof.copy(),
+            loads=self._loads + loads_inc,
+            displacements=self._displacements + displacements_inc,
+            reactions=self._reactions + reactions_inc
+        )

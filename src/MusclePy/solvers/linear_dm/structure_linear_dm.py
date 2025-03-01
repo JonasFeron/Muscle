@@ -1,10 +1,9 @@
-from MusclePy.solvers.linear_dm.elements_state_4linear_dm import Elements_State_4Linear_DM
-from MusclePy.state_model.nodes_state import Nodes_State
-from MusclePy.state_model.structure_state import Structure_State
+from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
+from MusclePy.femodel.fem_nodes import FEM_Nodes
 import numpy as np
 
 
-class Structure_State_4Linear_DM(Structure_State):
+class Structure_Linear_DM(Structure_State):
     def __init__(self, nodes=None, elements=None, applied=None, initial_nodes_results=None, initial_elements_results=None):
         """Initialize Structure_State_4Linear_DM, extending Structure_State with stiffness matrices attributes.
         
@@ -12,8 +11,8 @@ class Structure_State_4Linear_DM(Structure_State):
             Same arguments as Structure_State
         """
         # Call parent class constructor
-        self.nodes = Nodes_State(nodes,applied,initial_nodes_results)  
-        self.elements = Elements_State_4Linear_DM(elements,self.nodes,applied,initial_elements_results) 
+        self.nodes = FEM_Nodes(nodes,applied,initial_nodes_results)  
+        self.elements = Elements_Linear_DM(elements,self.nodes,applied,initial_elements_results) 
 
         # Initialize stiffness matrices attributes
         self.global_material_stiffness_matrix = None  # [N/m] - shape (3*nodes.count, 3*nodes.count)
