@@ -1,63 +1,114 @@
-
+using System;
 
 namespace MuscleCore.FEModel
 {
-	public class FEM_Nodes
-	{
+    public class FEM_Nodes
+    {
+        #region Properties
+        /// <summary>
+        /// [m] - shape (nodes_count, 3) - Initial nodal coordinates
+        /// </summary>
+        public double[,] InitialCoordinates { get; }
 
-		public double[,] Coordinates { get; private set; } //shape (NodesCount, 3)
+        /// <summary>
+        /// [m] - shape (nodes_count, 3) - Current nodal coordinates
+        /// </summary>
+        public double[,] Coordinates { get; set; }
 
-		public bool[] IsDOFfree { get; private set; } // [bool] - shape (3NodesCount,). Each DegreeOfFreedom can be fixed (False) or free (True). Each point i is associated to its X DOF (3i), Y DOF (3i+1), Z DOF (3i+2). .
+        /// <summary>
+        /// [-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)
+        /// </summary>
+        public bool[,] DOF { get; }
 
+        /// <summary>
+        /// Number of nodes
+        /// </summary>
+        public int Count { get; }
 
-		public FEM_Nodes()
-		{
-			Coordinates = new double[0, 0];
-			IsDOFfree = Array.Empty<bool>();
-		}
-		public FEM_Nodes(double[,] coordinates, bool[] isDofFree)
-		{
-			Coordinates = coordinates;
-			IsDOFfree = isDofFree;
-		}
+        /// <summary>
+        /// Number of fixed degrees of freedom
+        /// </summary>
+        public int FixationsCount { get; }
 
-        // public void RegisterNodes(StructureObj structObj)
-		// {
-		// 	int nodeCount = structObj.StructuralNodes.Count;
-		// 	NodesCoord = new double[nodeCount, 3];
-		// 	LoadsInit = new double[nodeCount, 3];
-		// 	LoadsToApply = new double[nodeCount, 3];
-		// 	IsDOFfree = new bool[3 * nodeCount];
-		// 	ReactionsInit = new double[3 * nodeCount];
-		// 	for (int i = 0; i < nodeCount; i++)
-		// 	{
-		// 		Node n = structObj.StructuralNodes[i];
-				
-		// 		// Coordinates (Python works in m - C# works in m)
-		// 		NodesCoord[i, 0] = n.Point.X;
-		// 		NodesCoord[i, 1] = n.Point.Y;
-		// 		NodesCoord[i, 2] = n.Point.Z;
+        /// <summary>
+        /// [N] - shape (nodes_count, 3) - External loads applied to nodes
+        /// </summary>
+        public double[,] Loads { get; set; }
 
-		// 		// DOF freedom
-		// 		IsDOFfree[3 * i] = n.isXFree;
-		// 		IsDOFfree[3 * i + 1] = n.isYFree;
-		// 		IsDOFfree[3 * i + 2] = n.isZFree;
+        /// <summary>
+        /// [m] - shape (nodes_count, 3) - Nodal displacements
+        /// </summary>
+        public double[,] Displacements { get; set; }
 
-		// 		// Initial loads (Python works in N - C# works in N)
-		// 		LoadsInit[i, 0] = n.Load.X;
-		// 		LoadsInit[i, 1] = n.Load.Y;
-		// 		LoadsInit[i, 2] = n.Load.Z;
+        /// <summary>
+        /// [N] - shape (nodes_count, 3) - Support reactions
+        /// </summary>
+        public double[,] Reactions { get; set; }
 
-		// 		// Loads to apply
-		// 		LoadsToApply[i, 0] = structObj.LoadsToApply[n.Ind].X;
-		// 		LoadsToApply[i, 1] = structObj.LoadsToApply[n.Ind].Y;
-		// 		LoadsToApply[i, 2] = structObj.LoadsToApply[n.Ind].Z;
+        /// <summary>
+        /// [N] - shape (nodes_count, 3) - Internal resisting forces at nodes
+        /// </summary>
+        public double[,] ResistingForces { get; set; }
 
-		// 		// Reactions
-		// 		if (n.isXFree == false) ReactionsInit[3 * i] = n.Reaction.X; //add the reaction if the X dof is fixed
-		// 		if (n.isYFree == false) ReactionsInit[3 * i + 1] = n.Reaction.Y;
-		// 		if (n.isZFree == false) ReactionsInit[3 * i + 2] = n.Reaction.Z;
-		// 	}
-		// }
+        /// <summary>
+        /// [N] - shape (nodes_count, 3) - Out of balance loads
+        /// </summary>
+        public double[,] Residual { get; set; }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initialize FEM_Nodes with node properties. All computations will be done in Python.
+        /// </summary>
+        /// <param name="initialCoordinates">[m] - shape (nodes_count, 3) - Initial nodal coordinates</param>
+        /// <param name="dof">[-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)</param>
+        /// <param name="loads">[N] - shape (nodes_count, 3) - External loads applied to nodes</param>
+        /// <param name="displacements">[m] - shape (nodes_count, 3) - Nodal displacements</param>
+        /// <param name="reactions">[N] - shape (nodes_count, 3) - Support reactions</param>
+        /// <param name="resistingForces">[N] - shape (nodes_count, 3) - Internal resisting forces at nodes</param>
+        /// <exception cref="ArgumentNullException">Thrown when required parameters are null</exception>
+        public FEM_Nodes(double[,] initialCoordinates, bool[,] dof, double[,] loads = null, 
+                        double[,] displacements = null, double[,] reactions = null, double[,] resistingForces = null)
+        {
+            // Validate required parameters
+            InitialCoordinates = initialCoordinates ?? throw new ArgumentNullException(nameof(initialCoordinates));
+            DOF = dof ?? throw new ArgumentNullException(nameof(dof));
+
+            // Set count and validate array dimensions
+            Count = InitialCoordinates.GetLength(0);
+            if (InitialCoordinates.GetLength(1) != 3)
+                throw new ArgumentException("Initial coordinates must have 3 columns", nameof(initialCoordinates));
+            if (DOF.GetLength(0) != Count || DOF.GetLength(1) != 3)
+                throw new ArgumentException($"DOF must have shape ({Count}, 3)", nameof(dof));
+
+            // Calculate fixations count
+            FixationsCount = 0;
+            for (int i = 0; i < DOF.GetLength(0); i++)
+                for (int j = 0; j < DOF.GetLength(1); j++)
+                    if (!DOF[i, j]) FixationsCount++;
+
+            // Initialize mutable properties
+            Coordinates = new double[Count, 3];
+            Loads = loads ?? new double[Count, 3];
+            Displacements = displacements ?? new double[Count, 3];
+            Reactions = reactions ?? new double[Count, 3];
+            ResistingForces = resistingForces ?? new double[Count, 3];
+            Residual = new double[Count, 3];
+
+            // Validate optional array dimensions if provided
+            ValidateArrayDimensions(loads, nameof(loads));
+            ValidateArrayDimensions(displacements, nameof(displacements));
+            ValidateArrayDimensions(reactions, nameof(reactions));
+            ValidateArrayDimensions(resistingForces, nameof(resistingForces));
+        }
+        #endregion
+
+        #region Private Methods
+        private void ValidateArrayDimensions(double[,] array, string paramName)
+        {
+            if (array != null && (array.GetLength(0) != Count || array.GetLength(1) != 3))
+                throw new ArgumentException($"{paramName} must have shape ({Count}, 3)", paramName);
+        }
+        #endregion
     }
 }

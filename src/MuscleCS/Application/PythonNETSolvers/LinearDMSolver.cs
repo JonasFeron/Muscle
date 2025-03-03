@@ -27,7 +27,7 @@ namespace MuscleCore.Application.PythonNETSolvers
         public static FEM_StructureResults? Solve(FEM_Structure csStruct)
         {
             string pythonScript = "main_linear_dm"; //linear displacement method
-            FEM_StructureResults? csResult = null;
+            FEM_StructureResults? csDeformedStruct = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
@@ -36,9 +36,9 @@ namespace MuscleCore.Application.PythonNETSolvers
                 {
                     PyObject pyStruct = csStruct.ToPython();
                     dynamic script = PyModule.Import(pythonScript);
-                    dynamic mainFunction = script.main;
-                    dynamic pyResult = mainFunction(pyStruct);
-                    csResult = pyResult.As<FEM_StructureResults>();
+                    dynamic mainFunction = script.main_linear_displacement_method;
+                    dynamic pyDeformedStruct = mainFunction(pyStruct);
+                    csDeformedStruct = pyDeformedStruct.As<FEM_Structure>();
                 }
                 catch (Exception e)
                 {
@@ -47,7 +47,7 @@ namespace MuscleCore.Application.PythonNETSolvers
             }
             PythonEngine.EndAllowThreads(m_threadState);
 
-            return csResult;
+            return csDeformedStruct;
         }
     }
 }
