@@ -24,20 +24,31 @@ namespace MuscleCore.Application.PythonNETSolvers
 {
     public static class LinearDMSolver
     {
-        public static FEM_StructureResults? Solve(FEM_Structure csStruct)
+        /// <summary>
+        /// Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).
+        /// </summary>
+        /// <param name="csInitialStruct">Current structure state</param>
+        /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
+        /// <param name="deltaFreeLengthIncrement">[m] - shape (elements.count,) - Free length increments to apply</param>
+        /// <returns>Updated FEM_Structure with incremented state</returns>
+        public static FEM_Structure? Solve(FEM_Structure csInitialStruct, double[] loadsIncrement, double[] deltaFreeLengthIncrement)
         {
             string pythonScript = "main_linear_dm"; //linear displacement method
-            FEM_StructureResults? csDeformedStruct = null;
+            FEM_Structure? csDeformedStruct = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
             {
                 try
                 {
-                    PyObject pyStruct = csStruct.ToPython();
+                    PyObject pyInitialStruct = csInitialStruct.ToPython();
                     dynamic script = PyModule.Import(pythonScript);
                     dynamic mainFunction = script.main_linear_displacement_method;
-                    dynamic pyDeformedStruct = mainFunction(pyStruct);
+                    dynamic pyDeformedStruct = mainFunction(
+                        pyInitialStruct,
+                        loadsIncrement,
+                        deltaFreeLengthIncrement
+                    );
                     csDeformedStruct = pyDeformedStruct.As<FEM_Structure>();
                 }
                 catch (Exception e)
