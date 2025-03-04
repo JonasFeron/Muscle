@@ -1,7 +1,5 @@
 using MuscleCore.FEModel;
 using Python.Runtime;
-using System.Runtime.InteropServices;
-using MuscleCore.Converters.Helpers;
 
 namespace MuscleCore.Converters
 {

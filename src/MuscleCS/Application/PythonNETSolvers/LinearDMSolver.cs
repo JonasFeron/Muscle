@@ -42,7 +42,7 @@ namespace MuscleCore.Application.PythonNETSolvers
                 try
                 {
                     PyObject pyInitialStruct = csInitialStruct.ToPython();
-                    dynamic script = PyModule.Import(pythonScript);
+                    dynamic script = Py.Import(pythonScript);
                     dynamic mainFunction = script.main_linear_displacement_method;
                     dynamic pyDeformedStruct = mainFunction(
                         pyInitialStruct,

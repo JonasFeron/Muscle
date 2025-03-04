@@ -1,3 +1,4 @@
+from argparse import ArgumentError
 import numpy as np
 from typing import Optional
 
@@ -44,49 +45,42 @@ class FEM_Nodes:
         # Initialize the instance
         self._initialize(initial_coordinates, dof, loads, displacements, reactions, resisting_forces)
     
-    def _check_array(self, arr, name):
-        """Check and convert array to proper numpy array with correct shape."""
-        if arr is not None:
-            result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=float)
-            assert result.shape == (self._count, 3), f"{name} should have shape ({self._count}, 3) but got {result.shape}"
-            return result
-        return np.zeros((self._count, 3), dtype=float)
-    
-    def _reshape_array(self, arr, name) -> np.ndarray:
-        """Reshape array to proper shape (nodes_count, 3) if possible.
+    def _check_and_reshape_array(self, arr, name) -> np.ndarray:
+        """Convert input array to proper numpy array with correct shape and type.
         
         Handles these cases:
         1. None -> zeros array
-        2. Shape (nodes_count, 3) -> unchanged
+        2. Shape (nodes_count, 3) -> converted to proper dtype (float or bool)
         3. Shape (3*nodes_count,) -> reshaped to (nodes_count, 3)
-        4. Shape (fixations_count,) -> expanded to (3*nodes_count,) and reshaped
+        4. Shape (fixations_count,) -> expanded to (nodes_count, 3) for reactions
         
         Args:
-            arr: Array to reshape
-            name: Name of array for error messages
-            
-        Returns:
-            Reshaped array of shape (nodes_count, 3)
+            arr: Array to convert
+            name: Name of array for error messages and type detection
         """
         if arr is None:
-            return np.zeros((self._count, 3), dtype=float)
-        
-        # Convert to numpy array if needed
-        result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=float)
-        
-        # If already correct shape, return as is
+            return np.zeros((self._count, 3), dtype=bool if name == "dof" else float)
+            
+        # Convert to numpy array with correct dtype
+        if not isinstance(arr, np.ndarray):  # if arr is a C# array
+            # Handle C# bool array conversion explicitly
+            if name == "dof":
+                result = np.array(list(arr), dtype=bool)
+            else:
+                result = np.array(arr, dtype=float, copy=True)
+        else:
+            result = arr
+            
+        # Handle correct shape
         if result.shape == (self._count, 3):
             return result
-        
+            
         # Try to reshape if it's a flat array
         if result.size == self._count * 3:
-            try:
-                return result.reshape(self._count, 3)
-            except ValueError:
-                pass  # Fall through to next case
-                
-        # Handle reactions array from fixations_count to nodes_count x 3
-        if result.size == np.sum(~self.dof.reshape(-1)):  # fixations_count
+            return result.reshape(self._count, 3)
+            
+        # Special case: reactions array from fixations_count to nodes_count x 3
+        if name in ["reactions", "reactions_increment"] and result.size == np.sum(~self.dof.reshape(-1)):
             full_array = np.zeros(3 * self._count)
             fixed_dof_indices = np.arange(3 * self._count)[~self.dof.reshape(-1)]
             full_array[fixed_dof_indices] = result
@@ -100,20 +94,32 @@ class FEM_Nodes:
         if initial_coordinates is not None:
             # Convert to numpy array if needed
             initial_coords = initial_coordinates if isinstance(initial_coordinates, np.ndarray) else np.array(initial_coordinates, dtype=float)
-            assert len(initial_coords.shape) == 2 and initial_coords.shape[1] == 3, "initial_coordinates must be a 2D array with 3 columns"
-            self._count = len(initial_coords)
-            self._initial_coordinates = initial_coords
-        
+            
+            # Handle flat array case
+            if initial_coords.ndim == 1:
+                if len(initial_coords) % 3 == 0:
+                    self._count = len(initial_coords) // 3
+                    self._initial_coordinates = initial_coords.reshape(self._count, 3)
+                else:
+                    raise ValueError("initial_coordinates as flat array must have length divisible by 3")
+            else: # handle 2D array
+                if initial_coords.shape[1] != 3:
+                    raise ValueError(f"initial_coordinates as 2D array must have shape (n,3), got shape {initial_coords.shape}")
+                self._count = len(initial_coords)
+                self._initial_coordinates = initial_coords
+        else:  
+            raise ArgumentError(f"impossible to initialize FEM_Nodes without initial_coordinates, no initial_coordinates provided")
+
         # Handle degrees of freedom
         if dof is not None:
-            self._dof = self._check_array(dof, "dof")
-            self._fixations_count = np.sum(~self._dof.flatten()) # Compute number of fixed DOFs
+            self._dof = self._check_and_reshape_array(dof, "dof")
+            self._fixations_count = np.sum(~self._dof.flatten())
 
         # Initialize state arrays
-        self._loads = self._check_array(loads, "loads")
-        self._displacements = self._check_array(displacements, "displacements")
-        self._reactions = self._check_array(reactions, "reactions")
-        self._resisting_forces = self._check_array(resisting_forces, "resisting_forces")
+        self._loads = self._check_and_reshape_array(loads, "loads")
+        self._displacements = self._check_and_reshape_array(displacements, "displacements")
+        self._reactions = self._check_and_reshape_array(reactions, "reactions")
+        self._resisting_forces = self._check_and_reshape_array(resisting_forces, "resisting_forces")
         self._residual = np.zeros((self._count, 3), dtype=float)
     
     # READ Only properties
@@ -184,10 +190,10 @@ class FEM_Nodes:
             resisting_forces: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Internal resisting forces
         """
         # Reshape inputs if needed
-        loads = self._reshape_array(loads, "loads")
-        displacements = self._reshape_array(displacements, "displacements")
-        reactions = self._reshape_array(reactions, "reactions")
-        resisting_forces = self._reshape_array(resisting_forces, "resisting_forces")
+        loads = self._check_and_reshape_array(loads, "loads")
+        displacements = self._check_and_reshape_array(displacements, "displacements")
+        reactions = self._check_and_reshape_array(reactions, "reactions")
+        resisting_forces = self._check_and_reshape_array(resisting_forces, "resisting_forces")
         
         return FEM_Nodes(
             initial_coordinates=self._initial_coordinates.copy(),
@@ -209,10 +215,10 @@ class FEM_Nodes:
             resisting_forces_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Resisting forces increments
         """
         # Reshape inputs if needed
-        loads_inc = self._reshape_array(loads_increment, "loads_increment")
-        displacements_inc = self._reshape_array(displacements_increment, "displacements_increment")
-        reactions_inc = self._reshape_array(reactions_increment, "reactions_increment")
-        resisting_forces_inc = self._reshape_array(resisting_forces_increment, "resisting_forces_increment")
+        loads_inc = self._check_and_reshape_array(loads_increment, "loads_increment")
+        displacements_inc = self._check_and_reshape_array(displacements_increment, "displacements_increment")
+        reactions_inc = self._check_and_reshape_array(reactions_increment, "reactions_increment")
+        resisting_forces_inc = self._check_and_reshape_array(resisting_forces_increment, "resisting_forces_increment")
         
         return FEM_Nodes(
             initial_coordinates=self._initial_coordinates.copy(),

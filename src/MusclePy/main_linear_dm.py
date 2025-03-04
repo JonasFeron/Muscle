@@ -1,9 +1,9 @@
-from MusclePy.solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
-from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
-from MusclePy.solvers.linear_dm.linear_dm import linear_displacement_method
-from MusclePy.solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads, perturb_structure
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
+from solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
+from solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
+from solvers.linear_dm.linear_dm import linear_displacement_method
+from solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads, perturb_structure
+from femodel.fem_structure import FEM_Structure
+from femodel.fem_nodes import FEM_Nodes
 import numpy as np
 
 
@@ -26,8 +26,8 @@ def main_linear_displacement_method(structure: FEM_Structure, loads_increment: n
         Updated FEM_Structure with incremented state
     """
     #check input shapes
-    loads_increment = structure.nodes._reshape_array(loads_increment, "loads_increment")
-    free_length_increment = structure.elements._reshape_array_1d(free_length_increment, "delta_free_length_increment")
+    loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
+    free_length_increment = structure.elements._check_and_reshape_array(free_length_increment, "delta_free_length_increment")
  
     # modify the free length of the elements via mechanical devices
     total_free_length_variation = structure.elements.delta_free_length + free_length_increment

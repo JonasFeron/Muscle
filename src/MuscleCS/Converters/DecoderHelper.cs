@@ -6,7 +6,7 @@ namespace MuscleCore.Converters
     public static class DecoderHelper
     {
         /// <summary>
-        /// Convert a numpy array to a C# 2D double array using efficient Buffer.BlockCopy
+        /// Convert a numpy array to a C# 2D double array using Array.Copy for maximum efficiency
         /// </summary>
         public static double[,] ToCSArray2D(dynamic npArray)
         {
@@ -17,20 +17,20 @@ namespace MuscleCore.Converters
                 throw new ArgumentException("Expected 2D numpy array");
             }
 
-            // Get the numpy array data directly as a contiguous array
+            // Get the numpy array data as a flat array
             var flatData = ((PyObject)npArray.ravel()).As<double[]>();
             
             // Create the 2D array with the correct dimensions
             var matrix = new double[shape[0], shape[1]];
             
-            // Copy the data directly into the 2D array
-            Buffer.BlockCopy(flatData, 0, matrix, 0, flatData.Length * sizeof(double));
+            // Copy the entire array at once
+            Array.Copy(flatData, 0, matrix, 0, flatData.Length);
             
             return matrix;
         }
 
         /// <summary>
-        /// Convert a numpy array to a C# 2D boolean array using efficient Buffer.BlockCopy
+        /// Convert a numpy array to a C# 2D boolean array using Array.Copy for maximum efficiency
         /// </summary>
         public static bool[,] ToCSBoolArray2D(dynamic npArray)
         {
@@ -41,14 +41,14 @@ namespace MuscleCore.Converters
                 throw new ArgumentException("Expected 2D numpy array");
             }
 
-            // Get the numpy array data directly as a contiguous array
+            // Get the numpy array data as a flat array
             var flatData = ((PyObject)npArray.ravel()).As<bool[]>();
             
             // Create the 2D array with the correct dimensions
             var matrix = new bool[shape[0], shape[1]];
             
-            // Copy the data directly into the 2D array
-            Buffer.BlockCopy(flatData, 0, matrix, 0, flatData.Length * sizeof(bool));
+            // Copy the entire array at once
+            Array.Copy(flatData, 0, matrix, 0, flatData.Length);
             
             return matrix;
         }

@@ -39,27 +39,29 @@
     <Compile Include="MainModuleDynamics.py" />
     <Compile Include="MainModuleDynamicsCONSISTENT.py" />
     <Compile Include="MainNonLinearSolveStructure.py" />
-    <Compile Include="py_model\py_data.py" />
-    <Compile Include="py_model\py_result.py" />
     <Compile Include="result.py" />
+    <Compile Include="solvers\linear_dm\elements_linear_dm.py" />
+    <Compile Include="solvers\linear_dm\helper_main_linear_dm.py" />
+    <Compile Include="solvers\linear_dm\linear_dm.py" />
+    <Compile Include="solvers\linear_dm\structure_linear_dm.py" />
     <Compile Include="StructureObj.py" />
     <Compile Include="test_script.py" />
-    <Compile Include="TwinObjects\TwinData.py" />
-    <Compile Include="TwinObjects\TwinResult.py" />
     <Compile Include="__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="femodel\" />
-    <Folder Include="py_model\" />
-    <Folder Include="py_model\__pycache__\" />
-    <Folder Include="TwinObjects\" />
-    <Folder Include="TwinObjects\__pycache__\" />
+    <Folder Include="solvers\" />
+    <Folder Include="solvers\dr\" />
+    <Folder Include="solvers\linear_dm\" />
+    <Folder Include="solvers\linear_dm\__pycache__\" />
+    <Folder Include="solvers\nonlinear_dm\" />
+    <Folder Include="solvers\svd\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="py_model\__pycache__\py_data.cpython-312.pyc" />
-    <Content Include="py_model\__pycache__\py_result.cpython-312.pyc" />
-    <Content Include="TwinObjects\__pycache__\TwinData.cpython-312.pyc" />
-    <Content Include="TwinObjects\__pycache__\TwinResult.cpython-312.pyc" />
+    <Content Include="solvers\linear_dm\__pycache__\elements_linear_dm.cpython-312.pyc" />
+    <Content Include="solvers\linear_dm\__pycache__\helper_main_linear_dm.cpython-312.pyc" />
+    <Content Include="solvers\linear_dm\__pycache__\linear_dm.cpython-312.pyc" />
+    <Content Include="solvers\linear_dm\__pycache__\structure_linear_dm.cpython-312.pyc" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

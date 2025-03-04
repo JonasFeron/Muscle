@@ -1,0 +1,55 @@
+using MuscleCore.Application.PythonNETInit;
+using MuscleCore.Application.PythonNETSolvers;
+using MuscleCore.FEModel;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Python.Runtime;
+using System.IO;
+using System;
+
+namespace MuscleCSTests.Application.PythonNETSolvers
+{
+    [TestClass]
+    public class TestScriptSolverTests
+    {
+        private static string condaEnvPath;
+        private static string pythonDllName;
+        private static string scriptDir;
+
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            condaEnvPath = PythonNETConfig.condaEnvPath;
+            pythonDllName = PythonNETConfig.pythonDllName;
+
+            scriptDir = Path.GetFullPath(Path.Combine(
+    Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src", "MusclePy"));
+
+
+            PythonNETManager.Initialize(condaEnvPath, pythonDllName, scriptDir);
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            PythonNETManager.ShutDown();
+        }
+
+
+
+        [TestMethod]
+        public void TestHelloFromPython()
+        {
+            // Arrange
+            string str0 = "HELLO";
+            string str1 = "from python";
+
+            // Act
+            string result = TestScriptSolver.Solve(str0, str1);
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual("hello FROM PYTHON", result);
+        }
+    }
+}

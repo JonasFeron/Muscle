@@ -60,7 +60,7 @@ class TestMainLinearDM_2BarsTruss(unittest.TestCase):
         loads[5] = -100000.0  # Node 1, Z direction
         
         # No prestress
-        delta_free_length = np.zeros(2)  # 2 elements
+        delta_free_length = np.zeros((2,))  # 2 elements
         
         # Solve
         result = main_linear_displacement_method(

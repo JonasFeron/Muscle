@@ -169,18 +169,18 @@ class TestFEMNodes(unittest.TestCase):
     def test_error_handling(self):
         """Test error handling for invalid inputs."""
         # Test wrong shape for initial_coordinates
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             FEM_Nodes(initial_coordinates=np.array([[0.0, 0.0]]))  # Missing z coordinate
             
         # Test wrong shape for dof
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             FEM_Nodes(
                 initial_coordinates=self.initial_coordinates,
                 dof=np.array([True, False, True])  # Wrong shape
             )
             
         # Test wrong shape for loads
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             FEM_Nodes(
                 initial_coordinates=self.initial_coordinates,
                 dof=self.dof,
@@ -196,43 +196,33 @@ class TestFEMNodes(unittest.TestCase):
                 resisting_forces=np.zeros((3, 3))
             )
 
-    def test_reshape_array(self):
-        """Test the _reshape_array method for various input cases."""
-        # Case 1: None input should return zeros
-        reshaped_none = self.nodes._reshape_array(None, "test_array")
-        np.testing.assert_array_equal(reshaped_none, np.zeros((3, 3)))
+    def test_check_and_reshape_array(self):
+        """Test the _check_and_reshape_array method for various input cases."""
+        nodes = FEM_Nodes(initial_coordinates=self.initial_coordinates)
         
-        # Case 2: Already correct shape (nodes_count, 3) should remain unchanged
-        correct_shape = np.ones((3, 3))
-        reshaped_correct = self.nodes._reshape_array(correct_shape, "test_array")
-        np.testing.assert_array_equal(reshaped_correct, correct_shape)
+        # Test None input
+        result = nodes._check_and_reshape_array(None, "test")
+        np.testing.assert_array_equal(result, np.zeros((3, 3)))
         
-        # Case 3: Flat array (3*nodes_count,) should reshape to (nodes_count, 3)
-        flat_array = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-        reshaped_flat = self.nodes._reshape_array(flat_array, "test_array")
-        expected_reshaped = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-        np.testing.assert_array_equal(reshaped_flat, expected_reshaped)
+        # Test correct shape input
+        input_array = np.ones((3, 3))
+        result = nodes._check_and_reshape_array(input_array, "test")
+        np.testing.assert_array_equal(result, input_array)
         
-        # Case 4: Reactions array (fixations_count,) should expand correctly
-        # Our test structure has 2 fixed nodes (7 fixed DOFs)
-        reactions = np.array([10, 20, 30, 40, 50, 60, 70])  # Forces at fixed DOFs
-        reshaped_reactions = self.nodes._reshape_array(reactions, "test_array")
-        # Check shape
-        self.assertEqual(reshaped_reactions.shape, (3, 3))
-        # Check that values are in correct positions based on DOF pattern
-        fixed_positions = ~self.nodes.dof
-        flattened_result = reshaped_reactions.flatten()
-        fixed_values = flattened_result[~self.nodes.dof.flatten()]
-        np.testing.assert_array_equal(fixed_values, reactions)
+        # Test 1D input that can be reshaped
+        input_array = np.ones(9)
+        result = nodes._check_and_reshape_array(input_array, "test")
+        np.testing.assert_array_equal(result, np.ones((3, 3)))
         
-        # Test error cases
-        # Wrong total size
+        # Test C# bool array
+        bool_array = [[True, False, True], [False, True, False], [True, True, False]]
+        result = nodes._check_and_reshape_array(bool_array, "dof")
+        self.assertEqual(result.dtype, np.bool_)
+        np.testing.assert_array_equal(result, np.array(bool_array))
+        
+        # Test wrong shape input
         with self.assertRaises(ValueError):
-            self.nodes._reshape_array(np.array([1, 2, 3, 4]), "test_array")
-        
-        # Wrong shape that can't be reshaped
-        with self.assertRaises(ValueError):
-            self.nodes._reshape_array(np.array([[1, 2], [3, 4]]), "test_array")
+            nodes._check_and_reshape_array(np.ones(4), "test")
 
 
 if __name__ == '__main__':

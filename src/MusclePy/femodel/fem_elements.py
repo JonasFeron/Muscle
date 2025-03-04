@@ -1,5 +1,5 @@
 import numpy as np
-from MusclePy.femodel.fem_nodes import FEM_Nodes
+from .fem_nodes import FEM_Nodes
 
 
 class FEM_Elements:
@@ -57,66 +57,66 @@ class FEM_Elements:
         # Initialize the instance
         self._initialize(type, end_nodes, areas, youngs, delta_free_length, tension)
     
-    def _check_array_1d(self, arr, name):
-        """Check and convert 1D array to proper numpy array with correct shape."""
-        if arr is not None:
-            result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=float)
-            assert len(result.shape) == 1 and len(result) == self._count, f"{name} should have shape ({self._count},) but got {result.shape}"
-            return result
-        return np.zeros(self._count, dtype=float)
-
-    def _reshape_array_1d(self, arr, name) -> np.ndarray:
-        """Reshape array to proper shape (elements_count,) if possible.
+    def _check_and_reshape_array(self, arr, name, shape_suffix=None) -> np.ndarray:
+        """Convert input array to proper numpy array with correct shape and type.
+        
+        Handles these cases:
+        1. None -> zeros array
+        2. Shape (elements_count,) or (elements_count, N) -> converted to proper dtype (float or int)
+        3. Shape (N*elements_count,) -> reshaped to (elements_count, N) if possible
         
         Args:
-            arr: Array to reshape
-            name: Name of array for error messages
-            
-        Returns:
-            Reshaped array of shape (elements_count,)
-            
-        Raises:
-            ValueError: If array cannot be reshaped to correct shape
+            arr: Array to convert
+            name: Name of array for error messages and type detection
+            shape_suffix: Optional second dimension (e.g. 2 for areas/youngs/end_nodes)
         """
         if arr is None:
-            return np.zeros(self._count, dtype=float)
+            shape = (self._count,) if shape_suffix is None else (self._count, shape_suffix)
+            return np.zeros(shape, dtype=int if name in ["type", "end_nodes"] else float)
             
-        # Convert to numpy array if needed
-        result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=float)
-        
-        # If already correct shape, return as is
-        if result.shape == (self._count,):
+        # Convert to numpy array with correct dtype
+        if not isinstance(arr, np.ndarray):  # if arr is a C# array
+            result = np.array(arr, dtype=int if name in ["type", "end_nodes"] else float, copy=True)
+        else:
+            result = arr
+            
+        # Handle correct shape
+        expected_shape = (self._count,) if shape_suffix is None else (self._count, shape_suffix)
+        if result.shape == expected_shape:
             return result
             
-        # Try to flatten if it's the right size
-        if result.size == self._count:
-            try:
-                return result.flatten()
-            except ValueError:
-                pass  # Fall through to error
-                
-        raise ValueError(f"{name} cannot be reshaped to ({self._count},), got shape {result.shape}")
-    
-    def _check_array_2d(self, arr, name, dtype=float):
-        """Check and convert 2D array to proper numpy array with correct shape."""
-        if arr is not None:
-            result = arr if isinstance(arr, np.ndarray) else np.array(arr, dtype=dtype)
-            assert result.shape == (self._count, 2), f"{name} should have shape ({self._count}, 2) but got {result.shape}"
-            return result
-        return np.zeros((self._count, 2), dtype=dtype)
+        # Try to reshape if it's a flat array
+        if result.size == np.prod(expected_shape):
+            return result.reshape(expected_shape)
+            
+        raise ValueError(f"{name} cannot be reshaped to {expected_shape}, got shape {result.shape}")
     
     def _initialize(self, type, end_nodes, areas, youngs, delta_free_length, tension):
         """Initialize all attributes with proper validation."""
         # Handle end_nodes first to establish count
         if end_nodes is not None:
-            self._end_nodes = end_nodes if isinstance(end_nodes, np.ndarray) else np.array(end_nodes, dtype=int)
-            assert self._end_nodes.shape[1] == 2, f"end_nodes should have shape (N, 2) but got {self._end_nodes.shape}"
-            self._count = len(self._end_nodes)
+            # Convert to numpy array if needed
+            end_nodes_arr = end_nodes if isinstance(end_nodes, np.ndarray) else np.array(end_nodes, dtype=int)
+            
+            # Handle flat array case
+            if end_nodes_arr.ndim == 1:
+                if len(end_nodes_arr) % 2 == 0:
+                    self._count = len(end_nodes_arr) // 2
+                    self._end_nodes = end_nodes_arr.reshape(self._count, 2)
+                else:
+                    raise ValueError("end_nodes as flat array must have length divisible by 2")
+            else: # handle 2D array
+                if end_nodes_arr.shape[1] != 2:
+                    raise ValueError(f"end_nodes as 2D array must have shape (n,2), got shape {end_nodes_arr.shape}")
+                self._count = len(end_nodes_arr)
+                self._end_nodes = end_nodes_arr
+        else:
+            raise ArgumentError("impossible to initialize FEM_Elements without end_nodes, no end_nodes provided")
         
         # Initialize immutable arrays
-        self._type = self._check_array_1d(type, "type")
-        self._areas = self._check_array_2d(areas, "areas")
-        self._youngs = self._check_array_2d(youngs, "youngs")
+        self._type = self._check_and_reshape_array(type, "type")
+        self._areas = self._check_and_reshape_array(areas, "areas", shape_suffix=2)
+        self._youngs = self._check_and_reshape_array(youngs, "youngs", shape_suffix=2)
         
         # Compute initial free length from nodes coordinates
         self._compute_initial_free_length()
@@ -125,8 +125,8 @@ class FEM_Elements:
         self._compute_connectivity()
         
         # Initialize mutable state arrays
-        self._delta_free_length = self._check_array_1d(delta_free_length, "delta_free_length")
-        self._tension = self._check_array_1d(tension, "tension")
+        self._delta_free_length = self._check_and_reshape_array(delta_free_length, "delta_free_length")
+        self._tension = self._check_and_reshape_array(tension, "tension")
     
     def _compute_initial_free_length(self):
         """Compute initial free length from nodes coordinates."""
@@ -303,8 +303,8 @@ class FEM_Elements:
             tension: [N] - shape (elements_count,) - Axial forces
         """
         # Reshape inputs if needed
-        delta_free_length = self._reshape_array_1d(delta_free_length, "delta_free_length")
-        tension = self._reshape_array_1d(tension, "tension")
+        delta_free_length = self._check_and_reshape_array(delta_free_length, "delta_free_length")
+        tension = self._check_and_reshape_array(tension, "tension")
         
         return FEM_Elements(
             nodes=nodes,
@@ -326,8 +326,8 @@ class FEM_Elements:
             tension_increment: [N] - shape (elements_count,) - Increment in axial forces
         """
         # Reshape inputs if needed
-        delta_free_length_inc = self._reshape_array_1d(delta_free_length_increment, "delta_free_length_increment")
-        tension_inc = self._reshape_array_1d(tension_increment, "tension_increment")
+        delta_free_length_inc = self._check_and_reshape_array(delta_free_length_increment, "delta_free_length_increment")
+        tension_inc = self._check_and_reshape_array(tension_increment, "tension_increment")
         
         return FEM_Elements(
             nodes=nodes,

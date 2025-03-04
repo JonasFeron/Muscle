@@ -25,20 +25,13 @@ namespace MuscleCore.Converters
     {
         public static void RegisterConverters()
         {
-            PyObjectConversions.RegisterEncoder(new TwinStructureEncoder());
-            PyObjectConversions.RegisterEncoder(new TwinNodesEncoder());
+            PyObjectConversions.RegisterEncoder(new FEM_StructureEncoder());
+            PyObjectConversions.RegisterEncoder(new FEM_NodesEncoder());
             PyObjectConversions.RegisterEncoder(new FEM_ElementsEncoder());
-            PyObjectConversions.RegisterEncoder(new TwinActionEncoder());
-            PyObjectConversions.RegisterEncoder(new TwinNodesResultsEncoder());
-            PyObjectConversions.RegisterEncoder(new TwinElementsResultsEncoder());
 
-            // PyObjectConversions.RegisterDecoder(new TwinStructureDecoder());
-            // PyObjectConversions.RegisterDecoder(new TwinNodesDecoder());
-            // PyObjectConversions.RegisterDecoder(new TwinElementsDecoder());
-            PyObjectConversions.RegisterDecoder(new TwinStructureResultsDecoder());
-            PyObjectConversions.RegisterDecoder(new TwinActionDecoder());
-            PyObjectConversions.RegisterDecoder(new TwinNodesResultsDecoder());
-            PyObjectConversions.RegisterDecoder(new FEM_ElementsDecoder());
+            PyObjectConversions.RegisterDecoder(new FEM_StructureDecoder());
+            PyObjectConversions.RegisterDecoder(new FEM_NodesDecoder());
+            PyObjectConversions.RegisterDecoder(new FEM_ElementsDecoder()); 
 
         }
     }

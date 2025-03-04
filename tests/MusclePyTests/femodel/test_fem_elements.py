@@ -158,16 +158,27 @@ class TestFEMElements(unittest.TestCase):
         
     def test_error_handling(self):
         """Test error handling for invalid inputs."""
-        # Test reshape_array_1d with wrong size
+        # Test wrong shape input
         with self.assertRaises(ValueError):
-            self.elements._reshape_array_1d(np.array([1.0]), "test_array")
+            self.elements._check_and_reshape_array(np.array([1.0]), "test")
             
+        # Test wrong size input
         with self.assertRaises(ValueError):
-            self.elements._reshape_array_1d(np.array([1.0, 2.0, 3.0]), "test_array")
+            self.elements._check_and_reshape_array(np.array([1.0, 2.0, 3.0]), "test")
             
-        # Test that reshape works with correct size but different shape
-        reshaped = self.elements._reshape_array_1d(np.array([[1.0], [2.0]]), "test_array")
-        np.testing.assert_array_equal(reshaped, np.array([1.0, 2.0]))
+        # Test 1D input that can be reshaped
+        result = self.elements._check_and_reshape_array(np.array([1.0, 2.0]), "test")
+        np.testing.assert_array_equal(result, np.array([1.0, 2.0]))
+        
+        # Test 2D input with shape_suffix
+        result = self.elements._check_and_reshape_array(np.array([[1.0, 2.0], [3.0, 4.0]]), "areas", shape_suffix=2)
+        np.testing.assert_array_equal(result, np.array([[1.0, 2.0], [3.0, 4.0]]))
+        
+        # Test C# array conversion
+        int_array = [[-1], [-1]]  # C# array for element types
+        result = self.elements._check_and_reshape_array(int_array, "type")
+        self.assertEqual(result.dtype, np.int_)
+        np.testing.assert_array_equal(result, np.array([-1, -1]))
         
         # Test copy_and_update with wrong size arrays
         with self.assertRaises(ValueError):

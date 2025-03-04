@@ -1,4 +1,4 @@
-﻿# PythonNETGrasshopperTemplate
+# PythonNETGrasshopperTemplate
 
 # Copyright <2025> <Jonas Feron>
 
@@ -16,8 +16,6 @@
 
 # List of the contributors to the development of PythonNETGrasshopperTemplate: see NOTICE file.
 # Description and complete License: see NOTICE file.
-
-# this file was imported from https://github.com/JonasFeron/PythonConnectedGrasshopperTemplate and is used with modification.
 # ------------------------------------------------------------------------------------------------------------
 
 # Copyright <2021-2025> <Université catholique de Louvain (UCLouvain)>
@@ -38,7 +36,16 @@
 # Description and complete License: see NOTICE file.
 # ------------------------------------------------------------------------------------------------------------
 
-def main(data0, data1):
-    result0 = data0.strip().lower()  
-    result1 = data1.strip().upper() 
+def main(str0: str, str1: str) -> str:
+    """Simple test function that concatenates two strings.
+    
+    Args:
+        str0: First string, to be converted to lower case.
+        str1: Second string, to be converted to upper case.
+        
+    Returns:
+        Concatenated string such that str0 is lower case and str1 is upper case.
+    """
+    result0 = str0.strip().lower()  
+    result1 = str1.strip().upper() 
     return f"{result0} {result1}"

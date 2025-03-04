@@ -1,5 +1,5 @@
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
+from .fem_nodes import FEM_Nodes
+from .fem_elements import FEM_Elements
 import numpy as np
 
 class FEM_Structure:

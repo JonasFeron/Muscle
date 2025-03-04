@@ -18,11 +18,14 @@ namespace MuscleCore.Converters
             var structure = (FEM_Structure)obj;
             using (Py.GIL())
             {
-                dynamic fem_structure = Py.Import("MusclePy.femodel.fem_structure");
+                dynamic fem_structure = Py.Import("femodel.fem_structure");
 
+                // Convert nodes first and reuse the same instance
+                var pythonNodes = structure.Nodes.ToPython();
+                var elementsEncoder = new FEM_ElementsEncoder(pythonNodes);
                 return fem_structure.FEM_Structure(
-                    nodes: structure.Nodes.ToPython(),
-                    elements: structure.Elements.ToPython()
+                    nodes: pythonNodes,
+                    elements: elementsEncoder.TryEncode(structure.Elements)
                 );
             }
         }
