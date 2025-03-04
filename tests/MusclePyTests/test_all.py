@@ -3,14 +3,18 @@ import os
 import sys
 
 # Add source directory to Python path
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src/MusclePy'))
-sys.path.append(base_dir)
+src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src'))
+sys.path.append(src_dir)
+
+# Add tests directory to Python path
+tests_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(tests_dir)
 
 # Import all test modules
-from femodel.test_fem_elements import TestFEMElements
-from femodel.test_fem_nodes import TestFEMNodes
-from solvers.main_linear_dm.test_main_linear_dm_2bars_truss import TestMainLinearDM_2BarsTruss
-from solvers.main_linear_dm.test_main_linear_dm_3prestressedcables import TestMainLinearDM_3PrestressedCables
+from MusclePyTests.femodel.test_fem_elements import TestFEMElements
+from MusclePyTests.femodel.test_fem_nodes import TestFEMNodes
+from MusclePyTests.solvers.main_linear_dm.test_main_linear_dm_2bars_truss import TestMainLinearDM_2BarsTruss
+from MusclePyTests.solvers.main_linear_dm.test_main_linear_dm_3prestressedcables import TestMainLinearDM_3PrestressedCables
 
 def create_test_suite():
     """Create a test suite containing all tests."""

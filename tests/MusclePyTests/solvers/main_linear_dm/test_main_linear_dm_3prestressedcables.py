@@ -2,8 +2,7 @@ import unittest
 import numpy as np
 import os
 import sys
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../src/MusclePy'))
-sys.path.append(base_dir)
+
 from MusclePy.main_linear_dm import main_linear_displacement_method
 from MusclePy.solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads
 from MusclePy.femodel.fem_structure import FEM_Structure

@@ -34,15 +34,15 @@ namespace MuscleCore.Application.PythonNETInit
         /// </summary>
         /// <param name="condaEnvPath">The path to the conda environment where Python is installed.</param>
         /// <param name="pythonDllName">The Name of the python3xx.dll file contained in the conda environment.</param>
-        /// <param name="pythonProjectDirectory">The path to the directory containing the python scripts.</param>
+        /// <param name="srcDirectory">The path to the directory containing the python package.</param>
         /// <remarks>
         /// This method sets the following environment variables:
         /// PATH: adds condaEnvPath to PATH
         /// PYTHONHOME: sets to condaEnvPath
-        /// PYTHONPATH: sets to the concat of site_packages, Lib, DLLs and pythonProjectDirectory
+        /// PYTHONPATH: sets to the concat of site_packages, Lib, DLLs and srcDirectory
         /// PYTHONNET_PYDLL: sets to pythonDllPath
         /// </remarks>
-        public static void Initialize(string condaEnvPath, string pythonDllName, string pythonProjectDirectory)
+        public static void Initialize(string condaEnvPath, string pythonDllName, string srcDirectory)
         {
             if (IsInitialized)
             {
@@ -63,7 +63,9 @@ namespace MuscleCore.Application.PythonNETInit
 
                 Environment.SetEnvironmentVariable("PATH", path, EnvironmentVariableTarget.Process);
                 Environment.SetEnvironmentVariable("PYTHONHOME", condaEnvPath, EnvironmentVariableTarget.Process);
-                Environment.SetEnvironmentVariable("PYTHONPATH", $"{site_packages};{Lib};{DLLs};{pythonProjectDirectory}", EnvironmentVariableTarget.Process);
+                Environment.SetEnvironmentVariable("PYTHONPATH", $"{site_packages};{Lib};{DLLs};{srcDirectory}", EnvironmentVariableTarget.Process);
+                //in development mode, MusclePy will be accessible from the srcDirectory
+                //in user mode, MusclePy will be accessible from site_packages, supposing the user will first "pip install MusclePy"
 
                 //Runtime.PythonDLL = pythonDllPath;
                 Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", pythonDllName);

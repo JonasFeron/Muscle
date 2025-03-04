@@ -1,9 +1,9 @@
-from solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
-from solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
-from solvers.linear_dm.linear_dm import linear_displacement_method
-from solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads, perturb_structure
-from femodel.fem_structure import FEM_Structure
-from femodel.fem_nodes import FEM_Nodes
+from .solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
+from .solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
+from .solvers.linear_dm.linear_dm import linear_displacement_method
+from .solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads, perturb_structure
+from .femodel.fem_structure import FEM_Structure
+from .femodel.fem_nodes import FEM_Nodes
 import numpy as np
 
 

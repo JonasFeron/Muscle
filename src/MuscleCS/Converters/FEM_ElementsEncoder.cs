@@ -25,9 +25,9 @@ namespace MuscleCore.Converters
             var elements = (FEM_Elements)obj;
             using (Py.GIL())
             {
-                dynamic fem_elements = Py.Import("femodel.fem_elements");
+                dynamic musclepy = Py.Import("MusclePy");
 
-                return fem_elements.FEM_Elements(
+                return musclepy.FEM_Elements(
                     nodes: _pythonNodes ?? elements.Nodes.ToPython(),
                     type: elements.Type,
                     end_nodes: elements.EndNodes,

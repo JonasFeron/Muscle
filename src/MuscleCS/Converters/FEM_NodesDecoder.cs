@@ -14,7 +14,10 @@ namespace MuscleCore.Converters
             {
                 try
                 {
-                    return objectType.Name == "FEM_Nodes";
+                    // Get the module where FEM_Nodes is defined
+                    dynamic musclepy = Py.Import("MusclePy");
+                    var femNodesType = ((PyObject)musclepy.FEM_Nodes).GetPythonType();
+                    return objectType == femNodesType;
                 }
                 catch
                 {
@@ -34,28 +37,15 @@ namespace MuscleCore.Converters
                 try
                 {
                     dynamic py = pyObj.As<dynamic>();
-                    
-                    // Convert numpy arrays to C# arrays using DecoderHelper
-                    var initialCoordinates = DecoderHelper.ToCSArray2D(py.initial_coordinates);
-                    var dof = DecoderHelper.ToCSBoolArray2D(py.dof);
-                    var loads = DecoderHelper.ToCSArray2D(py.loads);
-                    var displacements = DecoderHelper.ToCSArray2D(py.displacements);
-                    var reactions = DecoderHelper.ToCSArray2D(py.reactions);
-                    var resistingForces = DecoderHelper.ToCSArray2D(py.resisting_forces);
 
-                    // Create FEM_Nodes instance with initial properties
                     var nodes = new FEM_Nodes(
-                        initialCoordinates: initialCoordinates,
-                        dof: dof,
-                        loads: loads,
-                        displacements: displacements,
-                        reactions: reactions,
-                        resistingForces: resistingForces
+                        py.initial_coordinates.As<double[,]>(),
+                        py.dof.As<bool[,]>(),
+                        py.loads.As<double[,]>(),
+                        py.displacements.As<double[,]>(),
+                        py.reactions.As<double[,]>(),
+                        py.resisting_forces.As<double[,]>()
                     );
-
-                    // Set computed properties from Python
-                    nodes.Coordinates = DecoderHelper.ToCSArray2D(py.coordinates);
-                    nodes.Residual = DecoderHelper.ToCSArray2D(py.residual);
 
                     value = (T)(object)nodes;
                     return true;

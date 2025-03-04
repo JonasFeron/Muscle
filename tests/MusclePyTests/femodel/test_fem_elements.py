@@ -1,11 +1,9 @@
 import unittest
 import os
 import sys
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../src/MusclePy'))
-sys.path.append(base_dir)
 import numpy as np
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy import femodel
+
 
 
 class TestFEMElements(unittest.TestCase):
@@ -19,7 +17,7 @@ class TestFEMElements(unittest.TestCase):
         (0,0,0) (2,0,0)
         """
         # Create nodes instance first
-        self.nodes = FEM_Nodes(
+        self.nodes = femodel.FEM_Nodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],  # Node 0: origin
                 [1.0, 0.0, 1.0],  # Node 1: top
@@ -33,7 +31,7 @@ class TestFEMElements(unittest.TestCase):
         )
         
         # Create elements instance
-        self.elements = FEM_Elements(
+        self.elements = femodel.FEM_Elements(
             nodes=self.nodes,
             type=np.array([-1, -1]),  # Two struts
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2

@@ -25,7 +25,7 @@ namespace MuscleCore.Application.PythonNETSolvers
     {
         public static string? Solve(string str0, string str1)
         {
-            string pythonScript = "test_script";
+            string pythonPackage = "MusclePy";
 
             string result = "";
 
@@ -35,8 +35,8 @@ namespace MuscleCore.Application.PythonNETSolvers
             {
                 try
                 {
-                    dynamic test_script = PyModule.Import(pythonScript);
-                    dynamic mainFunction = test_script.main;
+                    dynamic musclepy = Py.Import(pythonPackage);
+                    dynamic mainFunction = musclepy.test_script_main;
                     dynamic pyResult = mainFunction(str0, str1);
                     result = (string)pyResult;
                 }

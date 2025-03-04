@@ -13,7 +13,7 @@ namespace MuscleCSTests.Application.PythonNETSolvers
     {
         private static string condaEnvPath;
         private static string pythonDllName;
-        private static string scriptDir;
+        private static string srcDir;
 
 
         [TestInitialize]
@@ -22,11 +22,11 @@ namespace MuscleCSTests.Application.PythonNETSolvers
             condaEnvPath = PythonNETConfig.condaEnvPath;
             pythonDllName = PythonNETConfig.pythonDllName;
 
-            scriptDir = Path.GetFullPath(Path.Combine(
-    Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src", "MusclePy"));
+            srcDir = Path.GetFullPath(Path.Combine(
+    Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src"));
 
 
-            PythonNETManager.Initialize(condaEnvPath, pythonDllName, scriptDir);
+            PythonNETManager.Initialize(condaEnvPath, pythonDllName, srcDir);
         }
 
         [TestCleanup]

@@ -33,7 +33,7 @@ namespace MuscleCore.Application.PythonNETSolvers
         /// <returns>Updated FEM_Structure with incremented state</returns>
         public static FEM_Structure? Solve(FEM_Structure csInitialStruct, double[] loadsIncrement, double[] deltaFreeLengthIncrement)
         {
-            string pythonScript = "main_linear_dm"; //linear displacement method
+            string pythonPackage = "MusclePy"; 
             FEM_Structure? csDeformedStruct = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
@@ -42,8 +42,8 @@ namespace MuscleCore.Application.PythonNETSolvers
                 try
                 {
                     PyObject pyInitialStruct = csInitialStruct.ToPython();
-                    dynamic script = Py.Import(pythonScript);
-                    dynamic mainFunction = script.main_linear_displacement_method;
+                    dynamic musclepy = Py.Import(pythonPackage);
+                    dynamic mainFunction = musclepy.main_linear_displacement_method;
                     dynamic pyDeformedStruct = mainFunction(
                         pyInitialStruct,
                         loadsIncrement,

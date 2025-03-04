@@ -18,9 +18,9 @@ namespace MuscleCore.Converters
             var nodes = (FEM_Nodes)obj;
             using (Py.GIL())
             {
-                dynamic fem_nodes = Py.Import("femodel.fem_nodes");
+                dynamic musclepy = Py.Import("MusclePy");
 
-                return fem_nodes.FEM_Nodes(
+                return musclepy.FEM_Nodes(
                         initial_coordinates: nodes.InitialCoordinates,
                         dof: nodes.DOF,
                         loads: nodes.Loads,
