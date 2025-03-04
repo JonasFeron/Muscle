@@ -1,43 +1,33 @@
 using System;
-using System.Linq;
 
 namespace MuscleCore.FEModel
 {
+    /// <summary>
+    /// Pure data container for FEM_Structure, combining nodes and elements.
+    /// All computations are handled in the Python equivalent (fem_structure.py).
+    /// </summary>
     public class FEM_Structure
     {
-        #region Properties
         /// <summary>
-        /// Get the FEM_Nodes instance
+        /// Get or set the FEM_Nodes instance
         /// </summary>
-        public FEM_Nodes Nodes { get; }
+        public FEM_Nodes Nodes { get; set; }
 
         /// <summary>
-        /// Get the FEM_Elements instance
+        /// Get or set the FEM_Elements instance
         /// </summary>
-        public FEM_Elements Elements { get; }
+        public FEM_Elements Elements { get; set; }
 
         /// <summary>
-        /// Check if the structure is in equilibrium.
+        /// Get or set whether the structure is in equilibrium.
         /// If loads magnitude is 1000N, the structure is considered in equilibrium 
         /// if the residual magnitude is inferior to 1e-4 * 1000N = 0.1 N
         /// </summary>
         public bool IsInEquilibrium { get; set; }
 
-
-        // /// <summary>
-        // /// Relative precision for equilibrium check
-        // /// </summary>
-        // private readonly double _relativePrecision = 1e-4;
-        #endregion
-
-        #region Constructor
         /// <summary>
-        /// Initialize FEM_Structure with nodes and elements. All computations will be done in Python.
+        /// Minimal constructor that validates node references
         /// </summary>
-        /// <param name="nodes">FEM_Nodes instance containing nodal data</param>
-        /// <param name="elements">FEM_Elements instance that must reference the same nodes instance</param>
-        /// <exception cref="ArgumentNullException">Thrown when either parameter is null</exception>
-        /// <exception cref="ArgumentException">Thrown when elements reference different nodes instance</exception>
         public FEM_Structure(FEM_Nodes nodes, FEM_Elements elements)
         {
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
@@ -48,6 +38,17 @@ namespace MuscleCore.FEModel
                 throw new ArgumentException("Elements must reference the same nodes instance", nameof(elements));
             }
         }
-        #endregion
+
+        /// <summary>
+        /// Full constructor for setting all properties, used when decoding from Python
+        /// </summary>
+        public FEM_Structure(
+            FEM_Nodes nodes,
+            FEM_Elements elements,
+            bool isInEquilibrium)
+            : this(nodes, elements)  // Call minimal constructor for validation
+        {
+            IsInEquilibrium = isInEquilibrium;
+        }
     }
 }

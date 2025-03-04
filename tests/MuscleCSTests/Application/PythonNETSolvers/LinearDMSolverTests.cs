@@ -21,15 +21,11 @@ namespace MuscleCSTests.Application.PythonNETSolvers
         {
             condaEnvPath = PythonNETConfig.condaEnvPath;
             pythonDllName = PythonNETConfig.pythonDllName;
-            //scriptDir = Path.GetFullPath(Path.Combine(
-            //    Directory.GetCurrentDirectory(), "..", "..", "..", "..", "src", "MusclePy"));
 
-            srcDir = Path.GetFullPath(Path.Combine(
-    Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src"));
 
-            string current = Directory.GetCurrentDirectory();
-//                Path.GetFullPath(Path.Combine(
-//    , "..", "..", "..", "..", "..", "src", "MyPythonScripts"));
+            srcDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(),
+             "..", "..", "..", "..", "..", "src"));
+
 
             PythonNETManager.Initialize(condaEnvPath, pythonDllName, srcDir);
         }
@@ -41,7 +37,7 @@ namespace MuscleCSTests.Application.PythonNETSolvers
         }
 
         [TestMethod]
-        public void Test_TestScript()
+        public void Test_LinearDMSolver()
         {
             // Create nodes
             var nodes = new FEM_Nodes(

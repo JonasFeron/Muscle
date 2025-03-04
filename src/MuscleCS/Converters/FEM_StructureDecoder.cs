@@ -5,6 +5,15 @@ namespace MuscleCore.Converters
 {
     public class FEM_StructureDecoder : IPyObjectDecoder
     {
+        private readonly FEM_NodesDecoder _nodesDecoder;
+        private readonly FEM_ElementsDecoder _elementsDecoder;
+
+        public FEM_StructureDecoder()
+        {
+            _nodesDecoder = new FEM_NodesDecoder();
+            _elementsDecoder = new FEM_ElementsDecoder();
+        }
+
         public bool CanDecode(PyType objectType, Type targetType)
         {
             if (targetType != typeof(FEM_Structure))
@@ -34,24 +43,27 @@ namespace MuscleCore.Converters
             {
                 try
                 {
+                    // Get Python object as dynamic
                     dynamic py = pyObj.As<dynamic>();
 
                     // Get nodes and elements objects
-                    var nodes = py.nodes.As<FEM_Nodes>();
-                    var elements = py.elements.As<FEM_Elements>();
+                    var csElements = py.elements.As<FEM_Elements>();
+                    var csNodes = csElements.Nodes;
+                    bool equilibirum = py.is_in_equilibrium.As<bool>();
 
-                    // Create FEM_Structure instance
-                    var structure = new FEM_Structure(nodes, elements);
-
-                    // Set computed properties from Python
-                    structure.IsInEquilibrium = py.is_in_equilibrium;
+                    // Create structure with all properties
+                    var structure = new FEM_Structure(
+                        nodes: csNodes,
+                        elements: csElements,
+                        isInEquilibrium: equilibirum
+                    );
 
                     value = (T)(object)structure;
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error in TryDecode: {ex.Message}");
+                    Console.WriteLine($"Error in TryDecode: {ex.Message}\n{ex.StackTrace}");
                     return false;
                 }
             }

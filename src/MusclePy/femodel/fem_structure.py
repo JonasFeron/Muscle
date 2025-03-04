@@ -38,8 +38,8 @@ class FEM_Structure:
     def is_in_equilibrium(self) -> bool:
         """Check if the structure is in equilibrium."""
         # if loads magnitude is 1000N, the structure is considered in equilibrium if the residual is inferior to 1e-4 * 1000N = 0.1 N
-        zero_residual_threshold = self._relative_precision * np.linalg.norm(self.nodes.loads.flatten()) # [N]  
-        return np.linalg.norm(self.nodes.residual.flatten()) <= zero_residual_threshold
+        zero_residual_threshold = self._relative_precision * np.linalg.norm(self.nodes.loads.flatten()) # [N] 
+        return bool(np.linalg.norm(self.nodes.residual.flatten()) <= zero_residual_threshold)
     
     def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray,
                        delta_free_length: np.ndarray, tension: np.ndarray, resisting_forces: np.ndarray) -> 'FEM_Structure':
