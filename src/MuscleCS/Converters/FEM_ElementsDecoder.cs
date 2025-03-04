@@ -14,10 +14,7 @@ namespace MuscleCore.Converters
             {
                 try
                 {
-                    // Get the module where FEM_Elements is defined
-                    dynamic musclepy = Py.Import("MusclePy");
-                    var femElementsType = ((PyObject)musclepy.FEM_Elements).GetPythonType();
-                    return objectType == femElementsType;
+                    return objectType.Name == "FEM_Elements";
                 }
                 catch
                 {
