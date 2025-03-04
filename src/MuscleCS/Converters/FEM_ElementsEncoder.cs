@@ -5,12 +5,6 @@ namespace MuscleCore.Converters
 {
     public class FEM_ElementsEncoder : IPyObjectEncoder
     {
-        private readonly PyObject? _pythonNodes;
-
-        public FEM_ElementsEncoder(PyObject? pythonNodes = null)
-        {
-            _pythonNodes = pythonNodes;
-        }
 
         public bool CanEncode(Type type)
         {
@@ -28,7 +22,7 @@ namespace MuscleCore.Converters
                 dynamic musclepy = Py.Import("MusclePy");
 
                 return musclepy.FEM_Elements(
-                    nodes: _pythonNodes ?? elements.Nodes.ToPython(),
+                    nodes: elements.Nodes.ToPython(),
                     type: elements.Type,
                     end_nodes: elements.EndNodes,
                     areas: elements.Areas,

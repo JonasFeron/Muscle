@@ -37,6 +37,27 @@ namespace MuscleCore.Converters
         }
 
         /// <summary>
+        /// Convert a numpy array to a C# 2D integer array
+        /// </summary>
+        public static int[,] ToCSIntArray2D(dynamic npArray)
+        {
+            var shape = ((PyObject)npArray.shape).As<int[]>();
+            int rows = shape[0];
+            int cols = shape[1];
+
+            var result = new int[rows, cols];
+            var list = npArray.tolist();
+            for (int i = 0; i < rows; i++)
+            {
+                var row = ((PyObject)list[i]).As<int[]>();
+                for (int j = 0; j < cols; j++)
+                    result[i, j] = row[j];
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Convert a numpy array to a C# 2D boolean array using nested loops
         /// </summary>
         public static bool[,] ToCSBoolArray2D(dynamic npArray)

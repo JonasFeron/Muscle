@@ -22,7 +22,7 @@ namespace MuscleCore.Converters
 
                 // Convert nodes first and reuse the same instance
                 var pythonNodes = structure.Nodes.ToPython();
-                var elementsEncoder = new FEM_ElementsEncoder(pythonNodes);
+                var elementsEncoder = new FEM_ElementsEncoder();
                 return musclepy.FEM_Structure(
                     nodes: pythonNodes,
                     elements: elementsEncoder.TryEncode(structure.Elements)
