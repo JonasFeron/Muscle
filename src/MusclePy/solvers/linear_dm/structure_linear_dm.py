@@ -89,3 +89,28 @@ class Structure_Linear_DM(FEM_Structure):
         elements_copy = self._elements.copy_and_add(nodes_copy, delta_free_length_increment, tension_increment)
         
         return Structure_Linear_DM(nodes_copy, elements_copy)
+
+    def copy(self) -> 'Structure_Linear_DM':
+        """Create a copy of this structure with the current state.
+        
+        Returns:
+            A new Structure_Linear_DM instance with copied nodes and elements
+        """
+        # Create new nodes with current state
+        nodes_copy = self._nodes.copy()
+        
+        # Create new elements with current state, referencing the new nodes
+        elements_copy = self._elements.copy(nodes_copy)
+        
+        return Structure_Linear_DM(nodes_copy, elements_copy)
+
+    def save_as_FEM_Structure(self) -> FEM_Structure:
+        """Return a FEM_Structure with the current state of this Structure_Linear_DM.
+        
+        Returns:
+            FEM_Structure: A new FEM_Structure instance with the current state
+        """
+        return FEM_Structure(
+            nodes=self._nodes,
+            elements=self._elements
+        )

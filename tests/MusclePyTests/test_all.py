@@ -13,8 +13,8 @@ sys.path.append(tests_dir)
 # Import all test modules
 from MusclePyTests.femodel.test_fem_elements import TestFEMElements
 from MusclePyTests.femodel.test_fem_nodes import TestFEMNodes
-from MusclePyTests.solvers.main_linear_dm.test_main_linear_dm_2bars_truss import TestMainLinearDM_2BarsTruss
-from MusclePyTests.solvers.main_linear_dm.test_main_linear_dm_3prestressedcables import TestMainLinearDM_3PrestressedCables
+from MusclePyTests.solvers.linear_dm.test_linear_dm_2bars_truss import TestLinearDM_2BarsTruss
+from MusclePyTests.solvers.linear_dm.test_linear_dm_3prestressedcables import TestLinearDM_3PrestressedCables
 
 def create_test_suite():
     """Create a test suite containing all tests."""
@@ -24,8 +24,8 @@ def create_test_suite():
     # Add test classes
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFEMElements))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFEMNodes))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestMainLinearDM_2BarsTruss))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestMainLinearDM_3PrestressedCables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLinearDM_2BarsTruss))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLinearDM_3PrestressedCables))
     
     return suite
 

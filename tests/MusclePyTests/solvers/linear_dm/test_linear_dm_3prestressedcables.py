@@ -1,15 +1,11 @@
 import unittest
 import numpy as np
-import os
-import sys
-
-from MusclePy.main_linear_dm import main_linear_displacement_method
-from MusclePy.solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads
+from MusclePy.solvers.linear_dm.linear_dm import LinearDisplacementMethod
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
 
-class TestMainLinearDM_3PrestressedCables(unittest.TestCase):
+class TestLinearDM_3PrestressedCables(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures with a tight rope structure with vertical cable.
         Structure layout:
@@ -72,7 +68,7 @@ class TestMainLinearDM_3PrestressedCables(unittest.TestCase):
         np.testing.assert_allclose(prestressed_elements.current_free_length, expected_free_length, atol=1e-6)
 
 
-        prestress, loads = equivalent_prestress_loads(prestressed_elements, delta_free_length_increment)
+        prestress, loads = LinearDisplacementMethod._equivalent_prestress_loads(prestressed_elements, delta_free_length_increment)
         
         # Test 1: Check prestress forces
         expected_prestress = np.array([14100.945, 0.0, 0.0])
@@ -107,7 +103,7 @@ class TestMainLinearDM_3PrestressedCables(unittest.TestCase):
         # -> Expected force ≈ 7036.37 N in both cables
 
         # Solve
-        result = main_linear_displacement_method(
+        result = LinearDisplacementMethod.apply_loads_and_prestress_increments(
             self.structure,
             loads_increment,
             delta_free_length_increment
@@ -138,23 +134,22 @@ class TestMainLinearDM_3PrestressedCables(unittest.TestCase):
 
         loads = np.zeros((4,3))
         loads[1,2] = 0.1  # 0.1N upward at node 1
-        result_step1 = main_linear_displacement_method(
+        result = LinearDisplacementMethod.apply_loads_and_prestress_increments(
             self.structure,
             loads,
             np.zeros(3)  # no free length changes
         )
         
         #  in step 1: Verify upward movement, compression in cable 3, and 0 stiffness
-        self.assertGreater(result_step1.nodes.displacements[1,2], 0)
-        self.assertEqual(result_step1.elements.tension[2], -0.1)
-        self.assertEqual(result_step1.elements.young[2], 0) #the young modulus in compression
+        self.assertGreater(result.nodes.displacements[1,2], 0)
+        self.assertEqual(result.elements.tension[2], -0.1)
+        self.assertEqual(result.elements.young[2], 0) #the young modulus in compression
 
-        stiffness = 1/result_step1.elements.flexibility[2]
-        self.assertAlmostEqual(result_step1.elements.young[2], 0, places=5) #the stiffness in compression
+        stiffness = 1/result.elements.flexibility[2]
+        self.assertAlmostEqual(result.elements.young[2], 0, places=5) #the stiffness in compression
 
         #a new application of an upward load will lead to 0 compression force
         
-
 
 
 if __name__ == '__main__':

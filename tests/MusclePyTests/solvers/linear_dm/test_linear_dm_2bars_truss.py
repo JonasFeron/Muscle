@@ -1,15 +1,12 @@
 import unittest
 import numpy as np
-import os
-import sys
-from MusclePy.main_linear_dm import main_linear_displacement_method
-from MusclePy.solvers.linear_dm.helper_main_linear_dm import equivalent_prestress_loads
+from MusclePy.solvers.linear_dm.linear_dm import LinearDisplacementMethod
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
 
 
-class TestMainLinearDM_2BarsTruss(unittest.TestCase):
+class TestLinearDM_2BarsTruss(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures with a simple 2-bar structure.
         Solution for this test can be find in Annexe A1.1.1 of J.Feron Master thesis (p103 of pdf))
@@ -61,7 +58,7 @@ class TestMainLinearDM_2BarsTruss(unittest.TestCase):
         delta_free_length = np.zeros((2,))  # 2 elements
         
         # Solve
-        result = main_linear_displacement_method(
+        result = LinearDisplacementMethod.apply_loads_and_prestress_increments(
             self.structure,
             loads,
             delta_free_length

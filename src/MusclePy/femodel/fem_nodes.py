@@ -228,3 +228,18 @@ class FEM_Nodes:
             reactions=self._reactions + reactions_inc,
             resisting_forces=self._resisting_forces + resisting_forces_inc
         )
+
+    def copy(self) -> 'FEM_Nodes':
+        """Create a copy of this instance with the current state.
+        
+        Returns:
+            A new FEM_Nodes instance with the current state
+        """
+        return FEM_Nodes(
+            initial_coordinates=self._initial_coordinates.copy(),
+            dof=self._dof.copy(),
+            loads=self._loads.copy(),
+            displacements=self._displacements.copy(),
+            reactions=self._reactions.copy(),
+            resisting_forces=self._resisting_forces.copy()
+        )

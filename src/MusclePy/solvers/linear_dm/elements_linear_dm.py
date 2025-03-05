@@ -121,6 +121,25 @@ class Elements_Linear_DM(FEM_Elements):
             
         return (tension_increment, resisting_forces_increment)
 
+    def copy(self, nodes: FEM_Nodes) -> 'Elements_Linear_DM':
+        """Create a copy of this instance with the current state.
+        
+        Args:
+            nodes: FEM_Nodes instance to reference in the copy
+            
+        Returns:
+            A new Elements_Linear_DM instance with the current state
+        """
+        return Elements_Linear_DM(
+            nodes=nodes,
+            type=self._type.copy(),
+            end_nodes=self._end_nodes.copy(),
+            areas=self._areas.copy(),
+            youngs=self._youngs.copy(),
+            delta_free_length=self._delta_free_length.copy(),
+            tension=self._tension.copy()
+        )
+
     def copy_and_update(self, nodes: FEM_Nodes, delta_free_length: np.ndarray, tension: np.ndarray) -> 'Elements_Linear_DM':
         """Create a copy with updated state values."""
         return Elements_Linear_DM(
