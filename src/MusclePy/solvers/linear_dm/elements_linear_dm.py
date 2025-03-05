@@ -140,8 +140,15 @@ class Elements_Linear_DM(FEM_Elements):
             tension=self._tension.copy()
         )
 
-    def copy_and_update(self, nodes: FEM_Nodes, delta_free_length: np.ndarray, tension: np.ndarray) -> 'Elements_Linear_DM':
-        """Create a copy with updated state values."""
+    def copy_and_update(self, nodes: FEM_Nodes, delta_free_length: np.ndarray = None, tension: np.ndarray = None) -> 'Elements_Linear_DM':
+        """Create a copy with updated state values, or use the current state if None is passed."""
+        # Reshape inputs if needed
+        if delta_free_length is None: delta_free_length = self._delta_free_length.copy()
+        if tension is None: tension = self._tension.copy()
+
+        delta_free_length = super()._check_and_reshape_array(delta_free_length, "delta_free_length")
+        tension = super()._check_and_reshape_array(tension, "tension")
+        
         return Elements_Linear_DM(
             nodes=nodes,
             type=self._type.copy(),
@@ -152,15 +159,23 @@ class Elements_Linear_DM(FEM_Elements):
             tension=tension
         )
 
-    def copy_and_add(self, nodes: FEM_Nodes, delta_free_length_increment: np.ndarray, 
-                     tension_increment: np.ndarray) -> 'Elements_Linear_DM':
-        """Create a copy with incremented state values."""
-        return Elements_Linear_DM(
+    def copy_and_add(self, nodes: FEM_Nodes, delta_free_length_increment: np.ndarray = None, 
+                     tension_increment: np.ndarray = None) -> 'Elements_Linear_DM':
+        """Create a copy with incremented state values.
+        
+        Args:
+            nodes: FEM_Nodes instance to reference in the copy
+            delta_free_length_increment: [m] - size: elements.count - Free length increment to add
+            tension_increment: [N] - size: elements.count - Tension increment to add
+            
+        Returns:
+            New Elements_Linear_DM with incremented state
+        """
+        delta_free_length_increment = super()._check_and_reshape_array(delta_free_length_increment, "delta_free_length_increment")
+        tension_increment = super()._check_and_reshape_array(tension_increment, "tension_increment")
+            
+        return self.copy_and_update(
             nodes=nodes,
-            type=self._type.copy(),
-            end_nodes=self._end_nodes.copy(),
-            areas=self._areas.copy(),
-            youngs=self._youngs.copy(),
             delta_free_length=self._delta_free_length + delta_free_length_increment,
             tension=self._tension + tension_increment
         )

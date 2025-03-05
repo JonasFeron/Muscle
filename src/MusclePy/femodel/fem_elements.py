@@ -294,8 +294,8 @@ class FEM_Elements:
         return np.column_stack((dx/current_length, dy/current_length, dz/current_length))
     
     # Public Methods
-    def copy_and_update(self, nodes: 'FEM_Nodes', delta_free_length: np.ndarray, tension: np.ndarray) -> 'FEM_Elements':
-        """Create a copy with updated state values.
+    def copy_and_update(self, nodes: 'FEM_Nodes', delta_free_length: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
+        """Create a copy with updated state values, or use existing state if None.
         
         Args:
             nodes: FEM_Nodes instance
@@ -303,6 +303,9 @@ class FEM_Elements:
             tension: [N] - shape (elements_count,) - Axial forces
         """
         # Reshape inputs if needed
+        if delta_free_length is None: delta_free_length = self._delta_free_length.copy()
+        if tension is None: tension = self._tension.copy()
+        
         delta_free_length = self._check_and_reshape_array(delta_free_length, "delta_free_length")
         tension = self._check_and_reshape_array(tension, "tension")
         
@@ -316,25 +319,24 @@ class FEM_Elements:
             tension=tension
         )
         
-    def copy_and_add(self, nodes: 'FEM_Nodes', delta_free_length_increment: np.ndarray, 
-                     tension_increment: np.ndarray) -> 'FEM_Elements':
+    def copy_and_add(self, nodes: FEM_Nodes, delta_free_length_increment: np.ndarray = None, 
+                     tension_increment: np.ndarray = None) -> 'FEM_Elements':
         """Create a copy with incremented state values.
         
         Args:
-            nodes: FEM_Nodes instance
-            delta_free_length_increment: [m] - shape (elements_count,) - Increment in free length
-            tension_increment: [N] - shape (elements_count,) - Increment in axial forces
+            nodes: FEM_Nodes instance to reference in the copy
+            delta_free_length_increment: [m] - size: elements.count - Free length increment to add
+            tension_increment: [N] - size: elements.count - Tension increment to add
+            
+        Returns:
+            New FEM_Elements with incremented state
         """
-        # Reshape inputs if needed
-        delta_free_length_inc = self._check_and_reshape_array(delta_free_length_increment, "delta_free_length_increment")
-        tension_inc = self._check_and_reshape_array(tension_increment, "tension_increment")
-        
-        return FEM_Elements(
+        # Create zero arrays if arguments are None
+        delta_free_length_increment = self._check_and_reshape_array(delta_free_length_increment, "delta_free_length_increment")
+        tension_increment = self._check_and_reshape_array(tension_increment, "tension_increment")
+            
+        return self.copy_and_update(
             nodes=nodes,
-            type=self._type.copy(),
-            end_nodes=self._end_nodes.copy(),
-            areas=self._areas.copy(),
-            youngs=self._youngs.copy(),
-            delta_free_length=self._delta_free_length + delta_free_length_inc,
-            tension=self._tension + tension_inc
+            delta_free_length=self._delta_free_length + delta_free_length_increment,
+            tension=self._tension + tension_increment
         )

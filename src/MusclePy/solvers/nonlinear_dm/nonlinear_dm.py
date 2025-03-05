@@ -27,6 +27,7 @@ class NonlinearDisplacementMethod:
 
         # total loads increment to apply on the structure
         loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
+        total_loads_incr = loads_increment.reshape((-1, ))
 
         # Create a linear structure for the Displacement Method     
         initial_state = Structure_Linear_DM(
@@ -44,7 +45,8 @@ class NonlinearDisplacementMethod:
         # Initialize solver parameters
         l0 = 1 / n_steps  # incremental length
         max_steps = n_steps * 5  # max number of steps allowed
-        
+        perturbation = 1e-3  # [m] perturbation of the nodes coordinates if singular matrix
+
         # Initialize solution tracking variables
         step = 0  # current step number
         _lambda = 0.0  # advancement factor: 0 <= lambda <= 1 (lambda=1 is final stage)
@@ -73,23 +75,23 @@ class NonlinearDisplacementMethod:
 
             try:
                 # Apply the total load increment on the current state of the structure, given the current structure's stiffness
-                v, r, f, t = LinearDisplacementMethod._core(current_state, loads_increment) 
+                v, r, f, t = LinearDisplacementMethod._core(current_state, total_loads_incr) 
                 # v, r, f, t are the total increments of displacements, reactions, resisting forces and axial forces, due to the application of the total load increment.
                 # see Jonas Feron's master thesis (2016) for explanations.  
                 
             except np.linalg.LinAlgError:
                 # Handle singular matrix with perturbation
-                perturbed = LinearDisplacementMethod._perturb_structure(current_state)
+                perturbed = LinearDisplacementMethod._perturb_structure(current_state, perturbation)
                 current_state = perturbed.copy()
-                v, r, f, t = LinearDisplacementMethod._core(current_state, loads_increment)
+                v, r, f, t = LinearDisplacementMethod._core(current_state, total_loads_incr)
                 
             # Calculate advancement using arc length control
-            d_lambda = NonlinearDisplacementMethod._arc_length_control(l0, _lambda, v, loads_increment)
+            d_lambda = NonlinearDisplacementMethod._arc_length_control(l0, _lambda, v, total_loads_incr)
             
             # Update solution increments
             step += 1
             _lambda += d_lambda
-            loads_incr = loads_increment * d_lambda # the current loads increment is a fraction of the total load increment
+            loads_incr = total_loads_incr * d_lambda # the current loads increment is a fraction of the total load increment
             displacements_incr = v * d_lambda
             tensions_incr = t * d_lambda
             reactions_incr = r * d_lambda

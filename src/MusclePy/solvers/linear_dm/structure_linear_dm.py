@@ -67,9 +67,9 @@ class Structure_Linear_DM(FEM_Structure):
                     
         return K
 
-    def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray,
-                       delta_free_length: np.ndarray, tension: np.ndarray, resisting_forces: np.ndarray) -> 'Structure_Linear_DM':
-        """Create a copy of this structure and update its state."""
+    def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None,
+                       delta_free_length: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'Structure_Linear_DM':
+        """Create a copy of this structure and update its state, or use the current state if None is passed."""
         # Create new nodes with updated state
         nodes_copy = self._nodes.copy_and_update(loads, displacements, reactions, resisting_forces)
         
@@ -78,17 +78,38 @@ class Structure_Linear_DM(FEM_Structure):
         
         return Structure_Linear_DM(nodes_copy, elements_copy)
         
-    def copy_and_add(self, loads_increment: np.ndarray, displacements_increment: np.ndarray, 
-                     reactions_increment: np.ndarray, delta_free_length_increment: np.ndarray,
-                     tension_increment: np.ndarray, resisting_forces_increment: np.ndarray) -> 'Structure_Linear_DM':
-        """Create a copy of this structure and add increments to its state."""
+    def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
+                     reactions_increment: np.ndarray = None, delta_free_length_increment: np.ndarray = None,
+                     tension_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'Structure_Linear_DM':
+        """Create a copy of the structure and add increments to its state.
+        
+        Args:
+            loads_increment: [N] - size: 3*nodes.count - Loads increment to add
+            displacements_increment: [m] - size: 3*nodes.count - Displacements increment to add
+            reactions_increment: [N] - size: 3*nodes.count - Reactions increment to add
+            delta_free_length_increment: [m] - size: elements.count - Free length increment to add
+            tension_increment: [N] - size: elements.count - Tension increment to add
+            resisting_forces_increment: [N] - size: 3*nodes.count - Resisting forces increment to add
+            
+        Returns:
+            New Structure_Linear_DM with incremented state
+        """
         # Create new nodes with incremented state
-        nodes_copy = self._nodes.copy_and_add(loads_increment, displacements_increment, reactions_increment, resisting_forces_increment)
+        new_nodes = self.nodes.copy_and_add(
+            loads_increment=loads_increment,
+            displacements_increment=displacements_increment,
+            reactions_increment=reactions_increment,
+            resisting_forces_increment=resisting_forces_increment
+        )
         
         # Create new elements with incremented state, referencing the new nodes
-        elements_copy = self._elements.copy_and_add(nodes_copy, delta_free_length_increment, tension_increment)
+        new_elements = self.elements.copy_and_add(
+            nodes=new_nodes,
+            delta_free_length_increment=delta_free_length_increment,
+            tension_increment=tension_increment
+        )
         
-        return Structure_Linear_DM(nodes_copy, elements_copy)
+        return Structure_Linear_DM(new_nodes, new_elements)
 
     def copy(self) -> 'Structure_Linear_DM':
         """Create a copy of this structure with the current state.

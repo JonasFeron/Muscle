@@ -218,7 +218,7 @@ class LinearDisplacementMethod:
         
         Args:
             structure: Structure to perturb
-            magnitude: Standard deviation for the random perturbation. Default is 1e-5 meters.
+            magnitude: [m] Standard deviation for the random perturbation. Default is 1e-5 meters.
             
         Returns:
             New Structure_Linear_DM with perturbed displacements
@@ -228,7 +228,8 @@ class LinearDisplacementMethod:
         perturbation = np.random.normal(0, magnitude, size=(3 * nodes_count,))
         
         # Zero out perturbations where DOFs are fixed
-        perturbation[~structure.nodes.dof] = 0
+        dof_flat = structure.nodes.dof.reshape(-1)  # Flatten the 2D dof array to match perturbation shape
+        perturbation[~dof_flat] = 0
         
         # Create perturbed structure by adding tiny displacements
         perturbed = structure.copy_and_add(
@@ -236,7 +237,8 @@ class LinearDisplacementMethod:
             displacements_increment=perturbation,
             reactions_increment=np.zeros_like(perturbation),  # No additional reactions
             delta_free_length_increment=np.zeros(structure.elements.count),  # No change in free length
-            tension_increment=np.zeros(structure.elements.count)  # No change in tension
+            tension_increment=np.zeros(structure.elements.count),  # No change in tension
+            resisting_forces_increment=np.zeros_like(perturbation)  # No change in resisting forces
         )
         
         return perturbed

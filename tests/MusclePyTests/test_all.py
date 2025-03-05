@@ -15,6 +15,10 @@ from MusclePyTests.femodel.test_fem_elements import TestFEMElements
 from MusclePyTests.femodel.test_fem_nodes import TestFEMNodes
 from MusclePyTests.solvers.linear_dm.test_linear_dm_2bars_truss import TestLinearDM_2BarsTruss
 from MusclePyTests.solvers.linear_dm.test_linear_dm_3prestressedcables import TestLinearDM_3PrestressedCables
+from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_2bars_truss import TestNonlinearDM_2BarsTruss
+from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_loose_mechanism import TestNonlinearDM_LooseMechanism
+from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_prestressed_tight_rope import TestNonlinearDM_PrestressedTightRope
+
 
 def create_test_suite():
     """Create a test suite containing all tests."""
@@ -26,6 +30,10 @@ def create_test_suite():
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFEMNodes))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLinearDM_2BarsTruss))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLinearDM_3PrestressedCables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_2BarsTruss))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_LooseMechanism))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_PrestressedTightRope))
+
     
     return suite
 

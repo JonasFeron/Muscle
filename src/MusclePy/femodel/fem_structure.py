@@ -41,9 +41,9 @@ class FEM_Structure:
         zero_residual_threshold = self._relative_precision * np.linalg.norm(self.nodes.loads.flatten()) # [N] 
         return bool(np.linalg.norm(self.nodes.residual.flatten()) <= zero_residual_threshold)
     
-    def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray,
-                       delta_free_length: np.ndarray, tension: np.ndarray, resisting_forces: np.ndarray) -> 'FEM_Structure':
-        """Create a copy of this structure and update its state.
+    def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None,
+                       delta_free_length: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Structure':
+        """Create a copy of this structure and update its state, or use the current state if None is passed.
         
         Args:
             loads: [N] - shape (nodes_count, 3) or (3*nodes_count,) - External loads
@@ -61,9 +61,9 @@ class FEM_Structure:
         
         return FEM_Structure(nodes_copy, elements_copy)
         
-    def copy_and_add(self, loads_increment: np.ndarray, displacements_increment: np.ndarray, 
-                     reactions_increment: np.ndarray, delta_free_length_increment: np.ndarray,
-                     tension_increment: np.ndarray, resisting_forces_increment: np.ndarray) -> 'FEM_Structure':
+    def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
+                     reactions_increment: np.ndarray = None, delta_free_length_increment: np.ndarray = None,
+                     tension_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'FEM_Structure':
         """Create a copy of this structure and add increments to its state.
         
         Args:

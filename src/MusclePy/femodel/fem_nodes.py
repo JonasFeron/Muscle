@@ -180,8 +180,8 @@ class FEM_Nodes:
         
 
     # Public Methods
-    def copy_and_update(self, loads: np.ndarray, displacements: np.ndarray, reactions: np.ndarray, resisting_forces: np.ndarray) -> 'FEM_Nodes':
-        """Create a copy of this instance and update its state.
+    def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Nodes':
+        """Create a copy of this instance and update its state, or use existing state if None.
         
         Args:
             loads: [N] - shape (nodes_count, 3) or (3*nodes_count,) - External loads
@@ -189,6 +189,11 @@ class FEM_Nodes:
             reactions: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Support reactions
             resisting_forces: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Internal resisting forces
         """
+        if loads is None: loads = self._loads.copy()
+        if displacements is None: displacements = self._displacements.copy()
+        if reactions is None: reactions = self._reactions.copy()
+        if resisting_forces is None: resisting_forces = self._resisting_forces.copy()
+            
         # Reshape inputs if needed
         loads = self._check_and_reshape_array(loads, "loads")
         displacements = self._check_and_reshape_array(displacements, "displacements")
@@ -204,29 +209,31 @@ class FEM_Nodes:
             resisting_forces=resisting_forces
         )
         
-    def copy_and_add(self, loads_increment: np.ndarray, displacements_increment: np.ndarray, 
-                     reactions_increment: np.ndarray, resisting_forces_increment: np.ndarray) -> 'FEM_Nodes':
+    def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
+                     reactions_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'FEM_Nodes':
         """Create a copy of this instance and add increments to its state.
         
         Args:
-            loads_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Load increments
-            displacements_increment: [m] - shape (nodes_count, 3) or (3*nodes_count,) - Displacement increments
-            reactions_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Reaction increments
-            resisting_forces_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Resisting forces increments
+            loads_increment: [N] - size: 3*nodes.count - Loads increment to add
+            displacements_increment: [m] - size: 3*nodes.count - Displacements increment to add
+            reactions_increment: [N] - size: 3*nodes.count - Reactions increment to add
+            resisting_forces_increment: [N] - size: 3*nodes.count - Resisting forces increment to add
+            
+        Returns:
+            New FEM_Nodes with incremented state
         """
-        # Reshape inputs if needed
-        loads_inc = self._check_and_reshape_array(loads_increment, "loads_increment")
-        displacements_inc = self._check_and_reshape_array(displacements_increment, "displacements_increment")
-        reactions_inc = self._check_and_reshape_array(reactions_increment, "reactions_increment")
-        resisting_forces_inc = self._check_and_reshape_array(resisting_forces_increment, "resisting_forces_increment")
-        
-        return FEM_Nodes(
-            initial_coordinates=self._initial_coordinates.copy(),
-            dof=self._dof.copy(),
-            loads=self._loads + loads_inc,
-            displacements=self._displacements + displacements_inc,
-            reactions=self._reactions + reactions_inc,
-            resisting_forces=self._resisting_forces + resisting_forces_inc
+        # Create zero arrays if arguments are None
+
+        loads_increment = self._check_and_reshape_array(loads_increment, "loads_increment")
+        displacements_increment = self._check_and_reshape_array(displacements_increment, "displacements_increment")
+        reactions_increment = self._check_and_reshape_array(reactions_increment, "reactions_increment")
+        resisting_forces_increment = self._check_and_reshape_array(resisting_forces_increment, "resisting_forces_increment")
+            
+        return self.copy_and_update(
+            loads=self._loads + loads_increment,
+            displacements=self._displacements + displacements_increment,
+            reactions=self._reactions + reactions_increment,
+            resisting_forces=self._resisting_forces + resisting_forces_increment
         )
 
     def copy(self) -> 'FEM_Nodes':

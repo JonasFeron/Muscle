@@ -17,22 +17,6 @@ class Test_StructureObj(unittest.TestCase):
 
     # region Assemble methods
 
-    def test_Simple_ConnectivityMatrix(self):
-        """
-        test to see if the computation of the connectivity_matrix of 2 cables (*--c1--*--c2--*) works
-        """
-        S0 = StructureObj() #empty object
-
-        #required input for the method
-        ElementsCount = 2
-        NodesCount = 3
-        ElementsEndNodes = np.array([[0,1],[1,2]])
-
-        C = S0.ConnectivityMatrix(NodesCount, ElementsCount, ElementsEndNodes)  #test the method
-
-        #check the results
-        success = (C == np.array([[-1,  1,  0],[ 0, -1, 1]])).all()
-        self.assertEqual(success, True)
 
 
     def test_CompareMaterialStiffnessMatricesFromTwoMethods(self):
