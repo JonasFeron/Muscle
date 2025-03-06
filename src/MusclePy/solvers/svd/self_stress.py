@@ -1,0 +1,292 @@
+"""
+Localization of self-stress modes in tensegrity and pin-jointed structures.
+
+This module implements algorithms for localizing and sorting self-stress modes
+as described in:
+- Feron, Latteur, 2023, "Implementation and propagation of prestress forces in 
+  pin-jointed and tensegrity structures."
+- L. R. Sanchez Sandoval, "Contribution à l'étude du dimensionnement optimal 
+  des systèmes de tenségrité," Université Montpellier II, 2005, p. 49
+- R. Sánchez, B. Maurin, M. N. Kazi-Aoual, and R. Motro, "Selfstress States 
+  Identification and Localization in Modular Tensegrity Grids," Int. J. Sp. Struct., 
+  vol. 22, no. 4, pp. 215–224, Nov. 2007.
+"""
+
+from MusclePy.femodel.svd_results import SVDresults
+from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.solvers.svd.structure_svd import Structure_SVD
+import numpy as np
+
+
+class SelfStressModes:
+    """
+    Implementation of algorithms to localize and sort self-stress modes in structures.
+    
+    This class provides methods to transform self-stress modes into "localized" self-stress
+    modes that activate the minimum number of elements possible, which is particularly 
+    useful for modular tensegrity structures.
+    """
+
+    @staticmethod
+    def localize(structure : FEM_Structure, Vs_T : np.ndarray, zero_tol=1e-6) -> np.ndarray:
+        """
+        Localizes and sorts self-stress modes to minimize the number of elements involved in each mode.
+        
+        Args:
+            structure: Structure object containing element information
+            Vs_T: Self-stress modes matrix of shape (s, elements_count). _T stands for Transposed, indicating that one row of Vs_T is one self-stress mode.
+            zero_tol: Tolerance for considering values as zero (default: 1e-6)
+            
+        Returns:
+            np.ndarray: Localized and sorted self-stress modes matrix
+        """
+        # Validate input
+        if structure.elements.count == 0:
+            raise ValueError("Structure must have elements defined")
+        
+        # Validate Vs_T shape
+        if Vs_T.shape[1] != structure.elements.count:
+            raise ValueError("The self-stress modes length must match the number of elements")
+        
+        # Get dimensions
+        s, b = Vs_T.shape
+        
+        # Get element lengths
+        element_lengths = structure.elements.current_length
+        L = np.diag(element_lengths)
+        Linv = np.diag(1.0 / element_lengths)
+        
+        # Convert force vectors to force densities, to help with localization
+        qs_T = Vs_T @ Linv  # [1/m] - force densities for each self-stress mode
+        
+        # Apply recursive reduction to localize modes
+        qs_T_localized = SelfStressModes._recursively_reduce(qs_T, structure.elements.type, zero_tol)
+        
+        # Sort the localized modes, to have the modes involving the least number of elements first
+        qs_T_sorted = SelfStressModes._sort_reduced_modes(qs_T_localized, zero_tol)
+        
+        # Convert back to dimensionless vectors
+        Vs_T_sorted = qs_T_sorted @ L
+        
+        # Normalize each mode
+        S = np.zeros((s, b))
+        for i in range(s):
+            S[i] = SelfStressModes._normalize(Vs_T_sorted[i], zero_tol)
+        
+        # Return the localized, sorted and normalized self-stress modes
+        return S 
+
+    @staticmethod
+    def _normalize(mode, zero_tol=1e-6):
+        """
+        Normalizes one self-stress mode such that the most compressed element correspond to -1 value.
+        If all elements have the same axial force sign, then all elements are supposed to be in tension, with 1 value in the most tensed element.
+
+        Args:
+            mode: one self-stress mode vector to normalize
+            zero_tol: Tolerance for considering values as zero
+            
+        Returns:
+            np.ndarray: Normalized self-stress mode
+        """
+        compression_max = mode.min()  # Most negative value (compression)
+        tension_max = mode.max()      # Most positive value (tension)
+        
+        # Determine which is larger in magnitude
+        use_compression = -compression_max > tension_max
+        max_value = compression_max if use_compression else tension_max
+        
+        # Normalize so the maximum value is -1 for compression
+        normalized_mode = -mode / max_value
+              
+        # Reverse the sign if all elements are in compression:
+        if normalized_mode.max() <= zero_tol:# If mode only has compression (no tension),
+            normalized_mode *= -1 # reverse the sign
+            
+        return normalized_mode
+
+    @staticmethod
+    def _recursively_reduce(modes : np.ndarray, elements_type : np.ndarray, zero_tol=1e-6) -> np.ndarray:
+        """
+        Recursively reduces the self-stress modes to localize them.
+        
+        This implements the Gauss-Jordan elimination with pivoting to minimize
+        the number of elements involved in each self-stress mode.
+        
+        Args:
+            structure: Structure object with element information
+            modes: Force density matrix for self-stress modes
+            zero_tol: Tolerance for considering values as zero
+            
+        Returns:
+            np.ndarray: Localized (reduced) self-stress modes
+        """
+        s, b = modes.shape
+        if s <= 1:
+            return modes
+        
+        # Validate element types
+        if elements_type is None or len(elements_type) != b:
+            raise ValueError("Element types must be provided and match the number of elements")
+            
+        # Count non-zero elements in each mode
+        non_zero_mask = ~np.isclose(modes, np.zeros((s, b)), atol=zero_tol)
+        elements_per_mode = np.sum(non_zero_mask, axis=1)
+        
+        # Sort modes by number of elements (descending: most localized (up) to most general (down)) 
+        sort_indices = np.argsort(elements_per_mode)
+        sorted_modes = modes[sort_indices]
+        elements_per_mode_sorted = elements_per_mode[sort_indices]
+        
+        # Try to reduce modes starting from the most general (with most elements)
+        # up to the most localized
+        reduction_performed = False
+        
+        # Loop through modes from most general to most localized
+        for j in range(s-1, 0, -1):
+            # Try to use each more localized mode to reduce the current mode
+            for i in range(0, j):
+                # Try each element as a potential pivot
+                for k in range(b-1, -1, -1):
+                    # Skip if either mode has zero at this element
+                    if (np.isclose(sorted_modes[i][k], 0, atol=zero_tol) or 
+                        np.isclose(sorted_modes[j][k], 0, atol=zero_tol)):
+                        continue
+                    
+                    # Test if reduction would better localize the mode j (reduce the number of elements)
+                    mode_i = sorted_modes[i].copy()
+                    mode_j = sorted_modes[j].copy()
+                    
+                    # Perform Gauss-Jordan elimination: Lj -> Lj - Li * Lj[k]/Li[k]
+                    factor = mode_j[k] / mode_i[k]
+                    mode_j -= mode_i * factor
+                    
+                    # Set near-zero values to exactly zero
+                    mode_j = np.where(np.isclose(mode_j, 0, atol=zero_tol), 0, mode_j)
+                    
+                    # Count non-zero elements after reduction
+                    elements_in_reduced_mode = np.count_nonzero(mode_j)
+                    
+                    # Check if reduction is beneficial
+                    perform_reduction = elements_in_reduced_mode < elements_per_mode_sorted[j]
+                    
+                    # If number of elements is unchanged, check if reduction improves element compatibility
+                    if elements_in_reduced_mode == elements_per_mode_sorted[j]:
+                        # Check if more elements conform to their expected behavior
+                        # (cables in tension, struts in compression)
+                        # Count elements with correct sign before reduction
+                        conform_before = np.sum(np.sign(sorted_modes[j]) == elements_type)
+                            
+                        # Count elements with correct sign after reduction
+                        conform_after = np.sum(np.sign(mode_j) == elements_type)
+                            
+                        perform_reduction = conform_after > conform_before
+                    
+                    if perform_reduction:
+                        # Apply the reduction
+                        factor = sorted_modes[j][k] / sorted_modes[i][k]
+                        sorted_modes[j] -= sorted_modes[i] * factor
+                        sorted_modes[j] = np.where(np.isclose(sorted_modes[j], 0, atol=zero_tol), 0, sorted_modes[j])
+                        
+                        # Normalize the mode
+                        sorted_modes[j] = SelfStressModes._normalize(sorted_modes[j], zero_tol)
+                        
+                        # Ensure correct sign based on element types
+                        conform = np.sum(np.sign(sorted_modes[j]) == elements_type)
+                        anti_conform = np.sum(np.sign(-sorted_modes[j]) == elements_type)
+                            
+                        if anti_conform > conform:
+                            sorted_modes[j] = -sorted_modes[j]
+                        
+                        reduction_performed = True
+                        break
+                
+                if reduction_performed:
+                    break
+            
+            if reduction_performed:
+                break
+        
+        # Recursively continue reduction if changes were made
+        if reduction_performed:
+            sorted_modes = SelfStressModes._recursively_reduce(sorted_modes, elements_type, zero_tol)
+        
+        return sorted_modes
+
+    @staticmethod
+    def _sort_reduced_modes(reduced_modes, zero_tol=1e-6):
+        """
+        Sorts the reduced self-stress modes by their first active element.
+
+        This function groups modes with the same number of active elements and sorts them
+        based on the first active element index
+        
+        Args:
+            reduced_modes: Reduced self-stress modes matrix
+            zero_tol: Tolerance for considering values as zero
+            
+        Returns:
+            np.ndarray: Sorted self-stress modes
+        """
+        s, b = reduced_modes.shape
+        if s <= 1:
+            return reduced_modes
+        
+        # Count non-zero elements in each mode
+        non_zero_mask = ~np.isclose(reduced_modes, np.zeros((s, b)), atol=zero_tol)
+        elements_per_mode = np.sum(non_zero_mask, axis=1)
+        
+        # Find groups of modes with the same number of elements
+        unique_counts = np.unique(elements_per_mode)
+        
+        # Sort each group separately
+        sorted_modes = np.zeros_like(reduced_modes)
+        current_index = 0
+        
+        for count in unique_counts:
+            # Get indices of modes with this count
+            group_indices = np.where(elements_per_mode == count)[0]
+            group_size = len(group_indices)
+            
+            # Extract the group of modes
+            group_modes = reduced_modes[group_indices]
+            
+            # Sort this group by the index of their first non-zero element
+            sorted_group = SelfStressModes._sort_mode_group(group_modes, zero_tol)
+            
+            # Place sorted group in the result array
+            sorted_modes[current_index:current_index+group_size] = sorted_group
+            current_index += group_size
+        
+        return sorted_modes
+
+    @staticmethod
+    def _sort_mode_group(group_modes, zero_tol=1e-6):
+        """
+        Sorts a group of self-stress modes by the index of their first non-zero element.
+        
+        Args:
+            group_modes: a Group of self-stress modes with the same number of elements
+            zero_tol: Tolerance for considering values as zero
+            
+        Returns:
+            np.ndarray: Sorted group of modes
+        """
+        sub_s, b = group_modes.shape
+        if sub_s <= 1:
+            return group_modes
+        
+        # Find the index of the first non-zero element in each mode
+        first_indices = np.zeros(sub_s, dtype=int)
+        
+        for i in range(sub_s):
+            mode = group_modes[i]
+            non_zero_indices = np.where(~np.isclose(mode, 0, atol=zero_tol))[0]
+            if len(non_zero_indices) > 0:
+                first_indices[i] = non_zero_indices[0]
+            else:
+                first_indices[i] = b  # Place modes with all zeros at the end
+        
+        # Sort by first non-zero index
+        sort_indices = np.argsort(first_indices)
+        return group_modes[sort_indices]
