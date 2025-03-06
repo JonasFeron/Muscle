@@ -29,7 +29,7 @@ class SingularValueDecomposition:
         # 3) Retrieve structure properties
         n = structure.nodes.count
         b = structure.elements.count
-        dof = structure.nodes.dof #true if free DOF, false if fixed DOF (Degree of Freedom)
+        dof = structure.nodes.dof.reshape((-1,)) #true if free DOF, false if fixed DOF (Degree of Freedom)
         n_dof = dof.sum() # 3 n - fixations_count
         
         # 4) Get equilibrium matrix for free DOFs

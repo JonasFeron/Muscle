@@ -16,7 +16,7 @@ class Structure_SVD(FEM_Structure):
         super().__init__(nodes, elements)
 
         self.A_3n = np.zeros((3 * self.nodes.count, self.elements.count)) # equilibrium matrix of the structure (containing the free and fixed DOF)
-        self.A_3n = self._equilibrium_matrix(self.elements.connectivity_matrix, self.nodes.coordinates)
+        self.A_3n = self._equilibrium_matrix(self.elements.connectivity, self.nodes.coordinates)
 
         self.global_material_stiffness_matrix = np.zeros((3 * self.nodes.count, 3 * self.nodes.count))
         self.global_material_stiffness_matrix = self._material_stiffness_matrix(self.A_3n, self.elements.flexibility)
@@ -28,7 +28,7 @@ class Structure_SVD(FEM_Structure):
         Returns:
             np.ndarray: (3* nodes_count - fixations_count, elements_count) : equilibrium matrix of the structure (containing the free DOF only)
         """
-        return self.A_3n[self.nodes.dof] 
+        return self.A_3n[self.nodes.dof.reshape((-1,)),:] 
 
     @property
     def Afix(self):
@@ -36,7 +36,7 @@ class Structure_SVD(FEM_Structure):
         Returns:
             np.ndarray: (fixations_count, elements_count) : equilibrium matrix of the structure (containing the fixed DOF only)
         """
-        return self.A_3n[~self.nodes.dof] 
+        return self.A_3n[~self.nodes.dof.reshape((-1,)),:] 
 
     def _equilibrium_matrix(self, connectivity_matrix, current_coordinates):
         """ Compute the equilibrium matrix of the structure in its current state, using the systematic approach described in Appendix A.4 of Feron J., Latteur P., Almeida J., 2024, Static Modal Analysis, Arch Comp Meth Eng.
