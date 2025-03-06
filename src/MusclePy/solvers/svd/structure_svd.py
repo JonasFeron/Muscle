@@ -15,64 +15,95 @@ class Structure_SVD(FEM_Structure):
         # Call parent class constructor
         super().__init__(nodes, elements)
 
+        self.A_3n = np.zeros((3 * self.nodes.count, self.elements.count)) # equilibrium matrix of the structure (containing the free and fixed DOF)
+        self.A_3n = self._equilibrium_matrix(self.elements.connectivity_matrix, self.nodes.coordinates)
+
+        self.global_material_stiffness_matrix = np.zeros((3 * self.nodes.count, 3 * self.nodes.count))
+        self.global_material_stiffness_matrix = self._material_stiffness_matrix(self.A_3n, self.elements.flexibility)
 
 
-    def EquilibriumMatrix(self, Struct, ElementsCos):
+    @property
+    def A(self):
         """
-        :param Struct:
-        :return: Compute the equilibrium matrix of the structure in its current state based on the current cosinus director of the elements
+        Returns:
+            np.ndarray: (3* nodes_count - fixations_count, elements_count) : equilibrium matrix of the structure (containing the free DOF only)
         """
-        #1) Check inputs
-        dof = Struct.IsDOFfree
-        C = Struct.C
-        ElementsCount = Struct.ElementsCount
-        NodesCount = Struct.NodesCount
-        assert dof.size !=0 , "Please check the shape of the support condition IsDOFfree"
-        assert ElementsCount != 0, "Please check the ElementsCount"
-        assert NodesCount != 0, "Please check the NodesCount"
+        return self.A_3n[self.nodes.dof] 
 
-        CosX = ElementsCos[:, 0]
-        CosY = ElementsCos[:, 1]
-        CosZ = ElementsCos[:, 2]
+    @property
+    def Afix(self):
+        """
+        Returns:
+            np.ndarray: (fixations_count, elements_count) : equilibrium matrix of the structure (containing the fixed DOF only)
+        """
+        return self.A_3n[~self.nodes.dof] 
+
+    def _equilibrium_matrix(self, connectivity_matrix, current_coordinates):
+        """ Compute the equilibrium matrix of the structure in its current state, using the systematic approach described in Appendix A.4 of Feron J., Latteur P., Almeida J., 2024, Static Modal Analysis, Arch Comp Meth Eng.
+        
+        Args:
+            connectivity_matrix: (b, n) : connectivity matrix of the structure
+            current_coordinates: (n, 3) : current coordinates of the nodes
+        
+        Returns:
+            np.ndarray: (3* n, b) : equilibrium matrix of the structure (containing the free and fixed DOF)
+        """
+        C = connectivity_matrix
+
+        b,n = C.shape # number of elements, number of nodes
+        
+        assert current_coordinates.shape == (n, 3), "Please check the shape of the current coordinates"
+
+        x, y, z = current_coordinates.T
+
+        dx = C @ x
+        dy = C @ y
+        dz = C @ z
+
+        current_length = np.sqrt(dx**2 + dy**2 + dz**2)
+
+        cx = dx / current_length
+        cy = dy / current_length
+        cz = dz / current_length
 
         # 2) calculate equilibrium matrix
-        # for each node (corresponding to one row), if the line (corresponding to a column) is connected to the node, then the entry of A contains the cos director, else 0.
-        Ax = C.T @ np.diag(
-            CosX)  # (NodesCount, ElementsCount)  =  (NodesCount, ElementsCount) @ (ElementsCount, ElementsCount)
-        Ay = C.T @ np.diag(CosY)
-        Az = C.T @ np.diag(CosZ)
+        # for each node (= one row i), if the element (= a column j) is connected to the node, then the entry (i,j)of A contains the cosinus director, else 0.
+        Ax = C.T @ np.diag(cx)  # (n, b)  =  (n, b) @ (b, b)
+        Ay = C.T @ np.diag(cy)
+        Az = C.T @ np.diag(cz)
 
-        A = np.zeros((3 * NodesCount, ElementsCount))  # (3*nbr nodes, nbr lines)
-
+        A = np.zeros((3 * n, b))  
         # the Degrees Of Freedom are sorted like this [0X 0Y OZ 1X 1Y 1Z ... (n-1)X (n-1)Y (n-1)Z]
-        for i in range(NodesCount):
-            A[3 * i, :] = Ax[i, :]
-            A[3 * i + 1, :] = Ay[i, :]
-            A[3 * i + 2, :] = Az[i, :]
+        # Vectorized assignment - more efficient than using a loop
+        A[0::3, :] = Ax  # X components for all nodes
+        A[1::3, :] = Ay  # Y components for all nodes
+        A[2::3, :] = Az  # Z components for all nodes
 
-        AFree = A[dof]  # (nbr free dof, ElementsCount)
-        AFixed = A[~dof]  # (nbr fixed dof, ElementsCount)
+        return A
 
-        return (A, AFree, AFixed)
-
-    def MaterialStiffnessMatrix(Cur, Struct, A, Flex):
+    def _material_stiffness_matrix(self, A, flexibility):
         """
-        Compute the material stiffness matrix of the structure in the current state given the equilibrium matrix and the flexibilities in the current state
-        :param Struct: The StructureObject in the current state
-        :param A: [/] - shape (3*NodesCount,ElementsCount) - The equilibrium matrix of the structure in the current state
-        :param Flex: [m/N] - shape (ElementsCount,) - The flexibility vector L/EA for each element in the current state
-        :return: Kmat : [N/m] - shape(3*NodesCount,3*NodesCount) - the material stiffness matrix of the structure in the current state
+        Compute the material stiffness matrix of the structure in its current state given the equilibrium matrix and the flexibilities
+
+        Args:
+            A: np.ndarray, optional: (3*n, b) : equilibrium matrix of the structure.
+            flexibility: np.ndarray, optional: (b,) : flexibility vector L/EA for each element.
+        
+        Returns:
+            np.ndarray: (3*n, 3*n) : material stiffness matrix of the structure
         """
-        ElementsCount = Struct.ElementsCount
-        NodesCount = Struct.NodesCount
-        DOFfreeCount = Struct.DOFfreeCount
 
-        assert A.shape == (3 * NodesCount, ElementsCount) or A.shape == (DOFfreeCount, ElementsCount), "Please check the shape of A"
-        assert Flex.size == ElementsCount, "Please check the shape of the Flex vector"
-        F = Flex.reshape(-1, )
+        _3n, b = A.shape
 
-        Kbsc = np.diag(1 / F)  # EA/L in a diagonal matrix. Note that EA/L can be equal to 0 if the cable is slacked
-        B = A.T  # The compatibility matrix is the linear application which transforms the displacements into elongation.
-        Kmat = A @ Kbsc @ B  # (3*NodesCount,3*NodesCount) OR (DOFfreeCount, DOFfreeCount)
-
-        return Kmat
+        #assert that sizes are compatible        
+        assert flexibility.size == b, "Please check the shape of the flexibility vector"
+        
+        # Create diagonal matrix of stiffness values (inverse of flexibility)
+        Ke = np.diag(1 / flexibility)  # EA/L in a diagonal matrix. Note that EA/L can be equal to 0 if the cable is slacked
+        
+        # The compatibility matrix is the transpose of the equilibrium matrix
+        B = A.T  
+        
+        # Compute the material stiffness matrix
+        Km = A @ Ke @ B  # (3*n, 3*n)
+        return Km
