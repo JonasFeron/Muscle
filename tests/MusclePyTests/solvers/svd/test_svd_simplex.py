@@ -1,9 +1,14 @@
+from stat import S_ISPORT
 import unittest
 import numpy as np
+from MusclePy.femodel import fem_elements
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.solvers.svd.structure_svd import Structure_SVD
 from MusclePy.solvers.svd.svd import SingularValueDecomposition
+from MusclePy.solvers.svd.self_stress_modes import SelfStressModes
+from MusclePy.solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
+from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
 
 
 class TestSVDSimplex(unittest.TestCase):
@@ -50,8 +55,32 @@ class TestSVDSimplex(unittest.TestCase):
             [1, 4],   # Element 10
             [0, 3]    # Element 11
         ])
+
+        # Set element types (1 for cables, -1 for struts)
+        elements_type = np.ones(12)
+        elements_type[[0, 1, 2]] = -1  # struts
+
+        # Set Young moduli [in compression, in tension] MPa
+        # Struts can only be in compression and cables only in tension
+        elementsE = np.array([[70390, 0],
+                              [70390, 0],
+                              [70390, 0],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 71750],
+                              [0, 72190],
+                              [0, 72190],
+                              [0, 72190]])  
+
+        # Set cross-sectional areas [mm²]
+        elementsA = np.ones((12,2))
+        elementsA[0:3,:] = 364.4 # struts 
+        elementsA[3:12,:] = 50.3 # cables
         
-        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes)
+        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, areas=elementsA)
         
         # Create Structure_SVD
         self.structure = Structure_SVD(nodes, elements)
@@ -98,20 +127,50 @@ class TestSVDSimplex(unittest.TestCase):
         self.assertTrue(np.allclose(np.abs(mechanisms), np.abs(expected_mechanism), atol=rounding_error),
                         f"Expected mechanisms:\n{expected_mechanism}\nGot:\n{mechanisms}")
 
-    # def test_selfstress_modes(self):
-    #     """Test the self-stress modes.
-    #     See Fig 3. in Feron, Rhode-Barbarigos, Latteur, 2023, Experimental testing of a tensegrity simplex, JSE
-    #
-    #     """
-    #     # Extract the self-stress modes from Vs
-    #     selfstress_modes = self.svd_results.Vs
-    #
-    #     # Expected result: [1,1]/sqrt(2)
-    #     expected_selfstress = np.array([1, 1]) / np.sqrt(2)
-    #
-    #     # Check result - need to use absolute values as signs might differ
-    #     self.assertTrue(np.allclose(np.abs(selfstress_modes), np.abs(expected_selfstress)),
-    #                     f"Expected self-stress modes:\n{expected_selfstress}\nGot:\n{selfstress_modes}")
+    def test_localize_self_stress_modes(self):
+        """Test the localization of self-stress modes.
+        See Fig 3. in Feron, Rhode-Barbarigos, Latteur, 2023, Experimental testing of a tensegrity simplex, JSE
+        """
+
+        # Get the self-stress modes from SVD
+        Vs_T = self.svd_results.Vs_T
+
+        # Check static indeterminacy
+        self.assertEqual(Vs_T.shape[0], 1, 
+                         f"Expected static indeterminacy: 1, Got: {Vs_T.shape[0]}")
+               
+        # Apply normalization
+        S_T = SelfStressModes._normalize(Vs_T)
+
+        expected_mode = np.array([
+            [-1.0, -1.0, -1.0, 0.393, 0.393, 0.393, 0.393, 0.393, 0.393, 0.681, 0.681, 0.681]
+        ])
+
+        self.assertTrue(np.allclose(np.abs(S_T), np.abs(expected_mode), atol=0.001),
+                        f"Expected localized modes:\n{expected_mode}\nGot:\n{S_T}")
+
+
+    def test_global_material_stiffness(self):
+        """Test the global material stiffness from two methods"""
+
+        # 1) Get the global material stiffness - computed based on the equilibrium matrix - within Structure_SVD
+        global_material_stiffness = self.structure.global_material_stiffness_matrix
+
+        # 2) Get the global material stiffness - computed based on the local stiffness matrix of each element - within Structure_Linear_DM
+        # 2a) compute the local stiffness matrix of each element
+        elements_linear_dm = Elements_Linear_DM( 
+            self.structure.nodes,
+            self.structure.elements.type,
+            self.structure.elements.end_nodes,
+            self.structure.elements.areas,
+            self.structure.elements.youngs
+            )
+        # 2b) compute the global stiffness matrix
+        structure_linear_dm = Structure_Linear_DM(self.structure.nodes, elements_linear_dm) 
+        global_material_stiffness_linear_dm = structure_linear_dm.global_material_stiffness_matrix
+
+        self.assertTrue(np.allclose(global_material_stiffness, global_material_stiffness_linear_dm),
+                        f"Expected global material stiffness:\n{global_material_stiffness_linear_dm}\nGot:\n{global_material_stiffness}")
 
 if __name__ == '__main__':
     unittest.main()

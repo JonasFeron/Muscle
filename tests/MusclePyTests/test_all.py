@@ -18,6 +18,10 @@ from MusclePyTests.solvers.linear_dm.test_linear_dm_3prestressedcables import Te
 from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_2bars_truss import TestNonlinearDM_2BarsTruss
 from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_loose_mechanism import TestNonlinearDM_LooseMechanism
 from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_prestressed_tight_rope import TestNonlinearDM_PrestressedTightRope
+from MusclePyTests.solvers.svd.test_svd_2cables import TestSVD2Cables
+from MusclePyTests.solvers.svd.test_svd_3cables import TestSVD3Cables
+from MusclePyTests.solvers.svd.test_svd_simplex import TestSVDSimplex
+from MusclePyTests.solvers.svd.test_self_stress import TestSelfStressModes
 
 
 def create_test_suite():
@@ -33,6 +37,10 @@ def create_test_suite():
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_2BarsTruss))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_LooseMechanism))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_PrestressedTightRope))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSVD2Cables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSVD3Cables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSVDSimplex))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSelfStressModes))
 
     
     return suite

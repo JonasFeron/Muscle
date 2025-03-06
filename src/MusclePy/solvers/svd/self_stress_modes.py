@@ -69,12 +69,12 @@ class SelfStressModes:
         Vs_T_sorted = qs_T_sorted @ L
         
         # Normalize each mode
-        S = np.zeros((s, b))
+        S_T = np.zeros((s, b))
         for i in range(s):
-            S[i] = SelfStressModes._normalize(Vs_T_sorted[i], zero_tol)
+            S_T[i] = SelfStressModes._normalize(Vs_T_sorted[i], zero_tol)
         
         # Return the localized, sorted and normalized self-stress modes
-        return S 
+        return S_T 
 
     @staticmethod
     def _normalize(mode, zero_tol=1e-6):
