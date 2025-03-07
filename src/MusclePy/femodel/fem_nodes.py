@@ -6,20 +6,24 @@ class FEM_Nodes:
     def __init__(self, initial_coordinates=None, dof=None, loads=None, displacements=None, reactions=None, resisting_forces=None):
         """Python equivalent of C# FEM_Nodes class, combining nodes state and results.
         
-        The class has two types of attributes:
+        The class has four types of attributes (immutable, or mutable (state dependant)) and (provided by the solver, or computed internally):
         1. Immutable attributes (initialized once from C#):
             - initial_coordinates: Initial nodal coordinates
             - dof: Degrees of freedom (support conditions)
+
+        2. Immutable attributes (computed internally):
             - count: Number of nodes
             - fixations_count: Number of fixed DOFs
             
-        2. Mutable state attributes:
+        3. Mutable state attributes (provided by the solver):
             - loads: external loads applied to nodes
             - displacements: Nodal displacements
             - reactions: Support reactions
             - resisting_forces: Internal resisting forces at nodes
+
+        4. Mutable state attributes (computed internally):
             - coordinates: Current nodal coordinates (initial_coordinates + displacements)
-            - residual: Out of balance forces
+            - residual: Out of balance forces (loads - resisting_forces - reactions)
         
         Args:
             initial_coordinates: [m] - shape (nodes_count, 3) - Initial nodal coordinates
@@ -180,6 +184,21 @@ class FEM_Nodes:
         
 
     # Public Methods
+    def copy(self) -> 'FEM_Nodes':
+        """Create a copy of this instance with the current state.
+        
+        Returns:
+            A new FEM_Nodes instance with the current state
+        """
+        return FEM_Nodes(
+            initial_coordinates=self._initial_coordinates.copy(),
+            dof=self._dof.copy(),
+            loads=self._loads.copy(),
+            displacements=self._displacements.copy(),
+            reactions=self._reactions.copy(),
+            resisting_forces=self._resisting_forces.copy()
+        )
+
     def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Nodes':
         """Create a copy of this instance and update its state, or use existing state if None.
         
@@ -236,17 +255,3 @@ class FEM_Nodes:
             resisting_forces=self._resisting_forces + resisting_forces_increment
         )
 
-    def copy(self) -> 'FEM_Nodes':
-        """Create a copy of this instance with the current state.
-        
-        Returns:
-            A new FEM_Nodes instance with the current state
-        """
-        return FEM_Nodes(
-            initial_coordinates=self._initial_coordinates.copy(),
-            dof=self._dof.copy(),
-            loads=self._loads.copy(),
-            displacements=self._displacements.copy(),
-            reactions=self._reactions.copy(),
-            resisting_forces=self._resisting_forces.copy()
-        )
