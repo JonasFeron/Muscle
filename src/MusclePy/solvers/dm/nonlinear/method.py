@@ -1,7 +1,7 @@
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
-from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
-from MusclePy.solvers.linear_dm.linear_dm import LinearDisplacementMethod
+from MusclePy.solvers.dm.model.dm_structure import DM_Structure
+from MusclePy.solvers.dm.model.dm_elements import DM_Elements
+from MusclePy.solvers.dm.linear.method import LinearDisplacementMethod
 import numpy as np
 
 
@@ -29,18 +29,8 @@ class NonlinearDisplacementMethod:
         loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
         total_loads_incr = loads_increment.reshape((-1, ))
 
-        # Create a linear structure for the Displacement Method     
-        initial_state = Structure_Linear_DM(
-            nodes=structure.nodes,
-            elements=Elements_Linear_DM(
-                nodes=structure.nodes,
-                type=structure.elements.type,
-                end_nodes=structure.elements.end_nodes,
-                areas=structure.elements.areas,
-                youngs=structure.elements.youngs,
-                tension=structure.elements.tension
-            )
-        )
+        # Create a DM_Structure for the Displacement Method     
+        initial_state = DM_Structure(structure)
 
         # Initialize solver parameters
         l0 = 1 / n_steps  # incremental length
@@ -81,7 +71,7 @@ class NonlinearDisplacementMethod:
                 
             except np.linalg.LinAlgError:
                 # Handle singular matrix with perturbation
-                perturbed = LinearDisplacementMethod._perturb_structure(current_state, perturbation)
+                perturbed = current_state.perturb(magnitude=perturbation)
                 current_state = perturbed.copy()
                 v, r, f, t = LinearDisplacementMethod._core(current_state, total_loads_incr)
                 
@@ -108,7 +98,7 @@ class NonlinearDisplacementMethod:
                 tension_increment=tensions_incr,
                 resisting_forces_increment=resisting_forces_incr
                 )
-        return final_state.save_as_FEM_Structure()
+        return final_state
 
     @staticmethod
     def _arc_length_control(l0: float, _lambda: float, v: np.ndarray, p: np.ndarray) -> float:

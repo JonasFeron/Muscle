@@ -1,14 +1,14 @@
-from stat import S_ISPORT
 import unittest
 import numpy as np
-from MusclePy.femodel import fem_elements
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.solvers.svd.structure_svd import Structure_SVD
 from MusclePy.solvers.svd.svd import SingularValueDecomposition
 from MusclePy.solvers.svd.self_stress_modes import SelfStressModes
-from MusclePy.solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
-from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
+from MusclePy.solvers.dm.model.dm_elements import DM_Elements
+from MusclePy.solvers.dm.model.dm_structure import DM_Structure
+
+
 
 
 class TestSVDSimplex(unittest.TestCase):
@@ -158,7 +158,7 @@ class TestSVDSimplex(unittest.TestCase):
 
         # 2) Get the global material stiffness - computed based on the local stiffness matrix of each element - within Structure_Linear_DM
         # 2a) compute the local stiffness matrix of each element
-        elements_linear_dm = Elements_Linear_DM( 
+        dm_elements = DM_Elements(
             self.structure.nodes,
             self.structure.elements.type,
             self.structure.elements.end_nodes,
@@ -166,8 +166,8 @@ class TestSVDSimplex(unittest.TestCase):
             self.structure.elements.youngs
             )
         # 2b) compute the global stiffness matrix
-        structure_linear_dm = Structure_Linear_DM(self.structure.nodes, elements_linear_dm) 
-        global_material_stiffness_linear_dm = structure_linear_dm.global_material_stiffness_matrix
+        dm_structure = DM_Structure(self.structure.nodes, dm_elements) 
+        global_material_stiffness_linear_dm = dm_structure.global_material_stiffness_matrix
 
         self.assertTrue(np.allclose(global_material_stiffness, global_material_stiffness_linear_dm),
                         f"Expected global material stiffness:\n{global_material_stiffness_linear_dm}\nGot:\n{global_material_stiffness}")

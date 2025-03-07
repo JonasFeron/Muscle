@@ -184,13 +184,31 @@ class FEM_Nodes:
         
 
     # Public Methods
+    def _create_copy(self, initial_coordinates, dof, loads, displacements, reactions, resisting_forces):
+        """Core copy method that creates a new instance of the appropriate class.
+        
+        This protected method is used by all copy methods to create a new instance.
+        Child classes should override this method to return an instance of their own class.
+        
+        Returns:
+            A new instance of the appropriate class (FEM_Nodes or a child class)
+        """
+        return self.__class__(
+            initial_coordinates=initial_coordinates,
+            dof=dof,
+            loads=loads,
+            displacements=displacements,
+            reactions=reactions,
+            resisting_forces=resisting_forces
+        )
+    
     def copy(self) -> 'FEM_Nodes':
         """Create a copy of this instance with the current state.
         
         Returns:
-            A new FEM_Nodes instance with the current state
+            A new instance with the current state
         """
-        return FEM_Nodes(
+        return self._create_copy(
             initial_coordinates=self._initial_coordinates.copy(),
             dof=self._dof.copy(),
             loads=self._loads.copy(),
@@ -219,7 +237,7 @@ class FEM_Nodes:
         reactions = self._check_and_reshape_array(reactions, "reactions")
         resisting_forces = self._check_and_reshape_array(resisting_forces, "resisting_forces")
         
-        return FEM_Nodes(
+        return self._create_copy(
             initial_coordinates=self._initial_coordinates.copy(),
             dof=self._dof.copy(),
             loads=loads,
@@ -254,4 +272,3 @@ class FEM_Nodes:
             reactions=self._reactions + reactions_increment,
             resisting_forces=self._resisting_forces + resisting_forces_increment
         )
-

@@ -37,9 +37,33 @@ class FEM_Structure:
     @property
     def is_in_equilibrium(self) -> bool:
         """Check if the structure is in equilibrium."""
-        # if loads magnitude is 1000N, the structure is considered in equilibrium if the residual is inferior to 1e-4 * 1000N = 0.1 N
         zero_residual_threshold = self._relative_precision * np.linalg.norm(self.nodes.loads.flatten()) # [N] 
         return bool(np.linalg.norm(self.nodes.residual.flatten()) <= zero_residual_threshold)
+    
+    def _create_copy(self, nodes, elements):
+        """Core copy method that creates a new instance of the appropriate class.
+        
+        This protected method is used by all copy methods to create a new instance.
+        Child classes should override this method to return an instance of their own class.
+        
+        Returns:
+            A new instance of the appropriate class (FEM_Structure or a child class)
+        """
+        return self.__class__(nodes, elements)
+        
+    def copy(self) -> 'FEM_Structure':
+        """Create a copy of this structure with the current state.
+        
+        Returns:
+            A new instance with the current state
+        """
+        # Create new nodes with current state
+        nodes_copy = self._nodes.copy()
+        
+        # Create new elements with current state, referencing the new nodes
+        elements_copy = self._elements.copy(nodes_copy)
+        
+        return self._create_copy(nodes_copy, elements_copy)
     
     def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None,
                        delta_free_length: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Structure':
@@ -59,7 +83,7 @@ class FEM_Structure:
         # Create new elements with updated state, referencing the new nodes
         elements_copy = self._elements.copy_and_update(nodes_copy, delta_free_length, tension)
         
-        return FEM_Structure(nodes_copy, elements_copy)
+        return self._create_copy(nodes_copy, elements_copy)
         
     def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
                      reactions_increment: np.ndarray = None, delta_free_length_increment: np.ndarray = None,
@@ -80,4 +104,4 @@ class FEM_Structure:
         # Create new elements with incremented state, referencing the new nodes
         elements_copy = self._elements.copy_and_add(nodes_copy, delta_free_length_increment, tension_increment)
         
-        return FEM_Structure(nodes_copy, elements_copy)
+        return self._create_copy(nodes_copy, elements_copy)

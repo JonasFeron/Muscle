@@ -1,7 +1,7 @@
 from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.solvers.linear_dm.structure_linear_dm import Structure_Linear_DM
-from MusclePy.solvers.linear_dm.elements_linear_dm import Elements_Linear_DM
+from MusclePy.solvers.dm.model.dm_structure import DM_Structure
+from MusclePy.solvers.dm.model.dm_elements import DM_Elements
 import numpy as np
 
 
@@ -27,29 +27,21 @@ class LinearDisplacementMethod:
         Returns:
             Updated FEM_Structure with incremented state
         """
-        #check input shapes
+        #check input
+        assert isinstance(structure, FEM_Structure), "structure must be an instance of FEM_Structure"
         loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
         free_length_increment = structure.elements._check_and_reshape_array(free_length_increment, "delta_free_length_increment")
     
-        # modify the free length of the elements via mechanical devices
-        total_free_length_variation = structure.elements.delta_free_length + free_length_increment
+        # Convert structure to DM structure -> compute global(material + geometric) stiffness matrix 
+        initial = DM_Structure(structure)
 
-        initial_state = Structure_Linear_DM(
-            nodes=structure.nodes,
-            elements=Elements_Linear_DM(
-                nodes=structure.nodes,
-                type=structure.elements.type,
-                end_nodes=structure.elements.end_nodes,
-                areas=structure.elements.areas,
-                youngs=structure.elements.youngs,
-                delta_free_length=total_free_length_variation,   # modify the free length of the elements via mechanical devices
-                tension=structure.elements.tension
-            )
-        )
+        # modify the free length of the elements via mechanical devices
+        initial = initial.copy_and_add(delta_free_length_increment=free_length_increment)
         
         # Compute equivalent prestress loads from free length variations
+        # following fig 5 in Latteur P., Feron J., Denoël V., 2017, “A design methodology for lattice and tensegrity structures based on a stiffness and volume optimization algorithm using morphological indicators”, International Journal of Space Structures, Volume 32, issue: 3-4, p. 226-243.
         eq_prestress, eq_prestress_loads = LinearDisplacementMethod._equivalent_prestress_loads(
-            initial_state.elements, 
+            initial.elements, 
             free_length_increment
         )
         
@@ -59,23 +51,23 @@ class LinearDisplacementMethod:
         try:
             # Solve linear system
             displacements, reactions, resisting_forces, tension = LinearDisplacementMethod._core(
-                initial_state, 
+                initial, 
                 total_loads_increment
             )
             
         except np.linalg.LinAlgError:
             # In case of singular matrix, perturb the structure with tiny displacements
-            perturbed = LinearDisplacementMethod._perturb_structure(initial_state)
+            perturbed = initial.perturb()
             displacements, reactions, resisting_forces, tension = LinearDisplacementMethod._core(
                 perturbed, 
                 total_loads_increment
             )
         
-        # Add the axial prestress force (equivalent to the free length variations) to the resulting axial forces 
+        # Add the axial prestress force to the resulting axial forces
         tension += eq_prestress
         
         # Update the inputted structure with incremented results
-        deformed_state = structure.copy_and_add(
+        final_structure = structure.copy_and_add(
             loads_increment=loads_increment,
             displacements_increment=displacements,
             reactions_increment=reactions,
@@ -83,10 +75,10 @@ class LinearDisplacementMethod:
             tension_increment=tension,
             resisting_forces_increment=resisting_forces
         )
-        return deformed_state
+        return final_structure
 
     @staticmethod
-    def _core(current: Structure_Linear_DM, loads_increment: np.ndarray):
+    def _core(current: DM_Structure, loads_increment: np.ndarray):
         """Solve the linear displacement method for the current structure with additional loads.
     
         Args:
@@ -182,11 +174,17 @@ class LinearDisplacementMethod:
         Returns:
             tuple containing:
             - eq_prestress: [N] - shape (elements.count,) - Axial force in each element
-            - eq_prestress_loads: [N] - shape (3*nodes.count,) - Equivalent external loads
+            - eq_prestress_loads: [N] - shape (nodes.count,3) - Equivalent external loads
         """
+        assert isinstance(elements, FEM_Elements), "elements must be an instance of FEM_Elements"
+        assert delta_free_length_increment.ndim == 1, "delta_free_length_increment must be a 1D array"
+        assert len(delta_free_length_increment) == elements.count, "delta_free_length_increment must have the same length as the number of elements"
+
         d_l0 = delta_free_length_increment 
         Ke = 1/elements.flexibility
         nodes_count = elements.nodes.count
+        cosines = elements.direction_cosines
+        end_nodes = elements.end_nodes
 
         # 1) Compute the tension
         t = Ke * - d_l0  # [N] - shape (elements_count,) -  t = EA/Lfree * (-d_l0). A lengthening d_l0 (+) creates a compression force (-), supposing all nodes are fixed.
@@ -194,11 +192,8 @@ class LinearDisplacementMethod:
 
         #2) Compute the equivalent prestress loads
         eq_prestress_loads = np.zeros((nodes_count, 3))  # Shape (nodes_count, 3)
-        direction_cosines = elements.direction_cosines
-        end_nodes = elements.end_nodes
-        
         for i in range(elements.count):
-            cx, cy, cz = direction_cosines[i]
+            cx, cy, cz = cosines[i]
             n0, n1 = end_nodes[i]  # Get start and end nodes
             
             # Apply forces to start node (negative)
@@ -208,37 +203,3 @@ class LinearDisplacementMethod:
             eq_prestress_loads[n1] += -t[i] * np.array([cx, cy, cz])
             
         return (eq_prestress, eq_prestress_loads)
-
-    @staticmethod
-    def _perturb_structure(structure: Structure_Linear_DM, magnitude: float = 1e-5) -> Structure_Linear_DM:
-        """Create a copy of the structure with tiny random displacements applied to free DOFs.
-        
-        This function helps deal with singular stiffness matrices by slightly perturbing the structure.
-        The perturbation is only applied to degrees of freedom that are not fixed by supports.
-        
-        Args:
-            structure: Structure to perturb
-            magnitude: [m] Standard deviation for the random perturbation. Default is 1e-5 meters.
-            
-        Returns:
-            New Structure_Linear_DM with perturbed displacements
-        """
-        # Create random perturbations for all DOFs
-        nodes_count = structure.nodes.count
-        perturbation = np.random.normal(0, magnitude, size=(3 * nodes_count,))
-        
-        # Zero out perturbations where DOFs are fixed
-        dof_flat = structure.nodes.dof.reshape(-1)  # Flatten the 2D dof array to match perturbation shape
-        perturbation[~dof_flat] = 0
-        
-        # Create perturbed structure by adding tiny displacements
-        perturbed = structure.copy_and_add(
-            loads_increment=np.zeros_like(perturbation),  # No additional loads
-            displacements_increment=perturbation,
-            reactions_increment=np.zeros_like(perturbation),  # No additional reactions
-            delta_free_length_increment=np.zeros(structure.elements.count),  # No change in free length
-            tension_increment=np.zeros(structure.elements.count),  # No change in tension
-            resisting_forces_increment=np.zeros_like(perturbation)  # No change in resisting forces
-        )
-        
-        return perturbed

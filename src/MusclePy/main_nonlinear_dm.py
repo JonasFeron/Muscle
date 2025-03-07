@@ -1,5 +1,5 @@
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.solvers.nonlinear_dm.nonlinear_dm import NonlinearDisplacementMethod
+from MusclePy.solvers.dm.nonlinear.method import NonlinearDisplacementMethod
 import numpy as np
 
 

@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.nonlinear_dm.nonlinear_dm import NonlinearDisplacementMethod
+from MusclePy.solvers.dm.nonlinear.method import NonlinearDisplacementMethod
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements

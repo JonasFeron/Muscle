@@ -1,5 +1,5 @@
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.solvers.linear_dm.linear_dm import LinearDisplacementMethod
+from MusclePy.solvers.dm.linear.method import LinearDisplacementMethod
 import numpy as np
 
 

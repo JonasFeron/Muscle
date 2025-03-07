@@ -294,6 +294,44 @@ class FEM_Elements:
         return np.column_stack((dx/current_length, dy/current_length, dz/current_length))
     
     # Public Methods
+    def _create_copy(self, nodes, type, end_nodes, areas, youngs, delta_free_length, tension):
+        """Core copy method that creates a new instance of the appropriate class.
+        
+        This protected method is used by all copy methods to create a new instance.
+        Child classes should override this method to return an instance of their own class.
+        
+        Returns:
+            A new instance of the appropriate class (FEM_Elements or a child class)
+        """
+        return self.__class__(
+            nodes=nodes,
+            type=type,
+            end_nodes=end_nodes,
+            areas=areas,
+            youngs=youngs,
+            delta_free_length=delta_free_length,
+            tension=tension
+        )
+        
+    def copy(self, nodes: 'FEM_Nodes') -> 'FEM_Elements':
+        """Create a copy with current state.
+        
+        Args:
+            nodes: FEM_Nodes instance to reference in the copy
+            
+        Returns:
+            New instance with current state
+        """
+        return self._create_copy(
+            nodes=nodes,
+            type=self._type.copy(),
+            end_nodes=self._end_nodes.copy(),
+            areas=self._areas.copy(),
+            youngs=self._youngs.copy(),
+            delta_free_length=self._delta_free_length.copy(),
+            tension=self._tension.copy()
+        )
+    
     def copy_and_update(self, nodes: 'FEM_Nodes', delta_free_length: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
         """Create a copy with updated state values, or use existing state if None.
         
@@ -309,7 +347,7 @@ class FEM_Elements:
         delta_free_length = self._check_and_reshape_array(delta_free_length, "delta_free_length")
         tension = self._check_and_reshape_array(tension, "tension")
         
-        return FEM_Elements(
+        return self._create_copy(
             nodes=nodes,
             type=self._type.copy(),
             end_nodes=self._end_nodes.copy(),
@@ -318,7 +356,7 @@ class FEM_Elements:
             delta_free_length=delta_free_length,
             tension=tension
         )
-        
+    
     def copy_and_add(self, nodes: FEM_Nodes, delta_free_length_increment: np.ndarray = None, 
                      tension_increment: np.ndarray = None) -> 'FEM_Elements':
         """Create a copy with incremented state values.
