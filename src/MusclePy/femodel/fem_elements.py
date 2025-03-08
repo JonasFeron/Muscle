@@ -41,13 +41,13 @@ class FEM_Elements:
         if not isinstance(nodes, FEM_Nodes):
             raise TypeError("nodes must be a FEM_Nodes instance")
         self._nodes = nodes
-        
+        self._count = 0
+
         self._type = np.array([], dtype=int)
         self._end_nodes = np.array([], dtype=int).reshape((0, 2))
         self._connectivity = np.array([], dtype=int).reshape((0, 0))  # Initialize empty connectivity matrix (computed from end_nodes)
         self._areas = np.array([], dtype=float).reshape((0, 2))
         self._youngs = np.array([], dtype=float).reshape((0, 2))
-        self._count = 0
         self._initial_free_length = np.array([], dtype=float)
         
         # Initialize mutable state attributes
@@ -56,7 +56,10 @@ class FEM_Elements:
         
         # Initialize the instance
         self._initialize(type, end_nodes, areas, youngs, delta_free_length, tension)
-    
+
+
+
+    # Private Initialization methods
     def _check_and_reshape_array(self, arr, name, shape_suffix=None) -> np.ndarray:
         """Convert input array to proper numpy array with correct shape and type.
         
@@ -155,12 +158,19 @@ class FEM_Elements:
             connectivity[element_index, node1] = -1 # end node of element
         self._connectivity = -connectivity  # According to J.Feron: minus sign to make n1-n0 consistent with direction cosines (x1-x0)/L
     
+
+
     # READ Only properties
     @property
     def nodes(self) -> FEM_Nodes:
         """FEM_Nodes instance containing nodes data"""
         return self._nodes
-    
+        
+    @property
+    def count(self) -> int:
+        """Number of elements"""
+        return self._count
+
     @property
     def type(self) -> np.ndarray:
         """[-] - shape (elements_count,) - Type of elements (-1 for struts, 1 for cables)"""
@@ -170,49 +180,6 @@ class FEM_Elements:
     def end_nodes(self) -> np.ndarray:
         """[-] - shape (elements_count, 2) - Indices of end nodes"""
         return self._end_nodes
-
-    @property
-    def initial_free_length(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Free length in unprestressed state"""
-        return self._initial_free_length
-    
-    @property
-    def count(self) -> int:
-        """Number of elements"""
-        return self._count
-
-    @property
-    def areas(self) -> np.ndarray:
-        """[mm²] - shape (elements_count, 2) - Areas in compression and tension"""
-        return self._areas
-    
-    @property
-    def youngs(self) -> np.ndarray:
-        """[MPa] - shape (elements_count, 2) - Young's moduli in compression and tension"""
-        return self._youngs
-
-    @property
-    def area(self) -> np.ndarray:
-        """[mm²] - shape (elements_count,) - Current area depending on tension state"""
-        return self._get_current_property(self._tension, self._areas, self._type)
-    
-    @property
-    def young(self) -> np.ndarray:
-        """[MPa] - shape (elements_count,) - Current Young's modulus depending on tension state"""
-        return self._get_current_property(self._tension, self._youngs, self._type)
-    
-    @property
-    def flexibility(self) -> np.ndarray:
-        """[m/N] - shape (elements_count,) - Current flexibility (L/EA).
-        Returns a large value (1e6) when EA = 0 (e.g., for slack cables)."""
-        if self._count == 0:
-            return np.array([], dtype=float)
-            
-        ea = self.young * self.area  # [MPa * mm²] = [N]
-        mask = ea > 0  # If EA is zero, flexibility L/EA is infinite
-        result = np.full(self._count, 1e6, dtype=float)  # Default large value (in m/N) for zero EA
-        result[mask] = self.current_free_length[mask] / ea[mask]
-        return result
     
     @property
     def connectivity(self) -> np.ndarray:
@@ -223,35 +190,22 @@ class FEM_Elements:
         - 0 otherwise
         """
         return self._connectivity
+
+    @property
+    def initial_free_length(self) -> np.ndarray:
+        """[m] - shape (elements_count,) - Free length in unprestressed state"""
+        return self._initial_free_length
+
+
+    @property
+    def areas(self) -> np.ndarray:
+        """[mm²] - shape (elements_count, 2) - Areas in compression and tension"""
+        return self._areas
     
-    def _get_current_property(self, tension_value: np.ndarray, property_in_compression_tension: np.ndarray, element_types: np.ndarray) -> np.ndarray:
-        """Get element properties (areas or young moduli) based on tension state (compression/tension).
-        
-        Args:
-            tension_value: Array of shape (elements_count,) containing element tensions
-            property_in_compression_tension: Array of shape (elements_count, 2) containing property values for compression and tension
-            element_types: Array of shape (elements_count,) containing element types
-            
-        Returns:
-            Array of shape (elements_count,) containing current property values
-        """
-        if self._count == 0:
-            return np.array([], dtype=float)
-            
-        # Get property based on tension state
-        property_values = np.where(tension_value > 0,
-                                 property_in_compression_tension[:, 1],  # Tension
-                                 property_in_compression_tension[:, 0])  # Compression
-        
-        # For zero tension, use element type
-        zero_tension_mask = tension_value == 0
-        if np.any(zero_tension_mask):
-            types = element_types[zero_tension_mask]
-            property_values[zero_tension_mask] = np.where(types > 0,
-                                                        property_in_compression_tension[zero_tension_mask, 1],  # Cables
-                                                        property_in_compression_tension[zero_tension_mask, 0])  # Struts
-        return property_values
-    
+    @property
+    def youngs(self) -> np.ndarray:
+        """[MPa] - shape (elements_count, 2) - Young's moduli in compression and tension"""
+        return self._youngs
 
     @property
     def delta_free_length(self) -> np.ndarray:
@@ -265,6 +219,18 @@ class FEM_Elements:
     
     
     # Computed properties
+    @property
+    def direction_cosines(self) -> np.ndarray:
+        """[-] - shape (elements_count, 3) - Current direction cosines"""
+        coords = self._nodes.coordinates
+        n0 = self._end_nodes[:, 0]
+        n1 = self._end_nodes[:, 1]
+        dx = coords[n1, 0] - coords[n0, 0]
+        dy = coords[n1, 1] - coords[n0, 1]
+        dz = coords[n1, 2] - coords[n0, 2]
+        current_length = np.sqrt(dx*dx + dy*dy + dz*dz)
+        return np.column_stack((dx/current_length, dy/current_length, dz/current_length))
+
     @property
     def current_length(self) -> np.ndarray:
         """[m] - shape (elements_count,) - Current length of elements (based on current nodes coordinates)"""
@@ -280,20 +246,73 @@ class FEM_Elements:
     def current_free_length(self) -> np.ndarray:
         """[m] - shape (elements_count,) - Current free length (initial + delta)"""
         return self._initial_free_length + self._delta_free_length
+
+    @property
+    def elastic_elongation(self) -> np.ndarray:
+        """[m] - shape (elements_count,) - Elastic elongation of elements (tension positive)"""
+        return self.current_length - self.current_free_length
     
     @property
-    def direction_cosines(self) -> np.ndarray:
-        """[-] - shape (elements_count, 3) - Current direction cosines"""
-        coords = self._nodes.coordinates
-        n0 = self._end_nodes[:, 0]
-        n1 = self._end_nodes[:, 1]
-        dx = coords[n1, 0] - coords[n0, 0]
-        dy = coords[n1, 1] - coords[n0, 1]
-        dz = coords[n1, 2] - coords[n0, 2]
-        current_length = np.sqrt(dx*dx + dy*dy + dz*dz)
-        return np.column_stack((dx/current_length, dy/current_length, dz/current_length))
+    def area(self) -> np.ndarray:
+        """[mm²] - shape (elements_count,) - Current area depending on tension state"""
+        return self._get_current_property(self.elastic_elongation, self._areas, self._type)
     
-    # Public Methods
+    @property
+    def young(self) -> np.ndarray:
+        """[MPa] - shape (elements_count,) - Current Young's modulus depending on tension state"""
+        return self._get_current_property(self.elastic_elongation, self._youngs, self._type)
+    
+    @property
+    def flexibility(self) -> np.ndarray:
+        """[m/N] - shape (elements_count,) - Current flexibility (L/EA).
+        Returns a large value (1e6) when EA = 0 (e.g., for slack cables)."""
+        
+        infinite_flexibility = 1e6 # Default large value (in m/N) for zero EA
+        if self._count == 0:
+            return np.array([], dtype=float)
+            
+        ea = self.young * self.area  # [MPa * mm²] = [N]
+        mask = ea > 0  # If EA is zero, flexibility L/EA is infinite
+        result = np.full(self._count, infinite_flexibility, dtype=float)  
+        result[mask] = self.current_free_length[mask] / ea[mask]
+        return result
+
+    # Note : tension is considered as an input to construct an element,
+    # It is not computed from EA(elastic_elongation)/free_length because,
+    # in linear calculation, the compatibility between displacements and elongations is linearized. 
+    # Hence, the linear displacement method computes tension by post-processing the displacements.
+
+    #private Methods
+    def _get_current_property(self, tension_state: np.ndarray, property_in_compression_tension: np.ndarray, element_types: np.ndarray, zero_rtol: float = 1e-6) -> np.ndarray:
+        """Get element properties (areas or young moduli) based on tension state (compression/tension).
+        
+        Args:
+            tension_state: Array of shape (elements_count,) containing the tension state of the elements (positive for tension, negative for compression, zero for unknown)
+            property_in_compression_tension: Array of shape (elements_count, 2) containing property values for compression and tension
+            element_types: Array of shape (elements_count,) containing element types
+            zero_rtol: Relative tolerance for zero values (compared to max(|tension_state|))
+            
+        Returns:
+            Array of shape (elements_count,) containing current property values
+        """
+        if self._count == 0:
+            return np.array([], dtype=float)
+            
+        # Get property based on tension state
+        property_values = np.where(tension_state > 0,
+                                 property_in_compression_tension[:, 1],  # Tension
+                                 property_in_compression_tension[:, 0])  # Compression
+        
+        # For zero tension, use element type
+        zero_tension_mask = np.abs(tension_state) < zero_rtol * np.max(np.abs(tension_state))
+        if np.any(zero_tension_mask):
+            types = element_types[zero_tension_mask]
+            property_values[zero_tension_mask] = np.where(types > 0,
+                                                        property_in_compression_tension[zero_tension_mask, 1],  # Cables
+                                                        property_in_compression_tension[zero_tension_mask, 0])  # Struts
+        return property_values
+    
+   
     def _create_copy(self, nodes, type, end_nodes, areas, youngs, delta_free_length, tension):
         """Core copy method that creates a new instance of the appropriate class.
         
@@ -312,7 +331,8 @@ class FEM_Elements:
             delta_free_length=delta_free_length,
             tension=tension
         )
-        
+    
+    # Public Methods
     def copy(self, nodes: 'FEM_Nodes') -> 'FEM_Elements':
         """Create a copy with current state.
         

@@ -44,7 +44,6 @@ class FEM_Nodes:
         self._displacements = np.array([], dtype=float).reshape((0, 3))
         self._reactions = np.array([], dtype=float).reshape((0, 3))
         self._resisting_forces = np.array([], dtype=float).reshape((0, 3))
-        self._residual = np.array([], dtype=float).reshape((0, 3))
         
         # Initialize the instance
         self._initialize(initial_coordinates, dof, loads, displacements, reactions, resisting_forces)
@@ -124,7 +123,6 @@ class FEM_Nodes:
         self._displacements = self._check_and_reshape_array(displacements, "displacements")
         self._reactions = self._check_and_reshape_array(reactions, "reactions")
         self._resisting_forces = self._check_and_reshape_array(resisting_forces, "resisting_forces")
-        self._residual = np.zeros((self._count, 3), dtype=float)
     
     # READ Only properties
     @property
@@ -178,7 +176,7 @@ class FEM_Nodes:
     
     
     @property
-    def residual(self) -> np.ndarray:
+    def residuals(self) -> np.ndarray:
         """[N] - shape (nodes_count, 3) - Out of balance loads"""
         return self._loads + self._reactions - self._resisting_forces
         

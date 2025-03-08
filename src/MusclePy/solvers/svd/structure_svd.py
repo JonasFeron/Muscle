@@ -1,7 +1,7 @@
 from MusclePy.femodel.fem_nodes  import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.utils.matrix_calculations import equilibrium_matrix, material_stiffness_matrix
+from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix, compute_global_material_stiffness_matrix
 import numpy as np
 
 
@@ -17,8 +17,8 @@ class Structure_SVD(FEM_Structure):
         super().__init__(nodes, elements)
 
         # Initialize attributes using utility functions
-        self.A_3n = equilibrium_matrix(self.elements.connectivity, self.nodes.coordinates)
-        self.global_material_stiffness_matrix = material_stiffness_matrix(self.A_3n, self.elements.flexibility)
+        self.A_3n = compute_equilibrium_matrix(self.elements.connectivity, self.nodes.coordinates)
+        self.global_material_stiffness_matrix = compute_global_material_stiffness_matrix(self.A_3n, self.elements.flexibility)
 
 
     @property

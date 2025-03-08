@@ -93,7 +93,7 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         np.testing.assert_allclose(resisting_forces, expected_resisting_forces, rtol=1e-3)
 
         # Check residual: should be very small
-        residual = result.nodes.residual
+        residual = result.nodes.residuals
         np.testing.assert_allclose(residual, np.zeros_like(residual), atol=1e-10)
 
         self.assertEqual(result.is_in_equilibrium, True)

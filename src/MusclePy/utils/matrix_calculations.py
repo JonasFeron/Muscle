@@ -15,7 +15,7 @@ import numpy as np
 from ..femodel.fem_elements import FEM_Elements
 
 
-def equilibrium_matrix(connectivity_matrix, current_coordinates):
+def compute_equilibrium_matrix(connectivity_matrix, current_coordinates):
     """
     Compute the equilibrium matrix of the structure in its current state.
     
@@ -63,7 +63,7 @@ def equilibrium_matrix(connectivity_matrix, current_coordinates):
     return A
 
 
-def material_stiffness_matrix(A, flexibility):
+def compute_global_material_stiffness_matrix(A, flexibility):
     """
     Compute the material stiffness matrix of the structure in its current state.
     

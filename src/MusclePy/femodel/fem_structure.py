@@ -22,7 +22,6 @@ class FEM_Structure:
         
         self._nodes = nodes
         self._elements = elements
-        self._relative_precision = 1e-4
     
     @property
     def nodes(self) -> FEM_Nodes:
@@ -35,10 +34,10 @@ class FEM_Structure:
         return self._elements
 
     @property
-    def is_in_equilibrium(self) -> bool:
+    def is_in_equilibrium(self, zero_rtol: float = 1e-4) -> bool:
         """Check if the structure is in equilibrium."""
-        zero_residual_threshold = self._relative_precision * np.linalg.norm(self.nodes.loads.flatten()) # [N] 
-        return bool(np.linalg.norm(self.nodes.residual.flatten()) <= zero_residual_threshold)
+        zero_residual_threshold = zero_rtol * np.linalg.norm(self.nodes.loads.flatten()) # [N] 
+        return bool(np.linalg.norm(self.nodes.residuals.flatten()) <= zero_residual_threshold)
     
     def _create_copy(self, nodes, elements):
         """Core copy method that creates a new instance of the appropriate class.

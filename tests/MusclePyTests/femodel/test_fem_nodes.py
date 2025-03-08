@@ -82,7 +82,7 @@ class TestFEMNodes(unittest.TestCase):
             resisting_forces=resisting_forces
         )
         expected_residual = self.loads - resisting_forces
-        np.testing.assert_array_equal(nodes.residual, expected_residual)
+        np.testing.assert_array_equal(nodes.residuals, expected_residual)
 
     def test_copy_and_update(self):
         """Test copy_and_update method."""
