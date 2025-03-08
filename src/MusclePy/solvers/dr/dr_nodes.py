@@ -43,7 +43,7 @@ class DR_Nodes(FEM_Nodes):
             super().__init__(initial_coordinates, dof, loads, displacements, reactions, resisting_forces)
         
         # Initialize DR-specific attributes
-        self._velocities = self._check_and_reshape_array(velocities, "velocities")
+        self._velocities = super()._check_and_reshape_array(velocities, "velocities")
 
         self._computed_reactions = False
         self._computed_resisting_forces = False
@@ -59,23 +59,23 @@ class DR_Nodes(FEM_Nodes):
     #     """[N] - shape (nodes_count, 3) - Support reactions"""
     #     return self._reactions
 
-    # @property
-    # def resisting_forces(self) -> np.ndarray:
-    #     """[N] - shape (nodes_count, 3) - Resisting forces"""
-    #     return self._resisting_forces
+    @property
+    def resisting_forces(self) -> np.ndarray:
+        """[N] - shape (nodes_count, 3) - Resisting forces"""
+        return self._resisting_forces
     
     @resisting_forces.setter
     def resisting_forces(self, value):
         """Set resisting forces. Resisting forces are set by DR_Structure instance once the equilibrium matrix is computed."""
         self._computed_resisting_forces = True
-        self._resisting_forces = self._check_and_reshape_array(value, "resisting_forces")
+        self._resisting_forces = super()._check_and_reshape_array(value, "resisting_forces")
     
     def compute_reactions(self):
         """Compute support reactions and store them in the _reactions attribute."""
         assert self._computed_resisting_forces, "Impossible to compute reactions, without computing resisting forces first."
         reactions = np.zeros_like(self.resisting_forces)
         where_supports = ~self.dof.astype(bool)
-        reactions[where_supports] = self.loads[where_supports] - self.resisting_forces[where_supports]
+        reactions[where_supports] = self.resisting_forces[where_supports] - self.loads[where_supports] 
         self._reactions = reactions
         self._computed_reactions = True
 
@@ -143,9 +143,9 @@ class DR_Nodes(FEM_Nodes):
         if velocities is None: velocities = self._velocities.copy()
         
         # Reshape inputs if needed
-        loads = self._check_and_reshape_array(loads, "loads")
-        displacements = self._check_and_reshape_array(displacements, "displacements")
-        velocities = self._check_and_reshape_array(velocities, "velocities")
+        loads = super()._check_and_reshape_array(loads, "loads")
+        displacements = super()._check_and_reshape_array(displacements, "displacements")
+        velocities = super()._check_and_reshape_array(velocities, "velocities")
         
         # Create a new instance with the updated state
         return self._create_copy(

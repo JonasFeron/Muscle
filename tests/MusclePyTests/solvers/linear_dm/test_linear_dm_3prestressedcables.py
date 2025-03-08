@@ -140,9 +140,9 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
             np.zeros(3)  # no free length changes
         )
         
-        #  in step 1: Verify upward movement, compression in cable 3, and 0 stiffness
+        #  in step 1: Verify upward movement, shortening in cable 3, and 0 stiffness
         self.assertGreater(result.nodes.displacements[1,2], 0)
-        self.assertEqual(result.elements.tension[2], -0.1)
+        self.assertLess(result.elements.elastic_elongation[2], 0)
         self.assertEqual(result.elements.young[2], 0) #the young modulus in compression
 
         stiffness = 1/result.elements.flexibility[2]

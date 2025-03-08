@@ -33,11 +33,21 @@ class FEM_Structure:
         """Get the FEM_Elements instance."""
         return self._elements
 
-    @property
-    def is_in_equilibrium(self, zero_rtol: float = 1e-4) -> bool:
-        """Check if the structure is in equilibrium."""
-        zero_residual_threshold = zero_rtol * np.linalg.norm(self.nodes.loads.flatten()) # [N] 
-        return bool(np.linalg.norm(self.nodes.residuals.flatten()) <= zero_residual_threshold)
+    def is_in_equilibrium(self, rtol: float = 1e-4, atol: float = 1e-6) -> bool:
+        """Check if the structure is in equilibrium, i.e. all residuals are zero for each DOF.
+        
+        Args:
+            rtol: Relative tolerance for zero residual check, compared to external loads.
+            atol: Absolute tolerance for zero residual check, when load is near zero for a certain DOF.
+            
+        Returns:
+            True if the structure is in equilibrium, False otherwise
+        """
+        # Calculate (residuals == 0) threshold based on load 
+        zero_residuals_threshold = rtol * np.abs(self.nodes.loads) + atol # [N] shape (nodes_count, 3)
+        
+        return np.all(np.abs(self.nodes.residuals) <= zero_residuals_threshold)
+
     
     def _create_copy(self, nodes, elements):
         """Core copy method that creates a new instance of the appropriate class.

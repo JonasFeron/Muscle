@@ -5,8 +5,8 @@ import numpy as np
 
 class DynamicRelaxation:
     @staticmethod
-    def main(structure: FEM_Structure, loads_increment: np.ndarray, 
-                                           free_length_increment: np.ndarray, config: DRconfig) -> DR_Structure:
+    def main(structure: FEM_Structure, loads_increment: np.ndarray = None, 
+                                           free_length_increment: np.ndarray = None, config: DRconfig = None) -> DR_Structure:
         """
         Perform the Dynamic Relaxation Method on the Start State of the Structure.
         This method assumes that the StructureObject has already been initialized with InitialData method
@@ -16,7 +16,10 @@ class DynamicRelaxation:
         # [1] Bel Adj Ali et al, 2011, Analysis of clustered tensegrity structures using a modified dynamic relaxation algorithm
         # [2] Barnes, 1999, Form finding and analysis of tension structures by dynamic relaxation
 
-  
+        assert isinstance(structure, FEM_Structure), "Structure must be a FEM_Structure instance"
+        if config is None:
+            config = DRconfig() #use default solver configuration
+
 
         input_state = DR_Structure(structure)
         
@@ -30,7 +33,7 @@ class DynamicRelaxation:
 
         while (config.n_time_step < config.max_time_step 
                and config.n_ke_reset < config.max_ke_reset 
-               and current_state.is_in_equilibrium(config.zero_residual_rtol) == False):
+               and not current_state.is_in_equilibrium(rtol=config.zero_residual_rtol, atol=config.zero_residual_atol)):
             
             # Compute Next State (Masses, Velocities, Displacements, Kinetic Energy)
             next_state = DynamicRelaxation.compute_next_state(current_state, config)
@@ -67,7 +70,8 @@ class DynamicRelaxation:
         # if energy peak detected, reset velocities and adjust displacements
         displacements_correction = np.zeros_like(current.nodes.displacements)
         if next_kinetic_energy <= current.kinetic_energy: # energy peak detected
-            displacements_correction = - 1.5 * dt * next_velocities + 0.5 * dt**2 * current.nodes.residuals/ current.nodes.masses
+            current_masses = np.maximum(current_masses, config.min_mass) # avoid zero mass 
+            displacements_correction = - 1.5 * dt * next_velocities + 0.5 * dt**2 * current.nodes.residuals/ current_masses
             next_kinetic_energy = 0
             next_velocities = np.zeros_like(current.nodes.velocities)
             config.n_ke_reset += 1
@@ -137,5 +141,3 @@ class DynamicRelaxation:
         KE_vector = masses * velocities **2
         KE = 0.5 * np.sum(KE_vector[where_no_support]) # Sum the Kinetic Energy only where there is no support
         return KE
-
-

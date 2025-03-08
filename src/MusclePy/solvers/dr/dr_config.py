@@ -7,7 +7,7 @@ class DRconfig:
     termination criteria.
     """
     
-    def __init__(self, dt=0.01, mass_ampl_factor=1, min_mass=0.005, max_time_step=10000, max_ke_reset=1000, zero_residual_rtol=1e-6):
+    def __init__(self, dt=0.01, mass_ampl_factor=1, min_mass=0.005, max_time_step=10000, max_ke_reset=1000, zero_residual_rtol=1e-4, zero_residual_atol=1e-6):
         """
         Initialize the Dynamic Relaxation configuration.
         
@@ -17,8 +17,8 @@ class DRconfig:
             min_mass: [kg] - Minimum mass applied to each DOF if null stiffness is detected
             max_time_step: Maximum number of time steps before termination
             max_ke_reset: Maximum number of kinetic energy resets before termination
-            zero_residual_rtol: Threshold below which the residual magnitude is considered zero, meaning the structure is in equilibrium.
-                                The tolerance is relative to the loads magnitude.
+            zero_residual_rtol: Relative tolerance for zero residual check, compared to external loads magnitude
+            zero_residual_atol: Absolute tolerance (in N) for zero residual check, when loads are near zero
         """
         # Mass parameters
         self.mass_ampl_factor = mass_ampl_factor if mass_ampl_factor > 0 else 1  # Amplification factor for masses
@@ -31,7 +31,8 @@ class DRconfig:
         # Termination criteria
         self.max_time_step = max_time_step if max_time_step > 0 else 10000  # Maximum number of time steps
         self.max_ke_reset = max_ke_reset if max_ke_reset > 0 else 1000  # Maximum number of kinetic energy resets
-        self.zero_residual_rtol = zero_residual_rtol if zero_residual_rtol > 0 else 1e-6  #  Tolerance for zero checks
+        self.zero_residual_rtol = zero_residual_rtol if zero_residual_rtol > 0 else 1e-4  # Relative tolerance for zero checks
+        self.zero_residual_atol = zero_residual_atol if zero_residual_atol > 0 else 1e-6  # Absolute tolerance (in N) for zero checks
 
         # Initialize counters, to be returned to the user for information regarding the solver performances.
         self.n_time_step = 0  # Number of time steps performed

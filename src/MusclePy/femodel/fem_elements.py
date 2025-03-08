@@ -283,14 +283,13 @@ class FEM_Elements:
     # Hence, the linear displacement method computes tension by post-processing the displacements.
 
     #private Methods
-    def _get_current_property(self, tension_state: np.ndarray, property_in_compression_tension: np.ndarray, element_types: np.ndarray, zero_rtol: float = 1e-6) -> np.ndarray:
+    def _get_current_property(self, elongation: np.ndarray, property_in_compression_tension: np.ndarray, element_types: np.ndarray) -> np.ndarray:
         """Get element properties (areas or young moduli) based on tension state (compression/tension).
         
         Args:
-            tension_state: Array of shape (elements_count,) containing the tension state of the elements (positive for tension, negative for compression, zero for unknown)
+            elongation: [m] Array of shape (elements_count,) containing the elastic elongation of the elements (positive for tension, negative for compression, zero for unknown)
             property_in_compression_tension: Array of shape (elements_count, 2) containing property values for compression and tension
             element_types: Array of shape (elements_count,) containing element types
-            zero_rtol: Relative tolerance for zero values (compared to max(|tension_state|))
             
         Returns:
             Array of shape (elements_count,) containing current property values
@@ -299,12 +298,12 @@ class FEM_Elements:
             return np.array([], dtype=float)
             
         # Get property based on tension state
-        property_values = np.where(tension_state > 0,
+        property_values = np.where(elongation > 0,
                                  property_in_compression_tension[:, 1],  # Tension
                                  property_in_compression_tension[:, 0])  # Compression
         
         # For zero tension, use element type
-        zero_tension_mask = np.abs(tension_state) < zero_rtol * np.max(np.abs(tension_state))
+        zero_tension_mask = np.isclose(elongation, 0)
         if np.any(zero_tension_mask):
             types = element_types[zero_tension_mask]
             property_values[zero_tension_mask] = np.where(types > 0,

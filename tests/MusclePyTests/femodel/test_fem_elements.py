@@ -64,25 +64,45 @@ class TestFEMElements(unittest.TestCase):
         ])
         np.testing.assert_array_equal(self.elements.connectivity, expected_connectivity)
         
-    def test_current_properties(self):
+    def test_current_properties_tension(self):
         """Test computation of current properties based on tension state."""
-        # Test with compression (negative tension)
-        compressed_elements = self.elements.copy_and_update(
-            nodes=self.nodes,
-            delta_free_length=self.elements.delta_free_length,
-            tension=np.array([-1000.0, -1000.0])
+
+        # if node 1 moves upwards, elements elongate and are in tension
+        displacement = np.array([
+            [0.0, 0.0, 0.0],  # Node 0: origin
+            [0.0, 0.0, 0.1],  # Node 1: top
+            [0.0, 0.0, 0.0]  # Node 2: right
+        ])
+        moved_nodes = self.nodes.copy_and_add(
+            displacements_increment = displacement
         )
-        np.testing.assert_array_equal(compressed_elements.area, [2500.0, 2500.0])
-        np.testing.assert_array_equal(compressed_elements.young, [10000.0, 10000.0])
         
         # Test with tension (positive tension)
         tensed_elements = self.elements.copy_and_update(
-            nodes=self.nodes,
-            delta_free_length=self.elements.delta_free_length,
-            tension=np.array([1000.0, 1000.0])
+            nodes=moved_nodes
         )
         np.testing.assert_array_equal(tensed_elements.area, [1000.0, 1000.0])
         np.testing.assert_array_equal(tensed_elements.young, [10000.0, 10000.0])
+
+    def test_current_properties_compression(self):
+        """Test computation of current properties based on tension state."""
+
+        # if node 1 moves downwards, elements shorten and are in compression
+        displacement = np.array([
+            [0.0, 0.0, 0.0],  # Node 0: origin
+            [0.0, 0.0, -0.1],  # Node 1: top
+            [0.0, 0.0, 0.0]  # Node 2: right
+        ])
+        moved_nodes = self.nodes.copy_and_add(
+            displacements_increment=displacement
+        )
+
+        # Test with tension (positive tension)
+        compressed_elements = self.elements.copy_and_update(
+            nodes=moved_nodes
+        )
+        np.testing.assert_array_equal(compressed_elements.area, [2500.0, 2500.0])
+        np.testing.assert_array_equal(compressed_elements.young, [10000.0, 10000.0])
         
     def test_flexibility(self):
         """Test computation of flexibility (L/EA)."""

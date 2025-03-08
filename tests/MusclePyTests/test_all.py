@@ -22,6 +22,11 @@ from MusclePyTests.solvers.svd.test_svd_2cables import TestSVD2Cables
 from MusclePyTests.solvers.svd.test_svd_3cables import TestSVD3Cables
 from MusclePyTests.solvers.svd.test_svd_simplex import TestSVDSimplex
 from MusclePyTests.solvers.svd.test_self_stress import TestSelfStressModes
+# Import Dynamic Relaxation test modules
+from MusclePyTests.solvers.dr.test_dr_2cables import TestDR_2Cables
+from MusclePyTests.solvers.dr.test_dr_3simplecables import TestDR_3SimpleCables
+from MusclePyTests.solvers.dr.test_dr_3complexcables import TestDR_3ComplexCables
+from MusclePyTests.solvers.dr.test_dr_simplex import TestDR_Simplex
 
 
 def create_test_suite():
@@ -41,7 +46,11 @@ def create_test_suite():
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSVD3Cables))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSVDSimplex))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSelfStressModes))
-
+    # Add Dynamic Relaxation test classes
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_2Cables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_3SimpleCables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_3ComplexCables))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_Simplex))
     
     return suite
 

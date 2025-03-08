@@ -36,17 +36,8 @@ class DR_Structure(FEM_Structure):
             # Assert that elements is None when a FEM_Structure instance is passed
             assert elements is None, "When passing a FEM_Structure instance, elements must be None"
             
-            # Convert nodes to DR_Nodes if not already
-            if not isinstance(structure.nodes, DR_Nodes):
-                dr_nodes = DR_Nodes(structure.nodes)
-            else:
-                dr_nodes = structure.nodes
-                
-            # Convert elements to DR_Elements if not already
-            if not isinstance(structure.elements, DR_Elements):
-                dr_elements = DR_Elements(structure.elements)
-            else:
-                dr_elements = structure.elements
+            # Convert nodes and elements to DR types
+            dr_nodes, dr_elements = self._convert_to_dr_types(structure.nodes, structure.elements)
                 
             # Call parent class constructor with the converted nodes and elements
             super().__init__(dr_nodes, dr_elements)
@@ -56,26 +47,53 @@ class DR_Structure(FEM_Structure):
             # Assert that elements is not None when a FEM_Nodes instance is passed
             assert elements is not None, "When passing a FEM_Nodes instance, elements must not be None"
             
-            # Convert nodes to DR_Nodes if not already
-            if not isinstance(structure_or_nodes, DR_Nodes):
-                nodes = DR_Nodes(structure_or_nodes)
-            else:
-                nodes = structure_or_nodes
-                
-            # Convert elements to DR_Elements if not already
-            if not isinstance(elements, DR_Elements):
-                dr_elements = DR_Elements(elements)
-            else:
-                dr_elements = elements
+            # Convert nodes and elements to DR types
+            dr_nodes, dr_elements = self._convert_to_dr_types(structure_or_nodes, elements)
                 
             # Call parent class constructor with the converted nodes and elements
-            super().__init__(nodes, dr_elements)
+            super().__init__(dr_nodes, dr_elements)
         
         # Initialize DR-specific attributes
         self._kinetic_energy = kinetic_energy
         self._equilibrium_matrix = None
         self._global_material_stiffness_matrix = None
         self._global_geometric_stiffness_matrix = None
+    
+    def _convert_to_dr_types(self, nodes, elements):
+        """Convert nodes and elements to DR_Nodes and DR_Elements types.
+        
+        This method ensures that:
+        1. Nodes are converted to DR_Nodes if not already
+        2. Elements are converted to DR_Elements if not already
+        3. Elements reference the correct nodes instance
+        
+        Args:
+            nodes: A FEM_Nodes or DR_Nodes instance
+            elements: A FEM_Elements or DR_Elements instance
+            
+        Returns:
+            Tuple of (DR_Nodes, DR_Elements) instances
+        """
+        # Convert nodes to DR_Nodes if not already
+        if not isinstance(nodes, DR_Nodes):
+            dr_nodes = DR_Nodes(nodes)
+        else:
+            dr_nodes = nodes
+            
+        # Convert elements to DR_Elements if not already, ensuring it references the new DR_Nodes
+        if not isinstance(elements, DR_Elements):
+            dr_elements = DR_Elements(elements)
+            # Create a new DR_Elements instance that references the new DR_Nodes
+            dr_elements = dr_elements.copy_and_update(nodes=dr_nodes)
+        else:
+            # If elements are already DR_Elements but nodes were converted,
+            # make sure elements reference the new nodes
+            if elements.nodes is not dr_nodes:
+                dr_elements = elements.copy_and_update(nodes=dr_nodes)
+            else:
+                dr_elements = elements
+                
+        return dr_nodes, dr_elements
     
     @property
     def kinetic_energy(self) -> float:
@@ -237,9 +255,9 @@ class DR_Structure(FEM_Structure):
             A new instance with the incremented state
         """
         # Create zero arrays for None increments
-        loads_increment = self._check_and_reshape_array(loads_increment,"loads_increment")  
+        loads_increment = self.nodes._check_and_reshape_array(loads_increment,"loads_increment")  
         
-        free_length_increment = self._check_and_reshape_array(free_length_increment,"free_length_increment")  
+        free_length_increment = self.elements._check_and_reshape_array(free_length_increment,"free_length_increment")  
         
         # Create new nodes with updated loads
         nodes_copy = self.nodes.copy_and_update(
