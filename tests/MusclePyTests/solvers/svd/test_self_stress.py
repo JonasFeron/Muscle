@@ -2,10 +2,9 @@ import unittest
 import numpy as np
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.solvers.svd.structure_svd import Structure_SVD
-from MusclePy.solvers.svd.svd import SingularValueDecomposition
-from MusclePy.solvers.svd.self_stress_modes import SelfStressModes
-
+from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.solvers.svd.main import main_singular_value_decomposition
+from MusclePy.solvers.svd.self_stress_modes import localize_self_stress_modes
 
 class TestSelfStressModes(unittest.TestCase):
     """Test cases for the SelfStressModes class with a 2X Snelson structure.
@@ -68,11 +67,10 @@ class TestSelfStressModes(unittest.TestCase):
         # Create elements with types
         elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, areas=elementsA)
         
-        # Create Structure_SVD
-        self.structure = Structure_SVD(nodes, elements)
+        self.structure = FEM_Structure(nodes, elements)
         
         # Run SVD analysis
-        self.svd_results = SingularValueDecomposition.core(self.structure)
+        self.svd_results = main_singular_value_decomposition(self.structure)
 
     def test_localize_self_stress_modes(self):
         """Test the localization of self-stress modes."""
@@ -81,7 +79,7 @@ class TestSelfStressModes(unittest.TestCase):
 
         
         # Apply localization
-        localized_modes = SelfStressModes.localize(self.structure,Vs_T)
+        localized_modes = localize_self_stress_modes(self.structure,Vs_T)
 
         expected_localized_modes = np.array([
             [0.60, 0.60, 0.60, 0.60, -0.67, -1.00, 0   , 0   , 0   ,  0   ,  0   ],

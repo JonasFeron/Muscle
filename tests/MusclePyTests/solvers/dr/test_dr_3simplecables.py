@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.dr.method import DynamicRelaxation
+from MusclePy.solvers.dr.main import main_dynamic_relaxation
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
@@ -85,7 +85,7 @@ class TestDR_3SimpleCables(unittest.TestCase):
         loads[3, 2] = 888.808  # [N] vertical load at Node 3
 
         # Solve with dynamic relaxation
-        result = DynamicRelaxation.main(
+        result = main_dynamic_relaxation(
             structure=tension_only_structure,
             loads_increment=loads,
             free_length_increment=delta_free_length,
@@ -124,7 +124,7 @@ class TestDR_3SimpleCables(unittest.TestCase):
 
         
         # Solve with dynamic relaxation
-        result = DynamicRelaxation.main(
+        result = main_dynamic_relaxation(
             structure=self.structure,
             loads_increment=loads,
             free_length_increment=delta_free_length,

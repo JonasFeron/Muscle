@@ -7,10 +7,10 @@ following the approach described in:
 [2] Barnes, 1999, Form finding and analysis of tension structures by dynamic relaxation
 """
 
-from .method import DynamicRelaxation
+from .main import main_dynamic_relaxation
 from .dr_config import DRconfig
 from .dr_structure import DR_Structure
 from .dr_nodes import DR_Nodes
 from .dr_elements import DR_Elements
 
-__all__ = ['DynamicRelaxation', 'DRconfig', 'DR_Structure', 'DR_Nodes', 'DR_Elements']
+__all__ = ['main_dynamic_relaxation', 'DRconfig', 'DR_Structure', 'DR_Nodes', 'DR_Elements']

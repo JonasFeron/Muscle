@@ -1,10 +1,11 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.dm.nonlinear.method import NonlinearDisplacementMethod
-from MusclePy.solvers.dm.linear.method import LinearDisplacementMethod
+from MusclePy.solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
+from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.prestress_increment import PrestressIncrement
 
 
 class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
@@ -55,10 +56,11 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         """
         # Stage 1: Apply prestress through free length changes
         delta_free_length_increment = np.array([-3.984e-3, -3.984e-3]) 
-        prestressed_structure = LinearDisplacementMethod.apply_loads_and_prestress_increments(
+        prestress_increment = PrestressIncrement(self.structure.elements, delta_free_length_increment)
+        prestressed_structure = main_linear_displacement_method(
             self.structure,
             np.zeros(9),  # No external loads
-            delta_free_length_increment
+            prestress_increment
         )
         # Check prestress forces
         expected_prestress = np.array([20000.0, 20000.0])  # N
@@ -70,7 +72,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         loads1 = np.zeros(9)
         loads1[5] = -5109.0  # Node 1, Z direction
         
-        stage1 = NonlinearDisplacementMethod.incremental_newton_raphson_procedure(
+        stage1 = main_nonlinear_displacement_method(
             prestressed_structure,
             loads1,
             n_steps=100
@@ -88,7 +90,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         loads2 = np.zeros(9)
         loads2[5] = -9988.0  # Node 1, Z direction
         
-        stage2 = NonlinearDisplacementMethod.incremental_newton_raphson_procedure(
+        stage2 = main_nonlinear_displacement_method(
             stage1,
             loads2 - loads1,  # Additional load increment
             n_steps=100

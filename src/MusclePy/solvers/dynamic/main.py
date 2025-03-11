@@ -1,4 +1,4 @@
-from MusclePy.solvers.dynamics.dynamic_results import DynamicResults
+from MusclePy.solvers.dynamic.dynamic_results import DynamicResults
 from MusclePy.femodel.fem_structure import FEM_Structure
 import numpy as np
         

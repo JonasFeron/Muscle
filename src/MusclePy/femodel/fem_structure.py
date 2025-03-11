@@ -75,14 +75,14 @@ class FEM_Structure:
         return self._create_copy(nodes_copy, elements_copy)
     
     def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None,
-                       delta_free_length: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Structure':
+                       free_length_variation: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Structure':
         """Create a copy of this structure and update its state, or use the current state if None is passed.
         
         Args:
             loads: [N] - shape (nodes_count, 3) or (3*nodes_count,) - External loads
             displacements: [m] - shape (nodes_count, 3) or (3*nodes_count,) - Nodal displacements
             reactions: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Support reactions
-            delta_free_length: [m] - shape (elements_count,) - Change in free length
+            free_length_variation: [m] - shape (elements_count,) - Change in free length
             tension: [N] - shape (elements_count,) - Axial forces
             resisting_forces: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Internal resisting forces
         """
@@ -90,12 +90,12 @@ class FEM_Structure:
         nodes_copy = self._nodes.copy_and_update(loads, displacements, reactions, resisting_forces)
         
         # Create new elements with updated state, referencing the new nodes
-        elements_copy = self._elements.copy_and_update(nodes_copy, delta_free_length, tension)
+        elements_copy = self._elements.copy_and_update(nodes_copy, free_length_variation, tension)
         
         return self._create_copy(nodes_copy, elements_copy)
         
     def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
-                     reactions_increment: np.ndarray = None, delta_free_length_increment: np.ndarray = None,
+                     reactions_increment: np.ndarray = None, free_length_variation: np.ndarray = None,
                      tension_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'FEM_Structure':
         """Create a copy of this structure and add increments to its state.
         
@@ -103,7 +103,7 @@ class FEM_Structure:
             loads_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Load increments
             displacements_increment: [m] - shape (nodes_count, 3) or (3*nodes_count,) - Displacement increments
             reactions_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Reaction increments
-            delta_free_length_increment: [m] - shape (elements_count,) - Increment in free length
+            free_length_variation: [m] - shape (elements_count,) - Increment in free length
             tension_increment: [N] - shape (elements_count,) - Increment in axial forces
             resisting_forces_increment: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Increment in resisting forces
         """
@@ -111,6 +111,6 @@ class FEM_Structure:
         nodes_copy = self._nodes.copy_and_add(loads_increment, displacements_increment, reactions_increment, resisting_forces_increment)
         
         # Create new elements with incremented state, referencing the new nodes
-        elements_copy = self._elements.copy_and_add(nodes_copy, delta_free_length_increment, tension_increment)
+        elements_copy = self._elements.copy_and_add(nodes_copy, free_length_variation, tension_increment)
         
         return self._create_copy(nodes_copy, elements_copy)

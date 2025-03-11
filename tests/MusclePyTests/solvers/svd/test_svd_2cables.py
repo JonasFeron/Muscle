@@ -2,8 +2,9 @@ import unittest
 import numpy as np
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.solvers.svd.structure_svd import Structure_SVD
-from MusclePy.solvers.svd.svd import SingularValueDecomposition
+from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.solvers.svd.main import main_singular_value_decomposition
+from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix
 
 
 class TestSVD2Cables(unittest.TestCase):
@@ -43,15 +44,18 @@ class TestSVD2Cables(unittest.TestCase):
         
         elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes)
         
-        # Create Structure_SVD
-        self.structure = Structure_SVD(nodes, elements)
+        # Create FEM_Structure
+        self.structure = FEM_Structure(nodes, elements)
         
         # Run SVD analysis
-        self.svd_results = SingularValueDecomposition.core(self.structure)
+        self.svd_results = main_singular_value_decomposition(self.structure)
 
     def test_equilibrium_matrix(self):
         """Test the equilibrium matrix computation."""
-        A = self.structure.A
+        # Get equilibrium matrix from the structure
+        A_3n = compute_equilibrium_matrix(self.structure.elements.connectivity, self.structure.nodes.coordinates)
+        dof = self.structure.nodes.dof.reshape((-1,))
+        A = A_3n[dof, :]
         
         # Expected result
         A_expected = np.array([

@@ -10,7 +10,7 @@ from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.utils.matrix_calculations import compute_local_lumped_mass_matrices
-from MusclePy.solvers.dynamics.method import main_dynamic_modal_analysis
+from MusclePy.solvers.dynamic.main import main_dynamic_modal_analysis
 
 def run_example():
     """

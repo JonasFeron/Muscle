@@ -1,9 +1,10 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.dm.linear.method import LinearDisplacementMethod
+from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.prestress_increment import PrestressIncrement
 
 class TestLinearDM_3PrestressedCables(unittest.TestCase):
     def setUp(self):
@@ -52,23 +53,25 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         # Create structure
         self.structure = FEM_Structure(self.nodes, self.elements)
 
-    def test_equivalent_prestress_loads(self):
-        """Test the equivalent_prestress_loads function with the cable structure."""
+    def test_prestress_increment(self):
+        """Test the PrestressIncrement class with the cable structure."""
         
         # Apply prestress through shortening first cable only
-        delta_free_length_increment = np.array([-0.007984, 0.0, 0.0])
+        free_length_variation = np.array([-0.007984, 0.0, 0.0])
+        prestress_increment = PrestressIncrement(self.elements, free_length_variation)
 
-        prestressed_elements = self.structure.elements.copy_and_add(self.structure.nodes, delta_free_length_increment,None)
 
         # Expected prestress force magnitude in cable 1: EA/L * dl
         # EA = 50.26 * 70e3 = 3518.2 kN
         # L = 2.0-0.007984 m (free length of cable 1)
         # -> Expected force ≈ 14100.945 N in cable 1 assuming all nodes are fixed
-        expected_free_length = np.array([2.0, 2.0, 1.0]) + delta_free_length_increment
-        np.testing.assert_allclose(prestressed_elements.current_free_length, expected_free_length, atol=1e-6)
+
+        expected_free_length = np.array([2.0, 2.0, 1.0]) + free_length_variation
+        np.testing.assert_allclose(prestress_increment.elements.current_free_length, expected_free_length, atol=1e-6)
 
 
-        prestress, loads = LinearDisplacementMethod._equivalent_prestress_loads(prestressed_elements, delta_free_length_increment)
+        prestress = prestress_increment.equivalent_tension
+        loads = prestress_increment.equivalent_loads
         
         # Test 1: Check prestress forces
         expected_prestress = np.array([14100.945, 0.0, 0.0])
@@ -96,6 +99,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         
         # Apply prestress through free length change in first cable only
         delta_free_length_increment = np.array([-0.007984, 0.0, 0.0])  # ~8mm shortening in first cable
+        prestress_increment = PrestressIncrement(self.structure.elements, delta_free_length_increment)
         
         # Expected prestress force magnitude in cables 1&2: EA/L * dl
         # EA = 50.26 * 70e3 = 3518.2 kN
@@ -103,10 +107,10 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         # -> Expected force ≈ 7036.37 N in both cables
 
         # Solve
-        result = LinearDisplacementMethod.apply_loads_and_prestress_increments(
+        result = main_linear_displacement_method(
             self.structure,
             loads_increment,
-            delta_free_length_increment
+            prestress_increment
         )
         
         # Check displacements
@@ -134,10 +138,12 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
 
         loads = np.zeros((4,3))
         loads[1,2] = 0.1  # 0.1N upward at node 1
-        result = LinearDisplacementMethod.apply_loads_and_prestress_increments(
+        prestress_increment = PrestressIncrement(self.structure.elements, np.zeros(3))
+        
+        result = main_linear_displacement_method(
             self.structure,
             loads,
-            np.zeros(3)  # no free length changes
+            prestress_increment
         )
         
         #  in step 1: Verify upward movement, shortening in cable 3, and 0 stiffness

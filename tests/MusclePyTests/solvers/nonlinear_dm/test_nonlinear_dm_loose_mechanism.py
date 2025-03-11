@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.dm.nonlinear.method import NonlinearDisplacementMethod
+from MusclePy.solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
@@ -55,7 +55,7 @@ class TestNonlinearDM_LooseMechanism(unittest.TestCase):
         loads[5] = -100000.0  # Node 1, Z direction
         
         # Solve with nonlinear solver
-        result = NonlinearDisplacementMethod.incremental_newton_raphson_procedure(
+        result = main_nonlinear_displacement_method(
             self.structure,
             loads,
             n_steps=100

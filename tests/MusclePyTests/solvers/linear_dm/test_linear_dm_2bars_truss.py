@@ -1,9 +1,10 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.dm.linear.method import LinearDisplacementMethod
+from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.prestress_increment import PrestressIncrement
 
 
 class TestLinearDM_2BarsTruss(unittest.TestCase):
@@ -56,12 +57,13 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         
         # No prestress
         delta_free_length = np.zeros((2,))  # 2 elements
+        prestress_increment = PrestressIncrement(self.structure.elements, delta_free_length)
         
         # Solve
-        result = LinearDisplacementMethod.apply_loads_and_prestress_increments(
+        result = main_linear_displacement_method(
             self.structure,
             loads,
-            delta_free_length
+            prestress_increment
         )
         
         # Check displacements

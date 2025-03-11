@@ -4,7 +4,7 @@ from .fem_nodes import FEM_Nodes
 
 class FEM_Elements:
     def __init__(self, nodes: FEM_Nodes, type=None, end_nodes=None, areas=None, youngs=None, 
-                 delta_free_length=None, tension=None):
+                 free_length_variation=None, tension=None):
         """Python equivalent of C# FEM_Elements class.
         
         Properties:
@@ -25,7 +25,7 @@ class FEM_Elements:
             - direction_cosines: [-] Unit vectors (x,y,z)
             
         3. Mutable State:
-            - delta_free_length: [m] Change in free length
+            - free_length_variation: [m] Change in free length
             - tension: [N] Axial force (positive in tension)
             
         Args:
@@ -34,7 +34,7 @@ class FEM_Elements:
             end_nodes: Node indices, shape (elements_count, 2)
             areas: Cross-sections, shape (elements_count, 2) : [A_if_compression, A_if_tension]
             youngs: Young's moduli, shape (elements_count, 2) : [E_if_compression, E_if_tension]
-            delta_free_length: variation of free Length due to prestressing or form-finding, shape (elements_count,)
+            free_length_variation: variation of free Length due to prestressing or form-finding, shape (elements_count,)
             tension: Axial forces, shape (elements_count,)
         """
         # Initialize immutable attributes (set once from C#)
@@ -51,11 +51,11 @@ class FEM_Elements:
         self._initial_free_length = np.array([], dtype=float)
         
         # Initialize mutable state attributes
-        self._delta_free_length = np.array([], dtype=float)
+        self._free_length_variation = np.array([], dtype=float)
         self._tension = np.array([], dtype=float)
         
         # Initialize the instance
-        self._initialize(type, end_nodes, areas, youngs, delta_free_length, tension)
+        self._initialize(type, end_nodes, areas, youngs, free_length_variation, tension)
 
 
 
@@ -94,7 +94,7 @@ class FEM_Elements:
             
         raise ValueError(f"{name} cannot be reshaped to {expected_shape}, got shape {result.shape}")
     
-    def _initialize(self, type, end_nodes, areas, youngs, delta_free_length, tension):
+    def _initialize(self, type, end_nodes, areas, youngs, free_length_variation, tension):
         """Initialize all attributes with proper validation."""
         # Handle end_nodes first to establish count
         if end_nodes is not None:
@@ -128,7 +128,7 @@ class FEM_Elements:
         self._compute_connectivity()
         
         # Initialize mutable state arrays
-        self._delta_free_length = self._check_and_reshape_array(delta_free_length, "delta_free_length")
+        self._free_length_variation = self._check_and_reshape_array(free_length_variation, "free_length_variation")
         self._tension = self._check_and_reshape_array(tension, "tension")
     
     def _compute_initial_free_length(self):
@@ -208,9 +208,9 @@ class FEM_Elements:
         return self._youngs
 
     @property
-    def delta_free_length(self) -> np.ndarray:
+    def free_length_variation(self) -> np.ndarray:
         """[m] - shape (elements_count,) - Change in free length due to prestress"""
-        return self._delta_free_length
+        return self._free_length_variation
         
     @property
     def tension(self) -> np.ndarray:
@@ -244,8 +244,8 @@ class FEM_Elements:
     
     @property
     def current_free_length(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Current free length (initial + delta)"""
-        return self._initial_free_length + self._delta_free_length
+        """[m] - shape (elements_count,) - Current free length (initial + variation)"""
+        return self._initial_free_length + self._free_length_variation
 
     @property
     def elastic_elongation(self) -> np.ndarray:
@@ -312,7 +312,7 @@ class FEM_Elements:
         return property_values
     
    
-    def _create_copy(self, nodes, type, end_nodes, areas, youngs, delta_free_length, tension):
+    def _create_copy(self, nodes, type, end_nodes, areas, youngs, free_length_variation, tension):
         """Core copy method that creates a new instance of the appropriate class.
         
         This protected method is used by all copy methods to create a new instance.
@@ -327,7 +327,7 @@ class FEM_Elements:
             end_nodes=end_nodes,
             areas=areas,
             youngs=youngs,
-            delta_free_length=delta_free_length,
+            free_length_variation=free_length_variation,
             tension=tension
         )
     
@@ -347,23 +347,23 @@ class FEM_Elements:
             end_nodes=self._end_nodes.copy(),
             areas=self._areas.copy(),
             youngs=self._youngs.copy(),
-            delta_free_length=self._delta_free_length.copy(),
+            free_length_variation=self._free_length_variation.copy(),
             tension=self._tension.copy()
         )
     
-    def copy_and_update(self, nodes: 'FEM_Nodes', delta_free_length: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
+    def copy_and_update(self, nodes: 'FEM_Nodes', free_length_variation: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
         """Create a copy with updated state values, or use existing state if None.
         
         Args:
             nodes: FEM_Nodes instance
-            delta_free_length: [m] - shape (elements_count,) - Change in free length
+            free_length_variation: [m] - shape (elements_count,) - Change in free length
             tension: [N] - shape (elements_count,) - Axial forces
         """
         # Reshape inputs if needed
-        if delta_free_length is None: delta_free_length = self._delta_free_length.copy()
+        if free_length_variation is None: free_length_variation = self._free_length_variation.copy()
         if tension is None: tension = self._tension.copy()
         
-        delta_free_length = self._check_and_reshape_array(delta_free_length, "delta_free_length")
+        free_length_variation = self._check_and_reshape_array(free_length_variation, "free_length_variation")
         tension = self._check_and_reshape_array(tension, "tension")
         
         return self._create_copy(
@@ -372,28 +372,28 @@ class FEM_Elements:
             end_nodes=self._end_nodes.copy(),
             areas=self._areas.copy(),
             youngs=self._youngs.copy(),
-            delta_free_length=delta_free_length,
+            free_length_variation=free_length_variation,
             tension=tension
         )
     
-    def copy_and_add(self, nodes: FEM_Nodes, delta_free_length_increment: np.ndarray = None, 
+    def copy_and_add(self, nodes: FEM_Nodes, free_length_variation: np.ndarray = None, 
                      tension_increment: np.ndarray = None) -> 'FEM_Elements':
         """Create a copy with incremented state values.
         
         Args:
             nodes: FEM_Nodes instance to reference in the copy
-            delta_free_length_increment: [m] - size: elements.count - Free length increment to add
+            free_length_variation: [m] - size: elements.count - Free length increment to add
             tension_increment: [N] - size: elements.count - Tension increment to add
             
         Returns:
             New FEM_Elements with incremented state
         """
         # Create zero arrays if arguments are None
-        delta_free_length_increment = self._check_and_reshape_array(delta_free_length_increment, "delta_free_length_increment")
+        free_length_variation = self._check_and_reshape_array(free_length_variation, "free_length_variation")
         tension_increment = self._check_and_reshape_array(tension_increment, "tension_increment")
             
         return self.copy_and_update(
             nodes=nodes,
-            delta_free_length=self._delta_free_length + delta_free_length_increment,
+            free_length_variation=self._free_length_variation + free_length_variation,
             tension=self._tension + tension_increment
         )

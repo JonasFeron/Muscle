@@ -214,7 +214,7 @@ class DR_Structure(FEM_Structure):
         return self._create_copy(nodes_copy, elements_copy)
     
     def copy_and_update(self, velocities=None, displacements=None, 
-                        loads=None, delta_free_length=None,
+                        loads=None, free_length_variation=None,
                         kinetic_energy=None) -> 'DR_Structure':
         """Create a copy of this instance and update its state.
         
@@ -222,7 +222,7 @@ class DR_Structure(FEM_Structure):
             velocity: [m/s] - shape (nodes_count, 3) - Nodal velocities
             displacement: [m] - shape (nodes_count, 3) - Nodal displacements
             loads: [N] - shape (nodes_count, 3) - External loads
-            delta_free_length: [m] - shape (elements_count,) - Change in free length
+            free_length_variation: [m] - shape (elements_count,) - Change in free length
             kinetic_energy: [J] - Total kinetic energy
             
         Returns:
@@ -238,7 +238,7 @@ class DR_Structure(FEM_Structure):
         # Create new elements with updated state, referencing the new nodes
         elements_copy = self.elements.copy_and_update(
             nodes=nodes_copy, 
-            delta_free_length=delta_free_length
+            free_length_variation=free_length_variation
         )
         
         # Create a new DR_Structure with the updated nodes and elements
@@ -264,10 +264,10 @@ class DR_Structure(FEM_Structure):
             loads=self.nodes.loads + loads_increment
         )
         
-        # Create new elements with updated delta_free_length
+        # Create new elements with updated free_length_variation
         elements_copy = self.elements.copy_and_update(
             nodes=nodes_copy,
-            delta_free_length=self.elements.delta_free_length + free_length_increment
+            free_length_variation=self.elements.free_length_variation + free_length_increment
         )
         
         # Create a new DR_Structure with the updated nodes and elements

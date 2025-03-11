@@ -14,7 +14,7 @@ class DR_Elements(FEM_Elements):
     """
     
     def __init__(self, elements_or_nodes, type=None, end_nodes=None, areas=None, youngs=None, 
-                 delta_free_length=None, tension=None):
+                 free_length_variation=None, tension=None):
         """Initialize a DR_Elements instance.
         
         This constructor accepts either:
@@ -27,7 +27,7 @@ class DR_Elements(FEM_Elements):
             end_nodes: [-] - shape (elements_count, 2) - Indices of end nodes
             areas: [mm²] - shape (elements_count, 2) - Areas for compression and tension
             youngs: [MPa] - shape (elements_count, 2) - Young's moduli for compression and tension
-            delta_free_length: [m] - shape (elements_count,) - Change in free length due to prestress
+            free_length_variation: [m] - shape (elements_count,) - Change in free length due to prestress
             tension: [N] - shape (elements_count,) - Current tension in elements
         """
         # Check if the first argument is a FEM_Elements instance
@@ -35,7 +35,7 @@ class DR_Elements(FEM_Elements):
             elements = elements_or_nodes
             
             # Assert that all other arguments are None when a FEM_Elements instance is passed
-            assert all(arg is None for arg in [type, end_nodes, areas, youngs, delta_free_length, tension]), \
+            assert all(arg is None for arg in [type, end_nodes, areas, youngs, free_length_variation, tension]), \
                 "When passing a FEM_Elements instance, all other arguments must be None"
 
             # Call parent class constructor with the properties from the FEM_Elements instance
@@ -45,7 +45,7 @@ class DR_Elements(FEM_Elements):
                 elements.end_nodes,
                 elements.areas,
                 elements.youngs,
-                elements.delta_free_length,
+                elements.free_length_variation,
                 elements.tension
             )
         else:
@@ -53,7 +53,7 @@ class DR_Elements(FEM_Elements):
             assert isinstance(elements_or_nodes, (FEM_Nodes, DR_Nodes)), "First argument must be either a FEM_Elements, FEM_Nodes, or DR_Nodes instance"
             nodes = elements_or_nodes
             # Call parent class constructor with the provided parameters
-            super().__init__(nodes, type, end_nodes, areas, youngs, delta_free_length, tension)
+            super().__init__(nodes, type, end_nodes, areas, youngs, free_length_variation, tension)
         
         # Initialize DR-specific attributes
         self._local_geometric_stiffness_matrices = []  # [N/m] - List(elements.count) of shape (6,6) matrices
@@ -98,7 +98,7 @@ class DR_Elements(FEM_Elements):
             self.current_length
         )
     
-    def _create_copy(self, nodes, type, end_nodes, areas, youngs, delta_free_length, tension):
+    def _create_copy(self, nodes, type, end_nodes, areas, youngs, free_length_variation, tension):
         """Core copy method that creates a new instance of the appropriate class.
         
         This protected method is used by all copy methods to create a new instance.
@@ -113,23 +113,23 @@ class DR_Elements(FEM_Elements):
             end_nodes,
             areas,
             youngs,
-            delta_free_length,
+            free_length_variation,
             tension
         )
     
-    def copy_and_update(self, nodes=None, delta_free_length=None) -> 'DR_Elements':
+    def copy_and_update(self, nodes=None, free_length_variation=None) -> 'DR_Elements':
         """Create a copy of this instance and update its state.
         
         Args:
             nodes: A FEM_Nodes or DR_Nodes instance
-            delta_free_length: [m] - shape (elements_count,) - Change in free length due to prestress
+            free_length_variation: [m] - shape (elements_count,) - Change in free length due to prestress
             
         Returns:
             A new instance with the updated state
         """
         # Use current values if not provided
         new_nodes = self.nodes if nodes is None else nodes
-        new_delta_free_length = self.delta_free_length if delta_free_length is None else delta_free_length
+        free_length_variation = self.free_length_variation if free_length_variation is None else free_length_variation
         
         # Create a new instance with the updated state
         return self._create_copy(
@@ -138,6 +138,6 @@ class DR_Elements(FEM_Elements):
             self.end_nodes.copy(),
             self.areas.copy(),
             self.youngs.copy(),
-            new_delta_free_length,
+            free_length_variation,
             self.tension.copy()
         )

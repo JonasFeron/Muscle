@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from MusclePy.solvers.dr.method import DynamicRelaxation
+from MusclePy.solvers.dr.main import main_dynamic_relaxation
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
@@ -104,7 +104,7 @@ class TestDR_Simplex(unittest.TestCase):
         delta_free_length[8] = -35e-3  # Shortening of cable 5 (index 8)
         
         # Solve with dynamic relaxation
-        result = DynamicRelaxation.main(
+        result = main_dynamic_relaxation(
             structure=self.structure,
             loads_increment=loads,
             free_length_increment=delta_free_length,
