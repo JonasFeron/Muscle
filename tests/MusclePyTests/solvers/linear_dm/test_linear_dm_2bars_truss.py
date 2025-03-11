@@ -40,7 +40,7 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
             areas=np.array([[2500.0, 2500.0], [2500.0, 2500.0]]),  # 2500 mm² area
             youngs=np.array([[10000.0, 10000.0], [10000.0, 10000.0]]),  # 10000 MPa Young's modulus
-            delta_free_length=np.array([0.0, 0.0]),  # No initial prestress
+            free_length_variation=np.array([0.0, 0.0]),  # No initial prestress
             tension=np.array([0.0, 0.0])  # No initial tension
         )
         
@@ -56,8 +56,7 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         loads[5] = -100000.0  # Node 1, Z direction
         
         # No prestress
-        delta_free_length = np.zeros((2,))  # 2 elements
-        prestress_increment = PrestressIncrement(self.structure.elements, delta_free_length)
+        prestress_increment = PrestressIncrement(self.structure.elements) #empty prestress increment
         
         # Solve
         result = main_linear_displacement_method(

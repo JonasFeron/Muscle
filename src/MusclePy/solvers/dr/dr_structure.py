@@ -244,20 +244,19 @@ class DR_Structure(FEM_Structure):
         # Create a new DR_Structure with the updated nodes and elements
         return self._create_copy(nodes_copy, elements_copy, kinetic_energy)
     
-    def copy_and_add(self, loads_increment=None, free_length_increment=None) -> 'DR_Structure':
-        """Create a copy of this instance and add increments to its state.
+    def copy_and_add(self, loads_increment=None, free_length_variation=None) -> 'DR_Structure':
+        """
+        Create a copy of the current state and add loads and/or free length increments.
         
         Args:
-            loads_increment: [N] - shape (nodes_count, 3) - Loads increment to add
-            free_length_increment: [m] - shape (elements_count,) - Free length increment to add
+            loads_increment: [N] - shape (dof,) - Loads increment to add
+            free_length_variation: [m] - shape (elements_count,) - Free length increment to add
             
         Returns:
-            A new instance with the incremented state
+            DR_Structure: New state with added loads and/or free length increments
         """
-        # Create zero arrays for None increments
-        loads_increment = self.nodes._check_and_reshape_array(loads_increment,"loads_increment")  
-        
-        free_length_increment = self.elements._check_and_reshape_array(free_length_increment,"free_length_increment")  
+        loads_increment = self.nodes._check_and_reshape_array(loads_increment, "loads_increment")
+        free_length_variation = self.elements._check_and_reshape_array(free_length_variation,"free_length_variation")  
         
         # Create new nodes with updated loads
         nodes_copy = self.nodes.copy_and_update(
@@ -267,7 +266,7 @@ class DR_Structure(FEM_Structure):
         # Create new elements with updated free_length_variation
         elements_copy = self.elements.copy_and_update(
             nodes=nodes_copy,
-            free_length_variation=self.elements.free_length_variation + free_length_increment
+            free_length_variation=self.elements.free_length_variation + free_length_variation
         )
         
         # Create a new DR_Structure with the updated nodes and elements

@@ -86,7 +86,7 @@ class TestDR_2Cables(unittest.TestCase):
         result = main_dynamic_relaxation(
             structure=disturbed_structure,
             loads_increment=loads,
-            free_length_increment=delta_free_length,
+            free_length_variation=delta_free_length,
             config=self.config
         )
 
@@ -118,7 +118,7 @@ class TestDR_2Cables(unittest.TestCase):
         result = main_dynamic_relaxation(
             structure=self.structure,
             loads_increment=loads,
-            free_length_increment=delta_free_length,
+            free_length_variation=delta_free_length,
             config=self.config
         )
 

@@ -37,8 +37,6 @@ class TestFEMElements(unittest.TestCase):
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
             areas=np.array([[2500.0, 1000.0], [2500.0, 1000.0]]),  # different areas in compression/tension
             youngs=np.array([[10000.0, 10000.0], [10000.0, 10000.0]]),  # Same Young's modulus
-            delta_free_length=np.array([0.0, 0.0]),  # No initial prestress
-            tension=np.array([0.0, 0.0])  # No initial tension
         )
 
     def test_initialization(self):
@@ -132,12 +130,12 @@ class TestFEMElements(unittest.TestCase):
         
     def test_copy_and_update(self):
         """Test copy_and_update method."""
-        new_delta_free_length = np.array([0.1, 0.1])
+        new_free_length_variation = np.array([0.1, 0.1])
         new_tension = np.array([1000.0, 1000.0])
         
         elements_copy = self.elements.copy_and_update(
             self.nodes,
-            new_delta_free_length,
+            new_free_length_variation,
             new_tension
         )
         
@@ -146,17 +144,17 @@ class TestFEMElements(unittest.TestCase):
         np.testing.assert_array_equal(elements_copy.end_nodes, self.elements.end_nodes)
         
         # Check mutable state is updated
-        np.testing.assert_array_equal(elements_copy.delta_free_length, new_delta_free_length)
+        np.testing.assert_array_equal(elements_copy.free_length_variation, new_free_length_variation)
         np.testing.assert_array_equal(elements_copy.tension, new_tension)
         
     def test_copy_and_add(self):
         """Test copy_and_add method."""
-        delta_free_length_inc = np.array([0.1, 0.1])
+        free_length_variation = np.array([0.1, 0.1])
         tension_inc = np.array([1000.0, 1000.0])
         
         elements_copy = self.elements.copy_and_add(
             self.nodes,
-            delta_free_length_inc,
+            free_length_variation,
             tension_inc
         )
         
@@ -166,8 +164,8 @@ class TestFEMElements(unittest.TestCase):
         
         # Check mutable state is incremented
         np.testing.assert_array_equal(
-            elements_copy.delta_free_length,
-            self.elements.delta_free_length + delta_free_length_inc
+            elements_copy.free_length_variation,
+            self.elements.free_length_variation + free_length_variation
         )
         np.testing.assert_array_equal(
             elements_copy.tension,
@@ -202,14 +200,14 @@ class TestFEMElements(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.elements.copy_and_update(
                 nodes=self.nodes,
-                delta_free_length=np.array([1.0]),  # Wrong size
+                free_length_variation=np.array([1.0]),  # Wrong size
                 tension=np.array([0.0, 0.0])
             )
             
         with self.assertRaises(ValueError):
             self.elements.copy_and_update(
                 nodes=self.nodes,
-                delta_free_length=np.array([0.0, 0.0]),
+                free_length_variation=np.array([0.0, 0.0]),
                 tension=np.array([1.0, 2.0, 3.0])  # Wrong size
             )
 

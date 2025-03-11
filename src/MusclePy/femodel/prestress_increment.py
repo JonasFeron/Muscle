@@ -33,7 +33,7 @@ class PrestressIncrement:
 
         # Modify the free length of the elements via mechanical devices
         self.free_length_variation = free_length_variation
-        self.elements = elements.copy_and_add(free_length_variation=free_length_variation) 
+        self.elements = elements.copy_and_add(nodes = elements.nodes, free_length_variation=free_length_variation) 
 
         # Initialize equivalent loads and tensions
         self.equivalent_loads = np.zeros((elements.nodes.count, 3))  # Shape (nodes_count, 3)

@@ -5,8 +5,7 @@ from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.solvers.svd.main import main_singular_value_decomposition
 from MusclePy.solvers.svd.self_stress_modes import normalize_self_stress_mode
-from MusclePy.solvers.dm.model.dm_elements import DM_Elements
-from MusclePy.solvers.dm.model.dm_structure import DM_Structure
+
 
 
 class TestSVDSimplex(unittest.TestCase):
@@ -163,7 +162,7 @@ class TestSVDSimplex(unittest.TestCase):
 
         # 2) Compute the global material stiffness based on the local stiffness matrix of each element
         local_material_stiffness = compute_local_material_stiffness_matrices(self.structure.elements.direction_cosines, self.structure.elements.flexibility)
-        global_material_stiffness2 = local_to_global_matrix(local_material_stiffness)
+        global_material_stiffness2 = local_to_global_matrix(local_material_stiffness, self.structure.elements.end_nodes, self.structure.nodes.count)
 
         self.assertTrue(np.allclose(global_material_stiffness1, global_material_stiffness2),
                         f"Expected global material stiffness:\n{global_material_stiffness2}\nGot:\n{global_material_stiffness1}")

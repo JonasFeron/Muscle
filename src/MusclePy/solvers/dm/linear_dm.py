@@ -27,6 +27,9 @@ def main_linear_displacement_method(structure: FEM_Structure, loads_increment: n
     assert isinstance(prestress_increment, PrestressIncrement), "prestress_increment must be an instance of PrestressIncrement"
     loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
  
+    # modify the free length of the elements through mechanical devices
+    initial = structure.copy_and_add(free_length_variation=prestress_increment.free_length_variation)
+
     # Get equivalent prestress loads and tension from free length variations
     eq_prestress = prestress_increment.equivalent_tension
     eq_prestress_loads = prestress_increment.equivalent_loads
@@ -37,13 +40,13 @@ def main_linear_displacement_method(structure: FEM_Structure, loads_increment: n
     try:
         # Solve linear system
         displacements, reactions, resisting_forces, tension = core_linear_displacement_method(
-            structure, 
+            initial, 
             total_loads_increment
         )
         
     except np.linalg.LinAlgError:
         # In case of singular matrix, perturb the structure with tiny displacements
-        perturbed = perturb(structure)
+        perturbed = perturb(initial)
         displacements, reactions, resisting_forces, tension = core_linear_displacement_method(
             perturbed, 
             total_loads_increment
