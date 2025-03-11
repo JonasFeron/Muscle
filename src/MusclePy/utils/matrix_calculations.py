@@ -161,19 +161,19 @@ def compute_local_geometric_stiffness_matrices(tension: np.ndarray, length: np.n
         return kg_loc_list
 
 
-def local_to_global_stiffness_matrix(local_matrices, elements_end_nodes, nodes_count):
+def local_to_global_matrix(local_matrices, elements_end_nodes, nodes_count):
     """
-    Convert list of local stiffness matrices to global stiffness matrix.
+    Convert list of local matrices to global matrix.
     
     Args:
-        local_matrices: List of local stiffness matrices, each of shape (6,6)
+        local_matrices: List of local matrices, each of shape (6,6)
         elements_end_nodes: Array of element end nodes, shape (elements_count, 2)
         nodes_count: Number of nodes in the structure
         
     Returns:
-        Global stiffness matrix of shape (3*nodes_count, 3*nodes_count)
+        Global  matrix of shape (3*nodes_count, 3*nodes_count)
     """
-    # Initialize global stiffness matrix
+    # Initialize global  matrix
     K = np.zeros((3*nodes_count, 3*nodes_count))
     
     # Get element count from local_matrices
@@ -193,7 +193,7 @@ def local_to_global_stiffness_matrix(local_matrices, elements_end_nodes, nodes_c
         # Global indices for the 6 DOFs of the element
         idx = np.array([3*n0, 3*n0+1, 3*n0+2, 3*n1, 3*n1+1, 3*n1+2], dtype=int)
         
-        # Add local stiffness contributions to global matrix
+        # Add local contributions to global matrix
         for j in range(6):
             for l in range(6):
                 K[idx[j], idx[l]] += k[j, l]
@@ -201,32 +201,62 @@ def local_to_global_stiffness_matrix(local_matrices, elements_end_nodes, nodes_c
     return K
 
 
-def compute_fictitious_masses(equilibrium_matrix, material_stiffness, geometric_stiffness, time_step):
-    """
-    Compute the fictitious masses for the dynamic relaxation algorithm.
-    
-    Based on equation (19) from Bel Adj Ali et al, 2011, Analysis of clustered 
-    tensegrity structures using a modified dynamic relaxation algorithm.
-    
-    Args:
-        equilibrium_matrix: (3*n, b) : equilibrium matrix of the structure
-        material_stiffness: (3*n, 3*n) : material stiffness matrix
-        geometric_stiffness: (3*n, 3*n) : geometric stiffness matrix
-        time_step: [s] - scalar - The time step
+def compute_local_lumped_mass_matrices(elements_mass: np.ndarray) -> list:
+        """Compute local lumped mass matrices for each element.
         
-    Returns:
-        M : [kg] - shape (3*NodesCount,) - The fictitious masses for the dynamic relaxation algorithm
-    """
-    # Total material stiffness associated to each DOF (diagonal of material stiffness matrix)
-    total_material_stiffness = np.diag(material_stiffness)
-    
-    # Total geometric stiffness associated to each DOF (diagonal of geometric stiffness matrix)
-    total_geometric_stiffness = np.diag(geometric_stiffness)
-    
-    # Total stiffness (equation 20 from reference)
-    total_stiffness = total_material_stiffness + total_geometric_stiffness
-    
-    # Fictitious masses (equation 19 from reference)
-    masses = 2 * time_step**2 * total_stiffness
-    
-    return masses
+        Args:
+            elements_mass: [Kg] - shape (elements_count,) - Mass of each element
+            
+        Returns:
+            List of local lumped mass matrices, each of shape (6,6)
+        """
+        # Get element count from mass array
+        elements_count = len(elements_mass)
+        
+        local_mass_matrices = []
+        
+        # Compute the lumped mass matrix for each element
+        for i in range(elements_count):
+            m1 = elements_mass[i] /2 # Mass of the element's half length, associated with the first node
+            m2 = elements_mass[i] /2 # Mass of the element's half length, associated with the second node
+
+            # Compute the lumped mass matrix
+            M = np.array([[m1, 0, 0, 0, 0, 0],  # node 1 X
+                          [0, m1, 0, 0, 0, 0],  # node 1 Y
+                          [0, 0, m1, 0, 0, 0],  # node 1 Z
+                          [0, 0, 0, m2, 0, 0],  # node 2 X
+                          [0, 0, 0, 0, m2, 0],  # node 2 Y
+                          [0, 0, 0, 0, 0, m2]]) # node 2 Z
+            local_mass_matrices.append(M)
+            
+        return local_mass_matrices
+
+def compute_local_consistent_mass_matrices(elements_mass: np.ndarray) -> list:
+        """Compute local consistent mass matrices for each element.
+        
+        Args:
+            elements_mass: [Kg] - shape (elements_count,) - Mass of each element
+            
+        Returns:
+            List of local consistent mass matrices, each of shape (6,6)
+        """
+        # Get element count from mass array
+        elements_count = len(elements_mass)
+        
+        local_mass_matrices = []
+        
+        # Compute the consistent mass matrix for each element
+        for i in range(elements_count):
+            m1 = elements_mass[i] /2 # Mass of the element's half length, associated with the first node
+            m2 = elements_mass[i] /2 # Mass of the element's half length, associated with the second node
+
+            # Compute the consistent mass matrix
+            M = (1/3) * np.array([[2*m1, 0, 0, m2, 0, 0],  # node 1 X
+                                  [0, 2*m1, 0, 0, m2, 0],  # node 1 Y
+                                  [0, 0, 2*m1, 0, 0, m2],  # node 1 Z
+                                  [m1, 0, 0, 2*m2, 0, 0],  # node 2 X
+                                  [0, m1, 0, 0, 2*m2, 0],  # node 2 Y
+                                  [0, 0, m1, 0, 0, 2*m2]]) # node 2 Z
+            local_mass_matrices.append(M)
+            
+        return local_mass_matrices

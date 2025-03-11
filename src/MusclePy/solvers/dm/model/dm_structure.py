@@ -59,15 +59,15 @@ class DM_Structure(FEM_Structure):
         1. Global material stiffness matrix
         2. Global geometric stiffness matrix
         """
-        from MusclePy.utils.matrix_calculations import local_to_global_stiffness_matrix
+        from MusclePy.utils.matrix_calculations import local_to_global_matrix
 
         # Convert local matrices to global matrices using utility function
-        self.global_material_stiffness_matrix = local_to_global_stiffness_matrix(
+        self.global_material_stiffness_matrix = local_to_global_matrix(
             self.elements.local_material_stiffness_matrices,
             self.elements.end_nodes,
             self.nodes.count
         )
-        self.global_geometric_stiffness_matrix = local_to_global_stiffness_matrix(
+        self.global_geometric_stiffness_matrix = local_to_global_matrix(
             self.elements.local_geometric_stiffness_matrices,
             self.elements.end_nodes,
             self.nodes.count

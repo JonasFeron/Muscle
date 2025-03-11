@@ -152,7 +152,7 @@ class DR_Structure(FEM_Structure):
         from MusclePy.utils.matrix_calculations import (
             compute_equilibrium_matrix,
             compute_global_material_stiffness_matrix,
-            local_to_global_stiffness_matrix
+            local_to_global_matrix
         )
         
         # Compute equilibrium matrix
@@ -168,7 +168,7 @@ class DR_Structure(FEM_Structure):
         )
 
         # Compute global geometric stiffness matrix
-        self.global_geometric_stiffness_matrix = local_to_global_stiffness_matrix(
+        self.global_geometric_stiffness_matrix = local_to_global_matrix(
             self.elements.local_geometric_stiffness_matrices,
             self.elements.end_nodes,
             self.nodes.count
