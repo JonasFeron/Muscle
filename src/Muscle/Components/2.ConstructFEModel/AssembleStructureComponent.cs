@@ -11,7 +11,7 @@ using Muscle.ViewModel;
 // folder in Grasshopper.
 // You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
-namespace Muscle.Components.CreateModel
+namespace Muscle.Components.ConstructFEModel
 {
     public class AssembleStructureComponent : GH_Component
     {

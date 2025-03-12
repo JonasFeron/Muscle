@@ -4,10 +4,12 @@ using Rhino.Input.Custom;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using static Muscle.Components.GHComponentsFolders;
+
 
 namespace Muscle.Components.Param
 {
-    public class ElementParam : GH_PersistentParam<GH_Element>
+    public class ElementParam : GH_PersistentParam<GH_CrossSection>
     {
         #region Properties
 
@@ -16,8 +18,8 @@ namespace Muscle.Components.Param
 
         #region Constructors
 
-        public ElementParam() : base("Element", "E", "Contains a collection of finite elements", "Muscles", "Params") { }
-        public override Guid ComponentGuid { get { return new Guid("0306bdf1-a106-48cf-a838-a472c2dd44f7"); } }
+        public ElementParam() : base("Cross Section", "CS", "Contains a collection of cross sections", GHAssemblyName, Folder1_Param) { }
+        public override Guid ComponentGuid { get { return new Guid("96b876dc-49b2-43c4-97d8-f200720e57a2"); } }
 
 
         #endregion Constructors
@@ -28,12 +30,12 @@ namespace Muscle.Components.Param
 
         protected override void Menu_AppendPromptOne(ToolStripDropDown menu) { }
 
-        protected override GH_GetterResult Prompt_Plural(ref List<GH_Element> values)
+        protected override GH_GetterResult Prompt_Plural(ref List<GH_CrossSection> values)
         {
             return GH_GetterResult.cancel; // to implement
         }
 
-        protected override GH_GetterResult Prompt_Singular(ref GH_Element value)
+        protected override GH_GetterResult Prompt_Singular(ref GH_CrossSection value)
         {
             return GH_GetterResult.cancel; // to implement
         }
@@ -41,4 +43,3 @@ namespace Muscle.Components.Param
         #endregion Methods
     }
 }
-

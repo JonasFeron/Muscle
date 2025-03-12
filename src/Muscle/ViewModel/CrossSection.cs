@@ -32,7 +32,7 @@ namespace Muscle.ViewModel
 
         #region Methods
 
-        ICrossSection Duplicate();
+        ICrossSection Copy();
 
         Curve InnerProfile(Point3d aPoint, Vector3d aNormal);
 
@@ -138,7 +138,7 @@ namespace Muscle.ViewModel
 
         #region Methods
 
-        public ICrossSection Duplicate()
+        public ICrossSection Copy()
         {
             return new CS_Circular(this);
         }
@@ -245,7 +245,7 @@ namespace Muscle.ViewModel
 
         #region Methods
 
-        public ICrossSection Duplicate()
+        public ICrossSection Copy()
         {
             return new CS_Square(this);
         }

@@ -3,7 +3,7 @@ using Grasshopper.Kernel;
 using Muscle.ViewModel;
 
 
-namespace Muscle.Components.ModelProperties
+namespace Muscle.Components.DeconstructFEModel
 {
     public class CS_PropertiesComponent : GH_Component
     {

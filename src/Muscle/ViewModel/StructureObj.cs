@@ -152,7 +152,7 @@ namespace Muscle.ViewModel
             ZeroTol = other.ZeroTol; //(m)
 
             StructuralElements = new List<Element>();
-            foreach (Element e in other.StructuralElements) StructuralElements.Add(e.Duplicate());
+            foreach (Element e in other.StructuralElements) StructuralElements.Add(e.Copy());
 
             StructuralNodes = new List<Node>();
             foreach (Node n in other.StructuralNodes) StructuralNodes.Add(n.Duplicate());
@@ -458,7 +458,7 @@ namespace Muscle.ViewModel
 
                 //1) axialforce results
                 elem.Tension = answ.Tension[e];
-                elem.LFree = answ.ElementsLFree[e];
+                elem.FreeLength = answ.ElementsLFree[e];
 
                 //update the lines end points
                 int n0 = elem.EndNodes[0];

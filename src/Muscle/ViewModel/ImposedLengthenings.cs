@@ -17,9 +17,9 @@ namespace Muscle.ViewModel
         {
             get
             {
-                double A = Element.CS_Main.Area; //[m2]
-                double E = Element.Mat_Main.E; //[N/m2]
-                double LFree = Element.LFree + Value; //[m]
+                double A = Element.CS.Area; //[m2]
+                double E = Element.Material.E; //[N/m2]
+                double LFree = Element.FreeLength + Value; //[m]
                 double P = E * A * Value / LFree; //[N] positive for lengthenings, negative for shortenings
                 return -P;
             }
@@ -79,8 +79,8 @@ namespace Muscle.ViewModel
         }
         public override string ToString()
         {
-            if (Value >= 0) return $"Lengthening of {Value * 1e3:F3}mm in Element {Element.TypeName}{Element.Ind} whose initial free length is {Element.LFree * 1e3:F3}mm.";
-            else return $"Shortening of {Value * 1e3:F3}mm in Element {Element.TypeName}{Element.Ind} whose initial free length is {Element.LFree * 1e3:F3}mm.";
+            if (Value >= 0) return $"Lengthening of {Value * 1e3:F3}mm in Element {Element.Name}{Element.Idx} whose initial free length is {Element.FreeLength * 1e3:F3}mm.";
+            else return $"Shortening of {Value * 1e3:F3}mm in Element {Element.Name}{Element.Idx} whose initial free length is {Element.FreeLength * 1e3:F3}mm.";
 
         }
 
@@ -95,9 +95,9 @@ namespace Muscle.ViewModel
         //}
         public double Tension2Lengthening(double tension)
         {
-            double A = Element.CS_Main.Area; //[m2]
-            double E = Element.Mat_Main.E; //[N/m2]
-            double LFreeInit = Element.LFree; //[m]
+            double A = Element.CS.Area; //[m2]
+            double E = Element.Material.E; //[N/m2]
+            double LFreeInit = Element.FreeLength; //[m]
             double LFreeFinal = LFreeInit / (1 + tension / (E * A)); //[m]
             double DL = LFreeFinal - LFreeInit;
             return DL;

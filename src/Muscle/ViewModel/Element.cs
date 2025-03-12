@@ -2,53 +2,46 @@
 using Grasshopper.Kernel.Types;
 using System.Collections.Generic;
 using System.Threading;
-using Muscle.Loads;
 using System;
 
 namespace Muscle.ViewModel
 {
     /// <summary>
-    /// An Element is the most general (bi-)linear elastic structural element. It allows modelling linear reinforced concrete element. In Tension, the rebars (A_tens, E_tens) are working. In compression, the concrete (A_comp, E_comp) is working. In compression, the element may or may not be sensitive to buckling. The mass is obtained by considering only the compressive cross-section and material. 
+    /// An Element is the most general (bi-)linear elastic structural element. 
     /// </summary>
     public class Element
     {
         #region Properties
-        public int Ind { get; set; } //index of the element in the structure
-        public virtual string TypeName { get { return "General Element"; } }
-        public virtual int Type { get { return -1; } } //-1 for struts, 1 for cables. General Elements are considered to mainly behave in compression.
-
+        public int Idx { get; set; } //index of the element in the structure
+        public string Name { get; set; }
+        public int Type { get; set; } //-1 if supposed in compression, 1 if supposed in tension. 0 if both.
         public Line Line { get; set; } // the line with a current length in the current state
         public List<int> EndNodes { get; set; } //index of the end nodes of the element
-        public double LFree { get; set; } // [m] - the Free length of the element
-        public virtual ICrossSection CS_Tens { get; set; } //participate to the stiffness in Tension
-        public virtual ICrossSection CS_Comp { get; set; } //participate to the stiffness in compression
-        public virtual Muscles_Material Mat_Tens { get; set; } //participate to the stiffness in Tension
-        public virtual Muscles_Material Mat_Comp { get; set; } //participate to the stiffness in compression
-
-        public virtual ICrossSection CS_Main { get; set; } //used for calculating volume and displaying the Element in GH. 
-        public virtual Muscles_Material Mat_Main { get; set; } //used for calculating mass
+        public double FreeLength { get; set; } // [m] - the Free length of the element
+        public virtual ICrossSection CS { get; set; } //used for calculating volume and displaying the Element in GH. 
+        public virtual BilinearMaterial Material { get; set; } //used for calculating mass and strength
 
         public double V //m3
         {
             get
             {
-                return LFree * CS_Main.Area;
+                return FreeLength * CS.Area;
             }
         }
         public double Mass//kg
         {
             get
             {
-                return V * Mat_Main.Rho;
+                return V * Material.Rho;
             }
         }
-        public Vector3d Weight { get { return AccessToAll.g * Mass; } } //N
+        // public Vector3d Weight { get { return AccessToAll.g * Mass; } } //N
 
         public bool IsValid
         {
             get
             {
-                if (CS_Main.IsValid && Mat_Main.IsValid && Line.IsValid && UC >= 0 && UC <= 1) return true;
+                if (CS.IsValid && Material.IsValid && Line.IsValid && UC >= 0 && UC <= 1) return true;
                 else return false;
             }
         }
@@ -57,17 +50,17 @@ namespace Muscle.ViewModel
 
 
 
-        ///// Resisting forces /////
+        ///// Strength /////
 
-        public string Buckling_Law { get; set; }
+        public string BucklingLaw { get; set; }
         public double kb { get; set; } //buckling factor
         public double Lambda
         {
             get
             {
-                double Lb = kb * LFree; //[m] - buckling length based on the free length of the element
-                double A = CS_Comp.Area;
-                double I = CS_Comp.Inertia;
+                double Lb = kb * FreeLength; //[m] - buckling length based on the free length of the element
+                double A = CS.Area;
+                double I = CS.Inertia;
                 return Lb * Math.Sqrt(A / I);
             }
         }
@@ -75,9 +68,9 @@ namespace Muscle.ViewModel
         {
             get
             {
-                double E = Mat_Comp.E;
-                double Fy = Mat_Comp.Fy;
-                return Math.PI * Math.Sqrt(E / Fy);
+                double Ec = Material.Ec;
+                double Fy = -Material.Fyc;
+                return Math.PI * Math.Sqrt(Ec / Fy);
             }
         }
 
@@ -93,7 +86,7 @@ namespace Muscle.ViewModel
         {
             get
             {
-                switch (Buckling_Law)
+                switch (BucklingLaw)
                 {
                     case "a":
                         {
@@ -139,7 +132,7 @@ namespace Muscle.ViewModel
         {
             get
             {
-                switch (Buckling_Law)
+                switch (BucklingLaw)
                 {
                     case "Euler":
                         {
@@ -167,32 +160,40 @@ namespace Muscle.ViewModel
                         {
                             return Xsi_EC3;
                         }
+                    case "Slack":
+                        {
+                            return 0.0;
+                        }
                 }
                 return 1.0; // return yielding in all other cases !
             }
         }
-        protected double Stress_buckling
+
+        /// <summary>
+        /// Buckling strength of the material in compression.
+        /// </summary>
+        protected double Fyb
         {
             get
             {
-                double Fy = Mat_Comp.Fy;
-                return Xsi * Fy;
+                double Fyc = Material.Fyc;
+                return Xsi * Fyc;
             }
         }
         public virtual Interval AllowableStress
         {
             get
             {
-                return new Interval(-Stress_buckling, Mat_Tens.Fy);
+                return new Interval(Fyb, Material.Fyt);
             }
         }
         public Interval AllowableTension
         {
             get
             {
-                double S_Tens = AllowableStress.T1;
-                double S_Comp = AllowableStress.T0;
-                return new Interval(S_Comp * CS_Comp.Area, S_Tens * CS_Tens.Area);
+                double Fyt = AllowableStress.T1;
+                double Fyb = AllowableStress.T0;
+                return new Interval(Fyb * CS.Area, Fyt * CS.Area);
             }
         }
         public virtual double UC
@@ -219,20 +220,17 @@ namespace Muscle.ViewModel
         #region Constructors
         private void Init()
         {
-            Ind = -1;
+            Idx = -1;
+            Name = "General Element";
+            Type = -1;
             Line = new Line();
-            LFree = -1.0;
+            FreeLength = -1.0;
             EndNodes = new List<int>();
-            CS_Tens = new CS_Circular();
-            CS_Comp = new CS_Circular();
-            Mat_Tens = new Muscles_Material();
-            Mat_Comp = new Muscles_Material();
-            CS_Main = CS_Comp;
-            Mat_Main = Mat_Comp;
-            Buckling_Law = "yielding";
+            CS = new CS_Circular();
+            Material = new BilinearMaterial();
+            BucklingLaw = "Yielding";
             kb = 1.0;
             Tension = 0;
-
         }
 
 
@@ -241,38 +239,34 @@ namespace Muscle.ViewModel
             Init();
         }
 
-        public Element(Line aLine, double lFree, ICrossSection aCS_Comp, ICrossSection aCS_Tens, Muscles_Material aMat_Comp, Muscles_Material aMat_Tens, string buckling_law, double buckling_factor)
+        public Element(Line aLine, ICrossSection aCS, BilinearMaterial aMat, string name, int type, string buckling_law, double buckling_factor)
         {
             Init();
             Line = aLine;
-            if (lFree < 0) LFree = aLine.Length; // if the inputted free length is smaller than 0, use the length of the inputted line. 
-            else LFree = lFree;
-            CS_Comp = aCS_Comp;
-            CS_Tens = aCS_Tens;
-            Mat_Comp = aMat_Comp;
-            Mat_Tens = aMat_Tens;
-            CS_Main = CS_Comp;
-            Mat_Main = Mat_Comp;
-            Buckling_Law = buckling_law;
+            FreeLength = aLine.Length; // Use the length of the inputted line as the free length
+            CS = aCS.Copy();
+            Material = aMat.Copy();
+            Name = name;
+            Type = type;
+            BucklingLaw = buckling_law;
             kb = buckling_factor;
             if (kb <= 0) kb = 0;
-
+            if (BucklingLaw == "Slack") Material.Ec = 0; // cancel compression stiffness. Buckling strength will also be set to 0.
         }
+
 
         public Element(Element other) // Copy constructor. This allows to create a new Element and modify it, without alterating the original
         {
+            Name = other.Name;
+            Type = other.Type;
             Line = other.Line;
-            LFree = other.LFree;
+            FreeLength = other.FreeLength;
             EndNodes = other.EndNodes;
-            CS_Tens = other.CS_Tens.Duplicate();
-            CS_Comp = other.CS_Comp.Duplicate();
-            Mat_Tens = other.Mat_Tens.Duplicate();
-            Mat_Comp = other.Mat_Comp.Duplicate();
-            CS_Main = other.CS_Main.Duplicate();
-            Mat_Main = other.Mat_Main.Duplicate();
-            Buckling_Law = other.Buckling_Law;
+            CS = other.CS.Copy();
+            Material = other.Material.Copy();
+            BucklingLaw = other.BucklingLaw;
             kb = other.kb;
-            Ind = other.Ind;
+            Idx = other.Idx;
             Tension = other.Tension;
         }
 
@@ -280,9 +274,16 @@ namespace Muscle.ViewModel
 
         #region Methods
 
-        public virtual Element Duplicate()
+        public Element Copy()
         {
             return new Element(this);
+        }
+        public Element CopyAndUpdate(double FreeLength, double Tension)
+        {
+            Element copy = new Element(this);
+            copy.FreeLength = FreeLength;
+            copy.Tension = Tension;
+            return copy;
         }
 
         public override string ToString()
@@ -290,7 +291,7 @@ namespace Muscle.ViewModel
             //if (this is Cable) return (this as Cable).ToString();
             //if (this is Strut) return (this as Strut).ToString();
             //if (this is Bar) return (this as Bar).ToString();
-            return $"{TypeName} {Ind} with free length {LFree:F3}m and mass {Mass:F1}kg.\n    In Compression : A={CS_Comp.Area * 1e6:F0}mm^2, E={Mat_Comp.E * 1e-6:F0}MPa.\n   In Tension : A={CS_Tens.Area * 1e6:F0}mm^2, E={Mat_Tens.E * 1e-6:F0}MPa.";
+            return $"{Name} {Idx} with free length {FreeLength:F3}m and mass {Mass:F1}kg.\n    In Compression : A={CS.Area * 1e6:F0}mm^2, E={Material.E * 1e-6:F0}MPa.\n   In Tension : A={CS.Area * 1e6:F0}mm^2, E={Material.E * 1e-6:F0}MPa.";
         }
 
 

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Muscle.GHModel;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Param
 {
@@ -37,7 +38,7 @@ namespace Muscle.Components.Param
 
         #region Constructors
 
-        public SupportParam() : base(new GH_InstanceDescription("Support", "Spt", "Contains a collection of supports", "Muscles", "Params"))
+        public SupportParam() : base(new GH_InstanceDescription("Support", "Spt", "Contains a collection of supports",  GHAssemblyName, Folder1_Param))
         {
         }
 

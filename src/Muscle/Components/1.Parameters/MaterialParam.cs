@@ -4,6 +4,7 @@ using Rhino.Input.Custom;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Param
 {
@@ -16,7 +17,7 @@ namespace Muscle.Components.Param
         /// <summary>
         /// This is the parameter constructor. It uses base constructor to set name, nickname, description, category and subcategory of the parameter.
         /// </summary>
-        public MaterialParam() : base("Material", "M", "Contains a collection of materials.", "Muscles", "Params") { }
+        public MaterialParam() : base("Material", "M", "Contains a collection of materials.",  GHAssemblyName, Folder1_Param) { }
 
 
         /// <summary>

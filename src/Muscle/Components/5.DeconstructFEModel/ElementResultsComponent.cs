@@ -5,7 +5,7 @@ using Grasshopper.Kernel;
 using Muscle.ViewModel;
 using Rhino.Geometry;
 
-namespace Muscle.Components.StaticResults
+namespace Muscle.Components.DeconstructFEModel
 {
     public class ElementResultsComponent : GH_Component
     {
