@@ -1,13 +1,13 @@
 from MusclePy.femodel.fem_elements import FEM_Elements
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.prestress_increment import PrestressIncrement
+from MusclePy.femodel.prestress_increment import PrestressScenario
 
 
 import numpy as np
 
 
 def main_linear_displacement_method(structure: FEM_Structure, loads_increment: np.ndarray, 
-                                       prestress_increment: PrestressIncrement) -> FEM_Structure:
+                                       prestress_increment: PrestressScenario) -> FEM_Structure:
     """Solve the linear displacement method for a structure with incremental loads and prestress (=free length changes).
     
     This function:
@@ -24,7 +24,7 @@ def main_linear_displacement_method(structure: FEM_Structure, loads_increment: n
     """
     #check input
     assert isinstance(structure, FEM_Structure), "structure must be an instance of FEM_Structure"
-    assert isinstance(prestress_increment, PrestressIncrement), "prestress_increment must be an instance of PrestressIncrement"
+    assert isinstance(prestress_increment, PrestressScenario), "prestress_increment must be an instance of PrestressScenario"
     loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
  
     # modify the free length of the elements through mechanical devices

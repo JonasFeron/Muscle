@@ -4,7 +4,7 @@ from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.prestress_increment import PrestressIncrement
+from MusclePy.femodel.prestress_increment import PrestressScenario
 
 class TestLinearDM_3PrestressedCables(unittest.TestCase):
     def setUp(self):
@@ -54,7 +54,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         self.structure = FEM_Structure(self.nodes, self.elements)
 
         # Create prestress increment
-        self.prestress_increment = PrestressIncrement(self.elements, np.array([-0.007984, 0.0, 0.0]))
+        self.prestress_increment = PrestressScenario(self.elements, np.array([-0.007984, 0.0, 0.0]))
 
         # No external loads
         self.loads_increment = np.zeros(12)  # 4 nodes * 3 DOFs
@@ -135,7 +135,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
 
         loads = np.zeros((4,3))
         loads[1,2] = 0.1  # 0.1N upward at node 1
-        prestress_increment = PrestressIncrement(self.structure.elements, np.zeros(3))
+        prestress_increment = PrestressScenario(self.structure.elements, np.zeros(3))
         
         result = main_linear_displacement_method(
             self.structure,

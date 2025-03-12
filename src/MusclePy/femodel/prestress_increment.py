@@ -2,8 +2,8 @@ import numpy as np
 from MusclePy.femodel.fem_elements import FEM_Elements
 
 
-class PrestressIncrement:
-    """Class representing a prestress increment applied through free length variations.
+class PrestressScenario:
+    """Class representing a prestress scenario applied through free length variations.
     
     This class computes:
     1. The axial force in each element that would result from the free length variations assuming all nodes are totally fixed.
@@ -21,7 +21,7 @@ class PrestressIncrement:
     """
     
     def __init__(self, elements: FEM_Elements, free_length_variation: np.ndarray = None):
-        """Initialize a PrestressIncrement instance.
+        """Initialize a PrestressScenario instance.
         
         Args:
             elements: FEM_Elements instance containing element properties and current state

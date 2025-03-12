@@ -1,5 +1,4 @@
 from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.prestress_increment import PrestressIncrement
 from MusclePy.solvers.dm.linear_dm import core_linear_displacement_method, perturb
 import numpy as np
 
@@ -15,9 +14,9 @@ def main_nonlinear_displacement_method(structure: FEM_Structure, loads_increment
     Returns:
         FEM_Structure in deformed state
     """
-    # Note: the PrestressIncrement class does not work well with the nonlinear DM.
-    # this is due to the reorientation of the elements during a non linear procedure.
-    # Indeed, the loads equivalent to the prestress are not fixed once for all. Instead the prestress loads reorient with the elements
+    # Note: the nonlinear DM does not support prestress.
+    # This is due to the reorientation of the elements during a non linear procedure.
+    # which means that the free_length_variation cannot be converted into an equivalent external loads, because the equivalent loads reorient at each step.
     # -> use Dynamic Relaxation for non-linear prestressing problems.
 
     # total loads increment to apply on the structure

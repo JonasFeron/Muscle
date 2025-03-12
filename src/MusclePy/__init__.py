@@ -10,7 +10,7 @@ from .test_script import main as test_script_main
 from .femodel.fem_nodes import FEM_Nodes
 from .femodel.fem_elements import FEM_Elements
 from .femodel.fem_structure import FEM_Structure
-from .femodel.prestress_increment import PrestressIncrement
+from .femodel.prestress_increment import PrestressScenario
 from .solvers.svd.svd_results import SVDresults
 from .solvers.dynamic.dynamic_results import DynamicResults
 
@@ -30,7 +30,7 @@ __all__ = [
     'FEM_Nodes',
     'FEM_Elements', 
     'FEM_Structure',
-    'PrestressIncrement',
+    'PrestressScenario',
     'main_singular_value_decomposition',
     'localize_self_stress_modes',
     'SVDresults',

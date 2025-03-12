@@ -5,7 +5,7 @@ from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
 from MusclePy.femodel.fem_structure import FEM_Structure
 from MusclePy.femodel.fem_nodes import FEM_Nodes
 from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.prestress_increment import PrestressIncrement
+from MusclePy.femodel.prestress_increment import PrestressScenario
 
 
 class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         """
         # Stage 1: Apply prestress through free length changes
         free_length_variation = np.array([-3.984e-3, -3.984e-3]) 
-        prestress_increment = PrestressIncrement(self.structure.elements, free_length_variation)
+        prestress_increment = PrestressScenario(self.structure.elements, free_length_variation)
         prestressed_structure = main_linear_displacement_method(
             self.structure,
             np.zeros(9),  # No external loads
