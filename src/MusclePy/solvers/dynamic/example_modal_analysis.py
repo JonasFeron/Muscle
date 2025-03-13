@@ -41,7 +41,7 @@ def run_example():
     elastic_moduli = np.array([2e11, 2e11])   # N/m² (steel)
     free_lengths = np.array([0.7, 0.7])       # m
     
-    elements = FEM_Elements(nodes, end_nodes, cross_sections, elastic_moduli, free_lengths)
+    elements = FEM_Elements(nodes, end_nodes=end_nodes, area=cross_sections, youngs=elastic_moduli, free_length_variation=free_lengths)
     
     # Create structure
     structure = FEM_Structure(nodes, elements)

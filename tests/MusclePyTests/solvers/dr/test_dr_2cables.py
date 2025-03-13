@@ -44,7 +44,7 @@ class TestDR_2Cables(unittest.TestCase):
             nodes=self.nodes,
             type=np.array([1, 1]),  # Two cables
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
-            areas=np.array([[cable_area, cable_area], [cable_area, cable_area]]),  # 50.26 mm² area
+            area=np.array([cable_area, cable_area]),  # 50.26 mm² area
             youngs=np.array([[70000.0, 70000.0], [70000.0, 70000.0]]),  # 70000 MPa Young's modulus
         )
         

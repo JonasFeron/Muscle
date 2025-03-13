@@ -35,8 +35,8 @@ class TestFEMElements(unittest.TestCase):
             nodes=self.nodes,
             type=np.array([-1, -1]),  # Two struts
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
-            areas=np.array([[2500.0, 1000.0], [2500.0, 1000.0]]),  # different areas in compression/tension
-            youngs=np.array([[10000.0, 10000.0], [10000.0, 10000.0]]),  # Same Young's modulus
+            area=np.array([2500.0, 2500.0]),  # Cross-section area
+            youngs=np.array([[10000.0, 5000.0], [10000.0, 5000.0]]),  # Same Young's modulus [[compression, tension], [compression, tension],...]
         )
 
     def test_initialization(self):
@@ -62,7 +62,7 @@ class TestFEMElements(unittest.TestCase):
         ])
         np.testing.assert_array_equal(self.elements.connectivity, expected_connectivity)
         
-    def test_current_properties_tension(self):
+    def test_current_young_tension(self):
         """Test computation of current properties based on tension state."""
 
         # if node 1 moves upwards, elements elongate and are in tension
@@ -79,10 +79,9 @@ class TestFEMElements(unittest.TestCase):
         tensed_elements = self.elements.copy_and_update(
             nodes=moved_nodes
         )
-        np.testing.assert_array_equal(tensed_elements.area, [1000.0, 1000.0])
-        np.testing.assert_array_equal(tensed_elements.young, [10000.0, 10000.0])
+        np.testing.assert_array_equal(tensed_elements.young, [5000.0, 5000.0])
 
-    def test_current_properties_compression(self):
+    def test_current_young_compression(self):
         """Test computation of current properties based on tension state."""
 
         # if node 1 moves downwards, elements shorten and are in compression
@@ -99,17 +98,15 @@ class TestFEMElements(unittest.TestCase):
         compressed_elements = self.elements.copy_and_update(
             nodes=moved_nodes
         )
-        np.testing.assert_array_equal(compressed_elements.area, [2500.0, 2500.0])
         np.testing.assert_array_equal(compressed_elements.young, [10000.0, 10000.0])
         
-    def test_flexibility(self):
+    def test_current_flexibility(self):
         """Test computation of flexibility (L/EA)."""
-        # When zero tension, flexibility is computed based on type (-1 for bars, 1 for cables)
-        np.testing.assert_array_equal(self.elements.type, [-1, -1]) # check that elements are bars
+        # When zero tension, flexibility is computed based on maximum young modulus.
 
         # Expected flexibility = L/(E*A)
         L = np.sqrt(2.0)  # Length of each element
-        E = 10000.0  # Young's modulus
+        E = 10000.0  # maximum Young's modulus
         A = 2500.0   # Area
         expected_flexibility = L / (E * A)
         

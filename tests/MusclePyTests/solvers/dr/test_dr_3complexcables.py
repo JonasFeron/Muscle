@@ -50,7 +50,7 @@ class TestDR_3ComplexCables(unittest.TestCase):
             nodes=self.nodes,
             type=np.array([1, 1, 1]),  # Three cables
             end_nodes=np.array([[0, 3], [1, 3], [2, 3]]),  # Element connections
-            areas=np.array([[cable_area, cable_area, cable_area], [cable_area, cable_area, cable_area]]),  # Area in mm²
+            area=np.array([cable_area, cable_area, cable_area]),  # Area in mm²
             youngs=np.array([[0.0, 70000.0, 70000.0], [70000.0, 70000.0, 70000.0]]),  # 70000 MPa Young's modulus. Cable 0 can only be in tension.
         )
         

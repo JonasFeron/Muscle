@@ -60,12 +60,13 @@ class TestSelfStressModes(unittest.TestCase):
         elements_type[[4, 5, 9, 10]] = -1  # struts
                 
         # Set element properties
-        elementsE = np.ones((11, 2)) * 70000  # MPa
-        elementsA = np.ones((11, 2)) * 50     # mm²
-        elementsA[[4, 5, 9, 10], :] = 365     # mm²
+        elementsE = np.ones((11,2)) * 70000  # MPa
+        elementsA = np.ones(11)
+        elementsA[0:3] = 364.4 # struts 
+        elementsA[3:11] = 50.3 # cables
         
         # Create elements with types
-        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, areas=elementsA)
+        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, area=elementsA)
         
         self.structure = FEM_Structure(nodes, elements)
         

@@ -3,7 +3,7 @@ from .fem_nodes import FEM_Nodes
 
 
 class FEM_Elements:
-    def __init__(self, nodes: FEM_Nodes, type=None, end_nodes=None, areas=None, youngs=None, 
+    def __init__(self, nodes: FEM_Nodes, type=None, end_nodes=None, area=None, youngs=None, 
                  free_length_variation=None, tension=None):
         """Python equivalent of C# FEM_Elements class.
         
@@ -15,9 +15,9 @@ class FEM_Elements:
             - end_nodes: [-] Element-node connectivity indices
             - connectivity: [-] Element-node connectivity matrix
             - initial_free_length: [m] Length in unprestressed state
+            - area: [mm²] Cross-section area of elements
             
         2. State-Dependent (computed from current state):
-            - area: [mm²] Cross-section based on tension state
             - young: [MPa] Young's modulus based on tension state
             - flexibility: [m/N] = L/(EA), large value (1e6) if EA ≈ 0
             - current_length: [m] Based on current node coordinates
@@ -32,7 +32,7 @@ class FEM_Elements:
             nodes: FEM_Nodes instance
             type: Element types, shape (elements_count,)
             end_nodes: Node indices, shape (elements_count, 2)
-            areas: Cross-sections, shape (elements_count, 2) : [A_if_compression, A_if_tension]
+            area: Cross-sections, shape (elements_count,)
             youngs: Young's moduli, shape (elements_count, 2) : [E_if_compression, E_if_tension]
             free_length_variation: variation of free Length due to prestressing or form-finding, shape (elements_count,)
             tension: Axial forces, shape (elements_count,)
@@ -46,7 +46,7 @@ class FEM_Elements:
         self._type = np.array([], dtype=int)
         self._end_nodes = np.array([], dtype=int).reshape((0, 2))
         self._connectivity = np.array([], dtype=int).reshape((0, 0))  # Initialize empty connectivity matrix (computed from end_nodes)
-        self._areas = np.array([], dtype=float).reshape((0, 2))
+        self._area = np.array([], dtype=float)
         self._youngs = np.array([], dtype=float).reshape((0, 2))
         self._initial_free_length = np.array([], dtype=float)
         
@@ -55,7 +55,7 @@ class FEM_Elements:
         self._tension = np.array([], dtype=float)
         
         # Initialize the instance
-        self._initialize(type, end_nodes, areas, youngs, free_length_variation, tension)
+        self._initialize(type, end_nodes, area, youngs, free_length_variation, tension)
 
 
 
@@ -71,7 +71,7 @@ class FEM_Elements:
         Args:
             arr: Array to convert
             name: Name of array for error messages and type detection
-            shape_suffix: Optional second dimension (e.g. 2 for areas/youngs/end_nodes)
+            shape_suffix: Optional second dimension (e.g. 2 for youngs/end_nodes)
         """
         if arr is None:
             shape = (self._count,) if shape_suffix is None else (self._count, shape_suffix)
@@ -94,7 +94,7 @@ class FEM_Elements:
             
         raise ValueError(f"{name} cannot be reshaped to {expected_shape}, got shape {result.shape}")
     
-    def _initialize(self, type, end_nodes, areas, youngs, free_length_variation, tension):
+    def _initialize(self, type, end_nodes, area, youngs, free_length_variation, tension):
         """Initialize all attributes with proper validation."""
         # Handle end_nodes first to establish count
         if end_nodes is not None:
@@ -114,11 +114,11 @@ class FEM_Elements:
                 self._count = len(end_nodes_arr)
                 self._end_nodes = end_nodes_arr
         else:
-            raise ArgumentError("impossible to initialize FEM_Elements without end_nodes, no end_nodes provided")
+            raise ValueError("impossible to initialize FEM_Elements without end_nodes, no end_nodes provided")
         
         # Initialize immutable arrays
         self._type = self._check_and_reshape_array(type, "type")
-        self._areas = self._check_and_reshape_array(areas, "areas", shape_suffix=2)
+        self._area = self._check_and_reshape_array(area, "area")
         self._youngs = self._check_and_reshape_array(youngs, "youngs", shape_suffix=2)
         
         # Compute initial free length from nodes coordinates
@@ -196,11 +196,10 @@ class FEM_Elements:
         """[m] - shape (elements_count,) - Free length in unprestressed state"""
         return self._initial_free_length
 
-
     @property
-    def areas(self) -> np.ndarray:
-        """[mm²] - shape (elements_count, 2) - Areas in compression and tension"""
-        return self._areas
+    def area(self) -> np.ndarray:
+        """[mm²] - shape (elements_count,) - Cross-section area of elements"""
+        return self._area
     
     @property
     def youngs(self) -> np.ndarray:
@@ -253,14 +252,9 @@ class FEM_Elements:
         return self.current_length - self.current_free_length
     
     @property
-    def area(self) -> np.ndarray:
-        """[mm²] - shape (elements_count,) - Current area depending on tension state"""
-        return self._get_current_property(self.elastic_elongation, self._areas, self._type)
-    
-    @property
     def young(self) -> np.ndarray:
         """[MPa] - shape (elements_count,) - Current Young's modulus depending on tension state"""
-        return self._get_current_property(self.elastic_elongation, self._youngs, self._type)
+        return self._get_current_young(self.elastic_elongation, self._youngs)
     
     @property
     def flexibility(self) -> np.ndarray:
@@ -283,36 +277,34 @@ class FEM_Elements:
     # Hence, the linear displacement method computes tension by post-processing the displacements.
 
     #private Methods
-    def _get_current_property(self, elongation: np.ndarray, property_in_compression_tension: np.ndarray, element_types: np.ndarray) -> np.ndarray:
-        """Get element properties (areas or young moduli) based on tension state (compression/tension).
+    def _get_current_young(self, elongation: np.ndarray, youngs: np.ndarray) -> np.ndarray:
+        """Get elements young modulus based on current elongation (compression/tension), or maximum Young's modulus when elongation is zero.
         
         Args:
-            elongation: [m] Array of shape (elements_count,) containing the elastic elongation of the elements (positive for tension, negative for compression, zero for unknown)
-            property_in_compression_tension: Array of shape (elements_count, 2) containing property values for compression and tension
-            element_types: Array of shape (elements_count,) containing element types
+            elongation: [m] Array of shape (elements_count,) containing positive values for tension, negative values for compression, or zero for unknown
+            youngs: [MPa] Array of shape (elements_count, 2) containing the young modulus values for the bilinear material in compression and tension
             
         Returns:
-            Array of shape (elements_count,) containing current property values
+            [MPa] Array of shape (elements_count,) containing current Young's modulus
         """
-        if self._count == 0:
-            return np.array([], dtype=float)
-            
+        assert elongation.shape[0] == self.count, f"Elongation shape {elongation.shape} does not match elements count {self.count}"
+        young_compression = youngs[:, 0]
+        young_tension = youngs[:, 1]
+
         # Get property based on tension state
-        property_values = np.where(elongation > 0,
-                                 property_in_compression_tension[:, 1],  # Tension
-                                 property_in_compression_tension[:, 0])  # Compression
+        current_young = np.where(elongation > 0,
+                                 young_tension,  
+                                 young_compression) 
         
-        # For zero tension, use element type
-        zero_tension_mask = np.isclose(elongation, 0)
-        if np.any(zero_tension_mask):
-            types = element_types[zero_tension_mask]
-            property_values[zero_tension_mask] = np.where(types > 0,
-                                                        property_in_compression_tension[zero_tension_mask, 1],  # Cables
-                                                        property_in_compression_tension[zero_tension_mask, 0])  # Struts
-        return property_values
+        # When elongation is zero, use maximum Young's modulus, assuming the element will be stressed in its prefered direction.
+        where0 = np.isclose(elongation, 0)
+        if np.any(where0):
+            current_young[where0] = np.maximum(young_compression[where0], young_tension[where0])
+        
+        return current_young
     
    
-    def _create_copy(self, nodes, type, end_nodes, areas, youngs, free_length_variation, tension):
+    def _create_copy(self, nodes, type, end_nodes, area, youngs, free_length_variation, tension):
         """Core copy method that creates a new instance of the appropriate class.
         
         This protected method is used by all copy methods to create a new instance.
@@ -325,7 +317,7 @@ class FEM_Elements:
             nodes=nodes,
             type=type,
             end_nodes=end_nodes,
-            areas=areas,
+            area=area,
             youngs=youngs,
             free_length_variation=free_length_variation,
             tension=tension
@@ -345,7 +337,7 @@ class FEM_Elements:
             nodes=nodes,
             type=self._type.copy(),
             end_nodes=self._end_nodes.copy(),
-            areas=self._areas.copy(),
+            area=self._area.copy(),
             youngs=self._youngs.copy(),
             free_length_variation=self._free_length_variation.copy(),
             tension=self._tension.copy()
@@ -370,7 +362,7 @@ class FEM_Elements:
             nodes=nodes,
             type=self._type.copy(),
             end_nodes=self._end_nodes.copy(),
-            areas=self._areas.copy(),
+            area=self._area.copy(),
             youngs=self._youngs.copy(),
             free_length_variation=free_length_variation,
             tension=tension

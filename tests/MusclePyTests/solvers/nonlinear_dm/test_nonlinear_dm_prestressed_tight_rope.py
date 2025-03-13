@@ -37,7 +37,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
             nodes=self.nodes,
             type=np.array([1, 1]),  # Two cables
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
-            areas=np.array([[50.0, 50.0], [50.0, 50.0]]),  # 50 mm² area
+            area=np.array([50.0, 50.0]),  # 50 mm² area
             youngs=np.array([[100000.0, 100000.0], [100000.0, 100000.0]]),  # 100 GPa Young's modulus
             free_length_variation=np.array([0.0, 0.0]),  # No initial prestress
             tension=np.array([0.0, 0.0])  # No initial tension

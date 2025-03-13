@@ -13,7 +13,7 @@ class DR_Elements(FEM_Elements):
         local_geometric_stiffness_matrices: List of local geometric stiffness matrices
     """
     
-    def __init__(self, elements_or_nodes, type=None, end_nodes=None, areas=None, youngs=None, 
+    def __init__(self, elements_or_nodes, type=None, end_nodes=None, area=None, youngs=None, 
                  free_length_variation=None, tension=None):
         """Initialize a DR_Elements instance.
         
@@ -25,7 +25,7 @@ class DR_Elements(FEM_Elements):
             elements_or_nodes: Either a FEM_Elements instance or a FEM_Nodes (or DR_Nodes) instance
             type: [-] - shape (elements_count,) - Type of elements (-1 for struts, 1 for cables)
             end_nodes: [-] - shape (elements_count, 2) - Indices of end nodes
-            areas: [mm²] - shape (elements_count, 2) - Areas for compression and tension
+            area: [mm²] - shape (elements_count,) - Cross-section area of elements
             youngs: [MPa] - shape (elements_count, 2) - Young's moduli for compression and tension
             free_length_variation: [m] - shape (elements_count,) - Change in free length due to prestress
             tension: [N] - shape (elements_count,) - Current tension in elements
@@ -35,7 +35,7 @@ class DR_Elements(FEM_Elements):
             elements = elements_or_nodes
             
             # Assert that all other arguments are None when a FEM_Elements instance is passed
-            assert all(arg is None for arg in [type, end_nodes, areas, youngs, free_length_variation, tension]), \
+            assert all(arg is None for arg in [type, end_nodes, area, youngs, free_length_variation, tension]), \
                 "When passing a FEM_Elements instance, all other arguments must be None"
 
             # Call parent class constructor with the properties from the FEM_Elements instance
@@ -43,7 +43,7 @@ class DR_Elements(FEM_Elements):
                 elements.nodes,
                 elements.type,
                 elements.end_nodes,
-                elements.areas,
+                elements.area,
                 elements.youngs,
                 elements.free_length_variation,
                 elements.tension
@@ -53,7 +53,7 @@ class DR_Elements(FEM_Elements):
             assert isinstance(elements_or_nodes, (FEM_Nodes, DR_Nodes)), "First argument must be either a FEM_Elements, FEM_Nodes, or DR_Nodes instance"
             nodes = elements_or_nodes
             # Call parent class constructor with the provided parameters
-            super().__init__(nodes, type, end_nodes, areas, youngs, free_length_variation, tension)
+            super().__init__(nodes, type, end_nodes, area, youngs, free_length_variation, tension)
         
         # Initialize DR-specific attributes
         self._local_geometric_stiffness_matrices = []  # [N/m] - List(elements.count) of shape (6,6) matrices
@@ -98,7 +98,7 @@ class DR_Elements(FEM_Elements):
             self.current_length
         )
     
-    def _create_copy(self, nodes, type, end_nodes, areas, youngs, free_length_variation, tension):
+    def _create_copy(self, nodes, type, end_nodes, area, youngs, free_length_variation, tension):
         """Core copy method that creates a new instance of the appropriate class.
         
         This protected method is used by all copy methods to create a new instance.
@@ -111,7 +111,7 @@ class DR_Elements(FEM_Elements):
             nodes,
             type,
             end_nodes,
-            areas,
+            area,
             youngs,
             free_length_variation,
             tension
@@ -136,7 +136,7 @@ class DR_Elements(FEM_Elements):
             new_nodes,
             self.type.copy(),
             self.end_nodes.copy(),
-            self.areas.copy(),
+            self.area.copy(),
             self.youngs.copy(),
             free_length_variation,
             self.tension.copy()

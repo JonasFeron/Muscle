@@ -73,11 +73,11 @@ class TestSVDSimplex(unittest.TestCase):
                               [0, 72190]])  
 
         # Set cross-sectional areas [mm²]
-        elementsA = np.ones((12,2))
-        elementsA[0:3,:] = 364.4 # struts 
-        elementsA[3:12,:] = 50.3 # cables
+        elementsA = np.ones(12)
+        elementsA[0:3] = 364.4 # struts 
+        elementsA[3:12] = 50.3 # cables
 
-        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, areas=elementsA)
+        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, area=elementsA)
         
         # Create FEM_Structure
         self.structure = FEM_Structure(nodes, elements)

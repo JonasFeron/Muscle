@@ -39,9 +39,9 @@ class TestDR_Simplex(unittest.TestCase):
         # Create elements (3 struts and 9 cables)
         # Struts can only be in compression, cables only in tension
 
-        areas = np.ones((12, 2))
-        areas[0:3, :] = 364.4  # Struts area in mm²
-        areas[3:12, :] = 50.3  # Cables area in mm²
+        area = np.ones(12)
+        area[0:3] = 364.4  # Struts area in mm²
+        area[3:12] = 50.3  # Cables area in mm²
 
         self.elements = FEM_Elements(
             nodes=self.nodes,
@@ -60,7 +60,7 @@ class TestDR_Simplex(unittest.TestCase):
                 [1, 4],  # Cable 7
                 [0, 3]   # Cable 8
             ]),
-            areas=areas,
+            area=area,
             youngs=np.array([
                 [70390, 0],  # Strut 0: E_compression = 70390 MPa, E_tension = 0
                 [70390, 0],  # Strut 1

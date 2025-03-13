@@ -36,7 +36,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         
         # Create elements (all cables)
         type=np.array([1, 1, 1])  # All elements are cables (type=1)
-        areas = np.ones((3,2)) * 50.26 #[mm²]
+        area = np.ones(3) * 50.26 #[mm²]
         youngs = np.ones((3,2)) * 70e3 #70 GPa Young's modulus
         youngs[:, 0] = 0 #tension only elements -> no stiffness in compression
 
@@ -44,7 +44,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
             nodes=self.nodes,
             type=type,
             end_nodes=np.array([[0, 1], [1, 2], [1, 3]]),  # Define connectivity
-            areas= areas, 
+            area=area, 
             youngs=youngs, 
             free_length_variation=np.array([0.0, 0.0, 0.0]),  # No initial prestress
             tension=np.array([0.0, 0.0, 0.0])

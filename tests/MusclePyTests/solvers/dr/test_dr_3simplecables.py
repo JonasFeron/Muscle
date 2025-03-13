@@ -48,7 +48,7 @@ class TestDR_3SimpleCables(unittest.TestCase):
             nodes=self.nodes,
             type=np.array([1, 1, 1]),  # Three cables
             end_nodes=np.array([[0, 3], [1, 3], [2, 3]]),  # Element connections
-            areas=np.array([[cable_area, cable_area, cable_area], [cable_area, cable_area, cable_area]]),  # Area in mm²
+            area=np.array([cable_area, cable_area, cable_area]),  # Area in mm²
             youngs=np.array([[70000.0, 70000.0, 70000.0], [70000.0, 70000.0, 70000.0]]),  # 70000 MPa Young's modulus
         )
         
@@ -72,7 +72,7 @@ class TestDR_3SimpleCables(unittest.TestCase):
             nodes=self.nodes,
             type=self.elements.type,  # Three cables
             end_nodes=self.elements.end_nodes,  # Element connections
-            areas=self.elements.areas,  # Area in mm²
+            area=self.elements.area,  # Area in mm²
             youngs=np.array([[0.0, 70000.0, 70000.0], [70000.0, 70000.0, 70000.0]])  # 70000 MPa Young's modulus, cable 0 withstands tension only
         )
         tension_only_structure = FEM_Structure(self.nodes, tension_only_elements)
