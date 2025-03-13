@@ -7,7 +7,7 @@ using System;
 using Muscle.Loads;
 
 
-namespace Muscle.Dynamics
+namespace Muscle.View
 {   
 
 

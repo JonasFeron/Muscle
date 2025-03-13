@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Muscle.GHModel
+namespace Muscle.View
 {
     public class GH_BilinearMaterial : GH_Goo<BilinearMaterial>
     {

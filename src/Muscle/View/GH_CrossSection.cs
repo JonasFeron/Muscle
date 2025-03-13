@@ -3,7 +3,7 @@ using Grasshopper.Kernel.Types;
 using Muscle.Materials;
 using Muscle.ViewModel;
 
-namespace Muscle.GHModel
+namespace Muscle.View
 {
     public class GH_CrossSection : GH_Goo<ICrossSection>
     {

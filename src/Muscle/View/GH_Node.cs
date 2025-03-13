@@ -7,7 +7,7 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Muscle.ViewModel;
 
-namespace Muscle.GHModel
+namespace Muscle.View
 {
     public class GH_Node : GH_Goo<Node> //: GH_GeometricGoo<Node>, IGH_PreviewData 
     {

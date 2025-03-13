@@ -1,7 +1,7 @@
 ﻿using Grasshopper.Kernel.Types;
 using Muscle.ViewModel;
 
-namespace Muscle.GHModel
+namespace Muscle.View
 {
     class GH_ImposedLengthenings : GH_Goo<ImposedLenghtenings>
     {

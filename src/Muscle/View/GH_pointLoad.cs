@@ -13,7 +13,7 @@ using Muscle.GHModel;
 */
 using Muscle.ViewModel;
 
-namespace Muscle.GHModel
+namespace Muscle.View
 {
     public class GH_PointLoad : GH_GeometricGoo<PointLoad>, IGH_PreviewData
     {

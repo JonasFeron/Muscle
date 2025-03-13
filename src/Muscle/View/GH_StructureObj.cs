@@ -10,7 +10,7 @@ using Muscle.ViewModel;
 using Rhino.Geometry;
 
 
-namespace Muscle.GHModel
+namespace Muscle.View
 {
 
     public class GH_StructureObj : GH_Goo<StructureObj>

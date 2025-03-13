@@ -1,7 +1,5 @@
 ﻿using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Muscle.Solvers;
-using Muscle.Dynamics;
 using Rhino.Geometry;
 using System;
 using System.Collections.Generic;
@@ -9,12 +7,12 @@ using System.IO;
 using System.Linq;
 using Muscle.Loads;
 using Muscle.PythonLink;
-using Muscle.GHModel;
+using Muscle.View;
 
 namespace Muscle.ViewModel
 {
 
-    public class StructureObj
+    public class StructureState
     {
 
         #region Properties
@@ -39,26 +37,26 @@ namespace Muscle.ViewModel
         public double ZeroTol { get; set; }
 
         ///// Structure informations /////
-        public int ElementsCount { get { return StructuralElements.Count; } }
-        public List<Element> StructuralElements { get; set; }
-        public int NodesCount { get { return StructuralNodes.Count; } }
-        public List<Node> StructuralNodes { get; set; }
-        public int FixationsCount { get { return StructuralNodes.Select(n => n.FixationsCount).Sum(); } }
+        public int ElementsCount { get { return Elements.Count; } }
+        public List<Element> Elements { get; set; }
+        public int NodesCount { get { return Nodes.Count; } }
+        public List<Node> Nodes { get; set; }
+        public int FixationsCount { get { return Nodes.Select(n => n.FixationsCount).Sum(); } }
         public int DOFfreeCount { get { return 3 * NodesCount - FixationsCount; } }
 
         ///// Data to send to Python /////
-        public double Residual0Threshold { get; set; }
+        // public double Residual0Threshold { get; set; }
 
-        public List<Vector3d> LoadsToApply { get; set; } // [N] - shape (NodesCount,) - the list of Loads to apply on each node of the structure
+        // public List<Vector3d> LoadsToApply { get; set; } // [N] - shape (NodesCount,) - the list of Loads to apply on each node of the structure
 
-        public List<double> LengtheningsToApply { get; set; } // [m] - shape (ElementsCount,) - the list of lengthenings to apply on each element of the structure
+        // public List<double> LengtheningsToApply { get; set; } // [m] - shape (ElementsCount,) - the list of lengthenings to apply on each element of the structure
 
 
         ///// Results coming from Python /////
 
         public bool IsInEquilibrium { get; set; }
 
-        public DRMethod DR { get; set; }
+        // public DRMethod DR { get; set; }
 
         ///public DynMethod DS { get; set; }
         ///
@@ -66,17 +64,17 @@ namespace Muscle.ViewModel
 
 
         ///Data used the dynamics computation
-        public int NumberOfFrequency { get; set; }
-        //Contains the number of frequency/mode of the structure who are computed
+        // public int NumberOfFrequency { get; set; }
+        // //Contains the number of frequency/mode of the structure who are computed
 
 
-        public List<double> Frequency { get; set; }
-        public List<List<double>> Mode { get; set; }
-        public List<List<Vector3d>> ModeVector { get; set; } //Modes written in a vector form
-        public List<double> DynMass { get; set; } //Masses used for the dynamic computation
-                                                  //List containing on each position the mass [kg]. The position in the list is equal to the node index of the node on wich the mass is applied.
-        public List<GH_PointMass> PointMasses { get; set; } //Masses used for the dynamic computation in objects
-                                                            //The mass written in a list of point masses
+        // public List<double> Frequency { get; set; }
+        // public List<List<double>> Mode { get; set; }
+        // public List<List<Vector3d>> ModeVector { get; set; } //Modes written in a vector form
+        // public List<double> DynMass { get; set; } //Masses used for the dynamic computation
+        //                                           //List containing on each position the mass [kg]. The position in the list is equal to the node index of the node on wich the mass is applied.
+        // public List<GH_PointMass> PointMasses { get; set; } //Masses used for the dynamic computation in objects
+        //                                                     //The mass written in a list of point masses
 
         #endregion Properties
 
@@ -95,15 +93,15 @@ namespace Muscle.ViewModel
             SpanZ = 0;
             ZeroTol = 1e-5f; //(m)
 
-            StructuralElements = new List<Element>();
-            StructuralNodes = new List<Node>();
+            Elements = new List<Element>();
+            Nodes = new List<Node>();
 
-            Residual0Threshold = 0.0001;
-            LoadsToApply = new List<Vector3d>();
-            LengtheningsToApply = new List<double>();
+            // Residual0Threshold = 0.0001;
+            // LoadsToApply = new List<Vector3d>();
+            // LengtheningsToApply = new List<double>();
 
 
-            DR = new DRMethod();
+            // DR = new DRMethod();
 
             ////DYN
             //NumberOfFrequency = 0; 
@@ -118,12 +116,12 @@ namespace Muscle.ViewModel
         /// <summary>
         /// Default constructor
         /// </summary>
-        public StructureObj()
+        public StructureState()
         {
             Init();
         }
 
-        public StructureObj(GH_Structure<IGH_Goo> GH_elements_input, GH_Structure<GH_Point> GH_points_input, GH_Structure<IGH_Goo> GH_supports_input)
+        public StructureState(GH_Structure<IGH_Goo> GH_elements_input, GH_Structure<GH_Point> GH_points_input, GH_Structure<IGH_Goo> GH_supports_input)
 
         {
             Init();
@@ -135,14 +133,14 @@ namespace Muscle.ViewModel
             RegisterPointsAsNodes(GH_points_input);
 
             //3)
-            RegisterNodesAsElementsExtremities();
+            RegisterNodesAsElementsEnds();
 
             //4) check validity of supports inputs
             RegisterSupports(GH_supports_input);
 
         }
 
-        public StructureObj(StructureObj other)
+        public StructureState(StructureState other)
         {
             warnings = new List<string>();
 
@@ -151,30 +149,30 @@ namespace Muscle.ViewModel
             SpanZ = other.SpanZ;
             ZeroTol = other.ZeroTol; //(m)
 
-            StructuralElements = new List<Element>();
-            foreach (Element e in other.StructuralElements) StructuralElements.Add(e.Copy());
+            Elements = new List<Element>();
+            foreach (Element e in other.Elements) Elements.Add(e.Copy());
 
-            StructuralNodes = new List<Node>();
-            foreach (Node n in other.StructuralNodes) StructuralNodes.Add(n.Duplicate());
+            Nodes = new List<Node>();
+            foreach (Node n in other.Nodes) Nodes.Add(n.Copy());
 
-            Residual0Threshold = other.Residual0Threshold;
+            // Residual0Threshold = other.Residual0Threshold;
 
-            LoadsToApply = other.LoadsToApply; // do not fill with old value
-            LoadsToApply = new List<Vector3d>();
-            foreach (var node in StructuralNodes) LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
+            // LoadsToApply = other.LoadsToApply; // do not fill with old value
+            // LoadsToApply = new List<Vector3d>();
+            // foreach (var node in Nodes) LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
 
-            //LengtheningsToApply = other.LengtheningsToApply;
-            LengtheningsToApply = new List<double>();
-            foreach (var elem in StructuralElements) LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
+            // //LengtheningsToApply = other.LengtheningsToApply;
+            // LengtheningsToApply = new List<double>();
+            // foreach (var elem in Elements) LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
 
 
-            DR = other.DR.Duplicate();
+            // DR = other.DR.Duplicate();
 
         }
 
-        public StructureObj Duplicate() //Duplication method calling the copy constructor
+        public StructureState Copy() //Duplication method calling the copy constructor
         {
-            return new StructureObj(this);
+            return new StructureState(this);
         }
 
 
@@ -200,9 +198,9 @@ namespace Muscle.ViewModel
                 if (data is GH_Element)
                 {
                     GH_Element gh_elem = data as GH_Element;
-                    StructuralElements.Add(gh_elem.Value);
-                    gh_elem.Value.Ind = index;
-                    LengtheningsToApply.Add(0.0);
+                    Elements.Add(gh_elem.Value);
+                    gh_elem.Value.Idx = index;
+                    // LengtheningsToApply.Add(0.0);
                     index++;
                 }
             }
@@ -237,7 +235,7 @@ namespace Muscle.ViewModel
                 //Register the user list of point (wo duplicates) into a list of Nodes
                 foreach (Point3d p in points_input_wo_d)
                 {
-                    StructuralNodes.Add(new Node(p, ind_node));
+                    Nodes.Add(new Node(p, ind_node));
                     ind_node++;
                 }
             }
@@ -245,11 +243,11 @@ namespace Muscle.ViewModel
             {
                 foreach (Point3d p in points_from_lines_wo_d)
                 {
-                    StructuralNodes.Add(new Node(p, ind_node));
+                    Nodes.Add(new Node(p, ind_node));
                     ind_node++;
                 }
             }// if user did not give points as input, register the lines extremities
-            for (int i = 0; i < NodesCount; i++) LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0));
+            // for (int i = 0; i < NodesCount; i++) LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0));
         }
 
         /// <summary>
@@ -258,7 +256,7 @@ namespace Muscle.ViewModel
         private List<Point3d> ElementsEndPoints()
         {
             List<Point3d> points = new List<Point3d>();
-            foreach (Element e in StructuralElements)
+            foreach (Element e in Elements)
             {
                 points.Add(e.Line.From);
                 points.Add(e.Line.To);
@@ -328,22 +326,22 @@ namespace Muscle.ViewModel
         /// Creates a List of Point3d that are the extremities of a List of Lines. Duplicates Points are removed. 
         /// The indexes of the extremities are stored in the matrice IndexLinesExtremities 
         /// </summary>
-        private void RegisterNodesAsElementsExtremities()
+        private void RegisterNodesAsElementsEnds()
         {
             Point3d n0;
             Point3d n1;
 
-            foreach (Element e in StructuralElements)
+            foreach (Element e in Elements)
             {
                 n0 = e.Line.From;
                 n1 = e.Line.To;
 
                 int ind0 = -1;
                 int ind1 = -1;
-                for (int j = 0; j < StructuralNodes.Count; j++) // parcourir tous les noeuds et voir a quel index correspond les extrémités d'un élément
+                for (int j = 0; j < Nodes.Count; j++) // parcourir tous les noeuds et voir a quel index correspond les extrémités d'un élément
                 {
-                    if (StructuralNodes[j].Point.EpsilonEquals(n0, ZeroTol)) { ind0 = j; }
-                    if (StructuralNodes[j].Point.EpsilonEquals(n1, ZeroTol)) { ind1 = j; }
+                    if (Nodes[j].Point.EpsilonEquals(n0, ZeroTol)) { ind0 = j; }
+                    if (Nodes[j].Point.EpsilonEquals(n1, ZeroTol)) { ind1 = j; }
                 }
                 e.EndNodes = new List<int> { ind0, ind1 }; // Dans tous les cas, on enregistre l'index des noeuds n0 et n1 dans l'objet Element
             }
@@ -360,9 +358,9 @@ namespace Muscle.ViewModel
                 {
                     GH_Support gh_spt = (GH_Support)data;
                     Support spt = gh_spt.Value;
-                    if (Node.EpsilonContains(StructuralNodes, spt.Point, ZeroTol, out ind))
+                    if (Node.EpsilonContains(Nodes, spt.Point, ZeroTol, out ind))
                     {
-                        StructuralNodes[ind].AddSupport(spt);
+                        Nodes[ind].AddSupport(spt);
                     }
                     else
                     {
@@ -376,7 +374,7 @@ namespace Muscle.ViewModel
             }
             //finally reference the identity of each reaction to be able to retrieve the results
             int ind_spt = 0;
-            foreach (Node node in StructuralNodes)
+            foreach (Node node in Nodes)
             {
                 if (!node.isXFree)
                 {
@@ -403,131 +401,131 @@ namespace Muscle.ViewModel
         /// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
         /// </summary>
 
-        #region PopulateWithSolverResult
-        public void PopulateWithSolverResult(SharedSolverResult answ)
-        {
-            if (answ == null)
-            {
-                return;
-            }
-            IsInEquilibrium = answ.IsInEquilibrium;
-            DR.nTimeStep = answ.nTimeStep;
-            DR.nKEReset = answ.nKEReset;
+        // #region PopulateWithSolverResult
+        // public void PopulateWithSolverResult(SharedSolverResult answ)
+        // {
+        //     if (answ == null)
+        //     {
+        //         return;
+        //     }
+        //     IsInEquilibrium = answ.IsInEquilibrium;
+        //     DR.nTimeStep = answ.nTimeStep;
+        //     DR.nKEReset = answ.nKEReset;
 
 
-            for (int n = 0; n < StructuralNodes.Count; n++)
-            {
-                Node node = StructuralNodes[n]; // lets give a nickname to the current node from the list. 
+        //     for (int n = 0; n < Nodes.Count; n++)
+        //     {
+        //         Node node = Nodes[n]; // lets give a nickname to the current node from the list. 
 
-                // 1) Register the loads, the new nodescoordinates, the reactions results from the solver
+        //         // 1) Register the loads, the new nodescoordinates, the reactions results from the solver
 
-                //Coordinates. 
-                double X = answ.NodesCoord[n][0];
-                double Y = answ.NodesCoord[n][1];
-                double Z = answ.NodesCoord[n][2];
-                node.Point = new Point3d(X, Y, Z);
-                // NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
-
-
-                //Loads
-                double FX = answ.Loads[n][0];
-                double FY = answ.Loads[n][1];
-                double FZ = answ.Loads[n][2];
-                node.Load = new Vector3d(FX, FY, FZ);
-
-                //Residual
-                double ResX = answ.Residual[n][0];
-                double ResY = answ.Residual[n][1];
-                double ResZ = answ.Residual[n][2];
-                node.Residual = new Vector3d(ResX, ResY, ResZ);
-
-                //Reactions 
-                double ReactX = 0;
-                double ReactY = 0;
-                double ReactZ = 0;
-                if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
-                if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
-                if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
-                node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
-            }
+        //         //Coordinates. 
+        //         double X = answ.NodesCoord[n][0];
+        //         double Y = answ.NodesCoord[n][1];
+        //         double Z = answ.NodesCoord[n][2];
+        //         node.Point = new Point3d(X, Y, Z);
+        //         // NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
 
 
-            for (int e = 0; e < StructuralElements.Count; e++)
-            {
-                Element elem = StructuralElements[e];
+        //         //Loads
+        //         double FX = answ.Loads[n][0];
+        //         double FY = answ.Loads[n][1];
+        //         double FZ = answ.Loads[n][2];
+        //         node.Load = new Vector3d(FX, FY, FZ);
 
-                //1) axialforce results
-                elem.Tension = answ.Tension[e];
-                elem.FreeLength = answ.ElementsLFree[e];
+        //         //Residual
+        //         double ResX = answ.Residual[n][0];
+        //         double ResY = answ.Residual[n][1];
+        //         double ResZ = answ.Residual[n][2];
+        //         node.Residual = new Vector3d(ResX, ResY, ResZ);
 
-                //update the lines end points
-                int n0 = elem.EndNodes[0];
-                int n1 = elem.EndNodes[1];
-                Point3d p0 = StructuralNodes[n0].Point; //make sure coordinates have been updated before the lines
-                Point3d p1 = StructuralNodes[n1].Point;
-                elem.Line = new Line(p0, p1);
-            }
-
-        }
-
-        #endregion PopulateWithSolverResult
-        //Use the result from the dynamic computation and set them in a structure object
-        public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
-        {
-            if (answ == null)
-            {
-                return;
-            }
-            NumberOfFrequency = answ.NumberOfFrequency;
-            Frequency = answ.Frequency;
-            Mode = answ.Modes;
-            DynMass = answ.DynMasses;
-
-        }
-
-        //#endregion PopulateWithSolverResult
+        //         //Reactions 
+        //         double ReactX = 0;
+        //         double ReactY = 0;
+        //         double ReactZ = 0;
+        //         if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
+        //         if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
+        //         if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
+        //         node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
+        //     }
 
 
-        public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
-        {
-            GH_Path path;
-            int i = 0;
-            GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
-            if (datalistlist == null)
-            {
-                return res;
-            }
-            foreach (List<double> datalist in datalistlist)
-            {
-                path = new GH_Path(i);
-                res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
-                i++;
-            }
-            return res;
-        }
+        //     for (int e = 0; e < Elements.Count; e++)
+        //     {
+        //         Element elem = Elements[e];
 
-        //Display the List of List of Vector3D
-        public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist)
-        {
-            GH_Path path;
-            int i = 0;
+        //         //1) axialforce results
+        //         elem.Tension = answ.Tension[e];
+        //         elem.FreeLength = answ.ElementsLFree[e];
 
-            GH_Structure<GH_Vector> res = new GH_Structure<GH_Vector>();
+        //         //update the lines end points
+        //         int n0 = elem.EndNodes[0];
+        //         int n1 = elem.EndNodes[1];
+        //         Point3d p0 = Nodes[n0].Point; //make sure coordinates have been updated before the lines
+        //         Point3d p1 = Nodes[n1].Point;
+        //         elem.Line = new Line(p0, p1);
+        //     }
 
-            if (datalistlist == null)
-            {
-                return res;
-            }
-            foreach (List<Vector3d> datalist in datalistlist)
-            {
+        // }
 
-                path = new GH_Path(i);
-                res.AppendRange(datalist.Select(data => new GH_Vector(data)), path);
-                i++;
+        // #endregion PopulateWithSolverResult
+        // //Use the result from the dynamic computation and set them in a structure object
+        // public void PopulateWithSolverResult_dyn(SharedSolverResult answ)
+        // {
+        //     if (answ == null)
+        //     {
+        //         return;
+        //     }
+        //     NumberOfFrequency = answ.NumberOfFrequency;
+        //     Frequency = answ.Frequency;
+        //     Mode = answ.Modes;
+        //     DynMass = answ.DynMasses;
 
-            }
-            return res;
-        }
+        // }
+
+        // //#endregion PopulateWithSolverResult
+
+
+        // public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
+        // {
+        //     GH_Path path;
+        //     int i = 0;
+        //     GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
+        //     if (datalistlist == null)
+        //     {
+        //         return res;
+        //     }
+        //     foreach (List<double> datalist in datalistlist)
+        //     {
+        //         path = new GH_Path(i);
+        //         res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
+        //         i++;
+        //     }
+        //     return res;
+        // }
+
+        // //Display the List of List of Vector3D
+        // public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist)
+        // {
+        //     GH_Path path;
+        //     int i = 0;
+
+        //     GH_Structure<GH_Vector> res = new GH_Structure<GH_Vector>();
+
+        //     if (datalistlist == null)
+        //     {
+        //         return res;
+        //     }
+        //     foreach (List<Vector3d> datalist in datalistlist)
+        //     {
+
+        //         path = new GH_Path(i);
+        //         res.AppendRange(datalist.Select(data => new GH_Vector(data)), path);
+        //         i++;
+
+        //     }
+        //     return res;
+        // }
 
         #endregion Methods
     }

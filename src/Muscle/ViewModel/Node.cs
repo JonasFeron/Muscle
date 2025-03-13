@@ -152,7 +152,7 @@ namespace Muscle.ViewModel
             //Displacement_Total = other.Displacement_Total;
         }
 
-        public Node Duplicate() //Duplication method calling the copy constructor
+        public Node Copy() //Duplication method calling the copy constructor
         {
             return new Node(this);
         }
