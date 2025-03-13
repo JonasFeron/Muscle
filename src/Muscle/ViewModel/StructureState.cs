@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Muscle.Loads;
-using Muscle.PythonLink;
 using Muscle.View;
 
 namespace Muscle.ViewModel
@@ -19,22 +17,22 @@ namespace Muscle.ViewModel
 
         public string TypeName { get { return "Structure"; } }
 
-        public List<string> warnings;
+        /// <summary>
+        /// List of warnings generated during structure initialization.
+        /// </summary>
+        public List<string> warnings { get; private set; }
+
+        /// <summary>
+        /// Absolute Tolerance for geometric comparisons in [m]. Two points are considered equal if they are closer than ZeroGeometricATol.
+        /// This value is calculated based on the maximum structure's dimension/100,000.
+        /// A 1m span structure has a ZeroGeometricATol of 0.01mm.
+        /// </summary>
+        public double ZeroGeometricATol { get; private set; }
 
         public bool IsValid
         {
-            get
-            {
-                return true;
-            }
+            get { return true; }
         }
-
-
-        ///// Geometric informations /////
-        public double SpanX { get; set; }
-        public double SpanY { get; set; }
-        public double SpanZ { get; set; }
-        public double ZeroTol { get; set; }
 
         ///// Structure informations /////
         public int ElementsCount { get { return Elements.Count; } }
@@ -88,10 +86,7 @@ namespace Muscle.ViewModel
         {
             warnings = new List<string>();
 
-            SpanX = 0;
-            SpanY = 0;
-            SpanZ = 0;
-            ZeroTol = 1e-5f; //(m)
+            ZeroGeometricATol = 1e-5f; //(m)
 
             Elements = new List<Element>();
             Nodes = new List<Node>();
@@ -122,32 +117,32 @@ namespace Muscle.ViewModel
         }
 
         public StructureState(GH_Structure<IGH_Goo> GH_elements_input, GH_Structure<GH_Point> GH_points_input, GH_Structure<IGH_Goo> GH_supports_input)
-
         {
             Init();
 
-            //1) StructuralElements property is filled
+            // Step 1: Register structural elements from Grasshopper input
+            // This populates the Elements collection with Element instances
             RegisterElements(GH_elements_input);
 
-            //2) check validity of points inputs
+            // Step 2: Register points as nodes
+            // This creates Node instances from input points, calculates structure dimensions,
+            // and ensures all element endpoints are represented as nodes
             RegisterPointsAsNodes(GH_points_input);
 
-            //3)
+            // Step 3: Connect nodes to element endpoints
+            // This establishes the topological relationship between elements and nodes
             RegisterNodesAsElementsEnds();
 
-            //4) check validity of supports inputs
+            // Step 4: Apply support conditions to nodes
+            // This adds boundary conditions (fixed/free DOFs) to the appropriate nodes
             RegisterSupports(GH_supports_input);
-
         }
 
         public StructureState(StructureState other)
         {
             warnings = new List<string>();
 
-            SpanX = other.SpanX;
-            SpanY = other.SpanY;
-            SpanZ = other.SpanZ;
-            ZeroTol = other.ZeroTol; //(m)
+            ZeroGeometricATol = other.ZeroGeometricATol; //(m)
 
             Elements = new List<Element>();
             foreach (Element e in other.Elements) Elements.Add(e.Copy());
@@ -182,14 +177,16 @@ namespace Muscle.ViewModel
 
         public override string ToString()
         {
-            return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and the {NumberOfFrequency} first frequency(ies)(on {DOFfreeCount}).";
+            return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {DOFfreeCount} free degrees of freedom.";
         }
 
         #region 1)RegisterElements
 
         /// <summary>
-        /// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
+        /// Processes Grasshopper element inputs and registers them in the structure.
+        /// Each element is added to the Elements collection and assigned a unique index.
         /// </summary>
+        /// <param name="GH_elements_input">Grasshopper structure containing element data</param>
         private void RegisterElements(GH_Structure<IGH_Goo> GH_elements_input)
         {
             int index = 0;
@@ -210,13 +207,23 @@ namespace Muscle.ViewModel
 
         #region 2)RegisterPointsAsNodes
 
+        /// <summary>
+        /// Creates Node instances from input points and element endpoints.
+        /// This method:
+        /// 1. Extracts all element endpoints
+        /// 2. Calculates structure dimensions and zero tolerance
+        /// 3. Removes duplicate points
+        /// 4. Ensures all element endpoints are included in the node list
+        /// 5. Creates Node instances with appropriate indices
+        /// </summary>
+        /// <param name="GH_points_input">Grasshopper structure containing point data</param>
         private void RegisterPointsAsNodes(GH_Structure<GH_Point> GH_points_input)
         {
             int ind_node = 0;
             //1) find the points that are extremities of the elements
             List<Point3d> points_from_lines = ElementsEndPoints();
             SpanXYZ(points_from_lines); // set the main dimensions of the structure and set the zeroTolerance for point equality
-            List<Point3d> points_from_lines_wo_d = Node.RemoveDuplicatedPoints(points_from_lines, ZeroTol); //remove points that are equal in order to keep only one instance
+            List<Point3d> points_from_lines_wo_d = Node.RemoveDuplicatedPoints(points_from_lines, ZeroGeometricATol); //remove points that are equal in order to keep only one instance
 
 
             //2) if user inputed a list of points : we want to use its indexation of the nodes
@@ -226,7 +233,7 @@ namespace Muscle.ViewModel
                 List<Point3d> points_input = list_GH_points_input.Select(gh => gh.Value).ToList(); //this transform a GH_Structure<GH_Point> into a List<Point3d> (without for loop). First we flatten the GH_Structure into a List<GH_Point>. Then each GH_Point is converted into a Point3D by replacing it by its value. 
 
                 //2.a) make sure the user list of points do not contains duplicated points
-                List<Point3d> points_input_wo_d = Node.RemoveDuplicatedPoints(points_input, ZeroTol);
+                List<Point3d> points_input_wo_d = Node.RemoveDuplicatedPoints(points_input, ZeroGeometricATol);
                 if (points_input_wo_d.Count < points_input.Count) { warnings.Add("Some user inputted points were duplicates and have been removed. Indexation of points may be affected."); } //warn the user if there were duplicates
 
                 //2.b) make sure all lines extremities are contained in the user list of points, if not add the missing extremity at the end of the user list of points
@@ -265,8 +272,12 @@ namespace Muscle.ViewModel
         }
 
         /// <summary>
-        /// Deduce the main dimensions (in the X,Y and Z directions) of the box containing the structure. Set the ZeroTol of the structure. Two points are considered equal if they are closer than ZeroTol. A structure of 1m span have a ZeroTol = 0.01mm.  
+        /// Calculates the ZeroTol value based on the structure's dimensions.
+        /// ZeroTol is set to 1/100,000 of the maximum span in any direction.
+        /// Two points are considered equal if they are closer than ZeroTol.
+        /// For a structure with 1m span, ZeroTol = 0.01mm.
         /// </summary>
+        /// <param name="points_from_lines">List of points representing element endpoints</param>
         private void SpanXYZ(List<Point3d> points_from_lines)
         {
             double minX = points_from_lines[0].X;
@@ -291,10 +302,7 @@ namespace Muscle.ViewModel
                 if (Z < minZ) { minZ = Z; }
                 if (Z > maxZ) { maxZ = Z; }
             }
-            SpanX = Math.Abs(maxX - minX);
-            SpanY = Math.Abs(maxY - minY);
-            SpanZ = Math.Abs(maxZ - minZ);
-            ZeroTol = Math.Max(SpanX, Math.Max(SpanY, SpanZ)) / 100000; // geometry of 1m span have a ZeroTol = 0.01mm. Two points are considered equal if they are closer than ZeroTol. 
+            ZeroGeometricATol = Math.Max(Math.Abs(maxX - minX), Math.Max(Math.Abs(maxY - minY), Math.Abs(maxZ - minZ))) / 100000; // geometry of 1m span have a ZeroTol = 0.01mm. Two points are considered equal if they are closer than ZeroTol. 
         }
 
         /// <summary>
@@ -308,7 +316,7 @@ namespace Muscle.ViewModel
             int ind;
             foreach (Point3d extremity in extremities)
             {
-                if (!Node.EpsilonContains(points_user, extremity, ZeroTol, out ind))
+                if (!Node.EpsilonContains(points_user, extremity, ZeroGeometricATol, out ind))
                 {
                     points_user.Add(extremity); //thus we add it
                     warnings.Add("Some line extremities were not contained in the user list of points. They have been added at the end of the user list of points");
@@ -323,8 +331,12 @@ namespace Muscle.ViewModel
         #region 3)RegisterNodesAsElementsExtremities
 
         /// <summary>
-        /// Creates a List of Point3d that are the extremities of a List of Lines. Duplicates Points are removed. 
-        /// The indexes of the extremities are stored in the matrice IndexLinesExtremities 
+        /// Establishes the topological relationship between elements and nodes.
+        /// For each element, this method:
+        /// 1. Identifies the nodes that correspond to its endpoints
+        /// 2. Stores the node indices in the element's EndNodes property
+        /// 
+        /// This creates the connectivity information needed for structural analysis.
         /// </summary>
         private void RegisterNodesAsElementsEnds()
         {
@@ -340,8 +352,8 @@ namespace Muscle.ViewModel
                 int ind1 = -1;
                 for (int j = 0; j < Nodes.Count; j++) // parcourir tous les noeuds et voir a quel index correspond les extrémités d'un élément
                 {
-                    if (Nodes[j].Point.EpsilonEquals(n0, ZeroTol)) { ind0 = j; }
-                    if (Nodes[j].Point.EpsilonEquals(n1, ZeroTol)) { ind1 = j; }
+                    if (Nodes[j].Point.EpsilonEquals(n0, ZeroGeometricATol)) { ind0 = j; }
+                    if (Nodes[j].Point.EpsilonEquals(n1, ZeroGeometricATol)) { ind1 = j; }
                 }
                 e.EndNodes = new List<int> { ind0, ind1 }; // Dans tous les cas, on enregistre l'index des noeuds n0 et n1 dans l'objet Element
             }
@@ -349,6 +361,16 @@ namespace Muscle.ViewModel
         #endregion 3)RegisterNodesAsElementsExtremities
 
         #region 4)RegisterSupports
+        /// <summary>
+        /// Applies support conditions to nodes from Grasshopper input.
+        /// For each support in the input:
+        /// 1. Identifies the node that corresponds to the support point
+        /// 2. Applies the support conditions (fixed/free DOFs) to the node
+        /// 3. Adds warnings if supports are defined at points not in the structure
+        /// 
+        /// This establishes the boundary conditions needed for structural analysis.
+        /// </summary>
+        /// <param name="GH_supports_input">Grasshopper structure containing support data</param>
         private void RegisterSupports(GH_Structure<IGH_Goo> GH_supports_input)
         {
             foreach (var data in GH_supports_input.FlattenData())
@@ -358,7 +380,7 @@ namespace Muscle.ViewModel
                 {
                     GH_Support gh_spt = (GH_Support)data;
                     Support spt = gh_spt.Value;
-                    if (Node.EpsilonContains(Nodes, spt.Point, ZeroTol, out ind))
+                    if (Node.EpsilonContains(Nodes, spt.Point, ZeroGeometricATol, out ind))
                     {
                         Nodes[ind].AddSupport(spt);
                     }
@@ -530,4 +552,3 @@ namespace Muscle.ViewModel
         #endregion Methods
     }
 }
-
