@@ -52,7 +52,7 @@ class TestFEMElements(unittest.TestCase):
             np.sqrt(1.0**2 + 1.0**2),  # Element 0: sqrt(2)
             np.sqrt(1.0**2 + 1.0**2)   # Element 1: sqrt(2)
         ])
-        np.testing.assert_array_almost_equal(self.elements.initial_free_length, expected_lengths)
+        np.testing.assert_array_almost_equal(self.elements.free_length, expected_lengths)
         
     def test_connectivity_matrix(self):
         """Test computation of connectivity matrix."""
@@ -127,13 +127,13 @@ class TestFEMElements(unittest.TestCase):
         
     def test_copy_and_update(self):
         """Test copy_and_update method."""
-        new_free_length_variation = np.array([0.1, 0.1])
+        free_length_variation = np.array([0.1, 0.1])
         new_tension = np.array([1000.0, 1000.0])
         
         elements_copy = self.elements.copy_and_update(
             self.nodes,
-            new_free_length_variation,
-            new_tension
+            free_length = self.elements.free_length + free_length_variation,
+            tension = new_tension
         )
         
         # Check immutable attributes are copied
@@ -141,7 +141,7 @@ class TestFEMElements(unittest.TestCase):
         np.testing.assert_array_equal(elements_copy.end_nodes, self.elements.end_nodes)
         
         # Check mutable state is updated
-        np.testing.assert_array_equal(elements_copy.free_length_variation, new_free_length_variation)
+        np.testing.assert_array_equal(elements_copy.free_length, self.elements.free_length + free_length_variation)
         np.testing.assert_array_equal(elements_copy.tension, new_tension)
         
     def test_copy_and_add(self):
@@ -161,8 +161,8 @@ class TestFEMElements(unittest.TestCase):
         
         # Check mutable state is incremented
         np.testing.assert_array_equal(
-            elements_copy.free_length_variation,
-            self.elements.free_length_variation + free_length_variation
+            elements_copy.free_length,
+            self.elements.free_length + free_length_variation
         )
         np.testing.assert_array_equal(
             elements_copy.tension,
@@ -197,14 +197,13 @@ class TestFEMElements(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.elements.copy_and_update(
                 nodes=self.nodes,
-                free_length_variation=np.array([1.0]),  # Wrong size
+                free_length=np.array([1.0]),  # Wrong size
                 tension=np.array([0.0, 0.0])
             )
             
         with self.assertRaises(ValueError):
             self.elements.copy_and_update(
                 nodes=self.nodes,
-                free_length_variation=np.array([0.0, 0.0]),
                 tension=np.array([1.0, 2.0, 3.0])  # Wrong size
             )
 

@@ -41,8 +41,10 @@ class TestSVD2Cables(unittest.TestCase):
             [0, 1],  # Element 0: connects nodes 0 and 1
             [1, 2]   # Element 1: connects nodes 1 and 2
         ])
-        
-        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes)
+
+        type = [1,1]
+
+        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type = type)
         
         # Create FEM_Structure
         self.structure = FEM_Structure(nodes, elements)

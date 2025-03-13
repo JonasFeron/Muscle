@@ -46,8 +46,6 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
             end_nodes=np.array([[0, 1], [1, 2], [1, 3]]),  # Define connectivity
             area=area, 
             youngs=youngs, 
-            free_length_variation=np.array([0.0, 0.0, 0.0]),  # No initial prestress
-            tension=np.array([0.0, 0.0, 0.0])
         )
         
         # Create structure
@@ -68,7 +66,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         # -> Expected force ≈ 14100.945 N in cable 1 assuming all nodes are fixed
 
         expected_free_length = np.array([2.0, 2.0, 1.0]) + np.array([-0.007984, 0.0, 0.0])
-        np.testing.assert_allclose(self.prestress_increment.elements.current_free_length, expected_free_length, atol=1e-6)
+        np.testing.assert_allclose(self.prestress_increment.elements.free_length, expected_free_length, atol=1e-6)
 
 
         prestress = self.prestress_increment.equivalent_tension

@@ -75,14 +75,14 @@ class FEM_Structure:
         return self._create_copy(nodes_copy, elements_copy)
     
     def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None,
-                       free_length_variation: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Structure':
+                       free_length: np.ndarray = None, tension: np.ndarray = None, resisting_forces: np.ndarray = None):
         """Create a copy of this structure and update its state, or use the current state if None is passed.
         
         Args:
             loads: [N] - shape (nodes_count, 3) or (3*nodes_count,) - External loads
             displacements: [m] - shape (nodes_count, 3) or (3*nodes_count,) - Nodal displacements
             reactions: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Support reactions
-            free_length_variation: [m] - shape (elements_count,) - Change in free length
+            free_length: [m] - shape (elements_count,) - Free length of elements
             tension: [N] - shape (elements_count,) - Axial forces
             resisting_forces: [N] - shape (nodes_count, 3) or (3*nodes_count,) - Internal resisting forces
         """
@@ -90,7 +90,7 @@ class FEM_Structure:
         nodes_copy = self._nodes.copy_and_update(loads, displacements, reactions, resisting_forces)
         
         # Create new elements with updated state, referencing the new nodes
-        elements_copy = self._elements.copy_and_update(nodes_copy, free_length_variation, tension)
+        elements_copy = self._elements.copy_and_update(nodes_copy, free_length, tension)
         
         return self._create_copy(nodes_copy, elements_copy)
         

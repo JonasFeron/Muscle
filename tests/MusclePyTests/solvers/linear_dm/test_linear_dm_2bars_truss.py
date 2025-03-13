@@ -40,7 +40,6 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
             area=np.array([2500.0, 2500.0]),  # 2500 mm² area
             youngs=np.array([[10000.0, 10000.0], [10000.0, 10000.0]]),  # 10000 MPa Young's modulus
-            free_length_variation=np.array([0.0, 0.0]),  # No initial prestress
             tension=np.array([0.0, 0.0])  # No initial tension
         )
         

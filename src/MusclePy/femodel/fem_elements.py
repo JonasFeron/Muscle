@@ -4,37 +4,37 @@ from .fem_nodes import FEM_Nodes
 
 class FEM_Elements:
     def __init__(self, nodes: FEM_Nodes, type=None, end_nodes=None, area=None, youngs=None, 
-                 free_length_variation=None, tension=None):
+                 free_length=None, tension=None):
         """Python equivalent of C# FEM_Elements class.
         
         Properties:
         1. Read-Only (computed once):
-            - nodes: FEM_Nodes instance
             - count: Number of elements
             - type: [-] Element types (-1: strut, 1: cable)
             - end_nodes: [-] Element-node connectivity indices
             - connectivity: [-] Element-node connectivity matrix
-            - initial_free_length: [m] Length in unprestressed state
             - area: [mm²] Cross-section area of elements
-            
-        2. State-Dependent (computed from current state):
-            - young: [MPa] Young's modulus based on tension state
+            - youngs: [MPa] 2 Young's moduli per element defining the bilinear material. 
+        
+        2. Mutable State:
+            - nodes: FEM_Nodes instance containing current node coordinates
+            - free_length: [m] Free length of elements
+            - tension: [N] Axial force (positive in tension)
+
+        3. State-Dependent (computed from current state):
+            - young: [MPa] Young's modulus based on current elastic elongation. 
             - flexibility: [m/N] = L/(EA), large value (1e6) if EA ≈ 0
             - current_length: [m] Based on current node coordinates
-            - current_free_length: [m] = initial + delta
-            - direction_cosines: [-] Unit vectors (x,y,z)
-            
-        3. Mutable State:
-            - free_length_variation: [m] Change in free length
-            - tension: [N] Axial force (positive in tension)
+            - direction_cosines: [-] Unit vectors (x,y,z)            
+
             
         Args:
             nodes: FEM_Nodes instance
             type: Element types, shape (elements_count,)
             end_nodes: Node indices, shape (elements_count, 2)
             area: Cross-sections, shape (elements_count,)
-            youngs: Young's moduli, shape (elements_count, 2) : [E_if_compression, E_if_tension]
-            free_length_variation: variation of free Length due to prestressing or form-finding, shape (elements_count,)
+            youngs: Young's moduli, shape (elements_count, 2) : [[Ei_compression, Ei_tension],[Ej_compression, Ej_tension],...]
+            free_length: Free length of elements, shape (elements_count,)
             tension: Axial forces, shape (elements_count,)
         """
         # Initialize immutable attributes (set once from C#)
@@ -42,20 +42,19 @@ class FEM_Elements:
             raise TypeError("nodes must be a FEM_Nodes instance")
         self._nodes = nodes
         self._count = 0
-
+        
+        # Initialize element properties
         self._type = np.array([], dtype=int)
-        self._end_nodes = np.array([], dtype=int).reshape((0, 2))
-        self._connectivity = np.array([], dtype=int).reshape((0, 0))  # Initialize empty connectivity matrix (computed from end_nodes)
+        self._end_nodes = np.array([], dtype=int).reshape(0, 2)
         self._area = np.array([], dtype=float)
-        self._youngs = np.array([], dtype=float).reshape((0, 2))
-        self._initial_free_length = np.array([], dtype=float)
+        self._youngs = np.array([], dtype=float).reshape(0, 2)
         
         # Initialize mutable state attributes
-        self._free_length_variation = np.array([], dtype=float)
+        self._free_length = np.array([], dtype=float)
         self._tension = np.array([], dtype=float)
         
         # Initialize the instance
-        self._initialize(type, end_nodes, area, youngs, free_length_variation, tension)
+        self._initialize(type, end_nodes, area, youngs, free_length, tension)
 
 
 
@@ -74,8 +73,11 @@ class FEM_Elements:
             shape_suffix: Optional second dimension (e.g. 2 for youngs/end_nodes)
         """
         if arr is None:
+            if name in ["type", "end_nodes"]:
+                raise ValueError(f"{name} cannot be None")
+
             shape = (self._count,) if shape_suffix is None else (self._count, shape_suffix)
-            return np.zeros(shape, dtype=int if name in ["type", "end_nodes"] else float)
+            return np.zeros(shape, dtype=float) # e.g. zero array if no tension is provided. 
             
         # Convert to numpy array with correct dtype
         if not isinstance(arr, np.ndarray):  # if arr is a C# array
@@ -94,7 +96,7 @@ class FEM_Elements:
             
         raise ValueError(f"{name} cannot be reshaped to {expected_shape}, got shape {result.shape}")
     
-    def _initialize(self, type, end_nodes, area, youngs, free_length_variation, tension):
+    def _initialize(self, type, end_nodes, area, youngs, free_length, tension):
         """Initialize all attributes with proper validation."""
         # Handle end_nodes first to establish count
         if end_nodes is not None:
@@ -120,27 +122,35 @@ class FEM_Elements:
         self._type = self._check_and_reshape_array(type, "type")
         self._area = self._check_and_reshape_array(area, "area")
         self._youngs = self._check_and_reshape_array(youngs, "youngs", shape_suffix=2)
-        
-        # Compute initial free length from nodes coordinates
-        self._compute_initial_free_length()
-        
+            
+        # Calculate free length based on node coordinates if not provided
+        if free_length is None:
+            self._free_length = self._calculate_current_length()
+        else:
+            self._free_length = self._check_and_reshape_array(free_length, "free_length")
+            
+        self._tension = self._check_and_reshape_array(tension, "tension")
+            
         # Compute connectivity matrix
         self._compute_connectivity()
-        
-        # Initialize mutable state arrays
-        self._free_length_variation = self._check_and_reshape_array(free_length_variation, "free_length_variation")
-        self._tension = self._check_and_reshape_array(tension, "tension")
     
-    def _compute_initial_free_length(self):
-        """Compute initial free length from nodes coordinates."""
-        if self._count > 0:
-            coords = self._nodes.initial_coordinates
-            n0 = self._end_nodes[:, 0]
-            n1 = self._end_nodes[:, 1]
-            dx = coords[n1, 0] - coords[n0, 0]
-            dy = coords[n1, 1] - coords[n0, 1]
-            dz = coords[n1, 2] - coords[n0, 2]
-            self._initial_free_length = np.sqrt(dx*dx + dy*dy + dz*dz)
+    def _calculate_current_length(self):
+        """Calculate current length of elements based on node coordinates."""
+        if self._count == 0:
+            return np.array([], dtype=float)
+        
+        # Get node coordinates
+        node_coords = self._nodes.coordinates
+        
+        # Get end node coordinates
+        start_nodes = node_coords[self._end_nodes[:, 0]]
+        end_nodes = node_coords[self._end_nodes[:, 1]]
+        
+        # Calculate vector from start to end
+        vectors = end_nodes - start_nodes
+        
+        # Calculate length
+        return np.sqrt(np.sum(vectors ** 2, axis=1))
     
     def _compute_connectivity(self):
         """Compute connectivity matrix between nodes and elements.
@@ -192,11 +202,6 @@ class FEM_Elements:
         return self._connectivity
 
     @property
-    def initial_free_length(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Free length in unprestressed state"""
-        return self._initial_free_length
-
-    @property
     def area(self) -> np.ndarray:
         """[mm²] - shape (elements_count,) - Cross-section area of elements"""
         return self._area
@@ -207,9 +212,9 @@ class FEM_Elements:
         return self._youngs
 
     @property
-    def free_length_variation(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Change in free length due to prestress"""
-        return self._free_length_variation
+    def free_length(self) -> np.ndarray:
+        """[m] - shape (elements_count,) - Free length of elements"""
+        return self._free_length
         
     @property
     def tension(self) -> np.ndarray:
@@ -232,24 +237,13 @@ class FEM_Elements:
 
     @property
     def current_length(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Current length of elements (based on current nodes coordinates)"""
-        coords = self._nodes.coordinates
-        n0 = self._end_nodes[:, 0]
-        n1 = self._end_nodes[:, 1]
-        dx = coords[n1, 0] - coords[n0, 0]
-        dy = coords[n1, 1] - coords[n0, 1]
-        dz = coords[n1, 2] - coords[n0, 2]
-        return np.sqrt(dx*dx + dy*dy + dz*dz)
+        """[m] - shape (elements_count,) - Current length of elements"""
+        return self._calculate_current_length()
     
     @property
-    def current_free_length(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Current free length (initial + variation)"""
-        return self._initial_free_length + self._free_length_variation
-
-    @property
     def elastic_elongation(self) -> np.ndarray:
-        """[m] - shape (elements_count,) - Elastic elongation of elements (tension positive)"""
-        return self.current_length - self.current_free_length
+        """[m] - shape (elements_count,) - Elastic elongation of elements (current_length - free_length)"""
+        return self.current_length - self.free_length
     
     @property
     def young(self) -> np.ndarray:
@@ -268,7 +262,7 @@ class FEM_Elements:
         ea = self.young * self.area  # [MPa * mm²] = [N]
         mask = ea > 0  # If EA is zero, flexibility L/EA is infinite
         result = np.full(self._count, infinite_flexibility, dtype=float)  
-        result[mask] = self.current_free_length[mask] / ea[mask]
+        result[mask] = self.free_length[mask] / ea[mask]
         return result
 
     # Note : tension is considered as an input to construct an element,
@@ -304,7 +298,7 @@ class FEM_Elements:
         return current_young
     
    
-    def _create_copy(self, nodes, type, end_nodes, area, youngs, free_length_variation, tension):
+    def _create_copy(self, nodes, type, end_nodes, area, youngs, free_length, tension):
         """Core copy method that creates a new instance of the appropriate class.
         
         This protected method is used by all copy methods to create a new instance.
@@ -319,7 +313,7 @@ class FEM_Elements:
             end_nodes=end_nodes,
             area=area,
             youngs=youngs,
-            free_length_variation=free_length_variation,
+            free_length=free_length,
             tension=tension
         )
     
@@ -339,23 +333,23 @@ class FEM_Elements:
             end_nodes=self._end_nodes.copy(),
             area=self._area.copy(),
             youngs=self._youngs.copy(),
-            free_length_variation=self._free_length_variation.copy(),
+            free_length=self._free_length.copy(),
             tension=self._tension.copy()
         )
     
-    def copy_and_update(self, nodes: 'FEM_Nodes', free_length_variation: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
+    def copy_and_update(self, nodes: 'FEM_Nodes', free_length: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
         """Create a copy with updated state values, or use existing state if None.
         
         Args:
             nodes: FEM_Nodes instance
-            free_length_variation: [m] - shape (elements_count,) - Change in free length
+            free_length: [m] - shape (elements_count,) - Free length of elements
             tension: [N] - shape (elements_count,) - Axial forces
         """
         # Reshape inputs if needed
-        if free_length_variation is None: free_length_variation = self._free_length_variation.copy()
+        if free_length is None: free_length = self._free_length.copy()
         if tension is None: tension = self._tension.copy()
         
-        free_length_variation = self._check_and_reshape_array(free_length_variation, "free_length_variation")
+        free_length = self._check_and_reshape_array(free_length, "free_length")
         tension = self._check_and_reshape_array(tension, "tension")
         
         return self._create_copy(
@@ -364,7 +358,7 @@ class FEM_Elements:
             end_nodes=self._end_nodes.copy(),
             area=self._area.copy(),
             youngs=self._youngs.copy(),
-            free_length_variation=free_length_variation,
+            free_length=free_length,
             tension=tension
         )
     
@@ -386,6 +380,6 @@ class FEM_Elements:
             
         return self.copy_and_update(
             nodes=nodes,
-            free_length_variation=self._free_length_variation + free_length_variation,
+            free_length=self._free_length + free_length_variation,
             tension=self._tension + tension_increment
         )
