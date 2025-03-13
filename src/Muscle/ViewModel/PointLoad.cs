@@ -33,7 +33,7 @@ namespace Muscle.ViewModel
         }
         public PointLoad(Node aNode, Vector3d aVector)
         {
-            NodeInd = aNode.Ind;
+            NodeInd = aNode.Idx;
             Vector = aVector;
         }
         public PointLoad(int ind, Vector3d aVector)

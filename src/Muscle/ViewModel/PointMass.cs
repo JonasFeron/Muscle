@@ -38,7 +38,7 @@ namespace Muscle.Dynamics
         }
         public PointMass(Node aNode, Vector3d aVector)
         {
-            NodeInd = aNode.Ind;
+            NodeInd = aNode.Idx;
             Vector = aVector;
         }
         public PointMass(int ind, Vector3d aVector)

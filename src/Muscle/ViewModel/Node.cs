@@ -11,7 +11,7 @@ namespace Muscle.ViewModel
     {
         #region Properties
         public string TypeName { get { return "Node"; } }
-        public int Ind { get; set; } //index of the node in the structure
+        public int Idx { get; set; } //index of the node in the structure
 
         public Point3d Point { get; set; }
         public bool IsValid { get { return true; } } //to implement
@@ -47,7 +47,7 @@ namespace Muscle.ViewModel
             get { return Convert.ToInt16(!isXFree) + Convert.ToInt16(!isYFree) + Convert.ToInt16(!isZFree); }
         }
 
-        public Vector3d Reaction { get; set; }
+        public Vector3d Reactions { get; set; }
         //public List<Vector3d> Reaction_Results { get; set; }
         //public List<Vector3d> Reaction_Total { get; set; } // addition of already applied + results
 
@@ -56,10 +56,10 @@ namespace Muscle.ViewModel
         ///// Load informations /////
         #region Load
 
-        public Vector3d Load { get; set; }
+        public Vector3d Loads { get; set; }
         //public Vector3d LoadToApply { get; set; }
 
-        public Vector3d Residual { get; set; } // the unbalanced loads = Load - SUM Tension*cos
+        public Vector3d Residuals { get; set; } // the unbalanced loads = Load - SUM Tension*cos
                                                //public Vector3d PrestressLoad_To_Apply { get; set; } // load coming from an initial force
 
         //public List<Vector3d> Load_Results { get; set; }
@@ -86,7 +86,7 @@ namespace Muscle.ViewModel
         /// </summary>
         private void Init()
         {
-            Ind = -1;
+            Idx = -1;
             Point = new Point3d();
 
             isXFree = true;
@@ -95,12 +95,12 @@ namespace Muscle.ViewModel
             Ind_RX = -1;
             Ind_RY = -1;
             Ind_RZ = -1;
-            Reaction = new Vector3d();
+            Reactions = new Vector3d();
             //Reaction_Results = new List<Vector3d>();
             //Reaction_Total = new List<Vector3d>();
 
-            Load = new Vector3d();
-            Residual = new Vector3d();
+            Loads = new Vector3d();
+            Residuals = new Vector3d();
             //LoadToApply = new Vector3d();
             //Load_Results = new List<Vector3d>();
             //Load_Total = new List<Vector3d>();
@@ -123,11 +123,11 @@ namespace Muscle.ViewModel
         {
             Init();
             Point = point;
-            Ind = ind;
+            Idx = ind;
         }
         public Node(Node other)
         {
-            Ind = other.Ind;
+            Idx = other.Idx;
             Point = other.Point;
 
             isXFree = other.isXFree;
@@ -137,12 +137,12 @@ namespace Muscle.ViewModel
             Ind_RY = other.Ind_RY;
             Ind_RZ = other.Ind_RZ;
 
-            Reaction = other.Reaction;
+            Reactions = other.Reactions;
             //Reaction_Results = other.Reaction_Results;
             //Reaction_Total = other.Reaction_Total;
 
-            Load = other.Load;
-            Residual = other.Residual;
+            Loads = other.Loads;
+            Residuals = other.Residuals;
             //LoadToApply = other.LoadToApply;
             //Load_Results = other.Load_Results;
             //Load_Total = other.Load_Total;
@@ -164,7 +164,7 @@ namespace Muscle.ViewModel
 
         public override string ToString()
         {
-            return $"Node {Ind} with coordinates {Point}";
+            return $"Node {Idx} with coordinates {Point}";
         }
 
         ///// Methods related to this object /////

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	
   <PropertyGroup>
     <!-- Select the framework(s) you wish to target.
@@ -58,6 +58,10 @@
     <PackageReference Include="Grasshopper" Version="8.10.24228.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="pythonnet" Version="3.0.5" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\MuscleCS\MuscleCS.csproj" />
   </ItemGroup>
   
   <!-- For Windows only builds -->
