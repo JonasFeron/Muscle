@@ -24,10 +24,6 @@ namespace MuscleCore.FEModel
         /// </summary>
         public int[,] EndNodes { get; set; }
 
-        /// <summary>
-        /// [m] - shape (elements_count,) - Free length in unprestressed state
-        /// </summary>
-        public double[] InitialFreeLength { get; set; }
 
         /// <summary>
         /// Number of elements
@@ -35,17 +31,12 @@ namespace MuscleCore.FEModel
         public int Count { get; set; }
 
         /// <summary>
-        /// [mm²] - shape (elements_count, 2) - Areas in compression and tension
-        /// </summary>
-        public double[,] Areas { get; set; }
-
-        /// <summary>
         /// [MPa] - shape (elements_count, 2) - Young's moduli in compression and tension
         /// </summary>
         public double[,] Youngs { get; set; }
 
         /// <summary>
-        /// [mm²] - shape (elements_count,) - Current area depending on tension state
+        /// [mm²] - shape (elements_count,) - Cross-sectional area of the elements
         /// </summary>
         public double[] Area { get; set; }
 
@@ -60,14 +51,9 @@ namespace MuscleCore.FEModel
         public double[] CurrentLength { get; set; }
 
         /// <summary>
-        /// [m] - shape (elements_count,) - Current free length (initial + delta)
+        /// [m] - shape (elements_count,) - Free length of the elements
         /// </summary>
-        public double[] CurrentFreeLength { get; set; }
-
-        /// <summary>
-        /// [-] - shape (elements_count,) - Change in free length
-        /// </summary>
-        public double[] DeltaFreeLength { get; set; }
+        public double[] FreeLength { get; set; }
 
         /// <summary>
         /// [N] - shape (elements_count,) - Axial force (positive in tension)
@@ -94,28 +80,26 @@ namespace MuscleCore.FEModel
         /// <param name="endNodes">Node indices, shape (elements_count, 2)</param>
         /// <param name="areas">Cross-sections, shape (elements_count, 2) : [A_if_compression, A_if_tension]</param>
         /// <param name="youngs">Young's moduli, shape (elements_count, 2) : [E_if_compression, E_if_tension]</param>
-        /// <param name="deltaFreeLength">variation of free Length due to prestressing or form-finding, shape (elements_count,)</param>
+        /// <param name="freeLength">Free length of the elements, shape (elements_count,)</param>
         /// <param name="tension">Axial forces, shape (elements_count,)</param>
-        public FEM_Elements(FEM_Nodes nodes, int[] type, int[,] endNodes, double[,] areas, 
-                          double[,] youngs, double[] deltaFreeLength = null, double[] tension = null)
+        public FEM_Elements(FEM_Nodes nodes, int[] type, int[,] endNodes, double[,] area, 
+                          double[,] youngs, double[] freeLength = null, double[] tension = null)
         {
             // Initialize required properties
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
             Type = type ?? throw new ArgumentNullException(nameof(type));
             EndNodes = endNodes ?? throw new ArgumentNullException(nameof(endNodes));
-            Areas = areas ?? throw new ArgumentNullException(nameof(areas));
             Youngs = youngs ?? throw new ArgumentNullException(nameof(youngs));
+            Area = area ?? throw new ArgumentNullException(nameof(area));
 
             // Set count from end nodes
             Count = EndNodes.GetLength(0);
 
             // Initialize mutable properties with empty arrays
-            InitialFreeLength = new double[Count];
-            Area = new double[Count];
+
             Young = new double[Count];
             CurrentLength = new double[Count];
-            CurrentFreeLength = new double[Count];
-            DeltaFreeLength = deltaFreeLength ?? new double[Count];
+            FreeLength = freeLength ?? new double[Count];
             Tension = tension ?? new double[Count];
             Flexibility = new double[Count];
             DirectionCosines = new double[Count, 3];
@@ -128,15 +112,12 @@ namespace MuscleCore.FEModel
             FEM_Nodes nodes,
             int[] type,
             int[,] endNodes,
-            double[] initialFreeLength,
             int count,
-            double[,] areas,
             double[,] youngs,
             double[] area,
             double[] young,
             double[] currentLength,
-            double[] currentFreeLength,
-            double[] deltaFreeLength,
+            double[] freeLength,
             double[] tension,
             double[] flexibility,
             double[,] directionCosines)
@@ -144,15 +125,12 @@ namespace MuscleCore.FEModel
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
             Type = type ?? throw new ArgumentNullException(nameof(type));
             EndNodes = endNodes ?? throw new ArgumentNullException(nameof(endNodes));
-            InitialFreeLength = initialFreeLength ?? throw new ArgumentNullException(nameof(initialFreeLength));
             Count = count;
-            Areas = areas ?? throw new ArgumentNullException(nameof(areas));
             Youngs = youngs ?? throw new ArgumentNullException(nameof(youngs));
             Area = area ?? throw new ArgumentNullException(nameof(area));
             Young = young ?? throw new ArgumentNullException(nameof(young));
             CurrentLength = currentLength ?? throw new ArgumentNullException(nameof(currentLength));
-            CurrentFreeLength = currentFreeLength ?? throw new ArgumentNullException(nameof(currentFreeLength));
-            DeltaFreeLength = deltaFreeLength ?? throw new ArgumentNullException(nameof(deltaFreeLength));
+            FreeLength = currentFreeLength ?? throw new ArgumentNullException(nameof(currentFreeLength));
             Tension = tension ?? throw new ArgumentNullException(nameof(tension));
             Flexibility = flexibility ?? throw new ArgumentNullException(nameof(flexibility));
             DirectionCosines = directionCosines ?? throw new ArgumentNullException(nameof(directionCosines));

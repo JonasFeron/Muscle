@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Muscle.View;
+using MuscleCore.FEModel;
 
 namespace Muscle.ViewModel
 {
@@ -170,6 +171,60 @@ namespace Muscle.ViewModel
             return new StructureState(this);
         }
 
+        /// <summary>
+        /// Creates a StructureState from a FEM_Structure instance.
+        /// This constructor converts the FEM model back to the ViewModel representation.
+        /// </summary>
+        /// <param name="femStructure">FEM_Structure instance to convert</param>
+        public StructureState(MuscleCore.FEModel.FEM_Structure femStructure)
+        {
+            Init();
+            CopyAndUpdateFrom(femStructure);
+        }
+
+        /// <summary>
+        /// Updates this StructureState instance with data from a FEM_Structure instance.
+        /// This method converts the FEM model back to the ViewModel representation.
+        /// </summary>
+        /// <param name="femStructure">FEM_Structure instance to copy data from</param>
+        public StructureState CopyAndUpdateFrom(FEM_Structure femStructure)
+        {
+            StructureState updatedStructure = this.Copy();
+
+            if (femStructure == null)
+                throw new ArgumentNullException(nameof(femStructure), "FEM_Structure cannot be null");
+                
+            if (femStructure.Nodes == null || femStructure.Elements == null)
+                throw new ArgumentException("FEM_Structure must have valid Nodes and Elements", nameof(femStructure));
+            
+            // Clear existing collections
+            Nodes.Clear();
+            Elements.Clear();
+            warnings.Clear();
+            
+            // Step 1: Create Node instances from FEM_Nodes
+            for (int i = 0; i < femStructure.Nodes.Count; i++)
+            {
+                Node node = new Node();
+                node.CopyAndUpdateFrom(femStructure.Nodes, i);
+                Nodes.Add(node);
+            }
+            
+            // Step 2: Create Element instances from FEM_Elements
+            for (int i = 0; i < femStructure.Elements.Count; i++)
+            {
+                Element element = new Element();
+                element.CopyAndUpdateFrom(femStructure.Elements, i, Nodes);
+                Elements.Add(element);
+            }
+            
+            // Step 3: Update structure properties
+            // Use the ZeroTol from the FEM_Nodes since FEM_Structure doesn't have one
+            ZeroGeometricATol = femStructure.Nodes.ZeroTol;
+            
+            // Add a warning if the conversion was successful
+            warnings.Add("Structure successfully converted from FEM_Structure");
+        }
 
         #endregion Constructors
 
@@ -328,7 +383,7 @@ namespace Muscle.ViewModel
 
         #endregion 2)RegisterPointsAsNodes
 
-        #region 3)RegisterNodesAsElementsExtremities
+        #region 3)RegisterNodesAsElementsEnds
 
         /// <summary>
         /// Establishes the topological relationship between elements and nodes.
@@ -358,7 +413,7 @@ namespace Muscle.ViewModel
                 e.EndNodes = new List<int> { ind0, ind1 }; // Dans tous les cas, on enregistre l'index des noeuds n0 et n1 dans l'objet Element
             }
         }
-        #endregion 3)RegisterNodesAsElementsExtremities
+        #endregion 3)RegisterNodesAsElementsEnds
 
         #region 4)RegisterSupports
         /// <summary>
