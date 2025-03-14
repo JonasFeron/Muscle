@@ -17,10 +17,11 @@
 //List of the contributors to the development of PythonNETGrasshopperTemplate: see NOTICE file.
 //Description and complete License: see NOTICE file.
 
-using MuscleCore.FEModel;
-using Python.Runtime;
+using MuscleApp.ViewModel;
+using static MuscleApp.Converters.StructureStateEncoder;
+using static MuscleApp.Converters.StructureStateDecoder;
 
-namespace MuscleCore.Solvers
+namespace MuscleApp.Solvers
 {
     public static class LinearDM
     {
@@ -30,35 +31,14 @@ namespace MuscleCore.Solvers
         /// <param name="initialStructure">Current structure state</param>
         /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
         /// <param name="freeLengthVariation">[m] - shape (elements.count,) - Free length increments to apply</param>
-        /// <returns>Updated FEM_Structure with incremented state</returns>
-        public static FEM_Structure? Solve(FEM_Structure initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
+        /// <returns>Updated StructureState with incremented state</returns>
+        public static StructureState? Solve(StructureState initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
         {
-            string pythonPackage = "MusclePy"; 
-            FEM_Structure? femResults = null;
+            var femResults = MuscleCore.Solvers.LinearDM.Solve(ToFEM(initialStructure), loadsIncrement, freeLengthVariation);
 
-            var m_threadState = PythonEngine.BeginAllowThreads();
-            using (Py.GIL())
-            {
-                try
-                {
-                    PyObject pyInitialStructure = initialStructure.ToPython();
-                    dynamic musclepy = Py.Import(pythonPackage);
-                    dynamic solve = musclepy.main_linear_displacement_method;
-                    dynamic pyFemResults = solve(
-                        pyInitialStructure,
-                        loadsIncrement,
-                        freeLengthVariation
-                    );
-                    femResults = pyFemResults.As<FEM_Structure>();
-                }
-                catch (Exception e)
-                {
-                    throw;
-                }
-            }
-            PythonEngine.EndAllowThreads(m_threadState);
+            var updatedStructure = CopyAndUpdate(initialStructure, femResults);
 
-            return femResults;
+            return updatedStructure;
         }
     }
 }

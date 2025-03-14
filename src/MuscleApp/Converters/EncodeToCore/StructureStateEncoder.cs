@@ -17,7 +17,7 @@ namespace MuscleApp.Converters
         /// </summary>
         /// <param name="structure">StructureState instance to convert</param>
         /// <returns>FEM_Structure instance containing all data needed for analysis</returns>
-        public static FEM_Structure ToFEM_Structure(StructureState structure)
+        public static FEM_Structure ToFEM(StructureState structure)
         {
             if (structure == null)
                 throw new ArgumentNullException(nameof(structure), "StructureState cannot be null");

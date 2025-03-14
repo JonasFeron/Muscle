@@ -12,13 +12,13 @@ namespace MuscleApp.Converters
     public static class ElementsDecoder
     {
         /// <summary>
-        /// Updates a list of Element instances with data from a FEM_Elements instance after computations.
+        /// Updates a list of Element instances with results from a FEM_Elements instance after computations.
         /// </summary>
         /// <param name="originalElements">List of Element instances to update</param>
         /// <param name="femElementsResults">FEM_Elements instance containing element results</param>
         /// <param name="updatedNodes">List of Node instances to get coordinates for creating the Lines</param>
         /// <returns>Updated list of Element instances</returns>
-        public static List<Element> CopyAndUpdateFrom(List<Element> originalElements, FEM_Elements femElementsResults, List<Node> updatedNodes)
+        public static List<Element> CopyAndUpdate(List<Element> originalElements, FEM_Elements femElementsResults, List<Node> updatedNodes)
         {
             if (originalElements == null)
                 throw new ArgumentNullException(nameof(originalElements), "Elements list cannot be null");

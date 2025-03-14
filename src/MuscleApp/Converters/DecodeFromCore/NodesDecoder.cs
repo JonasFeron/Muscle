@@ -13,12 +13,12 @@ namespace MuscleApp.Converters
     {
 
         /// <summary>
-        /// Updates a list of Node instances with data from a FEM_Nodes instance after computations.
+        /// Updates a list of Node instances with results from a FEM_Nodes instance after computations.
         /// </summary>
         /// <param name="originalNodes">List of Node instances to update</param>
         /// <param name="femNodesResults">FEM_Nodes instance containing node results</param>
         /// <returns>Updated list of Node instances</returns>
-        public static List<Node> CopyAndUpdateFrom(List<Node> originalNodes, FEM_Nodes femNodesResults)
+        public static List<Node> CopyAndUpdate(List<Node> originalNodes, FEM_Nodes femNodesResults)
         {
             if (originalNodes == null)
                 throw new ArgumentNullException(nameof(originalNodes), "Nodes list cannot be null");

@@ -14,12 +14,12 @@ namespace MuscleApp.Converters
     public static class StructureStateDecoder
     {
         /// <summary>
-        /// Updates a StructureState instance with data from a FEM_Structure instance.
+        /// Updates a StructureState instance with results from a FEM_Structure instance.
         /// </summary>
         /// <param name="original">StructureState instance to update</param>
         /// <param name="femResults">FEM_Structure instance containing structure data</param>
         /// <returns>Updated StructureState instance</returns>
-        public static StructureState CopyAndUpdateFrom(StructureState original, FEM_Structure femResults)
+        public static StructureState CopyAndUpdate(StructureState original, FEM_Structure femResults)
         {
             if (original == null)
                 throw new ArgumentNullException(nameof(original), "StructureState cannot be null");
@@ -38,10 +38,10 @@ namespace MuscleApp.Converters
             List<Element> elementsResults = femResults.Elements;
             
             // Copy and Update original nodes with the nodes results 
-            updated.Nodes = CopyAndUpdateFrom(original.Nodes, nodesResults);
+            updated.Nodes = CopyAndUpdate(original.Nodes, nodesResults);
             
             // Copy and Update original elements with the elements results
-            updated.Elements = CopyAndUpdateFrom(original.Elements, elementsResults, updated.Nodes);
+            updated.Elements = CopyAndUpdate(original.Elements, elementsResults, updated.Nodes);
             
             // Update equilibrium state
             updated.IsInEquilibrium = femResults.IsInEquilibrium;
