@@ -1,11 +1,11 @@
 using MuscleCore.Application.PythonNETSolvers;
-using MuscleCore.Application.PythonNETInit;
 using MuscleCore.Converters;
 using MuscleCore.FEModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Python.Runtime;
 using System.IO;
 using Rhino.Geometry;
+using MuscleCore.App.PythonNETInit;
 
 namespace MuscleCSTests.Converters
 {

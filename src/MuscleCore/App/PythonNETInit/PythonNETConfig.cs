@@ -46,7 +46,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MuscleCore.Application.PythonNETInit
+namespace MuscleCore.App.PythonNETInit
 {
 
     public static class PythonNETConfig

@@ -18,8 +18,8 @@
   <PropertyGroup>
     <!-- Specifies information for Assembly and Yak -->
     <Version>1.0</Version>
-    <Title>MyGrasshopperPlugin</Title>
-    <Company>MyGrasshopperPlugin Authors</Company>
+    <Title>Muscle</Title>
+    <Company>Université catholique de Louvain (UCLouvain)</Company>
     <Description>Description of MyGrasshopperPlugin</Description>
   </PropertyGroup>
   
@@ -60,10 +60,6 @@
     <PackageReference Include="pythonnet" Version="3.0.5" />
   </ItemGroup>
   
-  <ItemGroup>
-    <ProjectReference Include="..\MuscleCS\MuscleCS.csproj" />
-  </ItemGroup>
-  
   <!-- For Windows only builds -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
     <UseWindowsForms>true</UseWindowsForms>
@@ -78,6 +74,9 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" ExcludeAssets="all" GeneratePathProperty="true" />
     <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
   </ItemGroup>
 
   <Target Name="CopyPdbForMonoDebugging" AfterTargets="AfterBuild">

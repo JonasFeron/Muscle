@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grasshopper" Version="7.36.23346.16351" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
-    <PackageReference Include="Grasshopper" Version="8.10.24228.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
     <PackageReference Include="pythonnet" Version="3.0.5" />
   </ItemGroup>
 
