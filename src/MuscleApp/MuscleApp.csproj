@@ -39,6 +39,10 @@
     <Compile Include="ViewModel\Support.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Grasshopper" Version="7.35.23346.11001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
+    <PackageReference Include="Grasshopper" Version="8.10.24228.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\MuscleCore\MuscleCore.csproj">
       <Project>{fa523f56-aa22-416d-b68e-63ce60efda62}</Project>
       <Name>MuscleCore</Name>

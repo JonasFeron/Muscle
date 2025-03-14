@@ -1,7 +1,7 @@
 using MuscleCore.FEModel;
 using Muscle.ViewModel;
 
-namespace Muscle.ViewModel2FEModel
+namespace MuscleApp.Converters
 {
     public static class NodesEncoder
     {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Muscle.ViewModel2FEModel
+namespace MuscleApp.Converters
 {
     /// <summary>
     /// Converts Element instances to FEM_Elements for computational analysis.

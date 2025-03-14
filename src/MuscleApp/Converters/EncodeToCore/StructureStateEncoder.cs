@@ -2,7 +2,7 @@ using MuscleCore.FEModel;
 using Muscle.ViewModel;
 using System;
 
-namespace Muscle.ViewModel2FEModel
+namespace MuscleApp.Converters
 {
     /// <summary>
     /// Converts StructureState instances to FEM_Structure for computational analysis.
