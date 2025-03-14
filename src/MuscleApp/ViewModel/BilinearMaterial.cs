@@ -1,7 +1,7 @@
 ﻿using System;
 using Rhino.Geometry;
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
     public class BilinearMaterial
     {

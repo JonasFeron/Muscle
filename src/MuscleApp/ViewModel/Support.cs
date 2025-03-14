@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
 
     public class Support

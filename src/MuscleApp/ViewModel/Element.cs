@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System;
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
     /// <summary>
     /// An Element is the most general (bi-)linear elastic structural element. 

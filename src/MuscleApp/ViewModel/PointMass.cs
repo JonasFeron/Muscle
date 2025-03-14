@@ -4,7 +4,7 @@ using Muscle.ViewModel;
 using Rhino.Geometry;
 using System.Collections.Generic;
 
-namespace Muscle.Dynamics
+namespace MuscleApp.ViewModel
 {
     public class PointMass
     {

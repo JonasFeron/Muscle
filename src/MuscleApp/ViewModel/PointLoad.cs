@@ -2,7 +2,7 @@
 using Rhino.Geometry;
 using System.Collections.Generic;
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
     public class PointLoad
     {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MuscleCore.FEModel;
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
     public class Node
     {

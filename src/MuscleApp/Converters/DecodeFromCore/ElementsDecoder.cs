@@ -1,64 +1,62 @@
+using Rhino.Geometry;
+using System;
+using System.Collections.Generic;
+using MuscleApp.ViewModel;
+using MuscleCore.FEModel;
 
-
+namespace MuscleApp.Converters
+{
+    /// <summary>
+    /// Static class for decoding FEM_Elements instances to Element instances.
+    /// </summary>
+    public static class ElementsDecoder
+    {
         /// <summary>
-        /// Updates this Element instance with data from a FEM_Elements instance and element index.
+        /// Updates a list of Element instances with data from a FEM_Elements instance.
         /// </summary>
+        /// <param name="elements">List of Element instances to update</param>
         /// <param name="femElements">FEM_Elements instance containing element data</param>
-        /// <param name="elementIndex">Index of the element in the FEM_Elements arrays</param>
-        /// <param name="nodes">List of Node instances to get coordinates for creating the Line</param>
-        public void CopyAndUpdateFrom(MuscleCore.FEModel.FEM_Elements femElements, int elementIndex, List<Node> nodes)
+        /// <param name="nodes">List of Node instances to get coordinates for creating the Lines</param>
+        /// <returns>Updated list of Element instances</returns>
+        public static List<Element> CopyAndUpdateFrom(List<Element> elements, FEM_Elements femElements, List<Node> nodes)
         {
+            if (elements == null)
+                throw new ArgumentNullException(nameof(elements), "Elements list cannot be null");
+
             if (femElements == null)
                 throw new ArgumentNullException(nameof(femElements), "FEM_Elements cannot be null");
-                
-            if (elementIndex < 0 || elementIndex >= femElements.Count)
-                throw new ArgumentOutOfRangeException(nameof(elementIndex), "Element index is out of range");
-                
+
             if (nodes == null || nodes.Count == 0)
                 throw new ArgumentException("Nodes collection cannot be null or empty", nameof(nodes));
-            
-            // Set element index
-            Idx = elementIndex;
-            
-            // Set element type (-1 for struts, 1 for cables, 0 for both)
-            Type = femElements.Type[elementIndex];
-            
-            // Set end nodes indices
-            int node0Index = femElements.EndNodes[elementIndex, 0];
-            int node1Index = femElements.EndNodes[elementIndex, 1];
-            EndNodes = new List<int> { node0Index, node1Index };
-            
-            // Create line from node coordinates
-            if (node0Index < nodes.Count && node1Index < nodes.Count)
+
+            if (elements.Count != femElements.Count)
+                throw new ArgumentException("Elements list and FEM_Elements arrays must have the same length");
+
+            // Create a new list to hold the updated elements
+            List<Element> updatedElements = new List<Element>();
+
+            // Update each element
+            for (int i = 0; i < femElements.Count; i++)
             {
-                Line = new Line(nodes[node0Index].Point, nodes[node1Index].Point);
+                // Create a copy of the original element
+                Element updatedElement = elements[i].Copy();
+                
+                // Update Line with new nodes coordinates              
+                int node_idx0 = updatedElement.EndNodes[i,0];
+                int node_idx1  = updatedElement.EndNodes[i,1];
+                Point3d p0 = nodes[node_idx0].Point; // new coordinates of End Nodes
+                Point3d p1 = nodes[node_idx1].Point; 
+                updatedElement.Line = new Line(p0, p1);
+                
+                // Update free length and tension
+                updatedElement.FreeLength = femElements.FreeLength[i];
+                updatedElement.Tension = femElements.Tension[i];
+                
+                // Add the updated element to the list
+                updatedElements.Add(updatedElement);
             }
-            else
-            {
-                throw new ArgumentException("Node indices in FEM_Elements are out of range for the provided nodes collection");
-            }
             
-            // Set cross-section area
-            CS = new CS_Circular(femElements.Area[elementIndex] * 2, femElements.Area[elementIndex]);
-            
-            // Set material properties (Young's moduli for compression and tension)
-            Material = new BilinearMaterial(
-                "Material from FEM_Elements", 
-                femElements.Youngs[elementIndex, 0], // Young's modulus for compression
-                femElements.Youngs[elementIndex, 1], // Young's modulus for tension
-                -1e9, // Default compressive yield strength
-                1e9,  // Default tensile yield strength
-                7850  // Default density (steel)
-            );
-            
-            // Set free length and tension
-            FreeLength = femElements.FreeLength[elementIndex];
-            Tension = femElements.Tension[elementIndex];
-            
-            // Set default buckling law and factor
-            BucklingLaw = "Yielding";
-            kb = 1.0;
-            
-            // Set name
-            Name = $"Element {Idx}";
+            return updatedElements;
         }
+    }
+}

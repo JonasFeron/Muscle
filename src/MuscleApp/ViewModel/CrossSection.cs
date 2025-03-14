@@ -9,7 +9,7 @@ using Muscle.CrossSections;
 using Muscle.ViewModel;
 */
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
     /// <summary>
     /// Interface of CrossSection implement this to create new cross section

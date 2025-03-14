@@ -8,7 +8,7 @@ using System.Linq;
 using Muscle.View;
 using MuscleCore.FEModel;
 
-namespace Muscle.ViewModel
+namespace MuscleApp.ViewModel
 {
 
     public class StructureState
