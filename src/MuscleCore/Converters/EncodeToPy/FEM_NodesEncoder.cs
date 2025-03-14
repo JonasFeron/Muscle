@@ -24,7 +24,7 @@ namespace MuscleCore.Converters
                         initial_coordinates: nodes.InitialCoordinates,
                         dof: nodes.DOF,
                         loads: nodes.Loads,
-                        displacements: nodes.Displacements,
+                        displacements: nodes.Displacements, 
                         reactions: nodes.Reactions,   
                         resisting_forces: nodes.ResistingForces
                     );

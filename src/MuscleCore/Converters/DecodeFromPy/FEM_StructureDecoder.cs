@@ -47,15 +47,15 @@ namespace MuscleCore.Converters
                     dynamic py = pyObj.As<dynamic>();
 
                     // Get nodes and elements objects
-                    var csElements = py.elements.As<FEM_Elements>();
-                    var csNodes = csElements.Nodes;
-                    bool equilibirum = py.is_in_equilibrium.As<bool>();
+                    var femElements = py.elements.As<FEM_Elements>();
+                    var femNodes = femElements.Nodes;
+                    bool isInEquilibrium = py.is_in_equilibrium.As<bool>();
 
                     // Create structure with all properties
                     var structure = new FEM_Structure(
-                        nodes: csNodes,
-                        elements: csElements,
-                        isInEquilibrium: equilibirum
+                        nodes: femNodes,
+                        elements: femElements,
+                        isInEquilibrium: isInEquilibrium
                     );
 
                     value = (T)(object)structure;

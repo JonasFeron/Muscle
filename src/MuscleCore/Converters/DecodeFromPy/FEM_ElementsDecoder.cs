@@ -1,5 +1,6 @@
 using MuscleCore.FEModel;
 using Python.Runtime;
+using static MuscleCore.Converters.DecoderHelper;
 
 namespace MuscleCore.Converters
 {
@@ -53,36 +54,22 @@ namespace MuscleCore.Converters
                     // Convert all arrays using the helper
                     dynamic numpy = Py.Import("numpy");
                     var type = py.type.tolist().As<int[]>();
-                    var endNodes = DecoderHelper.ToCSIntArray2D(py.end_nodes);
-                    var initialFreeLength = py.initial_free_length.tolist().As<double[]>();
-                    var areas = DecoderHelper.ToCSArray2D(py.areas);
-                    var youngs = DecoderHelper.ToCSArray2D(py.youngs);
+                    var endNodes = AsInt2dArray(py.end_nodes);
+                    var youngs = As2dArray(py.youngs);
                     var area = py.area.tolist().As<double[]>();
-                    var young = py.young.tolist().As<double[]>();
-                    var currentLength = py.current_length.tolist().As<double[]>();
-                    var currentFreeLength = py.current_free_length.tolist().As<double[]>();
-                    var deltaFreeLength = py.delta_free_length.tolist().As<double[]>();
+                    var freeLength = py.free_length.tolist().As<double[]>();
                     var tension = py.tension.tolist().As<double[]>();
-                    var flexibility = py.flexibility.tolist().As<double[]>();
-                    var directionCosines = DecoderHelper.ToCSArray2D(py.direction_cosines);
+
 
                     // Create elements object with all properties
                     var elements = new FEM_Elements(
                         nodes: nodes,
                         type: type,
                         endNodes: endNodes,
-                        initialFreeLength: initialFreeLength,
-                        count: (int)py.count,
-                        areas: areas,
                         youngs: youngs,
                         area: area,
-                        young: young,
-                        currentLength: currentLength,
-                        currentFreeLength: currentFreeLength,
-                        deltaFreeLength: deltaFreeLength,
-                        tension: tension,
-                        flexibility: flexibility,
-                        directionCosines: directionCosines
+                        freeLength: freeLength,
+                        tension: tension
                     );
 
                     value = (T)(object)elements;

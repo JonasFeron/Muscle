@@ -36,20 +36,10 @@ namespace MuscleApp.ViewModel
         }
 
         ///// Structure informations /////
-        public int ElementsCount { get { return Elements.Count; } }
         public List<Element> Elements { get; set; }
-        public int NodesCount { get { return Nodes.Count; } }
         public List<Node> Nodes { get; set; }
         public int FixationsCount { get { return Nodes.Select(n => n.FixationsCount).Sum(); } }
-        public int DOFfreeCount { get { return 3 * NodesCount - FixationsCount; } }
-
-        ///// Data to send to Python /////
-        // public double Residual0Threshold { get; set; }
-
-        // public List<Vector3d> LoadsToApply { get; set; } // [N] - shape (NodesCount,) - the list of Loads to apply on each node of the structure
-
-        // public List<double> LengtheningsToApply { get; set; } // [m] - shape (ElementsCount,) - the list of lengthenings to apply on each element of the structure
-
+        public int DOFfreeCount { get { return 3 * Nodes.Count - FixationsCount; } }
 
         ///// Results coming from Python /////
 
@@ -91,7 +81,7 @@ namespace MuscleApp.ViewModel
 
             Elements = new List<Element>();
             Nodes = new List<Node>();
-
+            IsInEquilibrium = False;
             // Residual0Threshold = 0.0001;
             // LoadsToApply = new List<Vector3d>();
             // LengtheningsToApply = new List<double>();
@@ -151,6 +141,8 @@ namespace MuscleApp.ViewModel
             Nodes = new List<Node>();
             foreach (Node n in other.Nodes) Nodes.Add(n.Copy());
 
+            IsInEquilibrium = other.IsInEquilibrium;
+
             // Residual0Threshold = other.Residual0Threshold;
 
             // LoadsToApply = other.LoadsToApply; // do not fill with old value
@@ -169,61 +161,6 @@ namespace MuscleApp.ViewModel
         public StructureState Copy() //Duplication method calling the copy constructor
         {
             return new StructureState(this);
-        }
-
-        /// <summary>
-        /// Creates a StructureState from a FEM_Structure instance.
-        /// This constructor converts the FEM model back to the ViewModel representation.
-        /// </summary>
-        /// <param name="femStructure">FEM_Structure instance to convert</param>
-        public StructureState(MuscleCore.FEModel.FEM_Structure femStructure)
-        {
-            Init();
-            CopyAndUpdateFrom(femStructure);
-        }
-
-        /// <summary>
-        /// Updates this StructureState instance with data from a FEM_Structure instance.
-        /// This method converts the FEM model back to the ViewModel representation.
-        /// </summary>
-        /// <param name="femStructure">FEM_Structure instance to copy data from</param>
-        public StructureState CopyAndUpdateFrom(FEM_Structure femStructure)
-        {
-            StructureState updatedStructure = this.Copy();
-
-            if (femStructure == null)
-                throw new ArgumentNullException(nameof(femStructure), "FEM_Structure cannot be null");
-                
-            if (femStructure.Nodes == null || femStructure.Elements == null)
-                throw new ArgumentException("FEM_Structure must have valid Nodes and Elements", nameof(femStructure));
-            
-            // Clear existing collections
-            Nodes.Clear();
-            Elements.Clear();
-            warnings.Clear();
-            
-            // Step 1: Create Node instances from FEM_Nodes
-            for (int i = 0; i < femStructure.Nodes.Count; i++)
-            {
-                Node node = new Node();
-                node.CopyAndUpdateFrom(femStructure.Nodes, i);
-                Nodes.Add(node);
-            }
-            
-            // Step 2: Create Element instances from FEM_Elements
-            for (int i = 0; i < femStructure.Elements.Count; i++)
-            {
-                Element element = new Element();
-                element.CopyAndUpdateFrom(femStructure.Elements, i, Nodes);
-                Elements.Add(element);
-            }
-            
-            // Step 3: Update structure properties
-            // Use the ZeroTol from the FEM_Nodes since FEM_Structure doesn't have one
-            ZeroGeometricATol = femStructure.Nodes.ZeroTol;
-            
-            // Add a warning if the conversion was successful
-            warnings.Add("Structure successfully converted from FEM_Structure");
         }
 
         #endregion Constructors

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MuscleCore.FEModel
 {
@@ -24,7 +26,6 @@ namespace MuscleCore.FEModel
         /// </summary>
         public int[,] EndNodes { get; set; }
 
-
         /// <summary>
         /// Number of elements
         /// </summary>
@@ -41,16 +42,6 @@ namespace MuscleCore.FEModel
         public double[] Area { get; set; }
 
         /// <summary>
-        /// [MPa] - shape (elements_count,) - Current Young's modulus depending on tension state
-        /// </summary>
-        public double[] Young { get; set; }
-
-        /// <summary>
-        /// [m] - shape (elements_count,) - Current length based on current node coordinates
-        /// </summary>
-        public double[] CurrentLength { get; set; }
-
-        /// <summary>
         /// [m] - shape (elements_count,) - Free length of the elements
         /// </summary>
         public double[] FreeLength { get; set; }
@@ -60,81 +51,34 @@ namespace MuscleCore.FEModel
         /// </summary>
         public double[] Tension { get; set; }
 
-        /// <summary>
-        /// [m/N] - shape (elements_count,) - L/(EA), large value (1e6) if EA ≈ 0
-        /// </summary>
-        public double[] Flexibility { get; set; }
-
-        /// <summary>
-        /// [-] - shape (elements_count, 3) - Unit vectors (x,y,z)
-        /// </summary>
-        public double[,] DirectionCosines { get; set; }
         #endregion
 
         #region Constructors
         /// <summary>
-        /// Initialize FEM_Elements with minimal required data. All computations will be done in Python.
+        /// Minimal constructor that initializes with required data.
+        /// This constructor matches the Python constructor in fem_elements.py for testing FEM_ElementsEncoder.
+        /// This constructor is also used when decoding from Python where all values are known.
         /// </summary>
-        /// <param name="nodes">FEM_Nodes instance</param>
-        /// <param name="type">Element types, shape (elements_count,)</param>
-        /// <param name="endNodes">Node indices, shape (elements_count, 2)</param>
-        /// <param name="areas">Cross-sections, shape (elements_count, 2) : [A_if_compression, A_if_tension]</param>
-        /// <param name="youngs">Young's moduli, shape (elements_count, 2) : [E_if_compression, E_if_tension]</param>
-        /// <param name="freeLength">Free length of the elements, shape (elements_count,)</param>
-        /// <param name="tension">Axial forces, shape (elements_count,)</param>
-        public FEM_Elements(FEM_Nodes nodes, int[] type, int[,] endNodes, double[,] area, 
-                          double[,] youngs, double[] freeLength = null, double[] tension = null)
+        /// <param name="nodes">FEM_Nodes instance containing node data</param>
+        /// <param name="type">[-] - shape (elements_count,) - Element types (-1: strut, 1: cable)</param>
+        /// <param name="endNodes">[-] - shape (elements_count, 2) - Element-node connectivity indices</param>
+        /// <param name="area">[mm²] - shape (elements_count,) - Cross-section area of elements</param>
+        /// <param name="youngs">[MPa] - shape (elements_count, 2) - Young's moduli for compression and tension</param>
+        /// <param name="freeLength">[m] - shape (elements_count,) - Free length of the elements</param>
+        /// <param name="tension">[N] - shape (elements_count,) - Axial force (positive in tension)</param>
+        public FEM_Elements(FEM_Nodes nodes, int[] type = null, int[,] endNodes = null, double[] area = null, 
+                          double[,] youngs = null, double[] freeLength = null, double[] tension = null)
         {
-            // Initialize required properties
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
-            Type = type ?? throw new ArgumentNullException(nameof(type));
-            EndNodes = endNodes ?? throw new ArgumentNullException(nameof(endNodes));
-            Youngs = youngs ?? throw new ArgumentNullException(nameof(youngs));
-            Area = area ?? throw new ArgumentNullException(nameof(area));
-
-            // Set count from end nodes
+            Type = type ?? new int[0];
+            EndNodes = endNodes ?? new int[0, 2];
             Count = EndNodes.GetLength(0);
-
-            // Initialize mutable properties with empty arrays
-
-            Young = new double[Count];
-            CurrentLength = new double[Count];
+            Area = area ?? new double[Count];
+            Youngs = youngs ?? new double[Count, 2];
             FreeLength = freeLength ?? new double[Count];
             Tension = tension ?? new double[Count];
-            Flexibility = new double[Count];
-            DirectionCosines = new double[Count, 3];
         }
 
-        /// <summary>
-        /// Initialize FEM_Elements with all properties. Used when decoding from Python where all values are known.
-        /// </summary>
-        public FEM_Elements(
-            FEM_Nodes nodes,
-            int[] type,
-            int[,] endNodes,
-            int count,
-            double[,] youngs,
-            double[] area,
-            double[] young,
-            double[] currentLength,
-            double[] freeLength,
-            double[] tension,
-            double[] flexibility,
-            double[,] directionCosines)
-        {
-            Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
-            Type = type ?? throw new ArgumentNullException(nameof(type));
-            EndNodes = endNodes ?? throw new ArgumentNullException(nameof(endNodes));
-            Count = count;
-            Youngs = youngs ?? throw new ArgumentNullException(nameof(youngs));
-            Area = area ?? throw new ArgumentNullException(nameof(area));
-            Young = young ?? throw new ArgumentNullException(nameof(young));
-            CurrentLength = currentLength ?? throw new ArgumentNullException(nameof(currentLength));
-            FreeLength = currentFreeLength ?? throw new ArgumentNullException(nameof(currentFreeLength));
-            Tension = tension ?? throw new ArgumentNullException(nameof(tension));
-            Flexibility = flexibility ?? throw new ArgumentNullException(nameof(flexibility));
-            DirectionCosines = directionCosines ?? throw new ArgumentNullException(nameof(directionCosines));
-        }
         #endregion
     }
 }

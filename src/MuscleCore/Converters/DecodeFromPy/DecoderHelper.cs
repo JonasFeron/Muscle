@@ -8,7 +8,7 @@ namespace MuscleCore.Converters
         /// <summary>
         /// Convert a numpy array to a C# 2D double array using nested loops
         /// </summary>
-        public static double[,] ToCSArray2D(dynamic npArray)
+        public static double[,] As2dArray(dynamic npArray)
         {
             // Get array dimensions
             var shape = ((PyObject)npArray.shape).As<int[]>();
@@ -39,7 +39,7 @@ namespace MuscleCore.Converters
         /// <summary>
         /// Convert a numpy array to a C# 2D integer array
         /// </summary>
-        public static int[,] ToCSIntArray2D(dynamic npArray)
+        public static int[,] AsInt2dArray(dynamic npArray)
         {
             var shape = ((PyObject)npArray.shape).As<int[]>();
             int rows = shape[0];
@@ -60,7 +60,7 @@ namespace MuscleCore.Converters
         /// <summary>
         /// Convert a numpy array to a C# 2D boolean array using nested loops
         /// </summary>
-        public static bool[,] ToCSBoolArray2D(dynamic npArray)
+        public static bool[,] AsBool2dArray(dynamic npArray)
         {
             // Get array dimensions
             var shape = ((PyObject)npArray.shape).As<int[]>();

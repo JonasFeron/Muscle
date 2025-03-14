@@ -14,7 +14,7 @@ namespace MuscleApp.ViewModel
         public string TypeName { get { return "Node"; } }
         public int Idx { get; set; } //index of the node in the structure
 
-        public Point3d Point { get; set; }
+        public Point3d Coordinates { get; set; }
         public bool IsValid { get { return true; } } //to implement
 
 
@@ -25,20 +25,16 @@ namespace MuscleApp.ViewModel
         /// True if point is Free to move in X dir. False if fixed.
         /// </summary>
         public bool isXFree { get; set; }
-        public int Ind_RX { get; set; } //-1 if free to move in X; Ind of the Reaction if fixed
 
         /// <summary>
         /// True if point is Free to move in Y dir. False if fixed.
         /// </summary>
         public bool isYFree { get; set; }
-        public int Ind_RY { get; set; }
-
 
         /// <summary>
         /// True if point is Free to move in Z dir. False if fixed.
         /// </summary>
         public bool isZFree { get; set; }
-        public int Ind_RZ { get; set; }
 
         /// <summary>
         /// return the number (0,1,2, or 3) of fixed translations.
@@ -49,8 +45,6 @@ namespace MuscleApp.ViewModel
         }
 
         public Vector3d Reactions { get; set; }
-        //public List<Vector3d> Reaction_Results { get; set; }
-        //public List<Vector3d> Reaction_Total { get; set; } // addition of already applied + results
 
         #endregion Support
 
@@ -63,19 +57,12 @@ namespace MuscleApp.ViewModel
         public Vector3d Residuals { get; set; } // the unbalanced loads = Load - SUM Tension*cos
                                                //public Vector3d PrestressLoad_To_Apply { get; set; } // load coming from an initial force
 
-        //public List<Vector3d> Load_Results { get; set; }
-        //public List<Vector3d> Load_Total { get; set; }
-
 
         #endregion Load
 
         ///// Displacement informations /////
         #region Displacement
-
-        //public Vector3d Displacement_Already_Applied { get; set; }
-        //public List<Vector3d> Displacement_Results { get; set; }
-        //public List<Vector3d> Displacement_Total { get; set; } // addition of already applied + results
-
+        // Only keep the current nodal coordinates into Point. 
         #endregion Displacement
 
         #endregion Properties
@@ -88,28 +75,15 @@ namespace MuscleApp.ViewModel
         private void Init()
         {
             Idx = -1;
-            Point = new Point3d();
+            Coordinates = new Point3d();
 
             isXFree = true;
             isYFree = true;
             isZFree = true;
-            Ind_RX = -1;
-            Ind_RY = -1;
-            Ind_RZ = -1;
-            Reactions = new Vector3d();
-            //Reaction_Results = new List<Vector3d>();
-            //Reaction_Total = new List<Vector3d>();
 
+            Reactions = new Vector3d();
             Loads = new Vector3d();
             Residuals = new Vector3d();
-            //LoadToApply = new Vector3d();
-            //Load_Results = new List<Vector3d>();
-            //Load_Total = new List<Vector3d>();
-
-            //Displacement_Already_Applied = new Vector3d();
-            //Displacement_Results = new List<Vector3d>();
-            //Displacement_Total = new List<Vector3d>();
-
         }
         public Node()
         {
@@ -118,41 +92,28 @@ namespace MuscleApp.ViewModel
         public Node(Point3d point)
         {
             Init();
-            Point = point;
+            Coordinates = point;
         }
-        public Node(Point3d point, int ind)
+        public Node(Point3d point, int idx)
         {
             Init();
-            Point = point;
-            Idx = ind;
+            Coordinates = point;
+            Idx = idx;
         }
 
 
         public Node(Node other)
         {
             Idx = other.Idx;
-            Point = other.Point;
+            Coordinates = other.Coordinates;
 
             isXFree = other.isXFree;
             isYFree = other.isYFree;
             isZFree = other.isZFree;
-            Ind_RX = other.Ind_RX;
-            Ind_RY = other.Ind_RY;
-            Ind_RZ = other.Ind_RZ;
 
             Reactions = other.Reactions;
-            //Reaction_Results = other.Reaction_Results;
-            //Reaction_Total = other.Reaction_Total;
-
             Loads = other.Loads;
             Residuals = other.Residuals;
-            //LoadToApply = other.LoadToApply;
-            //Load_Results = other.Load_Results;
-            //Load_Total = other.Load_Total;
-
-            //Displacement_Already_Applied = other.Displacement_Already_Applied;
-            //Displacement_Results = other.Displacement_Results;
-            //Displacement_Total = other.Displacement_Total;
         }
 
         public Node Copy() //Duplication method calling the copy constructor
@@ -169,7 +130,7 @@ namespace MuscleApp.ViewModel
 
         public override string ToString()
         {
-            return $"Node {Idx} with coordinates {Point}";
+            return $"Node {Idx} with coordinates {Coordinates}";
         }
 
         ///// Methods related to this object /////
@@ -189,9 +150,9 @@ namespace MuscleApp.ViewModel
         /// <summary>
         /// Add the support conditions to the node (if the support is applied on a point closer than ZeroTol otherwise do nothing). If two supports are added to a same node (for instance, one is Fixed in X and the other one is Free) then the more restraining condition (Fixed) is conserved.  
         /// </summary>
-        public void AddSupportIfSamePoint(Support support, double ZeroTol)
+        public void AddSupportIfSamePoint(Support support, double ZeroGeometricATol)
         {
-            if (Point.EpsilonEquals(support.Point, ZeroTol))
+            if (Coordinates.EpsilonEquals(support.Point, ZeroGeometricATol))
             {
                 isXFree = isXFree && support.isXFree; // True (=Free) if both conditions are True
                 isYFree = isYFree && support.isYFree; // False(=Fixed) if at least 1 condition is False
@@ -247,9 +208,9 @@ namespace MuscleApp.ViewModel
         /// </summary>
         /// <param name="points"></param> the list of points
         /// <param name="thePoint"></param> is thePoint contained in the list ?
-        /// <param name="ZeroTol"></param> the max distance (in m) between 2 points to be considered as equal. 
+        /// <param name="ZeroGeometricATol"></param> the max distance (in m) between 2 points to be considered as equal. 
         /// <returns></returns>
-        public static bool EpsilonContains(List<Point3d> points, Point3d thePoint, double ZeroTol, out int ind)
+        public static bool EpsilonContains(List<Point3d> points, Point3d thePoint, double ZeroGeometricATol, out int ind)
         {
 
             if (points == null || points.Count == 0)
@@ -260,7 +221,7 @@ namespace MuscleApp.ViewModel
             ind = 0;
             foreach (Point3d point in points) // all point of the list is checked
             {
-                if (point.EpsilonEquals(thePoint, ZeroTol)) { return true; } // as soon as a point from the list is equal to thePoint within the tolerance eps, then the list contains thePoint == true and exit. 
+                if (point.EpsilonEquals(thePoint, ZeroGeometricATol)) { return true; } // as soon as a point from the list is equal to thePoint within the tolerance eps, then the list contains thePoint == true and exit. 
                 ind++;
             }
             ind = -1; // if the point do not belong to the list

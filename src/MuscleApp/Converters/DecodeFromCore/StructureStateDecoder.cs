@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using MuscleApp.ViewModel;
 using MuscleCore.FEModel;
+using static MuscleApp.Converters.NodesDecoder;
+using static MuscleApp.Converters.ElementsDecoder;
 
 namespace MuscleApp.Converters
 {
@@ -14,33 +16,37 @@ namespace MuscleApp.Converters
         /// <summary>
         /// Updates a StructureState instance with data from a FEM_Structure instance.
         /// </summary>
-        /// <param name="structureState">StructureState instance to update</param>
-        /// <param name="femStructure">FEM_Structure instance containing structure data</param>
+        /// <param name="original">StructureState instance to update</param>
+        /// <param name="femResults">FEM_Structure instance containing structure data</param>
         /// <returns>Updated StructureState instance</returns>
-        public static StructureState CopyAndUpdateFrom(StructureState structureState, FEM_Structure femStructure)
+        public static StructureState CopyAndUpdateFrom(StructureState original, FEM_Structure femResults)
         {
-            if (structureState == null)
-                throw new ArgumentNullException(nameof(structureState), "StructureState cannot be null");
+            if (original == null)
+                throw new ArgumentNullException(nameof(original), "StructureState cannot be null");
                 
-            if (femStructure == null)
-                throw new ArgumentNullException(nameof(femStructure), "FEM_Structure cannot be null");
+            if (femResults == null)
+                throw new ArgumentNullException(nameof(femResults), "FEM_Structure cannot be null");
                 
-            if (femStructure.Nodes == null || femStructure.Elements == null)
-                throw new ArgumentException("FEM_Structure must have valid Nodes and Elements", nameof(femStructure));
+            if (femResults.Nodes == null || femResults.Elements == null)
+                throw new ArgumentException("FEM_Structure must have valid Nodes and Elements", nameof(femResults));
             
             // Create a copy of the original structure state
-            StructureState updatedStructureState = structureState.Copy();
+            StructureState updated = original.Copy();
+
+            // retrieve the results from the computations stored in femResults
+            List<Node> nodesResults = femResults.Nodes;
+            List<Element> elementsResults = femResults.Elements;
             
-            // Update nodes
-            updatedStructureState.Nodes = NodesDecoder.CopyAndUpdateFrom(structureState.Nodes, femStructure.Nodes);
+            // Copy and Update original nodes with the nodes results 
+            updated.Nodes = CopyAndUpdateFrom(original.Nodes, nodesResults);
             
-            // Update elements using the updated nodes
-            updatedStructureState.Elements = ElementsDecoder.CopyAndUpdateFrom(structureState.Elements, femStructure.Elements, updatedStructureState.Nodes);
+            // Copy and Update original elements with the elements results
+            updated.Elements = CopyAndUpdateFrom(original.Elements, elementsResults, updated.Nodes);
             
             // Update equilibrium state
-            updatedStructureState.IsInEquilibrium = femStructure.IsInEquilibrium;
+            updated.IsInEquilibrium = femResults.IsInEquilibrium;
 
-            return updatedStructureState;
+            return updated;
         }
     }
 }

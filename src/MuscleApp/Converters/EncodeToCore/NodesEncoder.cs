@@ -5,6 +5,13 @@ namespace MuscleApp.Converters
 {
     public static class NodesEncoder
     {
+        /// <summary>
+        /// Converts a collection of Node instances into an FEM_Nodes instance.
+        /// This function initializes the FEM_Nodes data structure with coordinates, degrees of freedom,
+        /// loads, reactions, displacements, and resisting forces derived from the input nodes.
+        /// </summary>
+        /// <param name="nodes">Collection of Node instances to convert</param>
+        /// <returns>FEM_Nodes instance containing all node data needed for analysis</returns>
         public static FEM_Nodes ToFEM_Nodes(IEnumerable<Node> nodes)
         {
             if (nodes == null || !nodes.Any())
@@ -22,12 +29,12 @@ namespace MuscleApp.Converters
             
             // Populate arrays from nodes
             int i = 0;
-            foreach (var node in nodes)
+            foreach (Node node in nodes)
             {
                 // Convert coordinates: Current coordinates are considered as new initial coordinates
-                initialCoordinates[i, 0] = node.Point.X;
-                initialCoordinates[i, 1] = node.Point.Y;
-                initialCoordinates[i, 2] = node.Point.Z;
+                initialCoordinates[i, 0] = node.Coordinates.X;
+                initialCoordinates[i, 1] = node.Coordinates.Y;
+                initialCoordinates[i, 2] = node.Coordinates.Z;
 
                 // Reset displacements. 
                 displacements[i, 0] = 0;
@@ -49,7 +56,7 @@ namespace MuscleApp.Converters
                 reactions[i, 1] = node.Reactions.Y;
                 reactions[i, 2] = node.Reactions.Z;
                 
-                // Calculate resisting forces from load, reaction, and residual
+                // Calculate resisting forces from loads, reactions, and residuals data contained in the Node instance
                 resistingForces[i, 0] = node.Loads.X + node.Reactions.X - node.Residuals.X;
                 resistingForces[i, 1] = node.Loads.Y + node.Reactions.Y - node.Residuals.Y;
                 resistingForces[i, 2] = node.Loads.Z + node.Reactions.Z - node.Residuals.Z;

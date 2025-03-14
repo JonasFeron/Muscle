@@ -12,7 +12,7 @@ namespace MuscleApp.Converters
     public static class ElementsEncoder
     {
         /// <summary>
-        /// Converts a collection of Element instances to a FEM_Elements instance.
+        /// Converts a collection of Element instances to a FEM_Elements instance for computational analysis.
         /// </summary>
         /// <param name="elements">Collection of Element instances to convert</param>
         /// <param name="femNodes">FEM_Nodes instance that contains the nodes referenced by the elements</param>
@@ -81,33 +81,5 @@ namespace MuscleApp.Converters
             );
         }
         
-        /// <summary>
-        /// Updates Element instances from a FEM_Elements instance after computational analysis.
-        /// </summary>
-        /// <param name="elements">Collection of Element instances to update</param>
-        /// <param name="femElements">FEM_Elements instance containing analysis results</param>
-        public static void UpdateFromFEM_Elements(IEnumerable<Element> elements, FEM_Elements femElements)
-        {
-            if (elements == null || !elements.Any())
-                throw new ArgumentException("Elements collection cannot be null or empty");
-            
-            if (femElements == null)
-                throw new ArgumentNullException(nameof(femElements), "FEM_Elements instance cannot be null");
-            
-            if (elements.Count() != femElements.Count)
-                throw new ArgumentException("Elements count does not match FEM_Elements count");
-            
-            int i = 0;
-            foreach (var element in elements)
-            {
-                // Update tension
-                element.Tension = femElements.Tension[i];
-                
-                // Update free length
-                element.FreeLength = femElements.CurrentFreeLength[i];
-                
-                i++;
-            }
-        }
     }
 }

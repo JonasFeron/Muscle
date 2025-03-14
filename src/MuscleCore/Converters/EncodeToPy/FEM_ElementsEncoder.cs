@@ -25,9 +25,9 @@ namespace MuscleCore.Converters
                     nodes: elements.Nodes.ToPython(),
                     type: elements.Type,
                     end_nodes: elements.EndNodes,
-                    areas: elements.Areas,
+                    area: elements.Area,
                     youngs: elements.Youngs,
-                    delta_free_length: elements.DeltaFreeLength,
+                    free_length: elements.FreeLength,
                     tension: elements.Tension
                 );
             }

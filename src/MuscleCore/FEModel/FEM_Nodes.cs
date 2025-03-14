@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace MuscleCore.FEModel
 {
@@ -57,12 +58,13 @@ namespace MuscleCore.FEModel
         /// <summary>
         /// [N] - shape (nodes_count, 3) - Out of balance loads (loads + reactions - resisting_forces)
         /// </summary>
-        public double[,] Residual { get; set; }
+        public double[,] Residuals { get; set; }
         #endregion
 
         #region Constructors
         /// <summary>
-        /// Initialize FEM_Nodes data container with minimal required data. All computations will be done in Python.
+        /// Minimal constructor that initializes with initial coordinates and DOF.
+        /// This constructor matches the Python constructor in fem_nodes.py for testing FEM_NodesEncoder.
         /// </summary>
         /// <param name="initialCoordinates">[m] - shape (nodes_count, 3) - Initial nodal coordinates</param>
         /// <param name="dof">[-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)</param>
@@ -85,45 +87,46 @@ namespace MuscleCore.FEModel
             Displacements = displacements ?? new double[Count, 3];
             Reactions = reactions ?? new double[Count, 3];
             ResistingForces = resistingForces ?? new double[Count, 3];
-            Residual = new double[Count, 3];
+            Residuals = new double[Count, 3];
         }
 
         /// <summary>
-        /// Initialize FEM_Nodes data container with all properties. Used when decoding from Python where all values are known.
+        /// Full constructor for setting all properties. Used when decoding from Python where all values are known.
         /// </summary>
         /// <param name="initialCoordinates">[m] - shape (nodes_count, 3) - Initial nodal coordinates</param>
         /// <param name="coordinates">[m] - shape (nodes_count, 3) - Current nodal coordinates</param>
         /// <param name="dof">[-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)</param>
         /// <param name="count">Number of nodes</param>
-        /// <param name="fixationsCount">Number of fixed degrees of freedom</param>
         /// <param name="loads">[N] - shape (nodes_count, 3) - External loads applied to nodes</param>
         /// <param name="displacements">[m] - shape (nodes_count, 3) - Nodal displacements</param>
         /// <param name="reactions">[N] - shape (nodes_count, 3) - Support reactions</param>
         /// <param name="resistingForces">[N] - shape (nodes_count, 3) - Internal resisting forces at nodes</param>
-        /// <param name="residual">[N] - shape (nodes_count, 3) - Out of balance loads</param>
+        /// <param name="residuals">[N] - shape (nodes_count, 3) - Out of balance loads</param>
         public FEM_Nodes(
             double[,] initialCoordinates,
             double[,] coordinates,
             bool[,] dof,
             int count,
-            int fixationsCount,
             double[,] loads,
             double[,] displacements,
             double[,] reactions,
             double[,] resistingForces,
-            double[,] residual)
+            double[,] residuals)
         {
             InitialCoordinates = initialCoordinates ?? throw new ArgumentNullException(nameof(initialCoordinates));
             Coordinates = coordinates ?? throw new ArgumentNullException(nameof(coordinates));
             DOF = dof ?? throw new ArgumentNullException(nameof(dof));
             Count = count;
-            FixationsCount = fixationsCount;
             Loads = loads ?? throw new ArgumentNullException(nameof(loads));
             Displacements = displacements ?? throw new ArgumentNullException(nameof(displacements));
             Reactions = reactions ?? throw new ArgumentNullException(nameof(reactions));
             ResistingForces = resistingForces ?? throw new ArgumentNullException(nameof(resistingForces));
-            Residual = residual ?? throw new ArgumentNullException(nameof(residual));
+            Residuals = residuals ?? throw new ArgumentNullException(nameof(residuals));
         }
+        #endregion
+
+        #region Methods
+
         #endregion
     }
 }

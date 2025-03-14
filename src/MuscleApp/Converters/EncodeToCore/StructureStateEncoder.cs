@@ -1,6 +1,9 @@
 using MuscleCore.FEModel;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 using System;
+using System.Collections.Generic;
+using static MuscleApp.Converters.NodesEncoder;
+using static MuscleApp.Converters.ElementsEncoder;
 
 namespace MuscleApp.Converters
 {
@@ -10,7 +13,7 @@ namespace MuscleApp.Converters
     public static class StructureStateEncoder
     {
         /// <summary>
-        /// Converts a StructureState instance to a FEM_Structure instance.
+        /// Converts a StructureState instance to a FEM_Structure instance for computational analysis.
         /// </summary>
         /// <param name="structure">StructureState instance to convert</param>
         /// <returns>FEM_Structure instance containing all data needed for analysis</returns>
@@ -26,39 +29,15 @@ namespace MuscleApp.Converters
                 throw new ArgumentException("StructureState must have at least one element", nameof(structure));
             
             // First convert nodes
-            FEM_Nodes femNodes = NodesEncoder.ToFEM_Nodes(structure.Nodes);
+            List<Node> nodes = structure.Nodes;
+            FEM_Nodes femNodes = ToFEM_Nodes(nodes);
             
             // Then convert elements, using the converted nodes
-            FEM_Elements femElements = ElementsEncoder.ToFEM_Elements(structure.Elements, femNodes);
+            List<Element> elements = structure.Elements;
+            FEM_Elements femElements = ToFEM_Elements(elements, femNodes);
             
-            // Create the FEM_Structure
+            // Create the FEM_Structure for computational analysis
             return new FEM_Structure(femNodes, femElements);
-        }
-        
-        /// <summary>
-        /// Updates a StructureState instance from a FEM_Structure instance after computational analysis.
-        /// </summary>
-        /// <param name="structure">StructureState instance to update</param>
-        /// <param name="femStructure">FEM_Structure instance containing analysis results</param>
-        public static void UpdateFromFEM_Structure(StructureState structure, FEM_Structure femStructure)
-        {
-            if (structure == null)
-                throw new ArgumentNullException(nameof(structure), "StructureState cannot be null");
-            
-            if (femStructure == null)
-                throw new ArgumentNullException(nameof(femStructure), "FEM_Structure cannot be null");
-            
-            if (structure.NodesCount != femStructure.Nodes.Count)
-                throw new ArgumentException("Node count mismatch between StructureState and FEM_Structure");
-            
-            if (structure.ElementsCount != femStructure.Elements.Count)
-                throw new ArgumentException("Element count mismatch between StructureState and FEM_Structure");
-            
-            // Update nodes first
-            NodesEncoder.UpdateFromFEM_Nodes(structure.Nodes, femStructure.Nodes);
-            
-            // Then update elements
-            ElementsEncoder.UpdateFromFEM_Elements(structure.Elements, femStructure.Elements);
         }
     }
 }

@@ -1,5 +1,6 @@
 using MuscleCore.FEModel;
 using Python.Runtime;
+using static MuscleCore.Converters.DecoderHelper;
 
 namespace MuscleCore.Converters
 {
@@ -37,14 +38,14 @@ namespace MuscleCore.Converters
                     dynamic py = pyObj.As<dynamic>();
 
                     // Convert all arrays using the helper
-                    var initialCoords = DecoderHelper.ToCSArray2D(py.initial_coordinates);
-                    var coordinates = DecoderHelper.ToCSArray2D(py.coordinates);
-                    var dofs = DecoderHelper.ToCSBoolArray2D(py.dof);
-                    var loads = DecoderHelper.ToCSArray2D(py.loads);
-                    var displacements = DecoderHelper.ToCSArray2D(py.displacements);
-                    var reactions = DecoderHelper.ToCSArray2D(py.reactions);
-                    var resistingForces = DecoderHelper.ToCSArray2D(py.resisting_forces);
-                    var residual = DecoderHelper.ToCSArray2D(py.residual);
+                    var initialCoords = As2dArray(py.initial_coordinates);
+                    var coordinates = As2dArray(py.coordinates);
+                    var dofs = AsBool2dArray(py.dof);
+                    var loads = As2dArray(py.loads);
+                    var displacements = As2dArray(py.displacements);
+                    var reactions = As2dArray(py.reactions);
+                    var resistingForces = As2dArray(py.resisting_forces);
+                    var residuals = As2dArray(py.residuals);
 
                     // Create nodes object with all properties
                     var nodes = new FEM_Nodes(
@@ -52,12 +53,11 @@ namespace MuscleCore.Converters
                         coordinates: coordinates,
                         dof: dofs,
                         count: (int)py.count,
-                        fixationsCount: (int)py.fixations_count,
                         loads: loads,
                         displacements: displacements,
                         reactions: reactions,
                         resistingForces: resistingForces,
-                        residual: residual
+                        residuals: residuals
                     );
 
                     value = (T)(object)nodes;
