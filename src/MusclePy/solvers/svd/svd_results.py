@@ -31,7 +31,7 @@ class SVDresults():
     def Ur_T(self): 
         """
         Returns:
-            np.ndarray: Transpose of Ur (3*nodes_count, r) : extensional modes as row vectors
+            np.ndarray - shape (r, 3*nodes_count) : extensional modes as row vectors (i.e. Transpose of Ur)
         """
         return self.Ur.T
     
@@ -39,7 +39,7 @@ class SVDresults():
     def Um_T(self):
         """
         Returns:
-            np.ndarray: Transpose of Um (3*nodes_count, m) : inextensional modes as row vectors
+            np.ndarray - shape (m, 3*nodes_count) : inextensional modes as row vectors (i.e. Transpose of Um)
         """
         return self.Um.T
     
@@ -47,7 +47,7 @@ class SVDresults():
     def Vr_T(self):
         """
         Returns:
-            np.ndarray: Transpose of Vr (elements_count, r) : extensional modes as row vectors
+            np.ndarray - shape (r, elements_count) : extensional modes as row vectors (i.e. Transpose of Vr)
         """
         return self.Vr.T
     
@@ -55,6 +55,6 @@ class SVDresults():
     def Vs_T(self):
         """
         Returns:
-            np.ndarray: Transpose of Vs (elements_count, s) : self-stress modes as row vectors
+            np.ndarray - shape (s, elements_count) : self-stress modes as row vectors (i.e. Transpose of Vs)
         """
         return self.Vs.T
