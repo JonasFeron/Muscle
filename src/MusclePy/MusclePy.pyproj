@@ -24,27 +24,13 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="complex_script.py" />
-    <Compile Include="data.py" />
-    <Compile Include="femodel\fem_actions.py" />
     <Compile Include="femodel\fem_elements.py" />
-    <Compile Include="femodel\fem_elements_results.py" />
     <Compile Include="femodel\fem_nodes.py" />
-    <Compile Include="femodel\fem_nodes_results.py" />
     <Compile Include="femodel\fem_structure.py" />
-    <Compile Include="femodel\fem_structure_results.py" />
-    <Compile Include="MainAssembleStructure.py" />
-    <Compile Include="MainDynamicRelaxation.py" />
-    <Compile Include="MainLinearSolveStructure.py" />
-    <Compile Include="MainModuleDynamics.py" />
-    <Compile Include="MainModuleDynamicsCONSISTENT.py" />
-    <Compile Include="MainNonLinearSolveStructure.py" />
-    <Compile Include="result.py" />
     <Compile Include="solvers\linear_dm\elements_linear_dm.py" />
     <Compile Include="solvers\linear_dm\helper_main_linear_dm.py" />
     <Compile Include="solvers\linear_dm\linear_dm.py" />
     <Compile Include="solvers\linear_dm\structure_linear_dm.py" />
-    <Compile Include="StructureObj.py" />
     <Compile Include="test_script.py" />
     <Compile Include="__init__.py" />
   </ItemGroup>

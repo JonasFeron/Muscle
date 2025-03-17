@@ -46,7 +46,7 @@ class FEM_Structure:
         # Calculate (residuals == 0) threshold based on load 
         zero_residuals_threshold = rtol * np.abs(self.nodes.loads) + atol # [N] shape (nodes_count, 3)
         
-        return np.all(np.abs(self.nodes.residuals) <= zero_residuals_threshold)
+        return bool(np.all(np.abs(self.nodes.residuals) <= zero_residuals_threshold))
 
     
     def _create_copy(self, nodes, elements):

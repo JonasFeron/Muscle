@@ -49,7 +49,9 @@ namespace MuscleCore.Converters
                     // Get nodes and elements objects
                     var femElements = py.elements.As<FEM_Elements>();
                     var femNodes = femElements.Nodes;
-                    bool isInEquilibrium = py.is_in_equilibrium.As<bool>();
+                    
+                    // Call the is_in_equilibrium method with default parameters
+                    bool isInEquilibrium = py.is_in_equilibrium().As<bool>();
 
                     // Create structure with all properties
                     var structure = new FEM_Structure(

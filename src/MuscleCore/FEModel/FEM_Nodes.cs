@@ -31,11 +31,6 @@ namespace MuscleCore.FEModel
         public int Count { get; set; }
 
         /// <summary>
-        /// Number of fixed degrees of freedom
-        /// </summary>
-        public int FixationsCount { get; set; }
-
-        /// <summary>
         /// [N] - shape (nodes_count, 3) - External loads applied to nodes
         /// </summary>
         public double[,] Loads { get; set; }
@@ -81,7 +76,6 @@ namespace MuscleCore.FEModel
             Count = initialCoordinates.GetLength(0);
             
             // Initialize mutable properties with default values if null
-            FixationsCount = 0;
             Coordinates = new double[Count, 3];
             Loads = loads ?? new double[Count, 3];
             Displacements = displacements ?? new double[Count, 3];

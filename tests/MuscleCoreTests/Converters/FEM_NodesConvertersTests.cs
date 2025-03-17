@@ -9,7 +9,7 @@ using MuscleCore.PythonNETInit;
 namespace MuscleCoreTests.Converters
 {
     [TestClass]
-    public class FEM_NodesInitializerTests
+    public class FEM_NodesConvertersTests
     {
         private static string condaEnvPath;
         private static string pythonDllName;
@@ -73,50 +73,6 @@ namespace MuscleCoreTests.Converters
             _decoder = new FEM_NodesDecoder();
         }
 
-        [TestMethod]
-        public void Test_FEM_NodesInitializer()
-        {
-            // Initialize nodes using FEM_NodesInitializer
-            var initializedNodes = FEM_NodesInitializer.Initialize(_testNodes);
-            Assert.IsNotNull(initializedNodes);
-
-            // Check that all properties are properly initialized
-            Assert.AreEqual(3, initializedNodes.Count);
-            Assert.AreEqual(7, initializedNodes.FixationsCount); // 2 fixed nodes (6 DOFs) + 1 fixed Y DOF
-
-            // Check arrays have correct dimensions
-            Assert.AreEqual(3, initializedNodes.Coordinates.GetLength(0));
-            Assert.AreEqual(3, initializedNodes.Coordinates.GetLength(1));
-
-            // Check coordinates = initial_coordinates + displacements
-            for (int i = 0; i < initializedNodes.Count; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    Assert.AreEqual(
-                        initializedNodes.Coordinates[i,j], 
-                        initializedNodes.InitialCoordinates[i,j] + initializedNodes.Displacements[i,j]
-                    );
-                }
-            }
-
-            // Check residual = loads + reactions - resisting_forces
-            for (int i = 0; i < initializedNodes.Count; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    Assert.AreEqual(
-                        initializedNodes.Residuals[i,j], 
-                        initializedNodes.Loads[i,j] + initializedNodes.Reactions[i,j] - initializedNodes.ResistingForces[i,j]
-                    );
-                }
-            }
-
-            // Check specific values
-            // Node 1 (middle) should have non-zero loads
-            Assert.AreEqual(100.0, initializedNodes.Loads[1,0]); // X load
-            Assert.AreEqual(-50.0, initializedNodes.Loads[1,2]); // Z load
-        }
 
         [TestMethod]
         public void Test_Encoder_CanEncode()
@@ -183,12 +139,6 @@ namespace MuscleCoreTests.Converters
 
                 // Verify properties are preserved
                 Assert.AreEqual(3, decodedNodes.Count);
-                Assert.AreEqual(7, decodedNodes.FixationsCount);
-
-                //// Should fail to decode to other types
-                //Assert.IsFalse(_decoder.TryDecode(pyNodes, out string? _));
-                //Assert.IsFalse(_decoder.TryDecode(pyNodes, out int? _));
-                //Assert.IsFalse(_decoder.TryDecode(pyNodes, out object? _));
             }
         }
     }

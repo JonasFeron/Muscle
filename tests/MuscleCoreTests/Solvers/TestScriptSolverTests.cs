@@ -6,7 +6,7 @@ using System.IO;
 using System;
 using MuscleCore.PythonNETInit;
 
-namespace MuscleCoreTests.PythonNETSolvers
+namespace MuscleCoreTests.Solvers
 {
     [TestClass]
     public class TestScriptSolverTests

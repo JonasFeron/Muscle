@@ -9,15 +9,16 @@ using MuscleCore.PythonNETInit;
 namespace MuscleCoreTests.Converters
 {
     [TestClass]
-    public class FEM_ElementsInitializerTests
+    public class FEM_StructureConvertersTests
     {
         private static string condaEnvPath;
         private static string pythonDllName;
         private static string srcDir;
-        private static FEM_ElementsEncoder _encoder;
-        private static FEM_ElementsDecoder _decoder;
+        private static FEM_StructureEncoder _encoder;
+        private static FEM_StructureDecoder _decoder;
         private static FEM_Elements _elements;
         private static FEM_Nodes _nodes;
+        private static FEM_Structure _structure;
 
         // private static PyObject _pythonElements;
 
@@ -45,7 +46,8 @@ namespace MuscleCoreTests.Converters
         {
             _nodes = new FEM_Nodes(
                     new double[,] { { 0, 0, 0 }, { 1, 0, 0 }, { 0, 1, 0 } },
-                    new bool[,] { { true, true, true }, { false, false, false }, { true, true, true } }
+                    new bool[,] { { true, true, true }, { false, false, false }, { true, true, true } },
+                    loads: new double[,] { { 0, 0, 0 }, { 100, 0, -50 }, { 0, 0, 0 } }
                 );
 
                 // Create test elements
@@ -53,12 +55,16 @@ namespace MuscleCoreTests.Converters
                     nodes: _nodes,
                     type: new int[] { -1, 1 },
                     endNodes: new int[,] { { 0, 1 }, { 1, 2 } },
-                    area: new double[] {1000, 1000},
+                    area: new double[] { 1000, 1000 },
                     youngs: new double[,] { { 30000, 30000 }, { 0, 30000 } } // second element is a cable (0 Young's modulus in compression)
                 );
 
-            _encoder = new FEM_ElementsEncoder();
-            _decoder = new FEM_ElementsDecoder();
+            _structure = new FEM_Structure(
+                nodes: _nodes,
+                elements: _elements
+            );
+            _encoder = new FEM_StructureEncoder();
+            _decoder = new FEM_StructureDecoder();
 
         }
 
@@ -69,7 +75,7 @@ namespace MuscleCoreTests.Converters
             using (Py.GIL())
             {
                 // Test with valid type
-                bool canEncode = _encoder.CanEncode(typeof(FEM_Elements));
+                bool canEncode = _encoder.CanEncode(typeof(FEM_Structure));
                 Assert.IsTrue(canEncode);
 
                 // Test with invalid type
@@ -83,7 +89,7 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                PyObject result = _encoder.TryEncode(_elements);
+                PyObject result = _encoder.TryEncode(_structure);
                 // Test with valid elements
                 Assert.IsNotNull(result);
 
@@ -98,17 +104,17 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                PyObject pyElements = _elements.ToPython();
+                PyObject pyStructure = _structure.ToPython();
 
                 // Get Python type
-                PyType elementsType = pyElements.GetPythonType();
+                PyType structureType = pyStructure.GetPythonType();
 
                 // Test with valid type
-                bool canDecode = _decoder.CanDecode(elementsType, typeof(FEM_Elements));
+                bool canDecode = _decoder.CanDecode(structureType, typeof(FEM_Structure));
                 Assert.IsTrue(canDecode);
 
                 // Test with invalid target type
-                canDecode = _decoder.CanDecode(elementsType, typeof(string));
+                canDecode = _decoder.CanDecode(structureType, typeof(string));
                 Assert.IsFalse(canDecode);
 
             }
@@ -119,20 +125,13 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                PyObject pyElements =_elements.ToPython();
-                FEM_Elements result = null;
+                PyObject pyStructure =_structure.ToPython();
+                FEM_Structure result = null;
                 // Test with valid Python elements
-                bool success = _decoder.TryDecode(pyElements, out result);
+                bool success = _decoder.TryDecode(pyStructure, out result);
                 Assert.IsTrue(success);
                 Assert.IsNotNull(result);
-                
-                // Verify properties
-                Assert.AreEqual(_elements.Type.Length, result.Type.Length);
-                Assert.AreEqual(_elements.EndNodes.GetLength(0), result.EndNodes.GetLength(0));
-                Assert.AreEqual(_elements.EndNodes.GetLength(1), result.EndNodes.GetLength(1));
-                Assert.AreEqual(_elements.Area.GetLength(0), result.Area.GetLength(0));
-                Assert.AreEqual(_elements.Youngs.GetLength(0), result.Youngs.GetLength(0));
-                Assert.AreEqual(_elements.Youngs.GetLength(1), result.Youngs.GetLength(1));
+                Assert.IsFalse(result.IsInEquilibrium); //there are loads on the nodes without axial forces in the elements
 
             }
         }
