@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 using GH_IO.Serialization;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 using Rhino.Geometry;
 
 
 namespace Muscle.View
 {
 
-    public class GH_StructureObj : GH_Goo<StructureObj>
+    public class GH_StructureState : GH_Goo<StructureState>
     {
         // All data used in Grasshopper must implement the IGH_Goo interface. 
         // IGH_Goo defines the bare minimum of methods and properties for any kind of data before it is allowed to play ball
@@ -24,7 +24,7 @@ namespace Muscle.View
 
 
         #region Properties
-        public override StructureObj Value // The StructureObj object is accessible from the Value property of the GH_StructureObj
+        public override StructureState Value // The StructureObj object is accessible from the Value property of the GH_StructureObj
         {
             get { return base.Value; }
             set
@@ -51,7 +51,7 @@ namespace Muscle.View
 
         public override string TypeName { get { return Value.TypeName; } }
 
-        public override string TypeDescription { get { return "StructureObj object is composed of Lines linking the nodes"; } }
+        public override string TypeDescription { get { return "A structure is composed of finite elements linking the nodes"; } }
 
         public override string ToString() //return a string representation of the value of this instance
         {
@@ -62,23 +62,23 @@ namespace Muscle.View
 
         #region Constructors
 
-        public GH_StructureObj() // default constructor
+        public GH_StructureState() // default constructor
         {
-            Value = new StructureObj();
+            Value = new StructureState();
         }
 
-        public GH_StructureObj(StructureObj structure)   // constructor with initial parameter called in the AssembleStructureComponent Solveinstance method
+        public GH_StructureState(StructureState structure)   // constructor with initial parameter called in the AssembleStructureComponent Solveinstance method
         {
             Value = structure;
         }
-        public GH_StructureObj(GH_Goo<StructureObj> GH_structure)  //Copy constructor
+        public GH_StructureState(GH_Goo<StructureState> GH_structure)  //Copy constructor
         {
             Value = GH_structure.Value;
         }
 
         public override IGH_Goo Duplicate() //Duplication method calling the copy constructor
         {
-            return new GH_StructureObj(this);
+            return new GH_StructureState(this);
         }
 
         #endregion Constructors
@@ -88,9 +88,9 @@ namespace Muscle.View
         #region Casting
         public override bool CastFrom(object source)
         {
-            if (source is StructureObj)
+            if (source is StructureState)
             {
-                StructureObj s = source as StructureObj;
+                StructureState s = source as StructureState;
                 Value = s;
             }
 
@@ -100,7 +100,7 @@ namespace Muscle.View
         public override bool CastTo<Q>(ref Q target)
         {
 
-            if (typeof(Q).IsAssignableFrom(typeof(StructureObj)))
+            if (typeof(Q).IsAssignableFrom(typeof(StructureState)))
             {
                 object structure = Value;
                 target = (Q)structure;
@@ -120,36 +120,12 @@ namespace Muscle.View
         #region Serialization
         public override bool Write(GH_IWriter writer) // Serialize this instance to a Grasshopper writer object.
         {
-            //writer.SetString("type name", Value.ShapeName);
-            //writer.Setdouble("dimension", Value.Dimension);
-            //writer.Setdouble("thickness", Value.Thickness);
-
-            //new GH_StructuralMaterial(Value.Material).Write(writer);
 
 
             return base.Write(writer);
         }
         public override bool Read(GH_IReader reader) //Deserialize this instance from a Grasshopper reader object
         {
-            //string TypeName = reader.GetString("type name");
-
-            //if (TypeName == "Circle cross section")
-            //{
-            //    double diameter = reader.Getdouble("dimension");
-            //    double thickness = reader.Getdouble("thickness");
-            //    GH_StructuralMaterial ghMaterial = new GH_StructuralMaterial();
-            //    ghMaterial.Read(reader);
-            //    Value = new CircleCrossSection(diameter, thickness, ghMaterial.Value);
-            //}
-            //else if (TypeName == "Square cross section")
-            //{
-            //    double diameter = reader.Getdouble("dimension");
-            //    double thickness = reader.Getdouble("thickness");
-            //    GH_StructuralMaterial ghMaterial = new GH_StructuralMaterial();
-            //    ghMaterial.Read(reader);
-            //    Value = new SquareCrossSection(diameter, thickness, ghMaterial.Value);
-            //}
-            //else { return false; }
 
 
             return base.Read(reader);

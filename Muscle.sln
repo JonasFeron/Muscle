@@ -5,17 +5,18 @@ VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Muscle", "src\Muscle\Muscle.csproj", "{9C5C9254-CC56-4114-81C2-3EDBCEF96815}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCore", "src\MuscleCS\MuscleCore.csproj", "{FA523F56-AA22-416D-B68E-63CE60EFDA62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleApp", "src\MuscleApp\MuscleApp.csproj", "{DC5C0AE0-E43F-45A7-B851-F8EF4028FE34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCore", "src\MuscleCore\MuscleCore.csproj", "{FA523F56-AA22-416D-B68E-63CE60EFDA62}"
 EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "MusclePy", "src\MusclePy\MusclePy.pyproj", "{A23289B8-BD98-4335-94F7-9CC74112BFE6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCoreTests", "tests\MuscleCSTests\MuscleCoreTests.csproj", "{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleCoreTests", "tests\MuscleCoreTests\MuscleCoreTests.csproj", "{E419A7EE-98C6-4BB0-9A48-EF9D42AAE95C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{FA523F56-AA22-416D-B68E-63CE60EFDA62} = {FA523F56-AA22-416D-B68E-63CE60EFDA62}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuscleApp", "src\MuscleApp\MuscleApp.csproj", "{DC5C0AE0-E43F-45A7-B851-F8EF4028FE34}"
-EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

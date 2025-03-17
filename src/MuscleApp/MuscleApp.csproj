@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+
+
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -17,7 +19,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Solvers\DR\DRMethod.cs" />
     <Compile Include="Solvers\FEM_ElementsInitializer.cs" />
@@ -25,9 +26,6 @@
     <Compile Include="Solvers\FEM_StructureInitializer.cs" />
     <Compile Include="Solvers\LinearDMSolver.cs" />
     <Compile Include="Solvers\TestScriptSolver.cs" />
-    <Compile Include="ViewModel2FEModel\ElementsEncoder.cs" />
-    <Compile Include="ViewModel2FEModel\NodesEncoder.cs" />
-    <Compile Include="ViewModel2FEModel\StructureStateEncoder.cs" />
     <Compile Include="ViewModel\BilinearMaterial.cs" />
     <Compile Include="ViewModel\CrossSection.cs" />
     <Compile Include="ViewModel\Element.cs" />

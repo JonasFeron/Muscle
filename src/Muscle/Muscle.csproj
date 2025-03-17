@@ -60,6 +60,10 @@
     <PackageReference Include="pythonnet" Version="3.0.5" />
   </ItemGroup>
   
+  <ItemGroup>
+    <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
+  </ItemGroup>
+
   <!-- For Windows only builds -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
     <UseWindowsForms>true</UseWindowsForms>
@@ -75,9 +79,7 @@
     <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
-  </ItemGroup>
+
 
   <Target Name="CopyPdbForMonoDebugging" AfterTargets="AfterBuild">
     <!-- Enable debugging in Rhino 6/7 on Mac -->

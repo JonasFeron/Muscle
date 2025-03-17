@@ -4,16 +4,13 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Muscle.GHModel;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
+using static Muscle.Components.GHComponentsFolders;
 
-// In order to load the result of this wizard, you will also need to
-// add the output bin/ folder of this project to the list of loaded
-// folder in Grasshopper.
-// You can use the _GrasshopperDeveloperSettings Rhino command for that.
 
 namespace Muscle.Components.ConstructFEModel
 {
-    public class AssembleStructureComponent : GH_Component
+    public class ConstructStructureComponent : GH_Component
     {
 
         #region Properties
@@ -25,11 +22,11 @@ namespace Muscle.Components.ConstructFEModel
         /// <summary>
         /// Creation of the Component on the GH Canvas
         /// </summary>
-        public AssembleStructureComponent()
-          : base("Structure - Assemble", //Name
+        public ConstructStructureComponent()
+          : base("Construct Structure", //Name
                 "Structure", //NickName
               "Creates a Finite Element Model (FEM) of the Structure.",//Description
-              "Muscles", "Model")
+              GHAssemblyName, Folder2_ConstructFEM)
         {
 
         }
@@ -65,7 +62,7 @@ namespace Muscle.Components.ConstructFEModel
         {
             // all inputs are GH_ParamAccess.tree. because we create only 1 geometry, no matter how many branches have the trees. (list access would create 1 geometry per branch) 
             pManager.AddGenericParameter("Elements", "E", "The finite elements.", GH_ParamAccess.tree);
-            pManager.AddPointParameter("(Points)", "(Pt)", "(Optional) If no points are inputted, the points are extracted from the elements extremities in a random order", GH_ParamAccess.tree, null);
+            pManager.AddPointParameter("(Points)", "(Pt)", "(Optional) If no points are provided, the points are extracted from the elements ends in a random order", GH_ParamAccess.tree, null);
             pManager.AddGenericParameter("(Supports)", "(Spt)", "(Optional) Define the supports of the structure. A Structure may be self-stressed but can not be loaded without supports.", GH_ParamAccess.tree);
             pManager[1].Optional = true;
             pManager[2].Optional = true;

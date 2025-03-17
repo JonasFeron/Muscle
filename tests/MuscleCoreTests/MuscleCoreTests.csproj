@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\MuscleCS\MuscleCore.csproj" />
+    <ProjectReference Include="..\..\src\MuscleCore\MuscleCore.csproj" />
   </ItemGroup>
 
 </Project>
