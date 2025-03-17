@@ -31,7 +31,8 @@ namespace MuscleCore.Converters
 
             PyObjectConversions.RegisterDecoder(new FEM_StructureDecoder());
             PyObjectConversions.RegisterDecoder(new FEM_NodesDecoder());
-            PyObjectConversions.RegisterDecoder(new FEM_ElementsDecoder()); 
+            PyObjectConversions.RegisterDecoder(new FEM_ElementsDecoder());
+            PyObjectConversions.RegisterDecoder(new SVDResultsDecoder());
 
         }
     }

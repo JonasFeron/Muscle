@@ -235,7 +235,7 @@ namespace MuscleApp.ViewModel
         #region List<Node>Methods
         public static bool EpsilonContains(List<Node> nodes, Point3d thePoint, double ZeroTol, out int ind)
         {
-            List<Point3d> points = nodes.Select(n => n.Point).ToList(); //transform the list of nodes into a list of Point
+            List<Point3d> points = nodes.Select(n => n.Coordinates).ToList(); //transform the list of nodes into a list of Point
             return EpsilonContains(points, thePoint, ZeroTol, out ind);
         }
         #endregion List<Node>Methods

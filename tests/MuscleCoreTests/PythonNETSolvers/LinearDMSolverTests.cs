@@ -1,12 +1,12 @@
-using MuscleCore.Application.PythonNETSolvers;
+using MuscleCore.Solvers;
 using MuscleCore.FEModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Python.Runtime;
 using System.IO;
 using System;
-using MuscleCore.App.PythonNETInit;
+using MuscleCore.PythonNETInit;
 
-namespace MuscleCSTests.Application.PythonNETSolvers
+namespace MuscleCoreTests.Solvers
 {
     [TestClass]
     public class LinearDMSolverTests
@@ -58,9 +58,9 @@ namespace MuscleCSTests.Application.PythonNETSolvers
                 nodes: nodes,
                 type: new int[] { -1, -1 },  // Two struts
                 endNodes: new int[,] { { 0, 1 }, { 1, 2 } },  // Element 0: 0->1, Element 1: 1->2
-                areas: new double[,] { { 2500.0, 2500.0 }, { 2500.0, 2500.0 } },  // 2500 mm² area
+                area: new double[] { 2500.0, 2500.0 },   // 2500 mm² area
                 youngs: new double[,] { { 10000.0, 10000.0 }, { 10000.0, 10000.0 } },  // 10000 MPa Young's modulus
-                deltaFreeLength: new double[] { 0.0, 0.0 },  // No initial prestress
+                freeLength: new double[] { 0.0, 0.0 },  // No initial prestress
                 tension: new double[] { 0.0, 0.0 }  // No initial tension
             );
 
@@ -74,8 +74,8 @@ namespace MuscleCSTests.Application.PythonNETSolvers
             // No prestress
             var deltaFreeLength = new double[2];  // 2 elements
 
-            // Solve using LinearDMSolver
-            var result = LinearDMSolver.Solve(structure, loads, deltaFreeLength);
+            // Solve using LinearDM
+            var result = LinearDM.Solve(structure, loads, deltaFreeLength);
 
             // Verify result is not null
             Assert.IsNotNull(result);

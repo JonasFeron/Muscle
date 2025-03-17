@@ -1,12 +1,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MuscleCore.Application.PythonNETSolvers;
+using MuscleCore.Solvers;
 using MuscleCore.Converters;
 using MuscleCore.FEModel;
 using Python.Runtime;
 using System.IO;
-using MuscleCore.App.PythonNETInit;
+using MuscleCore.PythonNETInit;
 
-namespace MuscleCSTests.Converters
+namespace MuscleCoreTests.Converters
 {
     [TestClass]
     public class FEM_ElementsInitializerTests
@@ -53,7 +53,7 @@ namespace MuscleCSTests.Converters
                     nodes: _nodes,
                     type: new int[] { -1, 1 },
                     endNodes: new int[,] { { 0, 1 }, { 1, 2 } },
-                    areas: new double[,] { { 1000, 1000 }, { 1000, 1000 } },
+                    area: new double[] {1000, 1000},
                     youngs: new double[,] { { 30000, 30000 }, { 0, 30000 } } // second element is a cable (0 Young's modulus in compression)
                 );
 
@@ -130,8 +130,7 @@ namespace MuscleCSTests.Converters
                 Assert.AreEqual(_elements.Type.Length, result.Type.Length);
                 Assert.AreEqual(_elements.EndNodes.GetLength(0), result.EndNodes.GetLength(0));
                 Assert.AreEqual(_elements.EndNodes.GetLength(1), result.EndNodes.GetLength(1));
-                Assert.AreEqual(_elements.Areas.GetLength(0), result.Areas.GetLength(0));
-                Assert.AreEqual(_elements.Areas.GetLength(1), result.Areas.GetLength(1));
+                Assert.AreEqual(_elements.Area.GetLength(0), result.Area.GetLength(0));
                 Assert.AreEqual(_elements.Youngs.GetLength(0), result.Youngs.GetLength(0));
                 Assert.AreEqual(_elements.Youngs.GetLength(1), result.Youngs.GetLength(1));
 

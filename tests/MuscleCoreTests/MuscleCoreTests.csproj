@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Application\PythonNETSolvers\ComplexScriptSolverTests.cs" />
+    <Compile Remove="PythonNETSolvers\ComplexScriptSolverTests.cs" />
   </ItemGroup>
 
   <ItemGroup>

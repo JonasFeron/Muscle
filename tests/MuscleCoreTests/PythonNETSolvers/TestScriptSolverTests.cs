@@ -4,9 +4,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Python.Runtime;
 using System.IO;
 using System;
-using MuscleCore.App.PythonNETInit;
+using MuscleCore.PythonNETInit;
 
-namespace MuscleCSTests.Application.PythonNETSolvers
+namespace MuscleCoreTests.PythonNETSolvers
 {
     [TestClass]
     public class TestScriptSolverTests

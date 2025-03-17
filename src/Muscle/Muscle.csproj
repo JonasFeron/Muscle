@@ -33,6 +33,7 @@
     <Compile Remove="Resources\**" />
     <Compile Remove="Solvers\**" />
     <Compile Remove="Util\**" />
+    <Compile Remove="View\**" />
     <EmbeddedResource Remove="Components\**" />
     <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Dynamics\**" />
@@ -42,6 +43,7 @@
     <EmbeddedResource Remove="Resources\**" />
     <EmbeddedResource Remove="Solvers\**" />
     <EmbeddedResource Remove="Util\**" />
+    <EmbeddedResource Remove="View\**" />
     <None Remove="Components\**" />
     <None Remove="Converters\**" />
     <None Remove="Dynamics\**" />
@@ -51,6 +53,11 @@
     <None Remove="Resources\**" />
     <None Remove="Solvers\**" />
     <None Remove="Util\**" />
+    <None Remove="View\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="AccessToAll.cs" />
   </ItemGroup>
   
   <ItemGroup>
@@ -58,10 +65,6 @@
     <PackageReference Include="Grasshopper" Version="8.10.24228.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="pythonnet" Version="3.0.5" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
   </ItemGroup>
 
   <!-- For Windows only builds -->
@@ -78,6 +81,9 @@
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" ExcludeAssets="all" GeneratePathProperty="true" />
     <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
   </ItemGroup>
 
 

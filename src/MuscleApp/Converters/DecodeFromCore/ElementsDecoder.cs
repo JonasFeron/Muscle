@@ -42,8 +42,8 @@ namespace MuscleApp.Converters
                 Element updatedElement = originalElements[i].Copy();
                 
                 // Update Line with new nodes coordinates              
-                int node_idx0 = updatedElement.EndNodes[i,0];
-                int node_idx1  = updatedElement.EndNodes[i,1];
+                int node_idx0 = updatedElement.EndNodes[0];
+                int node_idx1  = updatedElement.EndNodes[1];
                 Point3d p0 = updatedNodes[node_idx0].Coordinates; // new coordinates of End Nodes
                 Point3d p1 = updatedNodes[node_idx1].Coordinates; 
                 updatedElement.Line = new Line(p0, p1);

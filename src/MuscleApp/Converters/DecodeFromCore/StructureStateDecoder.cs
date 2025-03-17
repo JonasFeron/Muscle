@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using MuscleApp.ViewModel;
 using MuscleCore.FEModel;
-using static MuscleApp.Converters.NodesDecoder;
-using static MuscleApp.Converters.ElementsDecoder;
 
 namespace MuscleApp.Converters
 {
@@ -34,14 +32,14 @@ namespace MuscleApp.Converters
             StructureState updated = original.Copy();
 
             // retrieve the results from the computations stored in femResults
-            List<Node> nodesResults = femResults.Nodes;
-            List<Element> elementsResults = femResults.Elements;
+            FEM_Nodes nodesResults = femResults.Nodes;
+            FEM_Elements elementsResults = femResults.Elements;
             
             // Copy and Update original nodes with the nodes results 
-            updated.Nodes = CopyAndUpdate(original.Nodes, nodesResults);
+            updated.Nodes = NodesDecoder.CopyAndUpdate(original.Nodes, nodesResults);
             
             // Copy and Update original elements with the elements results
-            updated.Elements = CopyAndUpdate(original.Elements, elementsResults, updated.Nodes);
+            updated.Elements = ElementsDecoder.CopyAndUpdate(original.Elements, elementsResults, updated.Nodes);
             
             // Update equilibrium state
             updated.IsInEquilibrium = femResults.IsInEquilibrium;

@@ -38,7 +38,6 @@ namespace MuscleApp.ViewModel
         public List<Element> Elements { get; set; }
         public List<Node> Nodes { get; set; }
         public int FixationsCount { get { return Nodes.Select(n => n.FixationsCount).Sum(); } }
-        public int DOFfreeCount { get { return 3 * Nodes.Count - FixationsCount; } }
 
         ///// Results coming from Python /////
 
@@ -175,7 +174,7 @@ namespace MuscleApp.ViewModel
 
         public override string ToString()
         {
-            return $"Structure of {NodesCount} nodes, {ElementsCount} elements, {FixationsCount} fixed displacements and {DOFfreeCount} free degrees of freedom.";
+            return $"Structure of {Nodes.Count} nodes, {Elements.Count} elements, {FixationsCount} fixed displacements and {3 * Nodes.Count - FixationsCount} free degrees of freedom.";
         }
 
         #region 1)RegisterElements
@@ -342,8 +341,8 @@ namespace MuscleApp.ViewModel
                 int ind1 = -1;
                 for (int j = 0; j < Nodes.Count; j++) // parcourir tous les noeuds et voir a quel index correspond les extrémités d'un élément
                 {
-                    if (Nodes[j].Point.EpsilonEquals(n0, ZeroGeometricATol)) { ind0 = j; }
-                    if (Nodes[j].Point.EpsilonEquals(n1, ZeroGeometricATol)) { ind1 = j; }
+                    if (Nodes[j].Coordinates.EpsilonEquals(n0, ZeroGeometricATol)) { ind0 = j; }
+                    if (Nodes[j].Coordinates.EpsilonEquals(n1, ZeroGeometricATol)) { ind1 = j; }
                 }
                 e.EndNodes = new List<int> { ind0, ind1 }; // Dans tous les cas, on enregistre l'index des noeuds n0 et n1 dans l'objet Element
             }
@@ -384,72 +383,7 @@ namespace MuscleApp.ViewModel
         /// Transform the user inputted elements into properly formatted datas and register them in the StructureObject.
         /// </summary>
 
-        // #region PopulateWithSolverResult
-        // public void PopulateWithSolverResult(SharedSolverResult answ)
-        // {
-        //     if (answ == null)
-        //     {
-        //         return;
-        //     }
-        //     IsInEquilibrium = answ.IsInEquilibrium;
-        //     DR.nTimeStep = answ.nTimeStep;
-        //     DR.nKEReset = answ.nKEReset;
-
-
-        //     for (int n = 0; n < Nodes.Count; n++)
-        //     {
-        //         Node node = Nodes[n]; // lets give a nickname to the current node from the list. 
-
-        //         // 1) Register the loads, the new nodescoordinates, the reactions results from the solver
-
-        //         //Coordinates. 
-        //         double X = answ.NodesCoord[n][0];
-        //         double Y = answ.NodesCoord[n][1];
-        //         double Z = answ.NodesCoord[n][2];
-        //         node.Point = new Point3d(X, Y, Z);
-        //         // NOTE that displacements can be simply computed in grasshopper as the vector between the old and the new coordinates
-
-
-        //         //Loads
-        //         double FX = answ.Loads[n][0];
-        //         double FY = answ.Loads[n][1];
-        //         double FZ = answ.Loads[n][2];
-        //         node.Load = new Vector3d(FX, FY, FZ);
-
-        //         //Residual
-        //         double ResX = answ.Residual[n][0];
-        //         double ResY = answ.Residual[n][1];
-        //         double ResZ = answ.Residual[n][2];
-        //         node.Residual = new Vector3d(ResX, ResY, ResZ);
-
-        //         //Reactions 
-        //         double ReactX = 0;
-        //         double ReactY = 0;
-        //         double ReactZ = 0;
-        //         if (!node.isXFree) ReactX = answ.Reactions[node.Ind_RX];
-        //         if (!node.isYFree) ReactY = answ.Reactions[node.Ind_RY];
-        //         if (!node.isZFree) ReactZ = answ.Reactions[node.Ind_RZ];
-        //         node.Reaction = new Vector3d(ReactX, ReactY, ReactZ);
-        //     }
-
-
-        //     for (int e = 0; e < Elements.Count; e++)
-        //     {
-        //         Element elem = Elements[e];
-
-        //         //1) axialforce results
-        //         elem.Tension = answ.Tension[e];
-        //         elem.FreeLength = answ.ElementsLFree[e];
-
-        //         //update the lines end points
-        //         int n0 = elem.EndNodes[0];
-        //         int n1 = elem.EndNodes[1];
-        //         Point3d p0 = Nodes[n0].Point; //make sure coordinates have been updated before the lines
-        //         Point3d p1 = Nodes[n1].Point;
-        //         elem.Line = new Line(p0, p1);
-        //     }
-
-        // }
+       
 
         // #endregion PopulateWithSolverResult
         // //Use the result from the dynamic computation and set them in a structure object
@@ -468,24 +402,6 @@ namespace MuscleApp.ViewModel
 
         // //#endregion PopulateWithSolverResult
 
-
-        // public GH_Structure<GH_Number> ListListToGH_Struct(List<List<double>> datalistlist)
-        // {
-        //     GH_Path path;
-        //     int i = 0;
-        //     GH_Structure<GH_Number> res = new GH_Structure<GH_Number>();
-        //     if (datalistlist == null)
-        //     {
-        //         return res;
-        //     }
-        //     foreach (List<double> datalist in datalistlist)
-        //     {
-        //         path = new GH_Path(i);
-        //         res.AppendRange(datalist.Select(data => new GH_Number(data)), path);
-        //         i++;
-        //     }
-        //     return res;
-        // }
 
         // //Display the List of List of Vector3D
         // public GH_Structure<GH_Vector> ListListVectToGH_Struct(List<List<Vector3d>> datalistlist)

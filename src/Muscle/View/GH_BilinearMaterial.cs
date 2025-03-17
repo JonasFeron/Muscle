@@ -1,6 +1,6 @@
 ﻿using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 using System;
 using System.Collections.Generic;
 
@@ -42,7 +42,8 @@ namespace Muscle.View
                 {
                     return "At least one Young Modulus (Compressive or Tensile) must be different than 0.";
                 }
-                else if (Value.Rho < 0.0)                                                 
+                else if (Value.Rho < 0.0)
+                { 
                     return "Specific mass must be positive.";
                 }
                 else                                                                

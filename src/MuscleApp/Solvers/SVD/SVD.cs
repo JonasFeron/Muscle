@@ -19,6 +19,7 @@
 
 using MuscleApp.ViewModel;
 using static MuscleApp.Converters.StructureStateEncoder;
+using MuscleCore.Solvers; 
 
 namespace MuscleApp.Solvers
 {

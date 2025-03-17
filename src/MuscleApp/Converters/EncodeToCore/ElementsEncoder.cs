@@ -1,5 +1,5 @@
 using MuscleCore.FEModel;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;

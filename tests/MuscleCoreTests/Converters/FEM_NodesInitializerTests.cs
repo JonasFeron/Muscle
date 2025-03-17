@@ -4,10 +4,9 @@ using MuscleCore.FEModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Python.Runtime;
 using System.IO;
-using Rhino.Geometry;
-using MuscleCore.App.PythonNETInit;
+using MuscleCore.PythonNETInit;
 
-namespace MuscleCSTests.Converters
+namespace MuscleCoreTests.Converters
 {
     [TestClass]
     public class FEM_NodesInitializerTests
@@ -107,7 +106,7 @@ namespace MuscleCSTests.Converters
                 for (int j = 0; j < 3; j++)
                 {
                     Assert.AreEqual(
-                        initializedNodes.Residual[i,j], 
+                        initializedNodes.Residuals[i,j], 
                         initializedNodes.Loads[i,j] + initializedNodes.Reactions[i,j] - initializedNodes.ResistingForces[i,j]
                     );
                 }
