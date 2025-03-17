@@ -3,8 +3,9 @@ using System.IO;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Muscle.GHModel;
+using Muscle.View;
 using MuscleApp.ViewModel;
+using Muscle.Converters;
 using static Muscle.Components.GHComponentsFolders;
 
 
@@ -100,11 +101,16 @@ namespace Muscle.Components.ConstructFEModel
             if (!DA.GetDataTree(1, out points_input)) { } // Nothing happen if i can't collect points.
             if (!DA.GetDataTree(2, out supports_input)) { supports_input = null; }  //no default value can be inputted for a generic parameter
 
+            // Convert Grasshopper data to MuscleApp ViewModel types
+            List<Element> elements = GH_Encoders.ToElements(gh_elements_input);
+            List<Point3d> points = GH_Encoders.ToPoint3ds(points_input);
+            List<Support> supports = GH_Encoders.ToSupports(supports_input);
+
             // 2) Create and solve geometry object 
-            StructureObj structure = null;
+            StructureState structure = null;
             try
             {
-                structure = new StructureObj(gh_elements_input, points_input, supports_input); // A geometry object is created from lines, points and supports. The validity of the inputs are checked when constructing the object.
+                structure = new StructureState(elements, points, supports); // A geometry object is created from lines, points and supports. The validity of the inputs are checked when constructing the object.
             }
             catch (InvalidDataException e) // error if the supports inputted by the user are not real supports
             {
@@ -116,10 +122,8 @@ namespace Muscle.Components.ConstructFEModel
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
             }
 
-            GH_StructureObj gh_structure = new GH_StructureObj(structure);
-
-            // 3) Set outputs
-            DA.SetData(0, gh_structure);
+            // 3) Set outputs 
+            DA.SetData(0, new GH_StructureState(structure));
 
         }
 

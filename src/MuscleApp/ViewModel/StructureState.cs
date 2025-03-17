@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Muscle.View;
 using MuscleCore.FEModel;
 
 namespace MuscleApp.ViewModel
@@ -81,7 +80,7 @@ namespace MuscleApp.ViewModel
 
             Elements = new List<Element>();
             Nodes = new List<Node>();
-            IsInEquilibrium = False;
+            IsInEquilibrium = false;
             // Residual0Threshold = 0.0001;
             // LoadsToApply = new List<Vector3d>();
             // LengtheningsToApply = new List<double>();
@@ -107,18 +106,25 @@ namespace MuscleApp.ViewModel
             Init();
         }
 
-        public StructureState(GH_Structure<IGH_Goo> GH_elements_input, GH_Structure<GH_Point> GH_points_input, GH_Structure<IGH_Goo> GH_supports_input)
+        /// <summary>
+        /// Creates a StructureState from lists of Elements, Points, and Supports.
+        /// This constructor allows creating a structure without depending on Grasshopper types.
+        /// </summary>
+        /// <param name="elements">List of Element objects defining the structural elements</param>
+        /// <param name="points">List of Point3d objects defining node locations</param>
+        /// <param name="supports">List of Support objects defining boundary conditions</param>
+        public StructureState(List<Element> elements, List<Point3d> points, List<Support> supports)
         {
             Init();
 
-            // Step 1: Register structural elements from Grasshopper input
+            // Step 1: Register structural elements
             // This populates the Elements collection with Element instances
-            RegisterElements(GH_elements_input);
+            RegisterElements(elements);
 
             // Step 2: Register points as nodes
             // This creates Node instances from input points, calculates structure dimensions,
             // and ensures all element endpoints are represented as nodes
-            RegisterPointsAsNodes(GH_points_input);
+            RegisterPointsAsNodes(points);
 
             // Step 3: Connect nodes to element endpoints
             // This establishes the topological relationship between elements and nodes
@@ -126,7 +132,7 @@ namespace MuscleApp.ViewModel
 
             // Step 4: Apply support conditions to nodes
             // This adds boundary conditions (fixed/free DOFs) to the appropriate nodes
-            RegisterSupports(GH_supports_input);
+            RegisterSupports(supports);
         }
 
         public StructureState(StructureState other)
@@ -175,23 +181,18 @@ namespace MuscleApp.ViewModel
         #region 1)RegisterElements
 
         /// <summary>
-        /// Processes Grasshopper element inputs and registers them in the structure.
+        /// Processes a list of elements and registers them in the structure.
         /// Each element is added to the Elements collection and assigned a unique index.
         /// </summary>
-        /// <param name="GH_elements_input">Grasshopper structure containing element data</param>
-        private void RegisterElements(GH_Structure<IGH_Goo> GH_elements_input)
+        /// <param name="elements">List of elements to register in the structure</param>
+        private void RegisterElements(List<Element> elements)
         {
             int index = 0;
-            foreach (var data in GH_elements_input.FlattenData())
+            foreach (var element in elements)
             {
-                if (data is GH_Element)
-                {
-                    GH_Element gh_elem = data as GH_Element;
-                    Elements.Add(gh_elem.Value);
-                    gh_elem.Value.Idx = index;
-                    // LengtheningsToApply.Add(0.0);
-                    index++;
-                }
+                Elements.Add(element);
+                element.Idx = index;
+                index++;
             }
         }
 
@@ -208,8 +209,8 @@ namespace MuscleApp.ViewModel
         /// 4. Ensures all element endpoints are included in the node list
         /// 5. Creates Node instances with appropriate indices
         /// </summary>
-        /// <param name="GH_points_input">Grasshopper structure containing point data</param>
-        private void RegisterPointsAsNodes(GH_Structure<GH_Point> GH_points_input)
+        /// <param name="points">List of Point3d objects defining node locations</param>
+        private void RegisterPointsAsNodes(List<Point3d> points)
         {
             int ind_node = 0;
             //1) find the points that are extremities of the elements
@@ -219,14 +220,11 @@ namespace MuscleApp.ViewModel
 
 
             //2) if user inputed a list of points : we want to use its indexation of the nodes
-            List<GH_Point> list_GH_points_input = GH_points_input.FlattenData();
-            if (!(list_GH_points_input == null || list_GH_points_input.Count == 0))// if user gave points as input.
+            if (!(points == null || points.Count == 0))// if user gave points as input.
             {
-                List<Point3d> points_input = list_GH_points_input.Select(gh => gh.Value).ToList(); //this transform a GH_Structure<GH_Point> into a List<Point3d> (without for loop). First we flatten the GH_Structure into a List<GH_Point>. Then each GH_Point is converted into a Point3D by replacing it by its value. 
-
                 //2.a) make sure the user list of points do not contains duplicated points
-                List<Point3d> points_input_wo_d = Node.RemoveDuplicatedPoints(points_input, ZeroGeometricATol);
-                if (points_input_wo_d.Count < points_input.Count) { warnings.Add("Some user inputted points were duplicates and have been removed. Indexation of points may be affected."); } //warn the user if there were duplicates
+                List<Point3d> points_input_wo_d = Node.RemoveDuplicatedPoints(points, ZeroGeometricATol);
+                if (points_input_wo_d.Count < points.Count) { warnings.Add("Some user inputted points were duplicates and have been removed. Indexation of points may be affected."); } //warn the user if there were duplicates
 
                 //2.b) make sure all lines extremities are contained in the user list of points, if not add the missing extremity at the end of the user list of points
                 UserPointsContainsAllExtremities(points_input_wo_d, points_from_lines_wo_d);
@@ -354,7 +352,7 @@ namespace MuscleApp.ViewModel
 
         #region 4)RegisterSupports
         /// <summary>
-        /// Applies support conditions to nodes from Grasshopper input.
+        /// Applies support conditions to nodes from a list of Support objects.
         /// For each support in the input:
         /// 1. Identifies the node that corresponds to the support point
         /// 2. Applies the support conditions (fixed/free DOFs) to the node
@@ -362,48 +360,19 @@ namespace MuscleApp.ViewModel
         /// 
         /// This establishes the boundary conditions needed for structural analysis.
         /// </summary>
-        /// <param name="GH_supports_input">Grasshopper structure containing support data</param>
-        private void RegisterSupports(GH_Structure<IGH_Goo> GH_supports_input)
+        /// <param name="supports">List of Support objects defining boundary conditions</param>
+        private void RegisterSupports(List<Support> supports)
         {
-            foreach (var data in GH_supports_input.FlattenData())
+            foreach (var support in supports)
             {
                 int ind;
-                if (data is GH_Support)
+                if (Node.EpsilonContains(Nodes, support.Point, ZeroGeometricATol, out ind))
                 {
-                    GH_Support gh_spt = (GH_Support)data;
-                    Support spt = gh_spt.Value;
-                    if (Node.EpsilonContains(Nodes, spt.Point, ZeroGeometricATol, out ind))
-                    {
-                        Nodes[ind].AddSupport(spt);
-                    }
-                    else
-                    {
-                        warnings.Add("A support is defined on a point which do not belong to the geometry. This support is ignored.");
-                    }
+                    Nodes[ind].AddSupport(support);
                 }
                 else
                 {
-                    throw new InvalidDataException("Input is not a support");
-                }
-            }
-            //finally reference the identity of each reaction to be able to retrieve the results
-            int ind_spt = 0;
-            foreach (Node node in Nodes)
-            {
-                if (!node.isXFree)
-                {
-                    node.Ind_RX = ind_spt;
-                    ind_spt++;
-                }
-                if (!node.isYFree)
-                {
-                    node.Ind_RY = ind_spt;
-                    ind_spt++;
-                }
-                if (!node.isZFree)
-                {
-                    node.Ind_RZ = ind_spt;
-                    ind_spt++;
+                    warnings.Add("A support is defined on a point which do not belong to the geometry. This support is ignored.");
                 }
             }
         }
