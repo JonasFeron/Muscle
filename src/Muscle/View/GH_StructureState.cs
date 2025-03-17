@@ -33,12 +33,6 @@ namespace Muscle.View
             }
         }
 
-        // on veut également transformer notre Objet StructureObj qui utilise des data de type Rhino.Geometry (Point 3D, Line,...) et de type System.Collections.Generic (list, Dictionnaries) 
-        // En un objet GH_StructureObj qui utilise des data de type Grasshopper.Kernel.Types (GH_Point, GH_line, GH_Structure<T>,...) 
-        // un objet StructureObj permet de manipuler les données ou faire des calculs
-        // un objet GH_StructureObj permet de les afficher et communiquer au sein de GH.
-        // Donc toutes les données de la géométrie qu'on veut pouvoir manipuler//afficher au sein de GH doivent être converties en donnée de type GH
-
 
         #endregion Properties
 

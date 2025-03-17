@@ -23,7 +23,7 @@ using System.IO;
 using Python.Runtime;
 using MuscleCore.Converters;
 
-namespace MuscleCore.App.PythonNETInit
+namespace MuscleCore.PythonNETInit
 {
     public static class PythonNETManager
     {

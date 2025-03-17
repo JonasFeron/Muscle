@@ -93,18 +93,18 @@ namespace Muscle.Components.ConstructFEModel
         {
 
             // 1) Collect Inputs
-            GH_Structure<IGH_Goo> gh_elements_input = new GH_Structure<IGH_Goo>();
-            GH_Structure<GH_Point> points_input = new GH_Structure<GH_Point>();
-            GH_Structure<IGH_Goo> supports_input = new GH_Structure<IGH_Goo>();
+            GH_Structure<IGH_Goo> gh_elements = new GH_Structure<IGH_Goo>();
+            GH_Structure<GH_Point> gh_points = new GH_Structure<GH_Point>();
+            GH_Structure<IGH_Goo> gh_supports = new GH_Structure<IGH_Goo>();
 
-            if (!DA.GetDataTree(0, out gh_elements_input)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
-            if (!DA.GetDataTree(1, out points_input)) { } // Nothing happen if i can't collect points.
-            if (!DA.GetDataTree(2, out supports_input)) { supports_input = null; }  //no default value can be inputted for a generic parameter
+            if (!DA.GetDataTree(0, out gh_elements)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
+            if (!DA.GetDataTree(1, out gh_points)) { } // Nothing happen if i can't collect points.
+            if (!DA.GetDataTree(2, out gh_supports)) { gh_supports = null; }  //no default value can be inputted for a generic parameter
 
             // Convert Grasshopper data to MuscleApp ViewModel types
-            List<Element> elements = GH_Encoders.ToElements(gh_elements_input);
-            List<Point3d> points = GH_Encoders.ToPoint3ds(points_input);
-            List<Support> supports = GH_Encoders.ToSupports(supports_input);
+            List<Element> elements = GH_Decoders.ToElements(gh_elements);
+            List<Point3d> points = GH_Decoders.ToPoint3ds(gh_points);
+            List<Support> supports = GH_Decoders.ToSupports(gh_supports);
 
             // 2) Create and solve geometry object 
             StructureState structure = null;

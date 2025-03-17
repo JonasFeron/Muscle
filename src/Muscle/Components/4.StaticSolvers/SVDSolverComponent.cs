@@ -1,13 +1,15 @@
 ﻿using System;
 using System.IO;
 using Grasshopper.Kernel;
-using Muscle.PythonLink;
-using Newtonsoft.Json;
+
 using Muscle.Util;
-using Muscle.PythonNETComponents.TwinObjects;
 using Python.Runtime;
-using Muscle.ViewModel;
-using Muscle.GHModel;
+using MuscleApp.ViewModel;
+using Muscle.View;
+using static Muscle.Converters.GH_Encoders;
+// using MuscleApp.Solvers;
+// using MuscleCore.Solvers;
+
 
 namespace Muscle.Solvers
 {
@@ -56,8 +58,8 @@ namespace Muscle.Solvers
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("ZeroTol", "Tol", "Tolerance factor underwhich a singular value of the equilibrium matrix is considered as 0. \nIn particular, a singular value Lambda is considered =0 if Lambda < LambdaMAX * Tol ", GH_ParamAccess.item,0.001);
+            pManager.AddGenericParameter("Structure", "struct", "A structure which may be prestressed (preloaded or self-stressed) from previous calculations.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Relative tolerance", "rtol", "Tolerance factor underwhich a singular value of the equilibrium matrix is considered as 0. \nIn particular, a singular value Lambda is considered =0 if Lambda < LambdaMAX * rTol ", GH_ParamAccess.item,0.001);
             pManager[1].Optional = true;
 
         }
@@ -70,17 +72,12 @@ namespace Muscle.Solvers
             pManager.AddGenericParameter("Structure", "struct", "Unchanged structure.", GH_ParamAccess.item);//0
             pManager.AddIntegerParameter("Rank", "r", "Rank of equilibrium matrix", GH_ParamAccess.item); //1
             pManager.AddNumberParameter("S", "S", "Eigen values of equilibrium matrix", GH_ParamAccess.list); //2
-            pManager.AddNumberParameter("A", "A", "Equilibrium matrix", GH_ParamAccess.tree); //3
-            pManager.AddIntegerParameter("StaticDeg", "s", "Degree of static indeterminacy", GH_ParamAccess.item); //4
-            pManager.AddNumberParameter("Self-Stress", "SS", "Self-stress modes of the structure", GH_ParamAccess.tree); //5
-            pManager.AddIntegerParameter("KinematicDeg", "m", "Degree of kinematic indeterminacy, or i.e. number of mechanisms (infinitesimal and rigid body)", GH_ParamAccess.item); //6
-            pManager.AddNumberParameter("Mechanisms", "Um", "Mechanisms of the structure", GH_ParamAccess.tree); //7
-            pManager.AddNumberParameter("SS Stiffness", "Ks", "[kN/m] Stiffness of self-stress modes", GH_ParamAccess.tree); //8
-            pManager.AddNumberParameter("SM Prestress level", "SMa", "[kN/m] Sensitivity Matrix of the prestress levels (=Ks*SS) to 1m imposed elongations in the elements", GH_ParamAccess.tree); //9
-            pManager.AddNumberParameter("SM displacements", "SMd", "[m/m] Sensitivity Matrix of the displacements to 1m imposed elongations in the elements", GH_ParamAccess.tree); //9
-
-
-
+            pManager.AddIntegerParameter("StaticDeg", "s", "Degree of static indeterminacy", GH_ParamAccess.item); //3
+            pManager.AddNumberParameter("Self-Stress", "Vs_T", "Self-stress modes of the structure", GH_ParamAccess.tree); //4
+            pManager.AddNumberParameter("Extensional Modes", "Vr_T", "Extensional modes of the structure", GH_ParamAccess.tree); //5
+            pManager.AddIntegerParameter("KinematicDeg", "m", "Degree of kinematic indeterminacy.", GH_ParamAccess.item); //6
+            pManager.AddNumberParameter("Mechanisms", "Um_T", "Mechanisms of the structure, in the form of row vectors.", GH_ParamAccess.tree); //7
+            pManager.AddNumberParameter("Extensional Modes", "Ur_T", "Extensional modes of the structure, in the form of row vectors.", GH_ParamAccess.tree); //8
         }
 
         /// <summary>
@@ -89,76 +86,35 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = "MainAssembleStructure"; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
             if (!AccessToAll.hasPythonStarted)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
                 return;
             }
-            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript + ".py")))
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
-                return;
-            }
 
             // 1) Collect Inputs
             //bool dataHasChanged = true;
-            GH_StructureObj gh_struct = new GH_StructureObj();
-            double ZeroTol = -1;
+            GH_StructureState gh_struct = new GH_StructureState();
+            double rTol = -1;
 
 
             if (!DA.GetData(0, ref gh_struct)) { return; }
-            if (!DA.GetData(1, ref ZeroTol)) { }
+            if (!DA.GetData(1, ref rTol)) { }
 
-
-            StructureObj structure = gh_struct.Value;
-            structure.Residual0Threshold = ZeroTol;
-            // 2) Create and solve geometry object 
-
-            SharedAssemblyResult result = new SharedAssemblyResult();
-            SharedData data = new SharedData(structure); //Object data contains all the essential informations of structure
-            string jsonData = JsonConvert.SerializeObject(data, Formatting.None);
-            dynamic jsonResult = null;
-
-            //2) Solve in python
-            var m_threadState = PythonEngine.BeginAllowThreads();
-
-            using (Py.GIL())
-            {
-                try
-                {
-                    dynamic script = PyModule.Import(pythonScript);
-                    dynamic mainFunction = script.main;
-                    jsonResult = mainFunction(jsonData);
-                    JsonConvert.PopulateObject((string)jsonResult, result);
-                }
-                catch (PythonException ex)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-                }
-                catch (Exception e)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"python result= {jsonResult}");
-                    return;
-                }
-            }
-
-            PythonEngine.EndAllowThreads(m_threadState);
-
+            StructureState structure = gh_struct.Value;
+            var svdResult = MuscleApp.Solvers.SVD.Solve(structure, rTol);
 
             // 3) Set outputs
             DA.SetData(0, gh_struct);
-            DA.SetData(1, result.r);
-            DA.SetDataList(2, result.S);
-            DA.SetDataTree(3, result.ListListToGH_Struct(result.A));
-            DA.SetData(4, result.s);
-            DA.SetDataTree(5, result.ListListToGH_Struct(result.SS));
-            DA.SetData(6, result.m);
-            DA.SetDataTree(7, result.ListListToGH_Struct(result.Um_row));
-            DA.SetDataTree(8, result.ListListToGH_Struct(Util.Util.MultiplyListListPerX(result.Ks,0.001)));
-            DA.SetDataTree(9, result.ListListToGH_Struct(Util.Util.MultiplyListListPerX(result.Sa,0.001)));
-            DA.SetDataTree(10, result.ListListToGH_Struct(result.Sd));
+            DA.SetData(1, svdResult.r);
+            DA.SetDataList(2, ToBranch(svdResult.S));
+            DA.SetData(3, svdResult.s);
+            DA.SetDataTree(4, ToTree(svdResult.Vs_T));
+            DA.SetDataTree(5, ToTree(svdResult.Vr_T));
+            DA.SetData(6, svdResult.m);
+            DA.SetDataTree(7, ToTree(svdResult.Ur_T));
+            DA.SetDataTree(8, ToTree(svdResult.Um_T));
+
         }
 
     }

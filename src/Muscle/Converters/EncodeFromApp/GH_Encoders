@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Data;
+using Rhino.Geometry;
+using MuscleApp.ViewModel;
+using Muscle.View;
+
+namespace Muscle.Converters
+{
+    /// <summary>
+    /// Provides methods to convert Grasshopper data types to MuscleApp ViewModel types.
+    /// This ensures MuscleApp remains independent from Grasshopper and Muscle.
+    /// </summary>
+    public static class GH_Encoders
+    {
+        #region Number Conversion
+        public static GH_Structure<GH_Number> ToTree(double[,] array)
+        {
+            GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
+            int rows = array.GetLength(0);
+            int cols = array.GetLength(1);
+
+            for (int i = 0; i < rows; i++)
+            {
+                GH_Path path = new GH_Path(i);
+                List<GH_Number> branch = new List<GH_Number>(cols);
+                for (int j = 0; j < cols; j++)
+                {
+                    branch.Add(new GH_Number(array[i, j]));
+                }
+                tree.AppendRange(branch, path);
+            }
+            return tree;
+        }
+
+        public static List<GH_Number> ToBranch(double[] array)
+        {
+            return array.Select(n => new GH_Number(n)).ToList();
+        }
+        #endregion Number Conversion
+    }
