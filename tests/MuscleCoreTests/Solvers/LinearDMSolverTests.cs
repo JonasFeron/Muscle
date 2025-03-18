@@ -40,7 +40,7 @@ namespace MuscleCoreTests.Solvers
         public void Test_LinearDMSolver()
         {
             // Create nodes
-            var nodes = new FEM_Nodes(
+            var nodes = new CoreNodes(
                 initialCoordinates: new double[,] {
                     { 0.0, 0.0, 0.0 },  // Node 0: origin
                     { 1.0, 0.0, 1.0 },  // Node 1: top
@@ -54,7 +54,7 @@ namespace MuscleCoreTests.Solvers
             );
 
             // Create elements
-            var elements = new FEM_Elements(
+            var elements = new CoreElements(
                 nodes: nodes,
                 type: new int[] { -1, -1 },  // Two struts
                 endNodes: new int[,] { { 0, 1 }, { 1, 2 } },  // Element 0: 0->1, Element 1: 1->2
@@ -65,7 +65,7 @@ namespace MuscleCoreTests.Solvers
             );
 
             // Create structure
-            var structure = new FEM_Structure(nodes, elements);
+            var structure = new CoreTruss(nodes, elements);
 
             // Apply -100kN vertical load at node 1
             var loads = new double[9];  // 3 nodes * 3 DOFs

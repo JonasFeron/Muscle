@@ -25,17 +25,17 @@ namespace MuscleCore.Application.PythonNETSolvers
     public static class FEM_ElementsInitializer
     {
 
-        public static FEM_Elements? Initialize(FEM_Elements csElements)
+        public static CoreElements? Initialize(CoreElements csElements)
         {
-            FEM_Elements? csInitializedElements = null;
+            CoreElements? csInitializedElements = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
             {
                 try
                 {
-                    PyObject pyInitializedElements = csElements.ToPython(); // convert C# FEM_Elements to Python FEM_Elements to compute all the properties
-                    csInitializedElements = pyInitializedElements.As<FEM_Elements>(); // retrieve in C# the properties that have been computed in python.
+                    PyObject pyInitializedElements = csElements.ToPython(); // convert C# CoreElements to Python CoreElements to compute all the properties
+                    csInitializedElements = pyInitializedElements.As<CoreElements>(); // retrieve in C# the properties that have been computed in python.
                 }
                 catch (Exception e)
                 {

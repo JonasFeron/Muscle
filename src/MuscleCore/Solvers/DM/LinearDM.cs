@@ -30,11 +30,11 @@ namespace MuscleCore.Solvers
         /// <param name="initialStructure">Current structure state</param>
         /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
         /// <param name="freeLengthVariation">[m] - shape (elements.count,) - Free length increments to apply</param>
-        /// <returns>Updated FEM_Structure with incremented state</returns>
-        public static FEM_Structure? Solve(FEM_Structure initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
+        /// <returns>Updated CoreTruss with incremented state</returns>
+        public static CoreTruss? Solve(CoreTruss initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
         {
             string pythonPackage = "MusclePy"; 
-            FEM_Structure? femResults = null;
+            CoreTruss? femResults = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
@@ -49,7 +49,7 @@ namespace MuscleCore.Solvers
                         loadsIncrement,
                         freeLengthVariation
                     );
-                    femResults = pyFemResults.As<FEM_Structure>();
+                    femResults = pyFemResults.As<CoreTruss>();
                 }
                 catch (Exception e)
                 {

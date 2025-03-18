@@ -14,7 +14,7 @@ namespace MuscleCoreTests.Solvers
         private static string condaEnvPath;
         private static string pythonDllName;
         private static string srcDir;
-        private FEM_Structure _structure;
+        private CoreTruss _structure;
 
         [TestInitialize]
         public void Initialize()
@@ -29,7 +29,7 @@ namespace MuscleCoreTests.Solvers
             
             // Set up the 2-cable structure for testing
             // Create nodes
-            var nodes = new FEM_Nodes(
+            var nodes = new CoreNodes(
                 initialCoordinates: new double[,] {
                     { 0.0, 0.0, 0.0 },  // Node 0
                     { 1.0, 0.0, 0.0 },  // Node 1
@@ -43,14 +43,14 @@ namespace MuscleCoreTests.Solvers
             );
 
             // Create elements (cables)
-            var elements = new FEM_Elements(
+            var elements = new CoreElements(
                 nodes: nodes,
                 type: new int[] { 1, 1 },  // Two cables (type 1)
                 endNodes: new int[,] { { 0, 1 }, { 1, 2 } }  // Element 0: 0->1, Element 1: 1->2
             );
 
             // Create structure
-            _structure = new FEM_Structure(nodes, elements);
+            _structure = new CoreTruss(nodes, elements);
         }
 
         [TestCleanup]

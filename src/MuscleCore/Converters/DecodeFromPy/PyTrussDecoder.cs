@@ -3,27 +3,27 @@ using Python.Runtime;
 
 namespace MuscleCore.Converters
 {
-    public class FEM_StructureDecoder : IPyObjectDecoder
+    public class PyTrussDecoder : IPyObjectDecoder
     {
-        private readonly FEM_NodesDecoder _nodesDecoder;
-        private readonly FEM_ElementsDecoder _elementsDecoder;
+        private readonly PyNodesDecoder _nodesDecoder;
+        private readonly PyElementsDecoder _elementsDecoder;
 
-        public FEM_StructureDecoder()
+        public PyTrussDecoder()
         {
-            _nodesDecoder = new FEM_NodesDecoder();
-            _elementsDecoder = new FEM_ElementsDecoder();
+            _nodesDecoder = new PyNodesDecoder();
+            _elementsDecoder = new PyElementsDecoder();
         }
 
         public bool CanDecode(PyType objectType, Type targetType)
         {
-            if (targetType != typeof(FEM_Structure))
+            if (targetType != typeof(CoreTruss))
                 return false;
 
             using (Py.GIL())
             {
                 try
                 {
-                    return objectType.Name == "FEM_Structure";
+                    return objectType.Name == "PyTruss";
 
                 }
                 catch
@@ -36,7 +36,7 @@ namespace MuscleCore.Converters
         public bool TryDecode<T>(PyObject pyObj, out T? value)
         {
             value = default;
-            if (typeof(T) != typeof(FEM_Structure))
+            if (typeof(T) != typeof(CoreTruss))
                 return false;
 
             using (Py.GIL())
@@ -47,14 +47,14 @@ namespace MuscleCore.Converters
                     dynamic py = pyObj.As<dynamic>();
 
                     // Get nodes and elements objects
-                    var femElements = py.elements.As<FEM_Elements>();
+                    var femElements = py.elements.As<CoreElements>();
                     var femNodes = femElements.Nodes;
                     
                     // Call the is_in_equilibrium method with default parameters
                     bool isInEquilibrium = py.is_in_equilibrium().As<bool>();
 
                     // Create structure with all properties
-                    var structure = new FEM_Structure(
+                    var structure = new CoreTruss(
                         nodes: femNodes,
                         elements: femElements,
                         isInEquilibrium: isInEquilibrium

@@ -25,17 +25,17 @@ namespace MuscleCore.Application.PythonNETSolvers
     public static class FEM_StructureInitializer
     {
 
-        public static FEM_Structure? Initialize(FEM_Structure csStructure)
+        public static CoreTruss? Initialize(CoreTruss csStructure)
         {
-            FEM_Structure? csInitializedStructure = null;
+            CoreTruss? csInitializedStructure = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
             {
                 try
                 {
-                    PyObject pyInitializedStructure = csStructure.ToPython(); // convert C# FEM_Structure to Python FEM_Structure to compute all the properties
-                    csInitializedStructure = pyInitializedStructure.As<FEM_Structure>(); // retrieve in C# the properties that have been computed in python.
+                    PyObject pyInitializedStructure = csStructure.ToPython(); // convert C# CoreTruss to Python CoreTruss to compute all the properties
+                    csInitializedStructure = pyInitializedStructure.As<CoreTruss>(); // retrieve in C# the properties that have been computed in python.
                 }
                 catch (Exception e)
                 {

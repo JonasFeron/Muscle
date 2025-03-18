@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace MuscleCore.FEModel
 {
     /// <summary>
-    /// Data container for FEM_Nodes. All computations and logic are handled in the Python equivalent class.
+    /// Data container for CoreNodes. All computations and logic are handled in the Python equivalent class.
     /// This class serves as a pure data transfer object between C# and Python.
     /// </summary>
-    public class FEM_Nodes
+    public class CoreNodes
     {
         #region Properties
         /// <summary>
@@ -59,7 +59,7 @@ namespace MuscleCore.FEModel
         #region Constructors
         /// <summary>
         /// Minimal constructor that initializes with initial coordinates and DOF.
-        /// This constructor matches the Python constructor in fem_nodes.py for testing FEM_NodesEncoder.
+        /// This constructor matches the Python constructor in fem_nodes.py for testing PyNodesEncoder.
         /// </summary>
         /// <param name="initialCoordinates">[m] - shape (nodes_count, 3) - Initial nodal coordinates</param>
         /// <param name="dof">[-] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)</param>
@@ -67,7 +67,7 @@ namespace MuscleCore.FEModel
         /// <param name="displacements">[m] - shape (nodes_count, 3) - Nodal displacements</param>
         /// <param name="reactions">[N] - shape (nodes_count, 3) - Support reactions</param>
         /// <param name="resistingForces">[N] - shape (nodes_count, 3) - Internal resisting forces at nodes</param>
-        public FEM_Nodes(double[,] initialCoordinates, bool[,] dof, double[,] loads = null, 
+        public CoreNodes(double[,] initialCoordinates, bool[,] dof, double[,] loads = null, 
                         double[,] displacements = null, double[,] reactions = null, double[,] resistingForces = null)
         {
             // Initialize properties
@@ -96,7 +96,7 @@ namespace MuscleCore.FEModel
         /// <param name="reactions">[N] - shape (nodes_count, 3) - Support reactions</param>
         /// <param name="resistingForces">[N] - shape (nodes_count, 3) - Internal resisting forces at nodes</param>
         /// <param name="residuals">[N] - shape (nodes_count, 3) - Out of balance loads</param>
-        public FEM_Nodes(
+        public CoreNodes(
             double[,] initialCoordinates,
             double[,] coordinates,
             bool[,] dof,

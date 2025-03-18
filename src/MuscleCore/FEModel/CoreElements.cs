@@ -5,16 +5,16 @@ using System.Linq;
 namespace MuscleCore.FEModel
 {
     /// <summary>
-    /// Data container for FEM_Elements. All computations and logic are handled in the Python equivalent class.
+    /// Data container for Elements. All computations and logic are handled in the Python equivalent class.
     /// This class serves as a pure data transfer object between C# and Python.
     /// </summary>
-    public class FEM_Elements
+    public class CoreElements
     {
         #region Properties
         /// <summary>
-        /// FEM_Nodes instance containing nodes data
+        /// CoreNodes instance containing nodes data
         /// </summary>
-        public FEM_Nodes Nodes { get; set; }
+        public CoreNodes Nodes { get; set; }
 
         /// <summary>
         /// [-] - shape (elements_count,) - Type of elements (-1 for struts, 1 for cables)
@@ -56,17 +56,17 @@ namespace MuscleCore.FEModel
         #region Constructors
         /// <summary>
         /// Minimal constructor that initializes with required data.
-        /// This constructor matches the Python constructor in fem_elements.py for testing FEM_ElementsEncoder.
+        /// This constructor matches the Python constructor in fem_elements.py for testing PyElementsEncoder.
         /// This constructor is also used when decoding from Python where all values are known.
         /// </summary>
-        /// <param name="nodes">FEM_Nodes instance containing node data</param>
+        /// <param name="nodes">CoreNodes instance containing node data</param>
         /// <param name="type">[-] - shape (elements_count,) - Element types (-1: strut, 1: cable)</param>
         /// <param name="endNodes">[-] - shape (elements_count, 2) - Element-node connectivity indices</param>
         /// <param name="area">[mm²] - shape (elements_count,) - Cross-section area of elements</param>
         /// <param name="youngs">[MPa] - shape (elements_count, 2) - Young's moduli for compression and tension</param>
         /// <param name="freeLength">[m] - shape (elements_count,) - Free length of the elements</param>
         /// <param name="tension">[N] - shape (elements_count,) - Axial force (positive in tension)</param>
-        public FEM_Elements(FEM_Nodes nodes, int[] type = null, int[,] endNodes = null, double[] area = null, 
+        public CoreElements(CoreNodes nodes, int[] type = null, int[,] endNodes = null, double[] area = null, 
                           double[,] youngs = null, double[] freeLength = null, double[] tension = null)
         {
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));

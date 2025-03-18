@@ -30,10 +30,10 @@ namespace MuscleCore.Solvers
         /// <param name="structure">Current structure state</param>
         /// <param name="rtol">Tolerance for considering singular values as zero, relative to the highest singular value</param>
         /// <returns>SVDresults object containing the SVD results</returns>
-        public static SVDResults? Solve(FEM_Structure structure, double rtol)
+        public static CoreResultsSVD? Solve(CoreTruss structure, double rtol)
         {
             string pythonPackage = "MusclePy"; 
-            SVDResults? svdResults = null;
+            CoreResultsSVD? svdResults = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
@@ -47,7 +47,7 @@ namespace MuscleCore.Solvers
                         pyStructure,
                         rtol
                     );
-                    svdResults = pysvdResults.As<SVDResults>();
+                    svdResults = pysvdResults.As<CoreResultsSVD>();
                 }
                 catch (Exception e)
                 {

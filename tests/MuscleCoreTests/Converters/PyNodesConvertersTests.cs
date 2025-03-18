@@ -9,14 +9,14 @@ using MuscleCore.PythonNETInit;
 namespace MuscleCoreTests.Converters
 {
     [TestClass]
-    public class FEM_NodesConvertersTests
+    public class PyNodesConvertersTests
     {
         private static string condaEnvPath;
         private static string pythonDllName;
         private static string srcDir;
-        private FEM_Nodes _testNodes;
-        private FEM_NodesEncoder _encoder;
-        private FEM_NodesDecoder _decoder;
+        private CoreNodes _testNodes;
+        private PyNodesEncoder _encoder;
+        private PyNodesDecoder _decoder;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
@@ -68,17 +68,17 @@ namespace MuscleCoreTests.Converters
                 { 0.0, 0.0, 0.0 }   // Node 2: right
             };
 
-            _testNodes = new FEM_Nodes(initialCoordinates, dof, loads, displacements);
-            _encoder = new FEM_NodesEncoder();
-            _decoder = new FEM_NodesDecoder();
+            _testNodes = new CoreNodes(initialCoordinates, dof, loads, displacements);
+            _encoder = new PyNodesEncoder();
+            _decoder = new PyNodesDecoder();
         }
 
 
         [TestMethod]
         public void Test_Encoder_CanEncode()
         {
-            // Should encode FEM_Nodes
-            Assert.IsTrue(_encoder.CanEncode(typeof(FEM_Nodes)));
+            // Should encode CoreNodes
+            Assert.IsTrue(_encoder.CanEncode(typeof(CoreNodes)));
 
             // Should not encode other types
             Assert.IsFalse(_encoder.CanEncode(typeof(string)));
@@ -91,11 +91,11 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                // Should successfully encode FEM_Nodes
+                // Should successfully encode CoreNodes
                 var pyNodes = _encoder.TryEncode(_testNodes);
                 Assert.IsNotNull(pyNodes);
 
-                // Should return null for non-FEM_Nodes objects
+                // Should return null for non-CoreNodes objects
                 Assert.IsNull(_encoder.TryEncode("not a node"));
                 Assert.IsNull(_encoder.TryEncode(42));
                 Assert.IsNull(_encoder.TryEncode(new object()));
@@ -107,13 +107,13 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                // Get a Python FEM_Nodes object
+                // Get a Python CoreNodes object
                 var pyNodes = _encoder.TryEncode(_testNodes);
                 Assert.IsNotNull(pyNodes);
 
-                // Should decode to FEM_Nodes
+                // Should decode to CoreNodes
                 var pyType = pyNodes.GetPythonType();
-                Assert.IsTrue(_decoder.CanDecode(pyType, typeof(FEM_Nodes)));
+                Assert.IsTrue(_decoder.CanDecode(pyType, typeof(CoreNodes)));
 
                 // Should not decode to other types
                 Assert.IsFalse(_decoder.CanDecode(pyType, typeof(string)));
@@ -127,12 +127,12 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                // Get a Python FEM_Nodes object
+                // Get a Python CoreNodes object
                 var pyNodes = _encoder.TryEncode(_testNodes);
                 Assert.IsNotNull(pyNodes);
 
-                // Should successfully decode to FEM_Nodes
-                FEM_Nodes decodedNodes = null;
+                // Should successfully decode to CoreNodes
+                CoreNodes decodedNodes = null;
                 var success = _decoder.TryDecode(pyNodes, out decodedNodes);
                 Assert.IsTrue(success);
                 Assert.IsNotNull(decodedNodes);

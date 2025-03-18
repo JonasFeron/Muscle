@@ -4,25 +4,25 @@ using static MuscleCore.Converters.DecoderHelper;
 
 namespace MuscleCore.Converters
 {
-    public class FEM_ElementsDecoder : IPyObjectDecoder
+    public class PyElementsDecoder : IPyObjectDecoder
     {
-        private readonly FEM_NodesDecoder _nodesDecoder;
+        private readonly PyNodesDecoder _nodesDecoder;
 
-        public FEM_ElementsDecoder()
+        public PyElementsDecoder()
         {
-            _nodesDecoder = new FEM_NodesDecoder();
+            _nodesDecoder = new PyNodesDecoder();
         }
 
         public bool CanDecode(PyType objectType, Type targetType)
         {
-            if (targetType != typeof(FEM_Elements))
+            if (targetType != typeof(CoreElements))
                 return false;
 
             using (Py.GIL())
             {
                 try
                 {
-                    return objectType.Name == "FEM_Elements";
+                    return objectType.Name == "PyElements";
                 }
                 catch
                 {
@@ -34,7 +34,7 @@ namespace MuscleCore.Converters
         public bool TryDecode<T>(PyObject pyObj, out T? value)
         {
             value = default;
-            if (typeof(T) != typeof(FEM_Elements))
+            if (typeof(T) != typeof(CoreElements))
                 return false;
 
             using (Py.GIL())
@@ -49,7 +49,7 @@ namespace MuscleCore.Converters
                     Console.WriteLine($"Python type: {py.type.__class__.__name__}");
 
                     // First decode the nodes object
-                    var nodes = py.nodes.As<FEM_Nodes>();
+                    var nodes = py.nodes.As<CoreNodes>();
 
                     // Convert all arrays using the helper
                     dynamic numpy = Py.Import("numpy");
@@ -62,7 +62,7 @@ namespace MuscleCore.Converters
 
 
                     // Create elements object with all properties
-                    var elements = new FEM_Elements(
+                    var elements = new CoreElements(
                         nodes: nodes,
                         type: type,
                         endNodes: endNodes,

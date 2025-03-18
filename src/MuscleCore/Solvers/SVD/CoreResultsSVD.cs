@@ -6,7 +6,7 @@ namespace MuscleCore.Solvers
     /// This class stores the results of the Singular Value Decomposition of the Equilibrium Matrix of the structure in the current state.
     /// Ref: S. Pellegrino, 1993, Structural computations with the singular value decomposition of the equilibrium matrix
     /// </summary>
-    public class SVDResults
+    public class CoreResultsSVD
     {
         /// <summary>
         /// Rank of equilibrium matrix
@@ -55,7 +55,7 @@ namespace MuscleCore.Solvers
         /// <summary>
         /// Empty constructor for deserialization
         /// </summary>
-        public SVDResults()
+        public CoreResultsSVD()
         {
             // Initialize with empty arrays to prevent null reference exceptions
             Ur_T = new double[0, 0];
@@ -66,7 +66,7 @@ namespace MuscleCore.Solvers
         }
 
         /// <summary>
-        /// Initialize a SVDResults object that stores the results of the Singular Value Decomposition
+        /// Initialize a CoreResultsSVD object that stores the results of the Singular Value Decomposition
         /// </summary>
         /// <param name="r">Rank of equilibrium matrix</param>
         /// <param name="s">Degree of static indeterminacy = number of self-stress modes</param>
@@ -76,7 +76,7 @@ namespace MuscleCore.Solvers
         /// <param name="sr">R singular values</param>
         /// <param name="vr_T">R extensional modes as row vectors</param>
         /// <param name="vs_T">S self-stress modes as row vectors</param>
-        public SVDResults(int r, int s, int m, double[,] ur_T, double[,] um_T, double[] sr, double[,] vr_T, double[,] vs_T)
+        public CoreResultsSVD(int r, int s, int m, double[,] ur_T, double[,] um_T, double[] sr, double[,] vr_T, double[,] vs_T)
         {
             this.r = r;
             this.s = s;

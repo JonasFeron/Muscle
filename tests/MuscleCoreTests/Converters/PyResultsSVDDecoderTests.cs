@@ -8,12 +8,12 @@ using MuscleCore.PythonNETInit;
 namespace MuscleCoreTests.Converters
 {
     [TestClass]
-    public class SVDResultsDecoderTests
+    public class PyResultsSVDDecoderTests
     {
         private static string condaEnvPath;
         private static string pythonDllName;
         private static string srcDir;
-        private SVDResultsDecoder _decoder;
+        private PyResultsSVDDecoder _decoder;
         private dynamic _pySVDResults;
 
         [ClassInitialize]
@@ -59,7 +59,7 @@ namespace MuscleCoreTests.Converters
                 _pySVDResults = SVDresults(r, s, m, Ur, Um, Sr, Vr, Vs);
             }
 
-            _decoder = new SVDResultsDecoder();
+            _decoder = new PyResultsSVDDecoder();
         }
 
         [TestMethod]
@@ -70,8 +70,8 @@ namespace MuscleCoreTests.Converters
                 // Get Python type
                 var pyType = ((PyObject)_pySVDResults).GetPythonType();
                 
-                // Should decode to SVDResults
-                Assert.IsTrue(_decoder.CanDecode(pyType, typeof(SVDResults)));
+                // Should decode to CoreResultsSVD
+                Assert.IsTrue(_decoder.CanDecode(pyType, typeof(CoreResultsSVD)));
                 
                 // Should not decode to other types
                 Assert.IsFalse(_decoder.CanDecode(pyType, typeof(string)));
@@ -85,8 +85,8 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                // Should successfully decode to SVDResults
-                SVDResults decodedResults = null;
+                // Should successfully decode to CoreResultsSVD
+                CoreResultsSVD decodedResults = null;
                 var success = _decoder.TryDecode((PyObject)_pySVDResults, out decodedResults);
                 Assert.IsTrue(success);
                 Assert.IsNotNull(decodedResults);
@@ -126,8 +126,8 @@ namespace MuscleCoreTests.Converters
                 dynamic np = Py.Import("numpy");
                 dynamic array = np.array(new double[] { 1.0, 2.0, 3.0 });
                 
-                // Should not decode to SVDResults
-                SVDResults decodedResults = null;
+                // Should not decode to CoreResultsSVD
+                CoreResultsSVD decodedResults = null;
                 var success = _decoder.TryDecode((PyObject)array, out decodedResults);
                 Assert.IsFalse(success);
                 Assert.IsNull(decodedResults);

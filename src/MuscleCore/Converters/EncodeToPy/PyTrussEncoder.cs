@@ -3,11 +3,11 @@ using Python.Runtime;
 
 namespace MuscleCore.Converters
 {
-    public class FEM_StructureEncoder : IPyObjectEncoder
+    public class PyTrussEncoder : IPyObjectEncoder
     {
         public bool CanEncode(Type type)
         {
-            return type == typeof(FEM_Structure);
+            return type == typeof(CoreTruss);
         }
 
         public PyObject TryEncode(object? obj)
@@ -15,7 +15,7 @@ namespace MuscleCore.Converters
             if (!CanEncode(obj.GetType()))
                 return null;
 
-            var structure = (FEM_Structure)obj;
+            var structure = (CoreTruss)obj;
             using (Py.GIL())
             {
                 try
@@ -24,7 +24,7 @@ namespace MuscleCore.Converters
                     dynamic pyElements = structure.Elements.ToPython();
                     dynamic pyNodes = pyElements.nodes;
 
-                    return musclepy.FEM_Structure(
+                    return musclepy.PyTruss(
                         nodes: pyNodes,
                         elements: pyElements
                     );

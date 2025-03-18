@@ -4,18 +4,18 @@ using static MuscleCore.Converters.DecoderHelper;
 
 namespace MuscleCore.Converters
 {
-    public class FEM_NodesDecoder : IPyObjectDecoder
+    public class PyNodesDecoder : IPyObjectDecoder
     {
         public bool CanDecode(PyType objectType, Type targetType)
         {
-            if (targetType != typeof(FEM_Nodes))
+            if (targetType != typeof(CoreNodes))
                 return false;
 
             using (Py.GIL())
             {
                 try
                 {
-                    return objectType.Name == "FEM_Nodes";
+                    return objectType.Name == "PyNodes";
                 }
                 catch
                 {
@@ -27,7 +27,7 @@ namespace MuscleCore.Converters
         public bool TryDecode<T>(PyObject pyObj, out T? value)
         {
             value = default;
-            if (typeof(T) != typeof(FEM_Nodes))
+            if (typeof(T) != typeof(CoreNodes))
                 return false;
 
             using (Py.GIL())
@@ -48,7 +48,7 @@ namespace MuscleCore.Converters
                     var residuals = As2dArray(py.residuals);
 
                     // Create nodes object with all properties
-                    var nodes = new FEM_Nodes(
+                    var nodes = new CoreNodes(
                         initialCoordinates: initialCoords,
                         coordinates: coordinates,
                         dof: dofs,

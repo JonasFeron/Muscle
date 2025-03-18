@@ -3,11 +3,11 @@ using Python.Runtime;
 
 namespace MuscleCore.Converters
 {
-    public class FEM_NodesEncoder : IPyObjectEncoder
+    public class PyNodesEncoder : IPyObjectEncoder
     {
         public bool CanEncode(Type type)
         {
-            return type == typeof(FEM_Nodes);
+            return type == typeof(CoreNodes);
         }
 
         public PyObject? TryEncode(object obj)
@@ -15,12 +15,12 @@ namespace MuscleCore.Converters
             if (!CanEncode(obj.GetType()))
                 return null;
 
-            var nodes = (FEM_Nodes)obj;
+            var nodes = (CoreNodes)obj;
             using (Py.GIL())
             {
                 dynamic musclepy = Py.Import("MusclePy");
 
-                return musclepy.FEM_Nodes(
+                return musclepy.PyNodes(
                         initial_coordinates: nodes.InitialCoordinates,
                         dof: nodes.DOF,
                         loads: nodes.Loads,

@@ -5,9 +5,9 @@ using static MuscleCore.Converters.DecoderHelper;
 namespace MuscleCore.Converters
 {
     /// <summary>
-    /// Decoder for converting Python SVDresults objects to C# SVDResults objects.
+    /// Decoder for converting Python SVDresults objects to C# CoreResultsSVD objects.
     /// </summary>
-    public class SVDResultsDecoder : IPyObjectDecoder
+    public class PyResultsSVDDecoder : IPyObjectDecoder
     {
         /// <summary>
         /// Determines if this decoder can decode the given Python object type to the specified target type.
@@ -17,14 +17,14 @@ namespace MuscleCore.Converters
         /// <returns>True if this decoder can decode the object, false otherwise</returns>
         public bool CanDecode(PyType objectType, Type targetType)
         {
-            if (targetType != typeof(SVDResults))
+            if (targetType != typeof(CoreResultsSVD))
                 return false;
 
             using (Py.GIL())
             {
                 try
                 {
-                    return objectType.Name == "SVDresults";
+                    return objectType.Name == "PyResultsSVD";
                 }
                 catch
                 {
@@ -34,16 +34,16 @@ namespace MuscleCore.Converters
         }
 
         /// <summary>
-        /// Attempts to decode a Python SVDresults object to a C# SVDResults object.
+        /// Attempts to decode a Python SVDresults object to a C# CoreResultsSVD object.
         /// </summary>
-        /// <typeparam name="T">The target type (must be SVDResults)</typeparam>
+        /// <typeparam name="T">The target type (must be CoreResultsSVD)</typeparam>
         /// <param name="pyObj">The Python object to decode</param>
         /// <param name="value">The decoded value, if successful</param>
         /// <returns>True if decoding was successful, false otherwise</returns>
         public bool TryDecode<T>(PyObject pyObj, out T? value)
         {
             value = default;
-            if (typeof(T) != typeof(SVDResults))
+            if (typeof(T) != typeof(CoreResultsSVD))
                 return false;
 
             using (Py.GIL())
@@ -66,8 +66,8 @@ namespace MuscleCore.Converters
                     var vr_T = As2dArray(py.Vr_T);
                     var vs_T = As2dArray(py.Vs_T);
 
-                    // Create SVDResults object with all properties
-                    var svdResults = new SVDResults(
+                    // Create CoreResultsSVD object with all properties
+                    var svdResults = new CoreResultsSVD(
                         r: r,
                         s: s,
                         m: m,
