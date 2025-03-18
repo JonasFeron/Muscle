@@ -46,6 +46,11 @@
   
   <ItemGroup>
     <Compile Remove="AccessToAll.cs" />
+    <Compile Remove="Converters\EncodeFromApp\GH_Encoders.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="Converters\EncodeFromApp\GH_Encoders.cs" />
   </ItemGroup>
   
   <ItemGroup>

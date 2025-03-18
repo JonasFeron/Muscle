@@ -30,12 +30,12 @@ namespace MuscleApp.Solvers
         /// </summary>
         /// <param name="structure">Current structure state</param>
         /// <param name="rtol">Tolerance for considering singular values as zero, relative to the highest singular value</param>
-        /// <returns>SVDResults object containing the SVD results</returns>
-        public static CoreResultsSVD? Solve(Truss structure, double rtol)
+        /// <returns>ResultsSVD object containing the SVD results</returns>
+        public static ResultsSVD? Solve(Truss structure, double rtol)
         {
             CoreResultsSVD coreResults = MuscleCore.Solvers.SVD.Solve(ToCore(structure), rtol);
 
-            return 
+            return new ResultsSVD(coreResults);
         }
     }
 }
