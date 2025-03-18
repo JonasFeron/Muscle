@@ -2,10 +2,10 @@ import unittest
 import numpy as np
 import os
 import sys
-from MusclePy.femodel.fem_nodes import FEM_Nodes
+from MusclePy.femodel.pynodes import PyNodes
 
 
-class TestFEMNodes(unittest.TestCase):
+class TestPyNodes(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures with a simple 3-node structure.
         Node 1 (1,0,1)
@@ -30,24 +30,24 @@ class TestFEMNodes(unittest.TestCase):
             [100.0, 0.0, 50.0], # Node 1: load in x,z
             [0.0, 0.0, 0.0]     # Node 2: no load
         ])
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=self.initial_coordinates,
             dof=self.dof,
             loads=self.loads
         )
 
     def test_initialization(self):
-        """Test proper initialization of FEM_Nodes."""
+        """Test proper initialization of PyNodes."""
         # Test basic properties
         self.assertEqual(self.nodes.count, 3)
         self.assertEqual(self.nodes.fixations_count, 7)  # 7 fixed DOFs
-        
+
         # Test array shapes and values
         np.testing.assert_array_equal(self.nodes.initial_coordinates, self.initial_coordinates)
         np.testing.assert_array_equal(self.nodes.coordinates, self.initial_coordinates)  # No displacements yet
         np.testing.assert_array_equal(self.nodes.dof, self.dof)
         np.testing.assert_array_equal(self.nodes.loads, self.loads)
-        
+
         # Test default zero arrays
         np.testing.assert_array_equal(self.nodes.displacements, np.zeros((3, 3)))
         np.testing.assert_array_equal(self.nodes.reactions, np.zeros((3, 3)))
@@ -60,7 +60,7 @@ class TestFEMNodes(unittest.TestCase):
             [0.1, 0.0, -0.2],    # Node 1: moves
             [0.0, 0.0, 0.0]      # Node 2: fixed
         ])
-        nodes = FEM_Nodes(
+        nodes = PyNodes(
             initial_coordinates=self.initial_coordinates,
             dof=self.dof,
             displacements=displacements
@@ -75,7 +75,7 @@ class TestFEMNodes(unittest.TestCase):
             [80.0, 0.0, 30.0],    # Node 1
             [0.0, 0.0, 0.0]       # Node 2
         ])
-        nodes = FEM_Nodes(
+        nodes = PyNodes(
             initial_coordinates=self.initial_coordinates,
             dof=self.dof,
             loads=self.loads,
@@ -106,18 +106,18 @@ class TestFEMNodes(unittest.TestCase):
             [150.0, 0.0, 75.0],  # Node 1
             [0.0, 0.0, 0.0]      # Node 2
         ])
-        
+
         nodes_copy = self.nodes.copy_and_update(
             new_loads,
             new_displacements,
             new_reactions,
             new_resisting_forces
         )
-        
+
         # Check immutable attributes are copied
         np.testing.assert_array_equal(nodes_copy.initial_coordinates, self.initial_coordinates)
         np.testing.assert_array_equal(nodes_copy.dof, self.dof)
-        
+
         # Check mutable state is updated
         np.testing.assert_array_equal(nodes_copy.loads, new_loads)
         np.testing.assert_array_equal(nodes_copy.displacements, new_displacements)
@@ -146,18 +146,18 @@ class TestFEMNodes(unittest.TestCase):
             [40.0, 0.0, 20.0],   # Node 1
             [0.0, 0.0, 0.0]      # Node 2
         ])
-        
+
         nodes_copy = self.nodes.copy_and_add(
             loads_increment,
             displacements_increment,
             reactions_increment,
             resisting_forces_increment
         )
-        
+
         # Check immutable attributes are copied
         np.testing.assert_array_equal(nodes_copy.initial_coordinates, self.initial_coordinates)
         np.testing.assert_array_equal(nodes_copy.dof, self.dof)
-        
+
         # Check mutable state is incremented
         np.testing.assert_array_equal(nodes_copy.loads, self.loads + loads_increment)
         np.testing.assert_array_equal(nodes_copy.displacements, displacements_increment)  # Was zero
@@ -168,23 +168,23 @@ class TestFEMNodes(unittest.TestCase):
         """Test error handling for invalid inputs."""
         # Test wrong shape for initial_coordinates
         with self.assertRaises(ValueError):
-            FEM_Nodes(initial_coordinates=np.array([[0.0, 0.0]]))  # Missing z coordinate
-            
+            PyNodes(initial_coordinates=np.array([[0.0, 0.0]]))  # Missing z coordinate
+
         # Test wrong shape for dof
         with self.assertRaises(ValueError):
-            FEM_Nodes(
+            PyNodes(
                 initial_coordinates=self.initial_coordinates,
                 dof=np.array([True, False, True])  # Wrong shape
             )
-            
+
         # Test wrong shape for loads
         with self.assertRaises(ValueError):
-            FEM_Nodes(
+            PyNodes(
                 initial_coordinates=self.initial_coordinates,
                 dof=self.dof,
                 loads=np.array([[0.0, 0.0]])  # Wrong shape
             )
-            
+
         # Test wrong shape for copy_and_update
         with self.assertRaises(ValueError):
             self.nodes.copy_and_update(
@@ -196,7 +196,7 @@ class TestFEMNodes(unittest.TestCase):
 
     def test_check_and_reshape_array(self):
         """Test the _check_and_reshape_array method for various input cases."""
-        nodes = FEM_Nodes(initial_coordinates=self.initial_coordinates)
+        nodes = PyNodes(initial_coordinates=self.initial_coordinates)
         
         # Test None input
         result = nodes._check_and_reshape_array(None, "test")

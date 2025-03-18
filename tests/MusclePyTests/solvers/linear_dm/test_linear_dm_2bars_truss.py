@@ -1,10 +1,10 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.prestress_increment import PrestressScenario
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.prestress_scenario import PrestressScenario
 
 
 class TestLinearDM_2BarsTruss(unittest.TestCase):
@@ -20,7 +20,7 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         (0,0,0) (2,0,0)
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],  # Node 0: origin
                 [1.0, 0.0, 1.0],  # Node 1: top
@@ -34,7 +34,7 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         )
         
         # Create elements
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([-1, -1]),  # Two struts
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
@@ -44,7 +44,7 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
     def test_vertical_load(self):
         """Test structure response to vertical load.

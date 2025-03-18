@@ -1,5 +1,5 @@
 import numpy as np
-from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.pyelements import PyElements
 
 
 class PrestressScenario:
@@ -14,21 +14,21 @@ class PrestressScenario:
     - fig 5: Latteur P., Feron J., Denoël V., 2017, "A design methodology for lattice and tensegrity structures based on a stiffness and volume optimization algorithm using morphological indicators", International Journal of Space Structures, Volume 32, issue: 3-4, p. 226-243.
     
     Attributes:
-        elements: FEM_Elements instance containing element properties and current state
+        elements: PyElements instance containing element properties and current state
         free_length_variation: [m] - shape (elements.count,) - free length variations (imposed by mechanical devices)
         equivalent_tension: [N] - shape (elements.count,) - Axial force in each element
         equivalent_loads: [N] - shape (nodes.count,3) - Equivalent external loads
     """
     
-    def __init__(self, elements: FEM_Elements, free_length_variation: np.ndarray = None):
+    def __init__(self, elements: PyElements, free_length_variation: np.ndarray = None):
         """Initialize a PrestressScenario instance.
         
         Args:
-            elements: FEM_Elements instance containing element properties and current state
+            elements: PyElements instance containing element properties and current state
             free_length_variation: [m] - shape (elements.count,) - free length variations (imposed by mechanical devices)
         """
         # Validate inputs
-        assert isinstance(elements, FEM_Elements), "elements must be an instance of FEM_Elements"
+        assert isinstance(elements, PyElements), "elements must be an instance of PyElements"
         free_length_variation = elements._check_and_reshape_array(free_length_variation, "free_length_variation")
 
         # Modify the free length of the elements via mechanical devices

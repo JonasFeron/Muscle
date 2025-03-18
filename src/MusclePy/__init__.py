@@ -7,11 +7,11 @@ from . import solvers
 from .test_script import main as test_script_main
 
 # Expose key classes at package level
-from .femodel.fem_nodes import FEM_Nodes
-from .femodel.fem_elements import FEM_Elements
-from .femodel.fem_structure import FEM_Structure
-from .femodel.prestress_increment import PrestressScenario
-from .solvers.svd.svd_results import SVDresults
+from .femodel.pynodes import PyNodes
+from .femodel.pyelements import PyElements
+from .femodel.pytruss import PyTruss
+from .femodel.prestress_scenario import PrestressScenario
+from .solvers.svd.py_results_svd import PyResultsSVD
 from .solvers.dynamic.dynamic_results import DynamicResults
 
 # Expose solver functions
@@ -27,13 +27,13 @@ __all__ = [
     'femodel',
     'solvers',
     'test_script_main',
-    'FEM_Nodes',
-    'FEM_Elements', 
-    'FEM_Structure',
+    'PyNodes',
+    'PyElements',
+    'PyTruss',
     'PrestressScenario',
     'main_singular_value_decomposition',
     'localize_self_stress_modes',
-    'SVDresults',
+    'PyResultsSVD',
     'main_linear_displacement_method',
     'main_nonlinear_displacement_method',
     'main_dynamic_relaxation',

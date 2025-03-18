@@ -6,7 +6,7 @@ from MusclePy import femodel
 
 
 
-class TestFEMElements(unittest.TestCase):
+class TestPyElements(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures with a simple 2-bar structure.
            Node 1 (1,0,1)
@@ -17,7 +17,7 @@ class TestFEMElements(unittest.TestCase):
         (0,0,0) (2,0,0)
         """
         # Create nodes instance first
-        self.nodes = femodel.FEM_Nodes(
+        self.nodes = femodel.PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],  # Node 0: origin
                 [1.0, 0.0, 1.0],  # Node 1: top
@@ -31,7 +31,7 @@ class TestFEMElements(unittest.TestCase):
         )
         
         # Create elements instance
-        self.elements = femodel.FEM_Elements(
+        self.elements = femodel.PyElements(
             nodes=self.nodes,
             type=np.array([-1, -1]),  # Two struts
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
@@ -40,7 +40,7 @@ class TestFEMElements(unittest.TestCase):
         )
 
     def test_initialization(self):
-        """Test proper initialization of FEM_Elements."""
+        """Test proper initialization of PyElements."""
         self.assertEqual(self.elements.count, 2)
         self.assertEqual(len(self.elements.type), 2)
         self.assertEqual(self.elements.end_nodes.shape, (2, 2))

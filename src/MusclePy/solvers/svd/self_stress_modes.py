@@ -15,11 +15,11 @@ references:
   des systèmes de tenségrité," Université Montpellier II, 2005, p. 49
 """
 
-from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.femodel.pytruss import PyTruss
 import numpy as np
 
 
-def localize_self_stress_modes(structure : FEM_Structure, Vs_T : np.ndarray, zero_atol=1e-6) -> np.ndarray:
+def localize_self_stress_modes(structure : PyTruss, Vs_T : np.ndarray, zero_atol=1e-6) -> np.ndarray:
     """
     Localizes and sorts self-stress modes to minimize the number of elements involved in each mode.
     

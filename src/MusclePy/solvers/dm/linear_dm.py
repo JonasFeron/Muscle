@@ -1,13 +1,13 @@
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.prestress_increment import PrestressScenario
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.prestress_scenario import PrestressScenario
 
 
 import numpy as np
 
 
-def main_linear_displacement_method(structure: FEM_Structure, loads_increment: np.ndarray, 
-                                       prestress_increment: PrestressScenario) -> FEM_Structure:
+def main_linear_displacement_method(structure: PyTruss, loads_increment: np.ndarray, 
+                                       prestress_increment: PrestressScenario) -> PyTruss:
     """Solve the linear displacement method for a structure with incremental loads and prestress (=free length changes).
     
     This function:
@@ -20,10 +20,10 @@ def main_linear_displacement_method(structure: FEM_Structure, loads_increment: n
         prestress_increment: [N] - shape (elements.count,) - Prestress increments to apply
         
     Returns:
-        Updated FEM_Structure with incremented state
+        Updated PyTruss with incremented state
     """
     #check input
-    assert isinstance(structure, FEM_Structure), "structure must be an instance of FEM_Structure"
+    assert isinstance(structure, PyTruss), "structure must be an instance of PyTruss"
     assert isinstance(prestress_increment, PrestressScenario), "prestress_increment must be an instance of PrestressScenario"
     loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
  
@@ -67,7 +67,7 @@ def main_linear_displacement_method(structure: FEM_Structure, loads_increment: n
     return final_structure
 
 
-def core_linear_displacement_method(current: FEM_Structure, loads_increment: np.ndarray):
+def core_linear_displacement_method(current: PyTruss, loads_increment: np.ndarray):
     """Solve the linear displacement method for the current structure with additional loads.
 
     Args:
@@ -81,7 +81,7 @@ def core_linear_displacement_method(current: FEM_Structure, loads_increment: np.
         - tension_increment: [N] - shape (elements.count,) - Element tension increments
     """
     # 0) check input
-    assert isinstance(current, FEM_Structure), "Current must be an instance of FEM_Structure"
+    assert isinstance(current, PyTruss), "Current must be an instance of PyTruss"
     assert isinstance(loads_increment, np.ndarray), "Loads increment must be a numpy array"
     nodes_count = current.nodes.count
     assert loads_increment.size == 3*nodes_count, f"Loads increment must have size {3*nodes_count} but got {loads_increment.size}"
@@ -142,7 +142,7 @@ def core_linear_displacement_method(current: FEM_Structure, loads_increment: np.
 
     return (displacements_increment.reshape((-1,)), reactions_increment.reshape((-1,)), resisting_forces_increment.reshape((-1,)), tension_increment.reshape((-1,)))
 
-def perturb(unstable_struct: FEM_Structure, magnitude: float = 1e-5):
+def perturb(unstable_struct: PyTruss, magnitude: float = 1e-5):
         """Create a copy of the structure with tiny random displacements applied to free DOFs.
         
         This method helps deal with singular stiffness matrices by slightly perturbing the structure.

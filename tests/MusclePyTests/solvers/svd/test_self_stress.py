@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.solvers.svd.main import main_singular_value_decomposition
 from MusclePy.solvers.svd.self_stress_modes import localize_self_stress_modes
 
@@ -38,7 +38,7 @@ class TestSelfStressModes(unittest.TestCase):
             True, False, False    # Node 5: free in x only
         ])
         
-        nodes = FEM_Nodes(coordinates, dof)
+        nodes = PyNodes(coordinates, dof)
         
         # Create elements
         end_nodes = np.array([
@@ -66,9 +66,9 @@ class TestSelfStressModes(unittest.TestCase):
         elementsA[3:11] = 50.3 # cables
         
         # Create elements with types
-        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, area=elementsA)
+        elements = PyElements(nodes=nodes, end_nodes=end_nodes, type=elements_type, youngs=elementsE, area=elementsA)
         
-        self.structure = FEM_Structure(nodes, elements)
+        self.structure = PyTruss(nodes, elements)
         
         # Run SVD analysis
         self.svd_results = main_singular_value_decomposition(self.structure)

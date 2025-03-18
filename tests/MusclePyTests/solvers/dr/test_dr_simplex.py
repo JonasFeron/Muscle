@@ -1,13 +1,13 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dr.main import main_dynamic_relaxation
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.solvers.dr.dr_elements import DR_Elements
-from MusclePy.solvers.dr.dr_structure import DR_Structure
-from MusclePy.solvers.dr.dr_nodes import DR_Nodes
-from MusclePy.solvers.dr.dr_config import DRconfig
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.solvers.dr.py_elements_dr import PyElementsDR
+from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
+from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
+from MusclePy.solvers.dr.py_config_dr import PyConfigDR
 
 
 class TestDR_Simplex(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestDR_Simplex(unittest.TestCase):
         with shortening of one horizontal cable.
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [   0.00, -2043.82, 0.00],  # Node 0
                 [   0.00,     0.00, 0.00],  # Node 1
@@ -43,7 +43,7 @@ class TestDR_Simplex(unittest.TestCase):
         area[0:3] = 364.4  # Struts area in mm²
         area[3:12] = 50.3  # Cables area in mm²
 
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([-1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1]),  # -1: strut, 1: cable
             end_nodes=np.array([
@@ -78,10 +78,10 @@ class TestDR_Simplex(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
         # Configure solver
-        self.config = DRconfig(
+        self.config = PyConfigDR(
             zero_residual_rtol=1e-4, 
             zero_residual_atol=1e-6,
             max_time_step=1000,

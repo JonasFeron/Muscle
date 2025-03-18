@@ -1,4 +1,4 @@
-class DRconfig:
+class PyConfigDR:
     """
     Configuration parameters for the Dynamic Relaxation method.
     

@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.solvers.svd.main import main_singular_value_decomposition
 from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix
 
@@ -31,7 +31,7 @@ class TestSVD3Cables(unittest.TestCase):
             False, False, False   # Node 3: fixed
         ])
         
-        nodes = FEM_Nodes(coordinates, dof)
+        nodes = PyNodes(coordinates, dof)
         
         # Create elements
         end_nodes = np.array([
@@ -41,10 +41,10 @@ class TestSVD3Cables(unittest.TestCase):
         ])
 
         type = [1,1,1]
-        elements = FEM_Elements(nodes=nodes, end_nodes=end_nodes, type = type)
+        elements = PyElements(nodes=nodes, end_nodes=end_nodes, type = type)
 
-        # Create FEM_Structure
-        self.structure = FEM_Structure(nodes, elements)
+        # Create PyTruss
+        self.structure = PyTruss(nodes, elements)
         
         # Run SVD analysis
         self.svd_results = main_singular_value_decomposition(self.structure)

@@ -12,7 +12,7 @@ References:
 """
 
 import numpy as np
-from ..femodel.fem_elements import FEM_Elements
+from ..femodel.pyelements import PyElements
 
 
 def compute_equilibrium_matrix(connectivity_matrix, current_coordinates):

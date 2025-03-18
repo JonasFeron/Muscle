@@ -2,9 +2,9 @@ from argparse import ArgumentError
 import numpy as np
 from typing import Optional
 
-class FEM_Nodes:
+class PyNodes:
     def __init__(self, initial_coordinates=None, dof=None, loads=None, displacements=None, reactions=None, resisting_forces=None):
-        """Python equivalent of C# FEM_Nodes class, combining nodes state and results.
+        """Python equivalent of C# PyNodes class, combining nodes state and results.
         
         The class has four types of attributes (immutable, or mutable (state dependant)) and (provided by the solver, or computed internally):
         1. Immutable attributes (initialized once from C#):
@@ -111,7 +111,7 @@ class FEM_Nodes:
                 self._count = len(initial_coords)
                 self._initial_coordinates = initial_coords
         else:  
-            raise ArgumentError(f"impossible to initialize FEM_Nodes without initial_coordinates, no initial_coordinates provided")
+            raise ArgumentError(f"impossible to initialize PyNodes without initial_coordinates, no initial_coordinates provided")
 
         # Handle degrees of freedom
         if dof is not None:
@@ -189,7 +189,7 @@ class FEM_Nodes:
         Child classes should override this method to return an instance of their own class.
         
         Returns:
-            A new instance of the appropriate class (FEM_Nodes or a child class)
+            A new instance of the appropriate class (PyNodes or a child class)
         """
         return self.__class__(
             initial_coordinates=initial_coordinates,
@@ -200,7 +200,7 @@ class FEM_Nodes:
             resisting_forces=resisting_forces
         )
     
-    def copy(self) -> 'FEM_Nodes':
+    def copy(self) -> 'PyNodes':
         """Create a copy of this instance with the current state.
         
         Returns:
@@ -215,7 +215,7 @@ class FEM_Nodes:
             resisting_forces=self._resisting_forces.copy()
         )
 
-    def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'FEM_Nodes':
+    def copy_and_update(self, loads: np.ndarray = None, displacements: np.ndarray = None, reactions: np.ndarray = None, resisting_forces: np.ndarray = None) -> 'PyNodes':
         """Create a copy of this instance and update its state, or use existing state if None.
         
         Args:
@@ -245,7 +245,7 @@ class FEM_Nodes:
         )
         
     def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
-                     reactions_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'FEM_Nodes':
+                     reactions_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'PyNodes':
         """Create a copy of this instance and add increments to its state.
         
         Args:
@@ -255,7 +255,7 @@ class FEM_Nodes:
             resisting_forces_increment: [N] - size: 3*nodes.count - Resisting forces increment to add
             
         Returns:
-            New FEM_Nodes with incremented state
+            New PyNodes with incremented state
         """
         # Create zero arrays if arguments are None
 

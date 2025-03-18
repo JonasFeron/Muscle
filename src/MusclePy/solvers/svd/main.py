@@ -1,22 +1,22 @@
-from MusclePy.solvers.svd.svd_results import SVDresults
-from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.solvers.svd.py_results_svd import PyResultsSVD
+from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix
 import numpy as np
 
 
-def main_singular_value_decomposition(structure: FEM_Structure, zero_rtol: float = 1e-3) -> SVDresults:
+def main_singular_value_decomposition(structure: PyTruss, zero_rtol: float = 1e-3) -> PyResultsSVD:
     """
     Compute the Singular Value Decomposition of the Equilibrium Matrix of the structure
     
     Args:
-        structure: FEM_Structure instance to analyze
+        structure: PyTruss instance to analyze
         zero_rtol: Tolerance for considering singular values as zero, relative to the highest singular value
             
     Returns:
-        SVDresults: Object containing the SVD results
+        PyResultsSVD: Object containing the SVD results
     """
     # 1) Validate input structure
-    assert isinstance(structure, FEM_Structure), "Input structure must be an instance of FEM_Structure"
+    assert isinstance(structure, PyTruss), "Input structure must be an instance of PyTruss"
        
     # 2) Retrieve structure properties
     n = structure.nodes.count
@@ -61,8 +61,8 @@ def main_singular_value_decomposition(structure: FEM_Structure, zero_rtol: float
     if m > 0:
         Um_3n= U_3n[:, r:]  # # the m last remaining columns 
 
-    # 9) Create and return SVDresults object
-    return SVDresults(
+    # 9) Create and return PyResultsSVD object
+    return PyResultsSVD(
             r=r,
             s=s,
             m=m,

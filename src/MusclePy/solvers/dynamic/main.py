@@ -1,9 +1,9 @@
 from MusclePy.solvers.dynamic.dynamic_results import DynamicResults
-from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.femodel.pytruss import PyTruss
 import numpy as np
         
 
-def main_dynamic_modal_analysis(structure : FEM_Structure, nodal_masses=None, element_mass_matrices=None, n_modes=0):
+def main_dynamic_modal_analysis(structure : PyTruss, nodal_masses=None, element_mass_matrices=None, n_modes=0):
     """
     Compute the dynamic modal analysis of a structure.
     
@@ -12,7 +12,7 @@ def main_dynamic_modal_analysis(structure : FEM_Structure, nodal_masses=None, el
     stiffness and geometric stiffness of the structure.
     
     Args:
-        structure: FEM_Structure: The structure to analyze
+        structure: PyTruss: The structure to analyze
         nodal_masses: np.ndarray: (nodes_count, 3) Nodal masses in each direction
         element_mass_matrices: list: List of element mass matrices (optional)
         max_frequencies: int: Maximum number of frequencies to compute (0 = all)
@@ -23,7 +23,7 @@ def main_dynamic_modal_analysis(structure : FEM_Structure, nodal_masses=None, el
 
 
     # Validate inputs
-    assert isinstance(structure, FEM_Structure), "Input structure must be an instance of FEM_Structure"
+    assert isinstance(structure, PyTruss), "Input structure must be an instance of PyTruss"
 
     nodal_masses = structure.nodes._check_and_reshape_array(nodal_masses)
     if np.any(nodal_masses < 0):
@@ -105,7 +105,7 @@ def main_dynamic_modal_analysis(structure : FEM_Structure, nodal_masses=None, el
     except Exception as e:
         raise RuntimeError(f"Eigenvalue computation failed: {e}")
 
-def _compute_tangent_stiffness_matrix(structure: FEM_Structure):
+def _compute_tangent_stiffness_matrix(structure: PyTruss):
     """Compute the tangent stiffness matrix based on the current state."""
     from MusclePy.utils.matrix_calculations import (
         compute_equilibrium_matrix,

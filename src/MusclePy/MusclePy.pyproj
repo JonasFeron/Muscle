@@ -24,9 +24,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="femodel\fem_elements.py" />
-    <Compile Include="femodel\fem_nodes.py" />
-    <Compile Include="femodel\fem_structure.py" />
+    <Compile Include="femodel\pyelements.py" />
+    <Compile Include="femodel\pynodes.py" />
+    <Compile Include="femodel\pytruss.py" />
     <Compile Include="solvers\linear_dm\elements_linear_dm.py" />
     <Compile Include="solvers\linear_dm\helper_main_linear_dm.py" />
     <Compile Include="solvers\linear_dm\linear_dm.py" />

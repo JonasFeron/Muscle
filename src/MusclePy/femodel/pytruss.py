@@ -1,22 +1,22 @@
-from .fem_nodes import FEM_Nodes
-from .fem_elements import FEM_Elements
+from .pynodes import PyNodes
+from .pyelements import PyElements
 import numpy as np
 
-class FEM_Structure:
-    def __init__(self, nodes: FEM_Nodes, elements: FEM_Elements):
-        """Python equivalent of C# FEM_Structure class, combining nodes and elements.
+class PyTruss:
+    def __init__(self, nodes: PyNodes, elements: PyElements):
+        """Python equivalent of C# PyTruss class, combining nodes and elements.
         
         This class serves as a container for both nodes and elements, ensuring they remain
         consistent with each other.
         
         Args:
-            nodes: FEM_Nodes instance containing nodal data
-            elements: FEM_Elements instance that must reference the same nodes instance
+            nodes: PyNodes instance containing nodal data
+            elements: PyElements instance that must reference the same nodes instance
         """
-        if not isinstance(nodes, FEM_Nodes):
-            raise TypeError("nodes must be a FEM_Nodes instance")
-        if not isinstance(elements, FEM_Elements):
-            raise TypeError("elements must be a FEM_Elements instance")
+        if not isinstance(nodes, PyNodes):
+            raise TypeError("nodes must be a PyNodes instance")
+        if not isinstance(elements, PyElements):
+            raise TypeError("elements must be a PyElements instance")
         if elements.nodes is not nodes:
             raise ValueError("elements must reference the same nodes instance")
         
@@ -24,13 +24,13 @@ class FEM_Structure:
         self._elements = elements
     
     @property
-    def nodes(self) -> FEM_Nodes:
-        """Get the FEM_Nodes instance."""
+    def nodes(self) -> PyNodes:
+        """Get the PyNodes instance."""
         return self._nodes
     
     @property
-    def elements(self) -> FEM_Elements:
-        """Get the FEM_Elements instance."""
+    def elements(self) -> PyElements:
+        """Get the PyElements instance."""
         return self._elements
 
     def is_in_equilibrium(self, rtol: float = 1e-4, atol: float = 1e-6) -> bool:
@@ -56,11 +56,11 @@ class FEM_Structure:
         Child classes should override this method to return an instance of their own class.
         
         Returns:
-            A new instance of the appropriate class (FEM_Structure or a child class)
+            A new instance of the appropriate class (PyTruss or a child class)
         """
         return self.__class__(nodes, elements)
         
-    def copy(self) -> 'FEM_Structure':
+    def copy(self) -> 'PyTruss':
         """Create a copy of this structure with the current state.
         
         Returns:
@@ -96,7 +96,7 @@ class FEM_Structure:
         
     def copy_and_add(self, loads_increment: np.ndarray = None, displacements_increment: np.ndarray = None, 
                      reactions_increment: np.ndarray = None, free_length_variation: np.ndarray = None,
-                     tension_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'FEM_Structure':
+                     tension_increment: np.ndarray = None, resisting_forces_increment: np.ndarray = None) -> 'PyTruss':
         """Create a copy of this structure and add increments to its state.
         
         Args:

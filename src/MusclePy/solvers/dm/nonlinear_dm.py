@@ -1,9 +1,9 @@
-from MusclePy.femodel.fem_structure import FEM_Structure
+from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.solvers.dm.linear_dm import core_linear_displacement_method, perturb
 import numpy as np
 
 
-def main_nonlinear_displacement_method(structure: FEM_Structure, loads_increment: np.ndarray, n_steps: int) -> FEM_Structure:
+def main_nonlinear_displacement_method(structure: PyTruss, loads_increment: np.ndarray, n_steps: int) -> PyTruss:
     """Execute the incremental (but not iterative) Newton-Raphson procedure with arc length control.
     
     Args:
@@ -12,7 +12,7 @@ def main_nonlinear_displacement_method(structure: FEM_Structure, loads_increment
         n_steps: Number of steps to use in the nonlinear solver
         
     Returns:
-        FEM_Structure in deformed state
+        PyTruss in deformed state
     """
     # Note: the nonlinear DM does not support prestress.
     # This is due to the reorientation of the elements during a non linear procedure.

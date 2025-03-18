@@ -1,23 +1,23 @@
 import numpy as np
-from MusclePy.femodel.fem_nodes import FEM_Nodes
+from MusclePy.femodel.pynodes import PyNodes
 
 
-class DR_Nodes(FEM_Nodes):
+class PyNodesDR(PyNodes):
     """
-    Extension of FEM_Nodes with Dynamic Relaxation specific attributes.
+    Extension of PyNodes with Dynamic Relaxation specific attributes.
     
     Attributes:
-        All attributes from FEM_Nodes
+        All attributes from PyNodes
         velocities: [m/s] - shape (nodes_count, 3) - Nodal velocities
         resisting_forces: [N] - shape (nodes_count, 3) - Resisting forces
     """
     
     def __init__(self, nodes_or_inititialcoordinates, dof=None, loads=None, displacements=None, 
                  reactions=None, resisting_forces=None, velocities=None):
-        """Initialize a DR_Nodes instance.
+        """Initialize a PyNodesDR instance.
         
         Args:
-            nodes_or_coordinates: Either a FEM_Nodes instance or a numpy array of shape (nodes_count, 3) containing nodal coordinates
+            nodes_or_coordinates: Either a PyNodes instance or a numpy array of shape (nodes_count, 3) containing nodal coordinates
             dof: [bool] - shape (nodes_count, 3) - Degrees of freedom (True if free, False if fixed)
             loads: [N] - shape (nodes_count, 3) - External loads
             displacements: [m] - shape (nodes_count, 3) - Nodal displacements
@@ -25,10 +25,10 @@ class DR_Nodes(FEM_Nodes):
             resisting_forces: [N] - shape (nodes_count, 3) - Resisting forces
             velocities: [m/s] - shape (nodes_count, 3) - Nodal velocities
         """
-        # Check if the first argument is a FEM_Nodes instance
-        if isinstance(nodes_or_inititialcoordinates, FEM_Nodes):
+        # Check if the first argument is a PyNodes instance
+        if isinstance(nodes_or_inititialcoordinates, PyNodes):
             nodes = nodes_or_inititialcoordinates
-            # Call parent class constructor with the FEM_Nodes instance
+            # Call parent class constructor with the PyNodes instance
             super().__init__(
                 nodes.initial_coordinates,
                 nodes.dof,
@@ -66,7 +66,7 @@ class DR_Nodes(FEM_Nodes):
     
     @resisting_forces.setter
     def resisting_forces(self, value):
-        """Set resisting forces. Resisting forces are set by DR_Structure instance once the equilibrium matrix is computed."""
+        """Set resisting forces. Resisting forces are set by PyTrussDR instance once the equilibrium matrix is computed."""
         self._computed_resisting_forces = True
         self._resisting_forces = super()._check_and_reshape_array(value, "resisting_forces")
     
@@ -96,7 +96,7 @@ class DR_Nodes(FEM_Nodes):
         Child classes should override this method to return an instance of their own class.
         
         Returns:
-            A new instance of the appropriate class (DR_Nodes or a child class)
+            A new instance of the appropriate class (PyNodesDR or a child class)
         """
         v = self._velocities if velocities is None else velocities
         return self.__class__(
@@ -109,7 +109,7 @@ class DR_Nodes(FEM_Nodes):
             v,
         )
     
-    def copy(self) -> 'DR_Nodes':
+    def copy(self) -> 'PyNodesDR':
         """Create a copy of this instance with the current state.
         
         Returns:
@@ -125,7 +125,7 @@ class DR_Nodes(FEM_Nodes):
             self._velocities.copy(),
         )
     
-    def copy_and_update(self, loads=None, displacements=None, velocities=None) -> 'DR_Nodes':
+    def copy_and_update(self, loads=None, displacements=None, velocities=None) -> 'PyNodesDR':
         """Create a copy of this instance and update its state.
         
         Args:

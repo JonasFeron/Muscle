@@ -6,9 +6,9 @@ using the compute_modal_analysis function.
 """
 
 import numpy as np
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
 from MusclePy.utils.matrix_calculations import compute_local_lumped_mass_matrices
 from MusclePy.solvers.dynamic.main import main_dynamic_modal_analysis
 
@@ -29,7 +29,7 @@ def run_example():
         [True, True, True]      # Node 2 - free
     ]).flatten()
     
-    nodes = FEM_Nodes(coordinates, is_dof_free)
+    nodes = PyNodes(coordinates, is_dof_free)
     
     # Create elements
     end_nodes = np.array([
@@ -41,10 +41,10 @@ def run_example():
     elastic_moduli = np.array([2e11, 2e11])   # N/m² (steel)
     free_lengths = np.array([0.7, 0.7])       # m
     
-    elements = FEM_Elements(nodes, end_nodes=end_nodes, area=cross_sections, youngs=elastic_moduli, free_length_variation=free_lengths)
+    elements = PyElements(nodes, end_nodes=end_nodes, area=cross_sections, youngs=elastic_moduli, free_length_variation=free_lengths)
     
     # Create structure
-    structure = FEM_Structure(nodes, elements)
+    structure = PyTruss(nodes, elements)
     
     # Set initial tensions
     structure.elements.tension = np.array([1000.0, 1000.0])  # N

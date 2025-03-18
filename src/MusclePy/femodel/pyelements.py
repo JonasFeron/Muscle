@@ -1,11 +1,11 @@
 import numpy as np
-from .fem_nodes import FEM_Nodes
+from .pynodes import PyNodes
 
 
-class FEM_Elements:
-    def __init__(self, nodes: FEM_Nodes, type=None, end_nodes=None, area=None, youngs=None, 
+class PyElements:
+    def __init__(self, nodes: PyNodes, type=None, end_nodes=None, area=None, youngs=None,
                  free_length=None, tension=None):
-        """Python equivalent of C# FEM_Elements class.
+        """Python equivalent of C# PyElements class.
         
         Properties:
         1. Read-Only (computed once):
@@ -17,7 +17,7 @@ class FEM_Elements:
             - youngs: [MPa] 2 Young's moduli per element defining the bilinear material. 
         
         2. Mutable State:
-            - nodes: FEM_Nodes instance containing current node coordinates
+            - nodes: PyNodes instance containing current node coordinates
             - free_length: [m] Free length of elements
             - tension: [N] Axial force (positive in tension)
 
@@ -29,7 +29,7 @@ class FEM_Elements:
 
             
         Args:
-            nodes: FEM_Nodes instance
+            nodes: PyNodes instance
             type: Element types, shape (elements_count,)
             end_nodes: Node indices, shape (elements_count, 2)
             area: Cross-sections, shape (elements_count,)
@@ -38,8 +38,8 @@ class FEM_Elements:
             tension: Axial forces, shape (elements_count,)
         """
         # Initialize immutable attributes (set once from C#)
-        if not isinstance(nodes, FEM_Nodes):
-            raise TypeError("nodes must be a FEM_Nodes instance")
+        if not isinstance(nodes, PyNodes):
+            raise TypeError("nodes must be a PyNodes instance")
         self._nodes = nodes
         self._count = 0
         
@@ -116,7 +116,7 @@ class FEM_Elements:
                 self._count = len(end_nodes_arr)
                 self._end_nodes = end_nodes_arr
         else:
-            raise ValueError("impossible to initialize FEM_Elements without end_nodes, no end_nodes provided")
+            raise ValueError("impossible to initialize PyElements without end_nodes, no end_nodes provided")
         
         # Initialize immutable arrays
         self._type = self._check_and_reshape_array(type, "type")
@@ -172,8 +172,8 @@ class FEM_Elements:
 
     # READ Only properties
     @property
-    def nodes(self) -> FEM_Nodes:
-        """FEM_Nodes instance containing nodes data"""
+    def nodes(self) -> PyNodes:
+        """PyNodes instance containing nodes data"""
         return self._nodes
         
     @property
@@ -305,7 +305,7 @@ class FEM_Elements:
         Child classes should override this method to return an instance of their own class.
         
         Returns:
-            A new instance of the appropriate class (FEM_Elements or a child class)
+            A new instance of the appropriate class (PyElements or a child class)
         """
         return self.__class__(
             nodes=nodes,
@@ -318,11 +318,11 @@ class FEM_Elements:
         )
     
     # Public Methods
-    def copy(self, nodes: 'FEM_Nodes') -> 'FEM_Elements':
+    def copy(self, nodes: 'PyNodes') -> 'PyElements':
         """Create a copy with current state.
         
         Args:
-            nodes: FEM_Nodes instance to reference in the copy
+            nodes: PyNodes instance to reference in the copy
             
         Returns:
             New instance with current state
@@ -337,11 +337,11 @@ class FEM_Elements:
             tension=self._tension.copy()
         )
     
-    def copy_and_update(self, nodes: 'FEM_Nodes', free_length: np.ndarray = None, tension: np.ndarray = None) -> 'FEM_Elements':
+    def copy_and_update(self, nodes: 'PyNodes', free_length: np.ndarray = None, tension: np.ndarray = None) -> 'PyElements':
         """Create a copy with updated state values, or use existing state if None.
         
         Args:
-            nodes: FEM_Nodes instance
+            nodes: PyNodes instance
             free_length: [m] - shape (elements_count,) - Free length of elements
             tension: [N] - shape (elements_count,) - Axial forces
         """
@@ -362,17 +362,17 @@ class FEM_Elements:
             tension=tension
         )
     
-    def copy_and_add(self, nodes: FEM_Nodes, free_length_variation: np.ndarray = None, 
-                     tension_increment: np.ndarray = None) -> 'FEM_Elements':
+    def copy_and_add(self, nodes: PyNodes, free_length_variation: np.ndarray = None,
+                     tension_increment: np.ndarray = None) -> 'PyElements':
         """Create a copy with incremented state values.
         
         Args:
-            nodes: FEM_Nodes instance to reference in the copy
+            nodes: PyNodes instance to reference in the copy
             free_length_variation: [m] - size: elements.count - Free length increment to add
             tension_increment: [N] - size: elements.count - Tension increment to add
             
         Returns:
-            New FEM_Elements with incremented state
+            New PyElements with incremented state
         """
         # Create zero arrays if arguments are None
         free_length_variation = self._check_and_reshape_array(free_length_variation, "free_length_variation")

@@ -1,9 +1,9 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
 
 
 class TestNonlinearDM_2BarsTruss(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestNonlinearDM_2BarsTruss(unittest.TestCase):
         (0,0,0) (2,0,0)
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],  # Node 0: origin
                 [1.0, 0.0, 1.0],  # Node 1: top
@@ -33,7 +33,7 @@ class TestNonlinearDM_2BarsTruss(unittest.TestCase):
         )
         
         # Create elements
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([-1, -1]),  # Two struts
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
@@ -42,7 +42,7 @@ class TestNonlinearDM_2BarsTruss(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
     def test_vertical_load(self):
         """Test structure response to vertical load.
@@ -94,7 +94,7 @@ class TestNonlinearDM_2BarsTruss(unittest.TestCase):
         Check that Snap through has occurred (cfr J.Feron Master thesis p34 of pdf)
         """
         # Create nodes for upward configuration
-        nodes_up = FEM_Nodes(
+        nodes_up = PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],    # Node 0: origin
                 [1.0, 0.0, 0.1],    # Node 1: slightly up
@@ -105,10 +105,10 @@ class TestNonlinearDM_2BarsTruss(unittest.TestCase):
         
         # Create elements and structure for upward configuration
         elements_up = self.elements.copy_and_update(nodes_up)
-        structure_up = FEM_Structure(nodes_up, elements_up)
+        structure_up = PyTruss(nodes_up, elements_up)
         
         # Create nodes for downward configuration
-        nodes_down = FEM_Nodes(
+        nodes_down = PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],     # Node 0: origin
                 [1.0, 0.0, -0.1],    # Node 1: slightly down
@@ -118,7 +118,7 @@ class TestNonlinearDM_2BarsTruss(unittest.TestCase):
         )
         
         elements_down = self.elements.copy_and_update(nodes_down)
-        structure_down = FEM_Structure(nodes_down, elements_down)
+        structure_down = PyTruss(nodes_down, elements_down)
         
         # Apply -15kN vertical load at node 1
         loads = np.zeros(9)  # 3 nodes * 3 DOFs

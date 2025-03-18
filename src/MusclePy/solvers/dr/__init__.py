@@ -8,9 +8,9 @@ following the approach described in:
 """
 
 from .main import main_dynamic_relaxation
-from .dr_config import DRconfig
-from .dr_structure import DR_Structure
-from .dr_nodes import DR_Nodes
-from .dr_elements import DR_Elements
+from .py_config_dr import PyConfigDR
+from .py_truss_dr import PyTrussDR
+from .py_nodes_dr import PyNodesDR
+from .py_elements_dr import PyElementsDR
 
-__all__ = ['main_dynamic_relaxation', 'DRconfig', 'DR_Structure', 'DR_Nodes', 'DR_Elements']
+__all__ = ['main_dynamic_relaxation', 'PyElementsDR', 'PyTrussDR', 'PyNodesDR', 'PyConfigDR']

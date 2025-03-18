@@ -11,8 +11,8 @@ tests_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(tests_dir)
 
 # Import all test modules
-from MusclePyTests.femodel.test_fem_elements import TestFEMElements
-from MusclePyTests.femodel.test_fem_nodes import TestFEMNodes
+from MusclePyTests.femodel.test_pyelements import TestPyElements
+from MusclePyTests.femodel.test_pynodes import TestPyNodes
 from MusclePyTests.solvers.linear_dm.test_linear_dm_2bars_truss import TestLinearDM_2BarsTruss
 from MusclePyTests.solvers.linear_dm.test_linear_dm_3prestressedcables import TestLinearDM_3PrestressedCables
 from MusclePyTests.solvers.nonlinear_dm.test_nonlinear_dm_2bars_truss import TestNonlinearDM_2BarsTruss
@@ -35,8 +35,8 @@ def create_test_suite():
     suite = unittest.TestSuite()
     
     # Add test classes
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFEMElements))
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestFEMNodes))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPyElements))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPyNodes))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLinearDM_2BarsTruss))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLinearDM_3PrestressedCables))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestNonlinearDM_2BarsTruss))

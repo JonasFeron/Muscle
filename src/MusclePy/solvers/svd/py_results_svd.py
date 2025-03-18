@@ -1,13 +1,13 @@
 import numpy as np
-class SVDresults():
+class PyResultsSVD():
     """
-    This class stores the results into a SVDresults object of the Singular Value Decomposition of the Equilibrium Matrix of the structure in the current state.
+    This class stores the results into a PyResultsSVD object of the Singular Value Decomposition of the Equilibrium Matrix of the structure in the current state.
     Ref: S. Pellegrino, 1993, Structural computations with the singular value decomposition of the equilibrium matrix
     """
 
     def __init__(self, r, s, m, Ur, Um, Sr, Vr, Vs):
         """
-        Initialize a SVDresults object that stores the results
+        Initialize a PyResultsSVD object that stores the results
         """
         self.r = r #rank of equilibrium matrix
         self.s = s # degree of static indeterminacy = nbr of self-stress modes

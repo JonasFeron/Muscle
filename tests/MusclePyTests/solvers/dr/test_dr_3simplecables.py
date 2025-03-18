@@ -1,13 +1,13 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dr.main import main_dynamic_relaxation
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.solvers.dr.dr_elements import DR_Elements
-from MusclePy.solvers.dr.dr_structure import DR_Structure
-from MusclePy.solvers.dr.dr_nodes import DR_Nodes
-from MusclePy.solvers.dr.dr_config import DRconfig
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.solvers.dr.py_elements_dr import PyElementsDR
+from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
+from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
+from MusclePy.solvers.dr.py_config_dr import PyConfigDR
 
 
 class TestDR_3SimpleCables(unittest.TestCase):
@@ -27,7 +27,7 @@ class TestDR_3SimpleCables(unittest.TestCase):
         The structure has a prestress in the first cable.
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [2.0, 0.0, 1.0],  # Node 0: top
                 [0.0, 0.0, 0.0],  # Node 1: left
@@ -44,7 +44,7 @@ class TestDR_3SimpleCables(unittest.TestCase):
         
         # Create elements with prestress in cable 0
         cable_area = np.pi * (8 / 2) ** 2  # 8mm diameter cable area in mm²
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([1, 1, 1]),  # Three cables
             end_nodes=np.array([[0, 3], [1, 3], [2, 3]]),  # Element connections
@@ -53,10 +53,10 @@ class TestDR_3SimpleCables(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
         # Configure solver
-        self.config = DRconfig(
+        self.config = PyConfigDR(
             zero_residual_rtol=1e-6,
             zero_residual_atol=1e-6,
             max_time_step=100,
@@ -68,14 +68,14 @@ class TestDR_3SimpleCables(unittest.TestCase):
         The test verifies the final tensions and node positions against analytical solutions.
         """
         # first lets ensure cable 0 withstands tension only
-        tension_only_elements = FEM_Elements(
+        tension_only_elements = PyElements(
             nodes=self.nodes,
             type=self.elements.type,  # Three cables
             end_nodes=self.elements.end_nodes,  # Element connections
             area=self.elements.area,  # Area in mm²
             youngs=np.array([[0.0, 70000.0, 70000.0], [70000.0, 70000.0, 70000.0]])  # 70000 MPa Young's modulus, cable 0 withstands tension only
         )
-        tension_only_structure = FEM_Structure(self.nodes, tension_only_elements)
+        tension_only_structure = PyTruss(self.nodes, tension_only_elements)
 
         # No prestress
         delta_free_length = np.array([0.0,0.0, 0.0])

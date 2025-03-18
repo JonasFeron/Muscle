@@ -1,28 +1,28 @@
 import numpy as np
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.solvers.dr.dr_nodes import DR_Nodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
 
 
-class DR_Elements(FEM_Elements):
+class PyElementsDR(PyElements):
     """
-    Extension of FEM_Elements with Dynamic Relaxation specific attributes.
+    Extension of PyElements with Dynamic Relaxation specific attributes.
     
     Attributes:
-        All attributes from FEM_Elements
+        All attributes from PyElements
         local_geometric_stiffness_matrices: List of local geometric stiffness matrices
     """
     
     def __init__(self, elements_or_nodes, type=None, end_nodes=None, area=None, youngs=None, 
                  free_length=None, tension=None):
-        """Initialize a DR_Elements instance.
+        """Initialize a PyElementsDR instance.
         
         This constructor accepts either:
-        1. A FEM_Elements instance to convert to a DR_Elements instance
-        2. A FEM_Nodes (or DR_Nodes) instance plus all parameters (legacy constructor)
+        1. A PyElements instance to convert to a PyElementsDR instance
+        2. A PyNodes (or PyNodesDR) instance plus all parameters (legacy constructor)
         
         Args:
-            elements_or_nodes: Either a FEM_Elements instance or a FEM_Nodes (or DR_Nodes) instance
+            elements_or_nodes: Either a PyElements instance or a PyNodes (or PyNodesDR) instance
             type: [-] - shape (elements_count,) - Type of elements (-1 for struts, 1 for cables)
             end_nodes: [-] - shape (elements_count, 2) - Indices of end nodes
             area: [mm²] - shape (elements_count,) - Cross-section area of elements
@@ -30,15 +30,15 @@ class DR_Elements(FEM_Elements):
             free_length: [m] - shape (elements_count,) - Free length of elements
             tension: [N] - shape (elements_count,) - Current tension in elements
         """
-        # Check if the first argument is a FEM_Elements instance
-        if isinstance(elements_or_nodes, FEM_Elements):
+        # Check if the first argument is a PyElements instance
+        if isinstance(elements_or_nodes, PyElements):
             elements = elements_or_nodes
             
-            # Assert that all other arguments are None when a FEM_Elements instance is passed
+            # Assert that all other arguments are None when a PyElements instance is passed
             assert all(arg is None for arg in [type, end_nodes, area, youngs, free_length, tension]), \
-                "When passing a FEM_Elements instance, all other arguments must be None"
+                "When passing a PyElements instance, all other arguments must be None"
 
-            # Call parent class constructor with the properties from the FEM_Elements instance
+            # Call parent class constructor with the properties from the PyElements instance
             super().__init__(
                 elements.nodes,
                 elements.type,
@@ -49,8 +49,8 @@ class DR_Elements(FEM_Elements):
                 elements.tension
             )
         else:
-            # Assert that the first argument is a FEM_Nodes or DR_Nodes instance
-            assert isinstance(elements_or_nodes, (FEM_Nodes, DR_Nodes)), "First argument must be either a FEM_Elements, FEM_Nodes, or DR_Nodes instance"
+            # Assert that the first argument is a PyNodes or PyNodesDR instance
+            assert isinstance(elements_or_nodes, (PyNodes, PyNodesDR)), "First argument must be either a PyElements, PyNodes, or PyNodesDR instance"
             nodes = elements_or_nodes
             # Call parent class constructor with the provided parameters
             super().__init__(nodes, type, end_nodes, area, youngs, free_length, tension)
@@ -105,7 +105,7 @@ class DR_Elements(FEM_Elements):
         Child classes should override this method to return an instance of their own class.
         
         Returns:
-            A new instance of the appropriate class (DR_Elements or a child class)
+            A new instance of the appropriate class (PyElementsDR or a child class)
         """
         return self.__class__(
             nodes,
@@ -117,11 +117,11 @@ class DR_Elements(FEM_Elements):
             tension=tension
         )
     
-    def copy_and_update(self, nodes=None, free_length=None) -> 'DR_Elements':
+    def copy_and_update(self, nodes=None, free_length=None) -> 'PyElementsDR':
         """Create a copy of this instance and update its state.
         
         Args:
-            nodes: A FEM_Nodes or DR_Nodes instance
+            nodes: A PyNodes or PyNodesDR instance
             free_length: [m] - shape (elements_count,) - Free length of elements
             
         Returns:

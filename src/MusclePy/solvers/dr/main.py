@@ -1,11 +1,11 @@
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.solvers.dr.dr_structure import DR_Structure
-from MusclePy.solvers.dr.dr_config import DRconfig
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
+from MusclePy.solvers.dr.py_config_dr import PyConfigDR
 import numpy as np
 
 
-def main_dynamic_relaxation(structure: FEM_Structure, loads_increment: np.ndarray = None, 
-                                       free_length_variation: np.ndarray = None, config: DRconfig = None) -> DR_Structure:
+def main_dynamic_relaxation(structure: PyTruss, loads_increment: np.ndarray = None, 
+                                       free_length_variation: np.ndarray = None, config: PyConfigDR = None) -> PyTrussDR:
     """
     Perform the Dynamic Relaxation Method on the Start State of the Structure.
     This method assumes that the StructureObject has already been initialized with InitialData method
@@ -14,13 +14,13 @@ def main_dynamic_relaxation(structure: FEM_Structure, loads_increment: np.ndarra
     # [1] Bel Adj Ali et al, 2011, Analysis of clustered tensegrity structures using a modified dynamic relaxation algorithm
     # [2] Barnes, 1999, Form finding and analysis of tension structures by dynamic relaxation
 
-    assert isinstance(structure, FEM_Structure), "Structure must be a FEM_Structure instance"
+    assert isinstance(structure, PyTruss), "Structure must be a PyTruss instance"
     assert isinstance(loads_increment, np.ndarray), "Loads increment must be a numpy array"
     assert isinstance(free_length_variation, np.ndarray), "Free length variation must be a numpy array"
     if config is None:
-        config = DRconfig() #use default solver configuration
+        config = PyConfigDR() #use default solver configuration
 
-    input_state = DR_Structure(structure)
+    input_state = PyTrussDR(structure)
     
     current_state = input_state.copy_and_add(loads_increment, free_length_variation)
 
@@ -47,7 +47,7 @@ def main_dynamic_relaxation(structure: FEM_Structure, loads_increment: np.ndarra
 
 
 
-def compute_next_state(current: DR_Structure, config: DRconfig):
+def compute_next_state(current: PyTrussDR, config: PyConfigDR):
 
     # retrieve parameters
     dt = config.dt
@@ -86,7 +86,7 @@ def compute_next_state(current: DR_Structure, config: DRconfig):
     return next_state
 
 
-def _compute_current_masses(current: DR_Structure, config: DRconfig) -> np.ndarray:
+def _compute_current_masses(current: PyTrussDR, config: PyConfigDR) -> np.ndarray:
     
     # compute material + geometric stiffness matrices of shape: (3*NodesCount, 3*NodesCount)
     K = current.global_material_stiffness_matrix + current.global_geometric_stiffness_matrix
@@ -103,7 +103,7 @@ def _compute_current_masses(current: DR_Structure, config: DRconfig) -> np.ndarr
 
     return current_masses
 
-def _compute_velocities_increments(current: DR_Structure, config: DRconfig, current_masses: np.ndarray) -> np.ndarray:
+def _compute_velocities_increments(current: PyTrussDR, config: PyConfigDR, current_masses: np.ndarray) -> np.ndarray:
     """
     Compute the velocities increments: 
 

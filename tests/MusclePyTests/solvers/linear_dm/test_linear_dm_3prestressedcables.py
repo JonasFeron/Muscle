@@ -1,10 +1,10 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.prestress_increment import PrestressScenario
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.prestress_scenario import PrestressScenario
 
 class TestLinearDM_3PrestressedCables(unittest.TestCase):
     def setUp(self):
@@ -19,7 +19,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
              cable1    cable2
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [-2.0, 0.0, 0.0],  # Node 0: left support
                 [0.0, 0.0, 0.0],   # Node 1: middle point
@@ -40,7 +40,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         youngs = np.ones((3,2)) * 70e3 #70 GPa Young's modulus
         youngs[:, 0] = 0 #tension only elements -> no stiffness in compression
 
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=type,
             end_nodes=np.array([[0, 1], [1, 2], [1, 3]]),  # Define connectivity
@@ -49,7 +49,7 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
         # Create prestress increment
         self.prestress_increment = PrestressScenario(self.elements, np.array([-0.007984, 0.0, 0.0]))

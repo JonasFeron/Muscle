@@ -2,10 +2,10 @@ import unittest
 import numpy as np
 from MusclePy.solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
 from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.femodel.prestress_increment import PrestressScenario
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.femodel.prestress_scenario  import PrestressScenario
 
 
 class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         The structure will be prestressed and then loaded vertically at Node 1.
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 0.0],  # Node 0: left support
                 [1.0, 0.0, 0.0],  # Node 1: middle point
@@ -33,7 +33,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         )
         
         # Create elements
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([1, 1]),  # Two cables
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
@@ -42,7 +42,7 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
     def test_3stage_loading(self):
         """Test tight rope structure through 3 loading stages:

@@ -1,13 +1,13 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dr.main import main_dynamic_relaxation
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.solvers.dr.dr_elements import DR_Elements
-from MusclePy.solvers.dr.dr_structure import DR_Structure
-from MusclePy.solvers.dr.dr_nodes import DR_Nodes
-from MusclePy.solvers.dr.dr_config import DRconfig
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.solvers.dr.py_elements_dr import PyElementsDR
+from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
+from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
+from MusclePy.solvers.dr.py_config_dr import PyConfigDR
 
 
 class TestDR_3ComplexCables(unittest.TestCase):
@@ -29,7 +29,7 @@ class TestDR_3ComplexCables(unittest.TestCase):
         The structure has a prestress in cable 0.
         """
         # Create nodes
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [0.0, 0.0, 1.0],  # Node 0: top
                 [0.0, 0.0, 0.0],  # Node 1: left
@@ -46,7 +46,7 @@ class TestDR_3ComplexCables(unittest.TestCase):
         
         # Create elements
         cable_area =  np.pi * (8/2)**2  # 8mm diameter cable area in mm²
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([1, 1, 1]),  # Three cables
             end_nodes=np.array([[0, 3], [1, 3], [2, 3]]),  # Element connections
@@ -55,10 +55,10 @@ class TestDR_3ComplexCables(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
         # Configure solver with higher precision
-        self.config = DRconfig(
+        self.config = PyConfigDR(
             zero_residual_atol=1e-6,
             max_time_step=150,
             max_ke_reset=30

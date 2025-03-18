@@ -1,13 +1,13 @@
 import unittest
 import numpy as np
 from MusclePy.solvers.dr.main import main_dynamic_relaxation
-from MusclePy.femodel.fem_structure import FEM_Structure
-from MusclePy.femodel.fem_nodes import FEM_Nodes
-from MusclePy.femodel.fem_elements import FEM_Elements
-from MusclePy.solvers.dr.dr_elements import DR_Elements
-from MusclePy.solvers.dr.dr_structure import DR_Structure
-from MusclePy.solvers.dr.dr_nodes import DR_Nodes
-from MusclePy.solvers.dr.dr_config import DRconfig
+from MusclePy.femodel.pytruss import PyTruss
+from MusclePy.femodel.pynodes import PyNodes
+from MusclePy.femodel.pyelements import PyElements
+from MusclePy.solvers.dr.py_elements_dr import PyElementsDR
+from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
+from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
+from MusclePy.solvers.dr.py_config_dr import PyConfigDR
 
 
 class TestDR_2Cables(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestDR_2Cables(unittest.TestCase):
         The structure has a slight initial displacement in the z direction at Node 1.
         """
         # Create nodes with initial displacement at node 1
-        self.nodes = FEM_Nodes(
+        self.nodes = PyNodes(
             initial_coordinates=np.array([
                 [-2.0, 0.0, 0.0],  # Node 0: left support
                 [0.0, 0.0, 0.0],   # Node 1: free to move
@@ -40,7 +40,7 @@ class TestDR_2Cables(unittest.TestCase):
         cable_area = np.pi * (8 / 2) ** 2  # 8mm diameter cable area in mm²
         self.cable_area = cable_area
 
-        self.elements = FEM_Elements(
+        self.elements = PyElements(
             nodes=self.nodes,
             type=np.array([1, 1]),  # Two cables
             end_nodes=np.array([[0, 1], [1, 2]]),  # Element 0: 0->1, Element 1: 1->2
@@ -49,10 +49,10 @@ class TestDR_2Cables(unittest.TestCase):
         )
         
         # Create structure
-        self.structure = FEM_Structure(self.nodes, self.elements)
+        self.structure = PyTruss(self.nodes, self.elements)
 
         # Configure solver
-        self.config = DRconfig(
+        self.config = PyConfigDR(
             zero_residual_rtol=1e-6,
             zero_residual_atol=1e-6,
             max_time_step=100,
