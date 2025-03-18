@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using MuscleCore.Solvers;
 using MuscleApp.ViewModel;
+using static MuscleApp.Converters.Vector3dDecoder;
 
 namespace MuscleApp.Solvers
 {
@@ -10,7 +11,7 @@ namespace MuscleApp.Solvers
     /// Application-level representation of SVD results, using composition to wrap the core SVDResults class
     /// with additional functionality for visualization and analysis in Rhino/Grasshopper.
     /// </summary>
-    public class SVDResultsApp
+    public class ResultsSVD
     {
         /// <summary>
         /// The underlying core SVD results
@@ -67,7 +68,7 @@ namespace MuscleApp.Solvers
         /// <summary>
         /// Empty constructor for deserialization
         /// </summary>
-        public SVDResultsApp()
+        public ResultsSVD()
         {
             _coreResults = new CoreResultsSVD();
             Ur_T = new Vector3d[0, 0];
@@ -75,54 +76,22 @@ namespace MuscleApp.Solvers
         }
 
         /// <summary>
-        /// Initialize a SVDResultsApp object that stores the results of the Singular Value Decomposition
+        /// Initialize a ResultsSVD object that stores the results of the Singular Value Decomposition
         /// </summary>
         /// <param name="coreResults">Core SVDResults object</param>
-        public SVDResultsApp(CoreResultsSVD coreResults)
+        public ResultsSVD(CoreResultsSVD coreResults)
         {
             _coreResults = coreResults ?? throw new ArgumentNullException(nameof(coreResults));
             
             // Convert Ur_T to Vector3d[,]
-            Ur_T = ConvertModesToVectors(coreResults.Ur_T);
+            Ur_T = ToVectors3d(coreResults.Ur_T);
             
             // Convert Um_T to Vector3d[,]
-            Um_T = ConvertModesToVectors(coreResults.Um_T);
+            Um_T = ToVectors3d(coreResults.Um_T);
         }
 
 
-        /// <summary>
-        /// Converts a matrix of mode vectors to a 2D array of Vector3d.
-        /// </summary>
-        /// <param name="modes">Matrix of mode vectors with shape (numModes, 3*nodesCount)</param>
-        /// <returns>2D array of Vector3d with shape (numModes, nodesCount)</returns>
-        private static Vector3d[,] ConvertModesToVectors(double[,] modes)
-        {
-            // Get dimensions of the modes matrix
-            int numModes = modes.GetLength(0);
-            int totalDofs = modes.GetLength(1);
-            
-            // Calculate number of nodes (assuming 3 DOFs per node: X, Y, Z)
-            int nodesCount = totalDofs / 3;
-            
-            // Create 2D array to store the converted modes
-            Vector3d[,] modeVectors = new Vector3d[numModes, nodesCount];
-            
-            // For each mode and each node, create a Vector3d from the x, y, z components
-            for (int modeIdx = 0; modeIdx < numModes; modeIdx++)
-            {
-                for (int nodeIdx = 0; nodeIdx < nodesCount; nodeIdx++)
-                {
-                    // Create a Vector3d from the x, y, z components
-                    modeVectors[modeIdx, nodeIdx] = new Vector3d(
-                        modes[modeIdx, 3 * nodeIdx],     // X component
-                        modes[modeIdx, 3 * nodeIdx + 1], // Y component
-                        modes[modeIdx, 3 * nodeIdx + 2]  // Z component
-                    );
-                }
-            }
-            
-            return modeVectors;
-        }
+
 
     }
 }

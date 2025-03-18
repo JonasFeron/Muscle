@@ -18,8 +18,8 @@
 //Description and complete License: see NOTICE file.
 
 using MuscleApp.ViewModel;
-using static MuscleApp.Converters.StructureStateEncoder;
-using static MuscleApp.Converters.StructureStateDecoder;
+using static MuscleApp.Converters.TrussEncoder;
+using static MuscleApp.Converters.TrussDecoder;
 
 namespace MuscleApp.Solvers
 {
@@ -31,8 +31,8 @@ namespace MuscleApp.Solvers
         /// <param name="initialStructure">Current structure state</param>
         /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
         /// <param name="freeLengthVariation">[m] - shape (elements.count,) - Free length increments to apply</param>
-        /// <returns>Updated StructureState with incremented state</returns>
-        public static StructureState? Solve(StructureState initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
+        /// <returns>Updated Truss with incremented state</returns>
+        public static Truss? Solve(Truss initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
         {
             var femResults = MuscleCore.Solvers.LinearDM.Solve(ToCore(initialStructure), loadsIncrement, freeLengthVariation);
 

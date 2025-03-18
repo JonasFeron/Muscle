@@ -10,7 +10,7 @@ using MuscleCore.FEModel;
 namespace MuscleApp.ViewModel
 {
 
-    public class StructureState
+    public class Truss
     {
 
         #region Properties
@@ -100,19 +100,19 @@ namespace MuscleApp.ViewModel
         /// <summary>
         /// Default constructor
         /// </summary>
-        public StructureState()
+        public Truss()
         {
             Init();
         }
 
         /// <summary>
-        /// Creates a StructureState from lists of Elements, Points, and Supports.
+        /// Creates a Truss from lists of Elements, Points, and Supports.
         /// This constructor allows creating a structure without depending on Grasshopper types.
         /// </summary>
         /// <param name="elements">List of Element objects defining the structural elements</param>
         /// <param name="points">List of Point3d objects defining node locations</param>
         /// <param name="supports">List of Support objects defining boundary conditions</param>
-        public StructureState(List<Element> elements, List<Point3d> points, List<Support> supports)
+        public Truss(List<Element> elements, List<Point3d> points, List<Support> supports)
         {
             Init();
 
@@ -134,7 +134,7 @@ namespace MuscleApp.ViewModel
             RegisterSupports(supports);
         }
 
-        public StructureState(StructureState other)
+        public Truss(Truss other)
         {
             warnings = new List<string>();
 
@@ -163,9 +163,9 @@ namespace MuscleApp.ViewModel
 
         }
 
-        public StructureState Copy() //Duplication method calling the copy constructor
+        public Truss Copy() //Duplication method calling the copy constructor
         {
-            return new StructureState(this);
+            return new Truss(this);
         }
 
         #endregion Constructors

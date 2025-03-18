@@ -94,14 +94,14 @@ namespace Muscle.Solvers
 
             // 1) Collect Inputs
             //bool dataHasChanged = true;
-            GH_StructureState gh_struct = new GH_StructureState();
+            GH_Truss gh_struct = new GH_Truss();
             double rTol = -1;
 
 
             if (!DA.GetData(0, ref gh_struct)) { return; }
             if (!DA.GetData(1, ref rTol)) { }
 
-            StructureState structure = gh_struct.Value;
+            Truss structure = gh_struct.Value;
             var svdResult = MuscleApp.Solvers.SVD.Solve(structure, rTol);
 
             // 3) Set outputs

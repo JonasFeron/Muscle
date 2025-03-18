@@ -24,36 +24,24 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Remove="Components\**" />
-    <Compile Remove="Converters\**" />
     <Compile Remove="Dynamics\**" />
     <Compile Remove="GHModel\**" />
     <Compile Remove="PythonLink\**" />
     <Compile Remove="PythonNETComponents\**" />
     <Compile Remove="Resources\**" />
     <Compile Remove="Solvers\**" />
-    <Compile Remove="Util\**" />
-    <Compile Remove="View\**" />
-    <EmbeddedResource Remove="Components\**" />
-    <EmbeddedResource Remove="Converters\**" />
     <EmbeddedResource Remove="Dynamics\**" />
     <EmbeddedResource Remove="GHModel\**" />
     <EmbeddedResource Remove="PythonLink\**" />
     <EmbeddedResource Remove="PythonNETComponents\**" />
     <EmbeddedResource Remove="Resources\**" />
     <EmbeddedResource Remove="Solvers\**" />
-    <EmbeddedResource Remove="Util\**" />
-    <EmbeddedResource Remove="View\**" />
-    <None Remove="Components\**" />
-    <None Remove="Converters\**" />
     <None Remove="Dynamics\**" />
     <None Remove="GHModel\**" />
     <None Remove="PythonLink\**" />
     <None Remove="PythonNETComponents\**" />
     <None Remove="Resources\**" />
     <None Remove="Solvers\**" />
-    <None Remove="Util\**" />
-    <None Remove="View\**" />
   </ItemGroup>
   
   <ItemGroup>

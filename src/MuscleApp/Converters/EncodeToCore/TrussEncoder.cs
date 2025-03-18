@@ -8,25 +8,25 @@ using static MuscleApp.Converters.ElementsEncoder;
 namespace MuscleApp.Converters
 {
     /// <summary>
-    /// Converts StructureState instances to CoreTruss for computational analysis.
+    /// Converts Truss instances to CoreTruss for computational analysis.
     /// </summary>
-    public static class StructureStateEncoder
+    public static class TrussEncoder
     {
         /// <summary>
-        /// Converts a StructureState instance to a CoreTruss instance for computational analysis.
+        /// Converts a Truss instance to a CoreTruss instance for computational analysis.
         /// </summary>
-        /// <param name="structure">StructureState instance to convert</param>
+        /// <param name="structure">Truss instance to convert</param>
         /// <returns>CoreTruss instance containing all data needed for analysis</returns>
-        public static CoreTruss ToCore(StructureState structure)
+        public static CoreTruss ToCore(Truss structure)
         {
             if (structure == null)
-                throw new ArgumentNullException(nameof(structure), "StructureState cannot be null");
+                throw new ArgumentNullException(nameof(structure), "Truss cannot be null");
             
             if (structure.Nodes.Count == 0)
-                throw new ArgumentException("StructureState must have at least one node", nameof(structure));
+                throw new ArgumentException("Truss must have at least one node", nameof(structure));
             
             if (structure.Elements.Count == 0)
-                throw new ArgumentException("StructureState must have at least one element", nameof(structure));
+                throw new ArgumentException("Truss must have at least one element", nameof(structure));
             
             // First convert nodes
             List<Node> nodes = structure.Nodes;

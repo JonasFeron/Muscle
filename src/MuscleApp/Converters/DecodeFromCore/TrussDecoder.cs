@@ -7,20 +7,20 @@ using MuscleCore.FEModel;
 namespace MuscleApp.Converters
 {
     /// <summary>
-    /// Static class for decoding CoreTruss instances to StructureState instances.
+    /// Static class for decoding CoreTruss instances to Truss instances.
     /// </summary>
-    public static class StructureStateDecoder
+    public static class TrussDecoder
     {
         /// <summary>
-        /// Updates a StructureState instance with results from a CoreTruss instance.
+        /// Updates a Truss instance with results from a CoreTruss instance.
         /// </summary>
-        /// <param name="original">StructureState instance to update</param>
+        /// <param name="original">Truss instance to update</param>
         /// <param name="coreTrussResults">CoreTruss instance containing structure results</param>
-        /// <returns>Updated StructureState instance</returns>
-        public static StructureState CopyAndUpdate(StructureState original, CoreTruss coreTrussResults)
+        /// <returns>Updated Truss instance</returns>
+        public static Truss CopyAndUpdate(Truss original, CoreTruss coreTrussResults)
         {
             if (original == null)
-                throw new ArgumentNullException(nameof(original), "StructureState cannot be null");
+                throw new ArgumentNullException(nameof(original), "Truss cannot be null");
                 
             if (coreTrussResults == null)
                 throw new ArgumentNullException(nameof(coreTrussResults), "CoreTruss cannot be null");
@@ -29,7 +29,7 @@ namespace MuscleApp.Converters
                 throw new ArgumentException("CoreTruss must have valid Nodes and Elements", nameof(coreTrussResults));
             
             // Create a copy of the original structure state
-            StructureState updated = original.Copy();
+            Truss updated = original.Copy();
 
             // retrieve the results from the computations stored in coreTrussResults
             CoreNodes nodesResults = coreTrussResults.Nodes;

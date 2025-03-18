@@ -13,7 +13,7 @@ using Rhino.Geometry;
 namespace Muscle.View
 {
 
-    public class GH_StructureState : GH_Goo<StructureState>
+    public class GH_Truss : GH_Goo<Truss>
     {
         // All data used in Grasshopper must implement the IGH_Goo interface. 
         // IGH_Goo defines the bare minimum of methods and properties for any kind of data before it is allowed to play ball
@@ -24,7 +24,7 @@ namespace Muscle.View
 
 
         #region Properties
-        public override StructureState Value // The StructureObj object is accessible from the Value property of the GH_StructureObj
+        public override Truss Value // The StructureObj object is accessible from the Value property of the GH_StructureObj
         {
             get { return base.Value; }
             set
@@ -56,23 +56,23 @@ namespace Muscle.View
 
         #region Constructors
 
-        public GH_StructureState() // default constructor
+        public GH_Truss() // default constructor
         {
-            Value = new StructureState();
+            Value = new Truss();
         }
 
-        public GH_StructureState(StructureState structure)   // constructor with initial parameter called in the AssembleStructureComponent Solveinstance method
+        public GH_Truss(Truss structure)   // constructor with initial parameter called in the AssembleStructureComponent Solveinstance method
         {
             Value = structure;
         }
-        public GH_StructureState(GH_Goo<StructureState> GH_structure)  //Copy constructor
+        public GH_Truss(GH_Goo<Truss> GH_structure)  //Copy constructor
         {
             Value = GH_structure.Value;
         }
 
         public override IGH_Goo Duplicate() //Duplication method calling the copy constructor
         {
-            return new GH_StructureState(this);
+            return new GH_Truss(this);
         }
 
         #endregion Constructors
@@ -82,9 +82,9 @@ namespace Muscle.View
         #region Casting
         public override bool CastFrom(object source)
         {
-            if (source is StructureState)
+            if (source is Truss)
             {
-                StructureState s = source as StructureState;
+                Truss s = source as Truss;
                 Value = s;
             }
 
@@ -94,7 +94,7 @@ namespace Muscle.View
         public override bool CastTo<Q>(ref Q target)
         {
 
-            if (typeof(Q).IsAssignableFrom(typeof(StructureState)))
+            if (typeof(Q).IsAssignableFrom(typeof(Truss)))
             {
                 object structure = Value;
                 target = (Q)structure;

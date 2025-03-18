@@ -107,7 +107,7 @@ namespace Muscle.Components.ConstructFEModel
             List<Support> supports = GH_Decoders.ToSupports(gh_supports);
 
             // 2) Create and solve geometry object 
-            StructureState structure = null;
+            Truss structure = null;
             try
             {
                 structure = new StructureState(elements, points, supports); // A geometry object is created from lines, points and supports. The validity of the inputs are checked when constructing the object.
@@ -123,7 +123,7 @@ namespace Muscle.Components.ConstructFEModel
             }
 
             // 3) Set outputs 
-            DA.SetData(0, new GH_StructureState(structure));
+            DA.SetData(0, new GH_Truss(structure));
 
         }
 
