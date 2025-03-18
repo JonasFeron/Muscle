@@ -49,59 +49,32 @@ namespace Muscle.Converters
         /// Converts a GH_Support to a MuscleApp.ViewModel.Support
         /// </summary>
         /// <param name="ghSupport">The Grasshopper support to convert</param>
-        /// <returns>A MuscleApp.ViewModel.Support instance</returns>
+        /// <returns>A MuscleApp.ViewModel.Support</returns>
         public static Support ToSupport(GH_Support ghSupport)
         {
-            if (ghSupport == null || !ghSupport.IsValid)
-                return null;
-
             return ghSupport.Value;
         }
 
         /// <summary>
-        /// Converts a collection of GH_Support objects to a list of MuscleApp.ViewModel.Support objects
+        /// Converts a list of GH_Support objects to a list of MuscleApp.ViewModel.Support objects
         /// </summary>
-        /// <param name="ghSupports">The collection of Grasshopper supports to convert</param>
-        /// <returns>A list of MuscleApp.ViewModel.Support instances</returns>
-        public static List<Support> ToSupports(IEnumerable<GH_Support> ghSupports)
+        /// <param name="ghSupports">The list of Grasshopper supports to convert</param>
+        /// <returns>A list of MuscleApp.ViewModel.Support objects</returns>
+        public static List<Support> ToSupportList(List<GH_Support> ghSupports)
         {
-            if (ghSupports == null)
-                return new List<Support>();
-
-            return ghSupports
-                .Where(s => s != null && s.IsValid)
-                .Select(s => s.Value)
-                .ToList();
+            return ghSupports.Select(s => s.Value).ToList();
         }
 
         /// <summary>
         /// Extracts Support objects from a Grasshopper data tree
         /// </summary>
-        /// <param name="ghSupportsTree">Grasshopper data tree containing support objects</param>
-        /// <returns>A list of MuscleApp.ViewModel.Support instances</returns>
-        public static List<Support> ToSupports(GH_Structure<IGH_Goo> ghSupportsTree)
+        /// <param name="tree">The Grasshopper data tree containing supports</param>
+        /// <returns>A list of MuscleApp.ViewModel.Support objects</returns>
+        public static List<Support> ToSupportList(GH_Structure<IGH_Goo> tree)
         {
-            if (ghSupportsTree == null)
-                return new List<Support>();
-
-            List<Support> supports = new List<Support>();
-            
-            foreach (var path in ghSupportsTree.Paths)
-            {
-                var branch = ghSupportsTree[path];
-                foreach (var goo in branch)
-                {
-                    if (goo is GH_Support ghSupport && ghSupport.IsValid)
-                    {
-                        supports.Add(ghSupport.Value);
-                    }
-                }
-            }
-            
-            return supports;
+            return FromTree<Support, GH_Support>(tree);
         }
-
-        #endregion
+        #endregion Support Conversion
 
         #region Element Conversion
 
@@ -112,9 +85,6 @@ namespace Muscle.Converters
         /// <returns>A MuscleApp.ViewModel.Element instance</returns>
         public static Element ToElement(GH_Element ghElement)
         {
-            if (ghElement == null || !ghElement.IsValid)
-                return null;
-
             return ghElement.Value;
         }
 
@@ -123,45 +93,22 @@ namespace Muscle.Converters
         /// </summary>
         /// <param name="ghElements">The collection of Grasshopper elements to convert</param>
         /// <returns>A list of MuscleApp.ViewModel.Element instances</returns>
-        public static List<Element> ToElements(IEnumerable<GH_Element> ghElements)
+        public static List<Element> ToElementList(List<GH_Element> ghElements)
         {
-            if (ghElements == null)
-                return new List<Element>();
-
-            return ghElements
-                .Where(e => e != null && e.IsValid)
-                .Select(e => e.Value)
-                .ToList();
+            return ghElements.Select(e => e.Value).ToList();
         }
 
         /// <summary>
         /// Extracts Element objects from a Grasshopper data tree
         /// </summary>
-        /// <param name="ghElementsTree">Grasshopper data tree containing element objects</param>
-        /// <returns>A list of MuscleApp.ViewModel.Element instances</returns>
-        public static List<Element> ToElements(GH_Structure<IGH_Goo> ghElementsTree)
+        /// <param name="tree">The Grasshopper data tree containing elements</param>
+        /// <returns>A list of MuscleApp.ViewModel.Element objects</returns>
+        public static List<Element> ToElementList(GH_Structure<IGH_Goo> tree)
         {
-            if (ghElementsTree == null)
-                return new List<Element>();
-
-            List<Element> elements = new List<Element>();
-            
-            foreach (var path in ghElementsTree.Paths)
-            {
-                var branch = ghElementsTree[path];
-                foreach (var goo in branch)
-                {
-                    if (goo is GH_Element ghElement && ghElement.IsValid)
-                    {
-                        elements.Add(ghElement.Value);
-                    }
-                }
-            }
-            
-            return elements;
+            return FromTree<Element, GH_Element>(tree);
         }
 
-        #endregion
+        #endregion Element Conversion
 
         #region Point Conversion
 
@@ -178,49 +125,124 @@ namespace Muscle.Converters
             return ghPoint.Value;
         }
 
-        /// <summary>
-        /// Converts a collection of GH_Point objects to a list of Point3d objects
-        /// </summary>
-        /// <param name="ghPoints">The collection of Grasshopper points to convert</param>
-        /// <returns>A list of Point3d instances</returns>
-        public static List<Point3d> ToPoint3ds(IEnumerable<GH_Point> ghPoints)
-        {
-            if (ghPoints == null)
-                return new List<Point3d>();
-
-            return ghPoints
-                .Where(p => p != null && p.IsValid)
-                .Select(p => p.Value)
-                .ToList();
-        }
 
         /// <summary>
         /// Extracts Point3d objects from a Grasshopper data tree
         /// </summary>
-        /// <param name="ghPointsTree">Grasshopper data tree containing point objects</param>
+        /// <param name="tree">The Grasshopper data tree containing points</param>
         /// <returns>A list of Point3d instances</returns>
-        public static List<Point3d> ToPoint3ds(GH_Structure<GH_Point> ghPointsTree)
+        public static List<Point3d> ToPoint3ds(GH_Structure<GH_Point> tree)
         {
-            if (ghPointsTree == null)
-                return new List<Point3d>();
+            return FromTree<Point3d, GH_Point>(tree);
+        }
 
-            List<Point3d> points = new List<Point3d>();
+        #endregion Point Conversion
+
+        #region PointLoad Conversion
+        /// <summary>
+        /// Converts a GH_PointLoad to a MuscleApp.ViewModel.PointLoad
+        /// </summary>
+        /// <param name="ghPointLoad">The Grasshopper point load to convert</param>
+        /// <returns>A MuscleApp.ViewModel.PointLoad</returns>
+        public static PointLoad ToPointLoad(GH_PointLoad ghPointLoad)
+        {
+            return ghPointLoad.Value;
+        }
+
+        /// <summary>
+        /// Converts a list of GH_PointLoad objects to a list of MuscleApp.ViewModel.PointLoad objects
+        /// </summary>
+        /// <param name="ghPointLoads">The list of Grasshopper point loads to convert</param>
+        /// <returns>A list of MuscleApp.ViewModel.PointLoad objects</returns>
+        public static List<PointLoad> ToPointLoadList(List<GH_PointLoad> ghPointLoads)
+        {
+            return ghPointLoads.Select(pl => pl.Value).ToList();
+        }
+
+        /// <summary>
+        /// Extracts PointLoad objects from a Grasshopper data tree
+        /// </summary>
+        /// <param name="tree">The Grasshopper data tree containing point loads</param>
+        /// <returns>A list of MuscleApp.ViewModel.PointLoad objects</returns>
+        public static List<PointLoad> ToPointLoadList(GH_Structure<IGH_Goo> tree)
+        {
+            return FromTree<PointLoad, GH_PointLoad>(tree);
+        }
+        #endregion PointLoad Conversion
+
+        #region Prestress Conversion
+        /// <summary>
+        /// Converts a GH_Prestress to a MuscleApp.ViewModel.Prestress
+        /// </summary>
+        /// <param name="ghPrestress">The Grasshopper prestress to convert</param>
+        /// <returns>A MuscleApp.ViewModel.Prestress</returns>
+        public static Prestress ToPrestress(GH_Prestress ghPrestress)
+        {
+            return ghPrestress.Value;
+        }
+
+        /// <summary>
+        /// Converts a list of GH_Prestress objects to a list of MuscleApp.ViewModel.Prestress objects
+        /// </summary>
+        /// <param name="ghPrestresses">The list of Grasshopper prestresses to convert</param>
+        /// <returns>A list of MuscleApp.ViewModel.Prestress objects</returns>
+        public static List<Prestress> ToPrestressList(List<GH_Prestress> ghPrestresses)
+        {
+            return ghPrestresses.Select(ps => ps.Value).ToList();
+        }
+
+        /// <summary>
+        /// Extracts Prestress objects from a Grasshopper data tree
+        /// </summary>
+        /// <param name="tree">The Grasshopper data tree containing prestresses</param>
+        /// <returns>A list of MuscleApp.ViewModel.Prestress objects</returns>
+        public static List<Prestress> ToPrestressList(GH_Structure<IGH_Goo> tree)
+        {
+            return FromTree<Prestress, GH_Prestress>(tree);
+        }
+        #endregion Prestress Conversion
+
+        #region Generic Conversion Methods
+        /// <summary>
+        /// Generic method to extract objects of type T from a Grasshopper data tree containing objects of type TGH
+        /// </summary>
+        /// <typeparam name="T">The target type (e.g., PointLoad, Prestress)</typeparam>
+        /// <typeparam name="GH_T">The Grasshopper wrapper type (e.g., GH_PointLoad, GH_Prestress)</typeparam>
+        /// <param name="tree">The Grasshopper data tree</param>
+        /// <returns>A list of objects of type T</returns>
+        public static List<T> FromTree<T, GH_T>(GH_Structure<IGH_Goo> tree) where GH_T : GH_Goo<T>
+        {
+            List<T> result = new List<T>();
             
-            foreach (var path in ghPointsTree.Paths)
+            foreach (var branch in tree.Branches)
             {
-                var branch = ghPointsTree[path];
-                foreach (var ghPoint in branch)
+                result.AddRange(FromBranch<T, GH_T>(branch));
+            }
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Generic method to extract objects of type T from a Grasshopper branch containing objects of type TGH
+        /// </summary>
+        /// <typeparam name="T">The target type (e.g., PointLoad, Prestress)</typeparam>
+        /// <typeparam name="GH_T">The Grasshopper wrapper type (e.g., GH_PointLoad, GH_Prestress)</typeparam>
+        /// <param name="branch">The Grasshopper branch</param>
+        /// <returns>A list of objects of type T</returns>
+        public static List<T> FromBranch<T, GH_T>(List<IGH_Goo> branch) where GH_T : GH_Goo<T>
+        {
+            List<T> result = new List<T>();
+            
+            foreach (var item in branch)
+            {
+                if (item is GH_T ghItem)
                 {
-                    if (ghPoint != null && ghPoint.IsValid)
-                    {
-                        points.Add(ghPoint.Value);
-                    }
+                    result.Add(ghItem.Value);
                 }
             }
             
-            return points;
+            return result;
         }
-
-        #endregion
+        #endregion Generic Conversion Methods
     }
 }

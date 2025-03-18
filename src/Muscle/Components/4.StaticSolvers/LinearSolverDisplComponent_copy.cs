@@ -54,23 +54,28 @@ using Muscle.FEModel;
 using Rhino.Geometry;
 using Muscle.ViewModel;
 using Muscle.GHModel;
+using MuscleApp.ViewModel;
+using Muscle.View;
+using Muscle.Converters;
+using MuscleApp.Solvers;
 
 namespace Muscle.Solvers.Components
 {
-    public class LinearSolverDisplComponent : GH_Component
+    public class LinearSolverDisplComponent_copy : GH_Component
     {
-        public LinearSolverDisplComponent()
-          : base("Linear Solver Displacement", "LinSolverDispl",
-              "Solve a linear problem with displacement method",
-              "Muscle", "Solvers")
+        /// <summary>
+        /// Initializes a new instance of the LinearSolverDisplComponent class.
+        /// </summary>
+        public LinearSolverDisplComponent_copy()
+          : base("Linear Displacement Method", "LinearDM",
+              "Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).",
+              "Muscle", "4.StaticSolvers")
         {
         }
 
-        public override Guid ComponentGuid
-        {
-            get { return new Guid("YOUR-GUID-HERE"); }
-        }
-
+        /// <summary>
+        /// Registers all the input parameters for this component.
+        /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may contain previous results (forces and displacements).", GH_ParamAccess.item);
@@ -85,10 +90,14 @@ namespace Muscle.Solvers.Components
             pManager.AddGenericParameter("Structure", "struct", "A structure containing the results (forces and displacements).", GH_ParamAccess.item);
         }
 
+        /// <summary>
+        /// This is the method that actually does the work.
+        /// </summary>
+        /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = "MainLinearSolveStructure";
-            if (!AccessToAll.hasPythonStarted)
+            // Check if Python.NET is initialized
+            if (!Python.Runtime.PythonEngine.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
                 return;
@@ -101,104 +110,71 @@ namespace Muscle.Solvers.Components
             }
 
             // 1) Collect Data
-            StructureObj structure = new StructureObj();
-            GH_Structure<IGH_Goo> gh_loads_ext = new GH_Structure<IGH_Goo>();
-            GH_Structure<IGH_Goo> gh_loads_prestress = new GH_Structure<IGH_Goo>();
+            GH_Truss gh_truss = new GH_Truss();
+            GH_Structure<IGH_Goo> gh_loads = new GH_Structure<IGH_Goo>();
+            GH_Structure<IGH_Goo> gh_prestress = new GH_Structure<IGH_Goo>();
 
-            if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetDataTree(1, out gh_loads_ext)) { }
-            if (!DA.GetDataTree(2, out gh_loads_prestress)) { }
+            if (!DA.GetData(0, ref gh_truss)) { return; }
+            if (!DA.GetDataTree(1, out gh_loads)) { }
+            if (!DA.GetDataTree(2, out gh_prestress)) { }
 
-            // 2) Transform data before solving in python
-            StructureObj new_structure = structure.Duplicate();
+            // 2) Transform data before solving 
+            Truss truss = gh_truss.Value;
+            List<PointLoad> pointLoads = GH_Decoders.ToPointLoadList(gh_loads);
+            List<Prestress> prestress = GH_Decoders.ToPrestressList(gh_prestress);
 
-            bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData());
-            bool success2 = RegisterPrestressLoads(new_structure, gh_loads_prestress.FlattenData());
-
-            if (!success1 && !success2)
+            // Check if we have any loads or prestress to apply
+            if (pointLoads.Count == 0 && prestress.Count == 0)
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to collect load data");
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No loads or prestress provided. The structure will not change.");
+                DA.SetData(0, gh_truss);
                 return;
             }
 
-            // 3) Convert to FEM model
-            var femNodes = FEM_PythonConverter.ConvertToPythonFEMNodes(new_structure);
-            var femElements = FEM_PythonConverter.ConvertToPythonFEMElements(new_structure);
+            // 3) Solve using the LinearDM solver
+            Truss? result = LinearDM.Solve(truss, pointLoads, prestress);
 
-            // 4) Solve in Python using Python.NET
-            var m_threadState = PythonEngine.BeginAllowThreads();
-
-            using (Py.GIL())
+            // Check if the solution was successful
+            if (result == null)
             {
-                try
-                {
-                    dynamic script = Py.Import(pythonScript);
-                    dynamic mainFunction = script.core;
-                    
-                    // Convert C# objects to Python objects
-                    using (PyObject pyNodes = femNodes.ToPython())
-                    using (PyObject pyElements = femElements.ToPython())
-                    {
-                        // Call Python function with direct object passing
-                        dynamic result = mainFunction(pyNodes, pyElements);
-                        
-                        // Update structure with results
-                        FEM_PythonConverter.UpdateStructureFromPythonResults(new_structure, result);
-                    }
-                }
-                catch (PythonException ex)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-                    return;
-                }
-                catch (Exception e)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-                    return;
-                }
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to solve the linear displacement method.");
+                return;
             }
-            PythonEngine.EndAllowThreads(m_threadState);
+
+            // 4) Check for warnings from the solver
+            if (result.warnings != null && result.warnings.Count > 0)
+            {
+                foreach (string warning in result.warnings)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
+                }
+                result.warnings.Clear();
+            }
 
             // 5) Set output
-            GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
-            DA.SetData(0, gh_structure);
+            GH_Truss gh_result = new GH_Truss(result);
+            DA.SetData(0, gh_result);
         }
 
-        private bool RegisterPointLoads(StructureObj structure, List<IGH_Goo> loads)
+        /// <summary>
+        /// Provides an Icon for the component.
+        /// </summary>
+        protected override System.Drawing.Bitmap Icon
         {
-            if (loads == null || loads.Count == 0) return false;
-
-            for (int i = 0; i < structure.StructuralNodes.Count; i++)
+            get
             {
-                if (i < loads.Count)
-                {
-                    GH_Vector load;
-                    if (loads[i].CastTo<GH_Vector>(out load))
-                    {
-                        Vector3d v = load.Value;
-                        structure.LoadsToApply[i] = new Point3d(v.X * 1000, v.Y * 1000, v.Z * 1000);
-                    }
-                }
+                // You can add image files to your project resources and access them like this:
+                //return Resources.IconForThisComponent;
+                return null;
             }
-            return true;
         }
 
-        private bool RegisterPrestressLoads(StructureObj structure, List<IGH_Goo> lengthenings)
+        /// <summary>
+        /// Gets the unique ID for this component. Do not change this ID after release.
+        /// </summary>
+        public override Guid ComponentGuid
         {
-            if (lengthenings == null || lengthenings.Count == 0) return false;
-
-            for (int i = 0; i < structure.StructuralElements.Count; i++)
-            {
-                if (i < lengthenings.Count)
-                {
-                    GH_Number lengthening;
-                    if (lengthenings[i].CastTo<GH_Number>(out lengthening))
-                    {
-                        structure.LengtheningsToApply[i] = lengthening.Value;
-                    }
-                }
-            }
-            return true;
+            get { return new Guid("2ec0d860-6029-4346-8925-49f2c69e132c"); }
         }
     }
 }

@@ -18,11 +18,8 @@
 //Description and complete License: see NOTICE file.
 
 using MuscleApp.ViewModel;
-using MuscleCore.FEModel;
 using MuscleApp.Converters;
-using System.Collections.Generic;
-using System.Linq;
-using MuscleCore.Solvers;
+
 
 namespace MuscleApp.Solvers
 {
@@ -32,14 +29,17 @@ namespace MuscleApp.Solvers
         /// Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).
         /// </summary>
         /// <param name="truss">Current structure state</param>
-        /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
+        /// <param name="pointLoads">Collection of PointLoad instances defining external loads to apply</param>
         /// <param name="prestress">Collection of Prestress instances defining free length variations to apply</param>
         /// <returns>Updated Truss with incremented state</returns>
-        public static Truss? Solve(Truss truss, double[] loadsIncrement, IEnumerable<Prestress> prestress)
+        public static Truss? Solve(Truss truss, IEnumerable<PointLoad> pointLoads, IEnumerable<Prestress> prestress)
         {
             // Create a free length variation array by adding up all prestress for each element.
             double[] freeLengthVariation = PrestressEncoder.AddsUpAllPrestress(prestress, truss.Elements.Count);
-            
+
+            // Create a load increment array by adding up all point loads for each node.
+            double[] loadsIncrement = PointLoadEncoder.AddsUpAllPointLoads(pointLoads, truss);
+
             // Call the core solver 
             var coreResult = MuscleCore.Solvers.LinearDM.Solve(TrussEncoder.ToCore(truss), loadsIncrement, freeLengthVariation);
             
