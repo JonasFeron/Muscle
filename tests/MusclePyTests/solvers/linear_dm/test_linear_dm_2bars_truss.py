@@ -4,7 +4,6 @@ from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
 from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.femodel.pynodes import PyNodes
 from MusclePy.femodel.pyelements import PyElements
-from MusclePy.femodel.prestress_scenario import PrestressScenario
 
 
 class TestLinearDM_2BarsTruss(unittest.TestCase):
@@ -54,14 +53,14 @@ class TestLinearDM_2BarsTruss(unittest.TestCase):
         loads = np.zeros(9)  # 3 nodes * 3 DOFs
         loads[5] = -100000.0  # Node 1, Z direction
         
-        # No prestress
-        prestress_increment = PrestressScenario(self.structure.elements) #empty prestress increment
+        # No prestress - create an array of zeros for free length variation
+        free_length_variation = np.zeros(self.structure.elements.count)
         
         # Solve
         result = main_linear_displacement_method(
             self.structure,
             loads,
-            prestress_increment
+            free_length_variation
         )
         
         # Check displacements

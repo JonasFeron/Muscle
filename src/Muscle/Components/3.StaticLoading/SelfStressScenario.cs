@@ -163,7 +163,7 @@ namespace Muscle.Components.StaticLoading
 
                 ImposedLenghtenings DL = new ImposedLenghtenings(e);
                 DL.Value = DL.Tension2Lengthening(t);
-                e.Tension += t; //[N] = DL.AsTension
+                e.Tension += t; //[N] = DL.EquivalentTension
                 e.LFree += DL.Value;
             }
             for (int i = 0; i < n; i++) //foreach node

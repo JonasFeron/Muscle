@@ -7,7 +7,7 @@ import numpy as np
 
 
 def main_linear_displacement_method(structure: PyTruss, loads_increment: np.ndarray, 
-                                       prestress_increment: PrestressScenario) -> PyTruss:
+                                    free_length_variation: np.ndarray) -> PyTruss:
     """Solve the linear displacement method for a structure with incremental loads and prestress (=free length changes).
     
     This function:
@@ -17,18 +17,21 @@ def main_linear_displacement_method(structure: PyTruss, loads_increment: np.ndar
     Args:
         structure: Current structure state
         loads_increment: [N] - shape (3*nodes.count,) - External load increments to apply
-        prestress_increment: [N] - shape (elements.count,) - Prestress increments to apply
+        free_length_variation: [m] - shape (elements.count,) - Free length variations to apply
         
     Returns:
         Updated PyTruss with incremented state
     """
     #check input
     assert isinstance(structure, PyTruss), "structure must be an instance of PyTruss"
-    assert isinstance(prestress_increment, PrestressScenario), "prestress_increment must be an instance of PrestressScenario"
     loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
+    free_length_variation = structure.elements._check_and_reshape_array(free_length_variation, "free_length_variation")
  
+    # Create a PrestressScenario from the free length variation
+    prestress_increment = PrestressScenario(structure.elements, free_length_variation)
+    
     # modify the free length of the elements through mechanical devices
-    initial = structure.copy_and_add(free_length_variation=prestress_increment.free_length_variation)
+    initial = structure.copy_and_add(free_length_variation=free_length_variation)
 
     # Get equivalent prestress loads and tension from free length variations
     eq_prestress = prestress_increment.equivalent_tension
@@ -240,5 +243,3 @@ def _post_process(displacements_increment: np.ndarray,
         tension_increment[i] = -(float(f_local[0])*cx + float(f_local[1])*cy + float(f_local[2])*cz) #axial forces
             
     return (tension_increment, resisting_forces_increment)
-
-

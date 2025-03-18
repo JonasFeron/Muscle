@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Muscle.ViewModel;
+using Muscle.View;
+using MuscleApp.ViewModel;
+
 
 namespace Muscle.Components.StaticLoading
 {
-    public class ImposedLenghteningsComponent : GH_Component
+    public class PrestressScenarioComponent : GH_Component
     {
 
-        public ImposedLenghteningsComponent()
-          : base("Create Imposed Lengthenings to prestress the structure", "DL",
-              "Set the lengthenings to apply on the elements free lengths.",
+        public PrestressScenarioComponent()
+          : base("Prestress", "Prestress",
+              "Set the free lengths variation to apply on the elements through mechanical devices.",
               "Muscles", "Loads")
         {
         }
@@ -44,31 +45,33 @@ namespace Muscle.Components.StaticLoading
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Element", "E", "Element (General, Bar, Strut, or Cable) subjected to a prestress load.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Lengthening", "DL (m)", "Length variation in m (+ lengthening, - shortening) to apply on the element free length.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Free length variation", "DL0 (m)", "Free length variation in m (+ lengthening, - shortening) to apply on the element.", GH_ParamAccess.item);
 
         }
 
 
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Lengthening", "DL (m)", "Length variation in m (+ lengthening, - shortening) to apply on the element free length.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Prestress", "P", "Prestress Scenario containing the free length variations to apply on the specified elements.", GH_ParamAccess.item);
         }
 
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             //1) Collect Data
-            Element e = new Element();
+            GH_Element gh_e = new GH_Element();
             double value = 0.0;
 
-            if (!DA.GetData(0, ref e)) { return; }
+            if (!DA.GetData(0, ref gh_e)) { return; }
             if (!DA.GetData(1, ref value)) { return; }
 
-            //2) Transform datas into ImposedLengthenings object
-            ImposedLenghtenings DL = new ImposedLenghtenings(e, value);
+            Element e = gh_e.Value;
+
+            //2) Transform datas into Prestress object
+            Prestress P = new Prestress(e, value);
 
             //3) output datas
-            DA.SetData(0, new GH_ImposedLengthenings(DL));
+            DA.SetData(0, new GH_Prestress(P));
 
         }
     }

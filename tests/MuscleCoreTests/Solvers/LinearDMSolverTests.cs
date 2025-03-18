@@ -60,8 +60,7 @@ namespace MuscleCoreTests.Solvers
                 endNodes: new int[,] { { 0, 1 }, { 1, 2 } },  // Element 0: 0->1, Element 1: 1->2
                 area: new double[] { 2500.0, 2500.0 },   // 2500 mm² area
                 youngs: new double[,] { { 10000.0, 10000.0 }, { 10000.0, 10000.0 } },  // 10000 MPa Young's modulus
-                freeLength: new double[] { 0.0, 0.0 },  // No initial prestress
-                tension: new double[] { 0.0, 0.0 }  // No initial tension
+                freeLength: new double[] { Math.Sqrt(2), Math.Sqrt(2) }  // Initial free length matching the initial geometry
             );
 
             // Create structure

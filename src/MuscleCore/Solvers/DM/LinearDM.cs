@@ -25,31 +25,32 @@ namespace MuscleCore.Solvers
     public static class LinearDM
     {
         /// <summary>
-        /// Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).
+        /// Solve the linear displacement method for a structure with incremental loads and prestress (free length variation).
         /// </summary>
-        /// <param name="initialStructure">Current structure state</param>
+        /// <param name="coreInitial">Current structure state</param>
         /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
-        /// <param name="freeLengthVariation">[m] - shape (elements.count,) - Free length increments to apply</param>
+        /// <param name="freeLengthVariation"> [m] - shape (elements.count,) - free length variation to apply </param>
         /// <returns>Updated CoreTruss with incremented state</returns>
-        public static CoreTruss? Solve(CoreTruss initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
+        public static CoreTruss? Solve(CoreTruss coreInitial, double[] loadsIncrement, double[] freeLengthVariation)
         {
             string pythonPackage = "MusclePy"; 
-            CoreTruss? femResults = null;
+            CoreTruss? coreResult = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
             using (Py.GIL())
             {
                 try
                 {
-                    PyObject pyInitialStructure = initialStructure.ToPython();
+                    PyObject pyInitial = coreInitial.ToPython();
+
                     dynamic musclepy = Py.Import(pythonPackage);
                     dynamic solve = musclepy.main_linear_displacement_method;
-                    dynamic pyFemResults = solve(
-                        pyInitialStructure,
+                    dynamic pyResult = solve(
+                        pyInitial,
                         loadsIncrement,
                         freeLengthVariation
                     );
-                    femResults = pyFemResults.As<CoreTruss>();
+                    coreResult = pyResult.As<CoreTruss>();
                 }
                 catch (Exception e)
                 {
@@ -58,7 +59,7 @@ namespace MuscleCore.Solvers
             }
             PythonEngine.EndAllowThreads(m_threadState);
 
-            return femResults;
+            return coreResult;
         }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel.Types;
@@ -40,7 +40,7 @@ namespace Muscle.Converters
             return array.Select(n => new GH_Number(n)).ToList();
         }
         #endregion Number Conversion
-        
+
         #region Vector3d Conversion
         public static GH_Structure<GH_Vector> ToTree(Vector3d[,] array)
         {
@@ -66,7 +66,7 @@ namespace Muscle.Converters
             return array.Select(n => new GH_Vector(n)).ToList();
         }
         #endregion Vector3d Conversion
-        
+
         #region Point3d Conversion
         public static GH_Structure<GH_Point> ToTree(Point3d[,] array)
         {
@@ -95,3 +95,4 @@ namespace Muscle.Converters
         #endregion Point3d Conversion
     }
 }
+

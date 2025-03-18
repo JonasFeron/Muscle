@@ -51,8 +51,11 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         # Create structure
         self.structure = PyTruss(self.nodes, self.elements)
 
-        # Create prestress increment
-        self.prestress_increment = PrestressScenario(self.elements, np.array([-0.007984, 0.0, 0.0]))
+        # Create free length variation array
+        self.free_length_variation = np.array([-0.007984, 0.0, 0.0])
+        
+        # Create prestress increment for test verification
+        self.prestress_increment = PrestressScenario(self.elements, self.free_length_variation)
 
         # No external loads
         self.loads_increment = np.zeros(12)  # 4 nodes * 3 DOFs
@@ -101,11 +104,11 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
         # L = 4.0 -0.007984  m (free length of cables 1 and 2)
         # -> Expected force ≈ 7036.37 N in both cables
 
-        # Solve
+        # Solve using free_length_variation directly
         result = main_linear_displacement_method(
             self.structure,
             self.loads_increment,
-            self.prestress_increment
+            self.free_length_variation
         )
         
         # Check displacements
@@ -133,12 +136,14 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
 
         loads = np.zeros((4,3))
         loads[1,2] = 0.1  # 0.1N upward at node 1
-        prestress_increment = PrestressScenario(self.structure.elements, np.zeros(3))
+        
+        # No prestress - create an array of zeros for free length variation
+        free_length_variation = np.zeros(self.structure.elements.count)
         
         result = main_linear_displacement_method(
             self.structure,
             loads,
-            prestress_increment
+            free_length_variation
         )
         
         #  in step 1: Verify upward movement, shortening in cable 3, and 0 stiffness
@@ -148,9 +153,6 @@ class TestLinearDM_3PrestressedCables(unittest.TestCase):
 
         stiffness = 1/result.elements.flexibility[2]
         self.assertAlmostEqual(result.elements.young[2], 0, places=5) #the stiffness in compression
-
-        #a new application of an upward load will lead to 0 compression force
-        
 
 
 if __name__ == '__main__':

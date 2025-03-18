@@ -1,16 +1,16 @@
 ﻿using Grasshopper.Kernel.Types;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 
 namespace Muscle.View
 {
-    class GH_ImposedLengthenings : GH_Goo<ImposedLenghtenings>
+    class GH_Prestress : GH_Goo<Prestress>
     {
         #region Properties
 
 
         //public bool IsPreviewCapable { get { return true; } } //to implement 
 
-        public override ImposedLenghtenings Value { set; get; }
+        public override Prestress Value { set; get; }
         public override bool IsValid { get { return Value.IsValid; } }
 
         public override string TypeDescription { get { return "Initial force in the element considering that all nodes are fixed in space."; } }
@@ -23,23 +23,23 @@ namespace Muscle.View
 
         #region Constructors
 
-        public GH_ImposedLengthenings() : base()
+        public GH_Prestress() : base()
         {
-            Value = new ImposedLenghtenings();
+            Value = new Prestress();
         }
 
-        public GH_ImposedLengthenings(ImposedLenghtenings prestress) : base(prestress)
+        public GH_Prestress(Prestress prestress) : base(prestress)
         {
             Value = prestress;
         }
 
-        public GH_ImposedLengthenings(GH_Goo<ImposedLenghtenings> gh_prestress)
+        public GH_Prestress(GH_Goo<Prestress> gh_prestress)
         {
             Value = gh_prestress.Value.Duplicate();
         }
         public override IGH_Goo Duplicate()
         {
-            return new GH_ImposedLengthenings(this);
+            return new GH_Prestress(this);
         }
 
         #endregion Constructors
@@ -63,7 +63,7 @@ namespace Muscle.View
 
         public override bool CastTo<Q>(ref Q target)
         {
-            if (typeof(Q).IsAssignableFrom(typeof(ImposedLenghtenings)))
+            if (typeof(Q).IsAssignableFrom(typeof(Prestress)))
             {
                 object initialforce = Value;
                 target = (Q)initialforce;

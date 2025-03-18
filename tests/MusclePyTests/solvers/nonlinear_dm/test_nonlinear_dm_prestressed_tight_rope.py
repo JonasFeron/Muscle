@@ -54,11 +54,10 @@ class TestNonlinearDM_PrestressedTightRope(unittest.TestCase):
         """
         # Stage 1: Apply prestress through free length changes
         free_length_variation = np.array([-3.984e-3, -3.984e-3]) 
-        prestress_increment = PrestressScenario(self.structure.elements, free_length_variation)
         prestressed_structure = main_linear_displacement_method(
             self.structure,
             np.zeros(9),  # No external loads
-            prestress_increment
+            free_length_variation
         )
         # Check prestress forces
         expected_prestress = np.array([20000.0, 20000.0])  # N

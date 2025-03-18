@@ -18,8 +18,11 @@
 //Description and complete License: see NOTICE file.
 
 using MuscleApp.ViewModel;
-using static MuscleApp.Converters.TrussEncoder;
-using static MuscleApp.Converters.TrussDecoder;
+using MuscleCore.FEModel;
+using MuscleApp.Converters;
+using System.Collections.Generic;
+using System.Linq;
+using MuscleCore.Solvers;
 
 namespace MuscleApp.Solvers
 {
@@ -28,17 +31,25 @@ namespace MuscleApp.Solvers
         /// <summary>
         /// Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).
         /// </summary>
-        /// <param name="initialStructure">Current structure state</param>
+        /// <param name="truss">Current structure state</param>
         /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
-        /// <param name="freeLengthVariation">[m] - shape (elements.count,) - Free length increments to apply</param>
+        /// <param name="prestress">Collection of Prestress instances defining free length variations to apply</param>
         /// <returns>Updated Truss with incremented state</returns>
-        public static Truss? Solve(Truss initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
+        public static Truss? Solve(Truss truss, double[] loadsIncrement, IEnumerable<Prestress> prestress)
         {
-            var femResults = MuscleCore.Solvers.LinearDM.Solve(ToCore(initialStructure), loadsIncrement, freeLengthVariation);
-
-            var updatedStructure = CopyAndUpdate(initialStructure, femResults);
-
-            return updatedStructure;
+            // Create a free length variation array by adding up all prestress for each element.
+            double[] freeLengthVariation = PrestressEncoder.AddsUpAllPrestress(prestress, truss.Elements.Count);
+            
+            // Call the core solver 
+            var coreResult = MuscleCore.Solvers.LinearDM.Solve(TrussEncoder.ToCore(truss), loadsIncrement, freeLengthVariation);
+            
+            // Update the structure with the results
+            if (coreResult == null)
+                return null;
+                
+            var updatedTruss = TrussDecoder.CopyAndUpdate(truss, coreResult);
+            
+            return updatedTruss;
         }
     }
 }
