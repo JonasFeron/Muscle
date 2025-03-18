@@ -31,9 +31,9 @@ namespace MuscleApp.Solvers
         /// <param name="initialStructure">Current structure state</param>
         /// <param name="rtol">Tolerance for considering singular values as zero, relative to the highest singular value</param>
         /// <returns>SVDResults object containing the SVD results</returns>
-        public static SVDResults? Solve(StructureState initialStructure, double rtol)
+        public static CoreResultsSVD? Solve(StructureState initialStructure, double rtol)
         {
-            return MuscleCore.Solvers.SVD.Solve(ToFEM(initialStructure), rtol);
+            return MuscleCore.Solvers.SVD.Solve(ToCore(initialStructure), rtol);
         }
     }
 }

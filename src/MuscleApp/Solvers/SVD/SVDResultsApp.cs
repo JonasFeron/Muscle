@@ -15,7 +15,7 @@ namespace MuscleApp.Solvers
         /// <summary>
         /// The underlying core SVD results
         /// </summary>
-        private readonly SVDResults _coreResults;
+        private readonly CoreResultsSVD _coreResults;
 
         /// <summary>
         /// Rank of equilibrium matrix
@@ -32,17 +32,6 @@ namespace MuscleApp.Solvers
         /// </summary>
         public int m => _coreResults.m;
 
-        /// <summary>
-        /// R extensional modes (transposed): loads which can be equilibrated in the current structure OR extensional displacements
-        /// (which elongate the elements) as row vectors
-        /// </summary>
-        public double[,] Ur_T => _coreResults.Ur_T;
-
-        /// <summary>
-        /// M inextensional modes (transposed): loads which can't be equilibrated in the current structure OR inextensional displacements 
-        /// (mechanisms) as row vectors
-        /// </summary>
-        public double[,] Um_T => _coreResults.Um_T;
 
         /// <summary>
         /// R singular values of the equilibrium matrix
@@ -80,7 +69,7 @@ namespace MuscleApp.Solvers
         /// </summary>
         public SVDResultsApp()
         {
-            _coreResults = new SVDResults();
+            _coreResults = new CoreResultsSVD();
             Ur_T = new Vector3d[0, 0];
             Um_T = new Vector3d[0, 0];
         }
@@ -89,7 +78,7 @@ namespace MuscleApp.Solvers
         /// Initialize a SVDResultsApp object that stores the results of the Singular Value Decomposition
         /// </summary>
         /// <param name="coreResults">Core SVDResults object</param>
-        public SVDResultsApp(SVDResults coreResults)
+        public SVDResultsApp(CoreResultsSVD coreResults)
         {
             _coreResults = coreResults ?? throw new ArgumentNullException(nameof(coreResults));
             

@@ -6,13 +6,13 @@ namespace MuscleApp.Converters
     public static class NodesEncoder
     {
         /// <summary>
-        /// Converts a collection of Node instances into an FEM_Nodes instance.
-        /// This function initializes the FEM_Nodes data structure with coordinates, degrees of freedom,
+        /// Converts a collection of Node instances into an CoreNodes instance.
+        /// This function initializes the CoreNodes data structure with coordinates, degrees of freedom,
         /// loads, reactions, displacements, and resisting forces derived from the input nodes.
         /// </summary>
         /// <param name="nodes">Collection of Node instances to convert</param>
-        /// <returns>FEM_Nodes instance containing all node data needed for analysis</returns>
-        public static FEM_Nodes ToFEM_Nodes(IEnumerable<Node> nodes)
+        /// <returns>CoreNodes instance containing all node data needed for analysis</returns>
+        public static CoreNodes ToCoreNodes(IEnumerable<Node> nodes)
         {
             if (nodes == null || !nodes.Any())
                 throw new ArgumentException("Nodes collection cannot be null or empty");
@@ -64,7 +64,7 @@ namespace MuscleApp.Converters
                 i++;
             }
             
-            return new FEM_Nodes(
+            return new CoreNodes(
                 initialCoordinates, 
                 dof, 
                 loads, 

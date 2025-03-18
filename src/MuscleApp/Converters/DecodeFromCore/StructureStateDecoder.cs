@@ -7,33 +7,33 @@ using MuscleCore.FEModel;
 namespace MuscleApp.Converters
 {
     /// <summary>
-    /// Static class for decoding FEM_Structure instances to StructureState instances.
+    /// Static class for decoding CoreTruss instances to StructureState instances.
     /// </summary>
     public static class StructureStateDecoder
     {
         /// <summary>
-        /// Updates a StructureState instance with results from a FEM_Structure instance.
+        /// Updates a StructureState instance with results from a CoreTruss instance.
         /// </summary>
         /// <param name="original">StructureState instance to update</param>
-        /// <param name="femResults">FEM_Structure instance containing structure data</param>
+        /// <param name="coreTrussResults">CoreTruss instance containing structure results</param>
         /// <returns>Updated StructureState instance</returns>
-        public static StructureState CopyAndUpdate(StructureState original, FEM_Structure femResults)
+        public static StructureState CopyAndUpdate(StructureState original, CoreTruss coreTrussResults)
         {
             if (original == null)
                 throw new ArgumentNullException(nameof(original), "StructureState cannot be null");
                 
-            if (femResults == null)
-                throw new ArgumentNullException(nameof(femResults), "FEM_Structure cannot be null");
+            if (coreTrussResults == null)
+                throw new ArgumentNullException(nameof(coreTrussResults), "CoreTruss cannot be null");
                 
-            if (femResults.Nodes == null || femResults.Elements == null)
-                throw new ArgumentException("FEM_Structure must have valid Nodes and Elements", nameof(femResults));
+            if (coreTrussResults.Nodes == null || coreTrussResults.Elements == null)
+                throw new ArgumentException("CoreTruss must have valid Nodes and Elements", nameof(coreTrussResults));
             
             // Create a copy of the original structure state
             StructureState updated = original.Copy();
 
-            // retrieve the results from the computations stored in femResults
-            FEM_Nodes nodesResults = femResults.Nodes;
-            FEM_Elements elementsResults = femResults.Elements;
+            // retrieve the results from the computations stored in coreTrussResults
+            CoreNodes nodesResults = coreTrussResults.Nodes;
+            CoreElements elementsResults = coreTrussResults.Elements;
             
             // Copy and Update original nodes with the nodes results 
             updated.Nodes = NodesDecoder.CopyAndUpdate(original.Nodes, nodesResults);
@@ -42,7 +42,7 @@ namespace MuscleApp.Converters
             updated.Elements = ElementsDecoder.CopyAndUpdate(original.Elements, elementsResults, updated.Nodes);
             
             // Update equilibrium state
-            updated.IsInEquilibrium = femResults.IsInEquilibrium;
+            updated.IsInEquilibrium = coreTrussResults.IsInEquilibrium;
 
             return updated;
         }

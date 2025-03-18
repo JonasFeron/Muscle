@@ -7,23 +7,23 @@ using System.Linq;
 namespace MuscleApp.Converters
 {
     /// <summary>
-    /// Converts Element instances to FEM_Elements for computational analysis.
+    /// Converts Element instances to CoreElements for computational analysis.
     /// </summary>
     public static class ElementsEncoder
     {
         /// <summary>
-        /// Converts a collection of Element instances to a FEM_Elements instance for computational analysis.
+        /// Converts a collection of Element instances to a CoreElements instance for computational analysis.
         /// </summary>
         /// <param name="elements">Collection of Element instances to convert</param>
-        /// <param name="femNodes">FEM_Nodes instance that contains the nodes referenced by the elements</param>
-        /// <returns>FEM_Elements instance containing all element data needed for analysis</returns>
-        public static FEM_Elements ToFEM_Elements(IEnumerable<Element> elements, FEM_Nodes femNodes)
+        /// <param name="coreNodes">CoreNodes instance that contains the nodes referenced by the elements</param>
+        /// <returns>CoreElements instance containing all element data needed for analysis</returns>
+        public static CoreElements ToCoreElements(IEnumerable<Element> elements, CoreNodes coreNodes)
         {
             if (elements == null || !elements.Any())
                 throw new ArgumentException("Elements collection cannot be null or empty");
             
-            if (femNodes == null)
-                throw new ArgumentNullException(nameof(femNodes), "FEM_Nodes instance cannot be null");
+            if (coreNodes == null)
+                throw new ArgumentNullException(nameof(coreNodes), "CoreNodes instance cannot be null");
             
             int count = elements.Count();
             
@@ -69,9 +69,9 @@ namespace MuscleApp.Converters
                 i++;
             }
             
-            // Create and return FEM_Elements instance
-            return new FEM_Elements(
-                femNodes,
+            // Create and return CoreElements instance
+            return new CoreElements(
+                coreNodes,
                 type,
                 endNodes,
                 area,

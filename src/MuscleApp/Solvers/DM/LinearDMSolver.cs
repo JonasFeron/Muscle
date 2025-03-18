@@ -34,7 +34,7 @@ namespace MuscleApp.Solvers
         /// <returns>Updated StructureState with incremented state</returns>
         public static StructureState? Solve(StructureState initialStructure, double[] loadsIncrement, double[] freeLengthVariation)
         {
-            var femResults = MuscleCore.Solvers.LinearDM.Solve(ToFEM(initialStructure), loadsIncrement, freeLengthVariation);
+            var femResults = MuscleCore.Solvers.LinearDM.Solve(ToCore(initialStructure), loadsIncrement, freeLengthVariation);
 
             var updatedStructure = CopyAndUpdate(initialStructure, femResults);
 

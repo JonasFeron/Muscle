@@ -14,7 +14,7 @@ namespace MuscleCoreTests.Converters
         private static string pythonDllName;
         private static string srcDir;
         private PyResultsSVDDecoder _decoder;
-        private dynamic _pySVDResults;
+        private dynamic _pyResultsSVD;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
@@ -39,11 +39,11 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                // Create a Python SVDresults object
+                // Create a Python PyResultsSVD object
                 dynamic np = Py.Import("numpy");
                 dynamic musclepy = Py.Import("MusclePy");
-                dynamic SVDresults = musclepy.SVDresults; // import the python SVDresults class
-                // Create test data for SVDresults
+                dynamic PyResultsSVD = musclepy.PyResultsSVD; // import the python PyResultsSVD class
+                // Create test data for PyResultsSVD
                 int r = 2;
                 int s = 1;
                 int m = 3;
@@ -55,8 +55,8 @@ namespace MuscleCoreTests.Converters
                 dynamic Vr = np.array(new double[,] { { 0.8, 0.6 }, { 0.6, -0.8 } });
                 dynamic Vs = np.array(new double[,] { { 0.7 }, { 0.7 } });
                 
-                // Create SVDresults Python object
-                _pySVDResults = SVDresults(r, s, m, Ur, Um, Sr, Vr, Vs);
+                // Create PyResultsSVD Python object
+                _pyResultsSVD = PyResultsSVD(r, s, m, Ur, Um, Sr, Vr, Vs);
             }
 
             _decoder = new PyResultsSVDDecoder();
@@ -68,7 +68,7 @@ namespace MuscleCoreTests.Converters
             using (Py.GIL())
             {
                 // Get Python type
-                var pyType = ((PyObject)_pySVDResults).GetPythonType();
+                var pyType = ((PyObject)_pyResultsSVD).GetPythonType();
                 
                 // Should decode to CoreResultsSVD
                 Assert.IsTrue(_decoder.CanDecode(pyType, typeof(CoreResultsSVD)));
@@ -87,7 +87,7 @@ namespace MuscleCoreTests.Converters
             {
                 // Should successfully decode to CoreResultsSVD
                 CoreResultsSVD decodedResults = null;
-                var success = _decoder.TryDecode((PyObject)_pySVDResults, out decodedResults);
+                var success = _decoder.TryDecode((PyObject)_pyResultsSVD, out decodedResults);
                 Assert.IsTrue(success);
                 Assert.IsNotNull(decodedResults);
                 
@@ -122,7 +122,7 @@ namespace MuscleCoreTests.Converters
         {
             using (Py.GIL())
             {
-                // Create a Python object that is not a SVDresults
+                // Create a Python object that is not a PyResultsSVD
                 dynamic np = Py.Import("numpy");
                 dynamic array = np.array(new double[] { 1.0, 2.0, 3.0 });
                 

@@ -8,16 +8,16 @@ using static MuscleApp.Converters.ElementsEncoder;
 namespace MuscleApp.Converters
 {
     /// <summary>
-    /// Converts StructureState instances to FEM_Structure for computational analysis.
+    /// Converts StructureState instances to CoreTruss for computational analysis.
     /// </summary>
     public static class StructureStateEncoder
     {
         /// <summary>
-        /// Converts a StructureState instance to a FEM_Structure instance for computational analysis.
+        /// Converts a StructureState instance to a CoreTruss instance for computational analysis.
         /// </summary>
         /// <param name="structure">StructureState instance to convert</param>
-        /// <returns>FEM_Structure instance containing all data needed for analysis</returns>
-        public static FEM_Structure ToFEM(StructureState structure)
+        /// <returns>CoreTruss instance containing all data needed for analysis</returns>
+        public static CoreTruss ToCore(StructureState structure)
         {
             if (structure == null)
                 throw new ArgumentNullException(nameof(structure), "StructureState cannot be null");
@@ -30,14 +30,14 @@ namespace MuscleApp.Converters
             
             // First convert nodes
             List<Node> nodes = structure.Nodes;
-            FEM_Nodes femNodes = ToFEM_Nodes(nodes);
+            CoreNodes coreNodes = ToCoreNodes(nodes);
             
             // Then convert elements, using the converted nodes
             List<Element> elements = structure.Elements;
-            FEM_Elements femElements = ToFEM_Elements(elements, femNodes);
+            CoreElements coreElements = ToCoreElements(elements, coreNodes);
             
-            // Create the FEM_Structure for computational analysis
-            return new FEM_Structure(femNodes, femElements);
+            // Create the CoreTruss for computational analysis
+            return new CoreTruss(coreNodes, coreElements);
         }
     }
 }
