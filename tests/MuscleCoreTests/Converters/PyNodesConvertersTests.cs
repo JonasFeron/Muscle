@@ -1,4 +1,3 @@
-using MuscleCore.Application.PythonNETSolvers;
 using MuscleCore.Converters;
 using MuscleCore.FEModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

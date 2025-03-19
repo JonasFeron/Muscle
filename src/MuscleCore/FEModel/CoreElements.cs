@@ -70,13 +70,16 @@ namespace MuscleCore.FEModel
                           double[,] youngs = null, double[] freeLength = null, double[] tension = null)
         {
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
-            Type = type ?? new int[0];
-            EndNodes = endNodes ?? new int[0, 2];
+            Type = type ?? throw new ArgumentNullException(nameof(type));
+            EndNodes = endNodes ?? throw new ArgumentNullException(nameof(endNodes));
             Count = EndNodes.GetLength(0);
-            Area = area ?? new double[Count];
-            Youngs = youngs ?? new double[Count, 2];
-            FreeLength = freeLength ?? new double[Count];
-            Tension = tension ?? new double[Count];
+
+
+            // if null values : handle it in Python
+            Area = area; //may be null for the SVD calculation
+            Youngs = youngs;
+            FreeLength = freeLength; 
+            Tension = tension;
         }
 
         #endregion

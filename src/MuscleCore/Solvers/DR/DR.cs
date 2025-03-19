@@ -40,25 +40,29 @@ namespace MuscleCore.Solvers
                 using (Py.GIL())
                 {
                     PyObject pyInitial = coreInitial.ToPython();
-                    PyObject pyConfigDR = config.ToPython();
-
+                    PyObject pyConfig = config.ToPython();
+                    
                     dynamic musclepy = Py.Import("MusclePy");
                     dynamic solve = musclepy.main_dynamic_relaxation;
                     dynamic pyResult = solve(
                         pyInitial,
                         loadsIncrement,
                         freeLengthVariation,
-                        pyConfigDR
+                        pyConfig
                     );
+                    
                     coreResult = pyResult.As<CoreTruss>();
 
                     // Check if structure is in equilibrium
-                    dynamic rtol = pyConfigDR.As<dynamic>().zero_residual_rtol;
-                    dynamic atol = pyConfigDR.As<dynamic>().zero_residual_atol;
+                    dynamic dynamicPyConfig = pyConfig.As<dynamic>();
+                    dynamic rtol = dynamicPyConfig.zero_residual_rtol;
+                    dynamic atol = dynamicPyConfig.zero_residual_atol;
                     coreResult.IsInEquilibrium = pyResult.is_in_equilibrium(rtol, atol).As<bool>();
 
-                    // Update configuration with resulting number of time steps 
-                    config = pyConfigDR.As<CoreConfigDR>();
+                    // Update configuration with values from the Python config
+                    // The Python function updates the config object in-place
+                    config.NTimeStep = dynamicPyConfig.n_time_step.As<int>();
+                    config.NKEReset = dynamicPyConfig.n_ke_reset.As<int>();
                 }
                 PythonEngine.EndAllowThreads(m_threadState);
             }

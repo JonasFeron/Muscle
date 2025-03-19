@@ -15,6 +15,16 @@ namespace MuscleApp.ViewModel
 
         public Vector3d Vector { set; get; }
 
+        public bool IsValid
+        {
+            get
+            {
+                if (Point.IsValid && Vector.IsValid && NodeInd >= 0) return true;
+                else return false;
+            }
+        }
+
+
         #endregion Properties
 
         #region Constructors

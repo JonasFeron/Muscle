@@ -12,6 +12,7 @@ from .femodel.pyelements import PyElements
 from .femodel.pytruss import PyTruss
 from .solvers.svd.py_results_svd import PyResultsSVD
 from .solvers.dynamic.dynamic_results import DynamicResults
+from .solvers.dr.py_config_dr import PyConfigDR
 
 # Expose solver functions
 from .solvers.svd.main import main_singular_value_decomposition
@@ -35,6 +36,7 @@ __all__ = [
     'main_linear_displacement_method',
     'main_nonlinear_displacement_method',
     'main_dynamic_relaxation',
+    'PyConfigDR',
     'main_dynamic_modal_analysis',
     'DynamicResults'
 ]

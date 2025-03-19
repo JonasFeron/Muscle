@@ -2,23 +2,37 @@ from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
 from MusclePy.solvers.dr.py_config_dr import PyConfigDR
 import numpy as np
+from typing import Tuple
 
 
 def main_dynamic_relaxation(structure: PyTruss, loads_increment: np.ndarray = None, 
                                        free_length_variation: np.ndarray = None, config: PyConfigDR = None) -> PyTrussDR:
     """
-    Perform the Dynamic Relaxation Method on the Start State of the Structure.
-    This method assumes that the StructureObject has already been initialized with InitialData method
+    Perform the Dynamic Relaxation Method on the Structure.
+    
+    Args:
+        structure: Initial structure state
+        loads_increment: External load increments to apply
+        free_length_variation: Free length variation to apply
+        config: Configuration for the Dynamic Relaxation method
+        
+    Returns:
+        PyTrussDR: The final structure state after Dynamic Relaxation
+        
+    Note:
+        The config object is updated in-place with the number of time steps and kinetic energy resets.
     """
     #ref:
     # [1] Bel Adj Ali et al, 2011, Analysis of clustered tensegrity structures using a modified dynamic relaxation algorithm
     # [2] Barnes, 1999, Form finding and analysis of tension structures by dynamic relaxation
 
     assert isinstance(structure, PyTruss), "Structure must be a PyTruss instance"
-    assert isinstance(loads_increment, np.ndarray), "Loads increment must be a numpy array"
-    assert isinstance(free_length_variation, np.ndarray), "Free length variation must be a numpy array"
+    loads_increment = structure.nodes._check_and_reshape_array(loads_increment, "loads_increment")
+    free_length_variation = structure.elements._check_and_reshape_array(free_length_variation, "free_length_variation")
     if config is None:
         config = PyConfigDR() #use default solver configuration
+    else: 
+        assert isinstance(config, PyConfigDR), "config must be a PyConfigDR instance"
 
     input_state = PyTrussDR(structure)
     
@@ -43,8 +57,6 @@ def main_dynamic_relaxation(structure: PyTruss, loads_increment: np.ndarray = No
         current_state.compute_residuals()
             
     return current_state
-
-
 
 
 def compute_next_state(current: PyTrussDR, config: PyConfigDR):

@@ -22,7 +22,7 @@ namespace MuscleCore.Converters
             {
                 try
                 {
-                    return objectType.Name == "PyElements";
+                    return objectType.Name == "PyElements" || objectType.Name == "PyElementsDR";
                 }
                 catch
                 {

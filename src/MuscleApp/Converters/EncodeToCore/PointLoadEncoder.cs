@@ -33,7 +33,7 @@ namespace MuscleApp.Converters
             // Populate the loads array by adding up values for the same node
             foreach (PointLoad load in pointLoads)
             {
-                if (load == null || !load.IsValid())
+                if (load == null || !load.IsValid)
                     continue;
                     
                 int nodeIndex = -1;

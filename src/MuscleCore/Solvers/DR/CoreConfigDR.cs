@@ -84,8 +84,7 @@ namespace MuscleCore.Solvers
         /// <param name="maxKEResets">Maximum number of kinetic energy resets before termination</param>
         /// <param name="zeroResidualRTol">Relative tolerance for zero residual check</param>
         /// <param name="zeroResidualATol">Absolute tolerance (in N) for zero residual check</param>
-        /// <param name="nTimeStep">Number of time steps performed</param>
-        /// <param name="nKEReset">Number of kinetic energy resets performed</param>
+
         public CoreConfigDR(
             double dt = 0.01,
             double massAmplFactor = 1.0,
@@ -93,9 +92,7 @@ namespace MuscleCore.Solvers
             int maxTimeStep = 10000,
             int maxKEResets = 1000,
             double zeroResidualRTol = 1e-4,
-            double zeroResidualATol = 1e-6,
-            int nTimeStep = 0,
-            int nKEReset = 0)
+            double zeroResidualATol = 1e-6)
         {
             Dt = dt > 0 ? dt : 0.01;
             MassAmplFactor = massAmplFactor > 0 ? massAmplFactor : 1.0;
@@ -104,8 +101,8 @@ namespace MuscleCore.Solvers
             MaxKEResets = maxKEResets > 0 ? maxKEResets : 1000;
             ZeroResidualRTol = zeroResidualRTol > 0 ? zeroResidualRTol : 1e-4;
             ZeroResidualATol = zeroResidualATol > 0 ? zeroResidualATol : 1e-6;
-            NTimeStep = nTimeStep;
-            NKEReset = nKEReset;
+            NTimeStep = 0;
+            NKEReset = 0;
         }
     }
 }

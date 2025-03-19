@@ -15,7 +15,7 @@ namespace MuscleCore.Converters
             {
                 try
                 {
-                    return objectType.Name == "PyNodes";
+                    return objectType.Name == "PyNodes" || objectType.Name == "PyNodesDR";
                 }
                 catch
                 {

@@ -72,9 +72,12 @@ class PyElements:
             name: Name of array for error messages and type detection
             shape_suffix: Optional second dimension (e.g. 2 for youngs/end_nodes)
         """
-        if arr is None:
+        if arr is None or (hasattr(arr, "__len__") and len(arr) == 0): #if arr value is python None or C# null
             if name in ["type", "end_nodes"]:
                 raise ValueError(f"{name} cannot be None")
+
+            if name == "free_length": #if no free_length is provided:
+                return self._calculate_current_length() # calculate free_length based on current nodes coordinates 
 
             shape = (self._count,) if shape_suffix is None else (self._count, shape_suffix)
             return np.zeros(shape, dtype=float) # e.g. zero array if no tension is provided. 
@@ -124,11 +127,8 @@ class PyElements:
         self._youngs = self._check_and_reshape_array(youngs, "youngs", shape_suffix=2)
             
         # Calculate free length based on node coordinates if not provided
-        if free_length is None:
-            self._free_length = self._calculate_current_length()
-        else:
-            self._free_length = self._check_and_reshape_array(free_length, "free_length")
-            
+        self._free_length = self._check_and_reshape_array(free_length, "free_length")
+        
         self._tension = self._check_and_reshape_array(tension, "tension")
             
         # Compute connectivity matrix

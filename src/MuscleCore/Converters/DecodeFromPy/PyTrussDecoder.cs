@@ -21,10 +21,10 @@ namespace MuscleCore.Converters
 
             using (Py.GIL())
             {
+
                 try
                 {
-                    return objectType.Name == "PyTruss";
-
+                    return objectType.Name == "PyTruss" || objectType.Name == "PyTrussDR";
                 }
                 catch
                 {
@@ -47,11 +47,21 @@ namespace MuscleCore.Converters
                     dynamic py = pyObj.As<dynamic>();
 
                     // Get nodes and elements objects
-                    var coreElements = py.elements.As<CoreElements>();
+                    dynamic pyElements = py.elements;
+                    CoreElements coreElements = pyElements.As<CoreElements>();
                     var coreNodes = coreElements.Nodes;
                     
-                    // Call the is_in_equilibrium method with default parameters
-                    bool isInEquilibrium = py.is_in_equilibrium().As<bool>();
+                    // Call the is_in_equilibrium method with default parameters if it exists
+                    bool isInEquilibrium = false;
+                    try
+                    {
+                        isInEquilibrium = py.is_in_equilibrium().As<bool>();
+                    }
+                    catch
+                    {
+                        // If is_in_equilibrium method doesn't exist, assume not in equilibrium
+                        isInEquilibrium = false;
+                    }
 
                     // Create structure with all properties
                     var structure = new CoreTruss(

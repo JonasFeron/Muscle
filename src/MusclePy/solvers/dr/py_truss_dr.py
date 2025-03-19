@@ -271,3 +271,4 @@ class PyTrussDR(PyTruss):
         
         # Create a new PyTrussDR with the updated nodes and elements
         return self._create_copy(nodes_copy, elements_copy)
+
