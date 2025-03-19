@@ -1,10 +1,7 @@
-using MuscleCore.Application.PythonNETSolvers;
-using MuscleCore.FEModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Python.Runtime;
 using System.IO;
-using System;
 using MuscleCore.PythonNETInit;
+using MuscleCore.Solvers;
 
 namespace MuscleCoreTests.Solvers
 {

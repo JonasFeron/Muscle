@@ -19,7 +19,7 @@
 
 using Python.Runtime;
 
-namespace MuscleCore.Application.PythonNETSolvers
+namespace MuscleCore.Solvers
 {
     public static class TestScriptSolver
     {
