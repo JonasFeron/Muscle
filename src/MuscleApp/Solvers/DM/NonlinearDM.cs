@@ -23,29 +23,25 @@ using MuscleCore.FEModel;
 
 namespace MuscleApp.Solvers
 {
-    public static class LinearDM
+    public static class NonlinearDM
     {
         /// <summary>
-        /// Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).
+        /// Solve the nonlinear displacement method for a structure with incremental loads.
         /// </summary>
         /// <param name="truss">Current structure state</param>
         /// <param name="pointLoads">Collection of PointLoad instances defining external loads to apply</param>
-        /// <param name="prestress">Collection of Prestress instances defining free length variations to apply</param>
+        /// <param name="nSteps"> Number of steps for the incremental (but not iterative) Newton-Raphson procedure with arc length control</param>
         /// <returns>Updated Truss with incremented state</returns>
-        public static Truss? Solve(Truss truss, IEnumerable<PointLoad> pointLoads, IEnumerable<Prestress> prestress)
-        {
-            
+        public static Truss? Solve(Truss truss, IEnumerable<PointLoad> pointLoads, int nSteps)
+        {   
             // 1) Convert the input data to the core data types
-            // Create a free length variation array by adding up all prestress for each element.
-            double[] freeLengthVariation = PrestressEncoder.AddsUpAllPrestress(prestress, truss.Elements.Count);
-
             // Create a load increment array by adding up all point loads for each node.
             double[] loadsIncrement = PointLoadEncoder.AddsUpAllPointLoads(pointLoads, truss);
 
             // 2) Call the core solver 
             CoreTruss? coreResult = null;
             try{
-                coreResult = MuscleCore.Solvers.LinearDM.Solve(TrussEncoder.ToCore(truss), loadsIncrement, freeLengthVariation);
+                coreResult = MuscleCore.Solvers.NonlinearDM.Solve(TrussEncoder.ToCore(truss), loadsIncrement, nSteps);
             }
             catch (Exception)
             {

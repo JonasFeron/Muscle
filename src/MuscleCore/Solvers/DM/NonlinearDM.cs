@@ -22,16 +22,16 @@ using Python.Runtime;
 
 namespace MuscleCore.Solvers
 {
-    public static class LinearDM
+    public static class NonlinearDM
     {
         /// <summary>
-        /// Solve the linear displacement method for a structure with incremental loads and prestress (free length variation).
+        /// Solve the nonlinear displacement method for a structure with incremental loads.
         /// </summary>
         /// <param name="coreInitial">Current structure state</param>
         /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
-        /// <param name="freeLengthVariation"> [m] - shape (elements.count,) - free length variation to apply </param>
+        /// <param name="nSteps"> Number of steps for the incremental (but not iterative) Newton-Raphson procedure with arc length control</param>
         /// <returns>Updated CoreTruss with incremented state</returns>
-        public static CoreTruss? Solve(CoreTruss coreInitial, double[] loadsIncrement, double[] freeLengthVariation)
+        public static CoreTruss? Solve(CoreTruss coreInitial, double[] loadsIncrement, int nSteps)
         {
             CoreTruss? coreResult = null;
             try
@@ -42,11 +42,11 @@ namespace MuscleCore.Solvers
                     PyObject pyInitial = coreInitial.ToPython();
 
                     dynamic musclepy = Py.Import("MusclePy");
-                    dynamic solve = musclepy.main_linear_displacement_method;
+                    dynamic solve = musclepy.main_nonlinear_displacement_method;
                     dynamic pyResult = solve(
                         pyInitial,
                         loadsIncrement,
-                        freeLengthVariation
+                        nSteps
                     );
                     coreResult = pyResult.As<CoreTruss>();
                 }

@@ -49,27 +49,24 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Python.Runtime;
-using Muscle.FEModel;
 using Rhino.Geometry;
-using Muscle.ViewModel;
-using Muscle.GHModel;
-using MuscleApp.ViewModel;
 using Muscle.View;
 using Muscle.Converters;
+using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
+using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Solvers.Components
+namespace Muscle.Components.Solvers
 {
-    public class LinearSolverDisplComponent_copy : GH_Component
+    public class LinearDMSolverComponent : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the LinearSolverDisplComponent class.
+        /// Initializes a new instance of the LinearDMSolverComponent class.
         /// </summary>
-        public LinearSolverDisplComponent_copy()
+        public LinearDMSolverComponent()
           : base("Linear Displacement Method", "LinearDM",
               "Solve the linear displacement method for a structure with incremental loads and prestress (free length changes).",
-              "Muscle", "4.StaticSolvers")
+              GHAssemblyName, Folder4_StaticSolvers)
         {
         }
 
@@ -78,9 +75,9 @@ namespace Muscle.Solvers.Components
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may contain previous results (forces and displacements).", GH_ParamAccess.item);
-            pManager.AddGenericParameter("External Point Loads", "Le (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Length Variation", "DL (m)", "Lengthening (+) or shortening (-) to apply on the elements.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Structure", "struct", "A structure on which the point loads and prestress will be applied via the linear displacement method.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point Loads", "PL (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Prestress", "P (m)", "Prestress Scenario containing the free length variations (m) to apply on the specified elements.", GH_ParamAccess.tree);
             pManager[1].Optional = true;
             pManager[2].Optional = true;
         }
@@ -97,15 +94,9 @@ namespace Muscle.Solvers.Components
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             // Check if Python.NET is initialized
-            if (!Python.Runtime.PythonEngine.IsInitialized)
+            if (!PythonNETManager.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
-                return;
-            }
-            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript + ".py")))
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
-                DA.SetData(0, null);
                 return;
             }
 
@@ -132,16 +123,24 @@ namespace Muscle.Solvers.Components
             }
 
             // 3) Solve using the LinearDM solver
-            Truss? result = LinearDM.Solve(truss, pointLoads, prestress);
+            try
+            {
+                Truss? result = LinearDM.Solve(truss, pointLoads, prestress);
+            }
+            catch (Exception e)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to solve the linear displacement method: {e.Message}");
+                return;
+            }
 
-            // Check if the solution was successful
+            // 4) Check if the solution was successful
             if (result == null)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to solve the linear displacement method.");
                 return;
             }
 
-            // 4) Check for warnings from the solver
+            // 5) Check for warnings from the solver
             if (result.warnings != null && result.warnings.Count > 0)
             {
                 foreach (string warning in result.warnings)
@@ -151,7 +150,7 @@ namespace Muscle.Solvers.Components
                 result.warnings.Clear();
             }
 
-            // 5) Set output
+            // 6) Set output
             GH_Truss gh_result = new GH_Truss(result);
             DA.SetData(0, gh_result);
         }
