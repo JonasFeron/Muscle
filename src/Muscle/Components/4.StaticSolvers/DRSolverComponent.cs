@@ -5,15 +5,13 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Muscle.GHModel;
-using Muscle.PythonLink;
-using Muscle.ViewModel;
-using Newtonsoft.Json;
-using Python.Runtime;
-using Rhino.Geometry;
-using Rhino.Runtime;
+using MuscleApp.ViewModel;
+using MuscleApp.Solvers;
+using Muscle.View;
+using Muscle.Converters;
+using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Solvers
+namespace Muscle.Components.Solvers
 {
     public class DRSolverComponent : GH_Component
     {
@@ -22,9 +20,9 @@ namespace Muscle.Solvers
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public DRSolverComponent()
-          : base("Solver - Non Linear - Dynamic Relaxation Method", "DR",
-                "Solve truss with geometric non linearities and large changes of the elements free lengths.",
-              "Muscles", "Solvers")
+          : base("Dynamic Relaxation Method", "DR",
+                "Solve form-finding, deployment, nonlinear loading, and nonlinear prestressing problems",
+              GHAssemblyName, Folder4_StaticSolvers)
         {
         }
 
@@ -54,15 +52,16 @@ namespace Muscle.Solvers
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("External Point Loads", "Load (kN)", "The additional external point loads to apply on the structure.", GH_ParamAccess.tree);
-            pManager.AddGenericParameter("Lengthenings", "Delta L (m)", "The additional length changes to apply on the free lengths of the elements.\n + Lengthening, - Shortening.", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Tolerance 0", "tol (N)", "A structure is in equilibrium if all the unbalanced loads are equal to 0.\n This parameter fixes the ZERO tolerance tol.\n If the norm of the unbalanced loads < tol, the structure is considered in equilibrium.\n The unbalanced load of each node in each direction is equal to the external load applied minus the sum of the internal resisting forces for each element connected to this node.", GH_ParamAccess.item, 0.0001);
-            pManager.AddNumberParameter("Delta t", "Dt (s)", "The time increment for the dynamic relaxation analysis", GH_ParamAccess.item, 0.01);
-            pManager.AddIntegerParameter("Max Time Step", "max it (/)", "The maximum number of time increment before the solver aborts looking for the equilibrium", GH_ParamAccess.item, 10000);
-            pManager.AddIntegerParameter("Max Peak Reset", "max peak (/)", "A peak of kinetic energy corresponds to a configuration with the minimum potential energy, hence the equilibrium. At each peak of kinetic energy, the velocity of each degree of freedom is reset to 0. This parameter allows to set the maximum number of kinetic energy reset before the solver aborts looking for the equilibrium", GH_ParamAccess.item, 1000);
-            pManager.AddNumberParameter("Mass Amplification", "Ampl (/)", "The fictitious mass can be amplified in case the DR solver faces convergence issue", GH_ParamAccess.item, 1);
-            pManager.AddNumberParameter("Minimum Mass", "Min (kg)", "The minimum fictitious mass applied on the degrees of freedom with 0 fictitious mass", GH_ParamAccess.item, 0.005);
+            pManager.AddGenericParameter("Structure", "struct", "A structure on which the point loads and prestress will be applied via the dynamic relaxation method.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point Loads", "PL (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Prestress", "P (m)", "Prestress Scenario containing the free length variations (m) to apply on the specified elements.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Relative tolerance", "rtol (-)", "Set the relative tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, 0.0001);
+            pManager.AddNumberParameter("Absolute tolerance", "atol (N)", "Set the absolute tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, 0.000001);
+            pManager.AddNumberParameter("Delta t", "Dt (s)", "The time increment for the dynamic relaxation method.", GH_ParamAccess.item, 0.01);
+            pManager.AddIntegerParameter("Max Time Step", "max it (-)", "Maximum number of time increment before the solver aborts looking for the equilibrium", GH_ParamAccess.item, 10000);
+            pManager.AddIntegerParameter("Max Peak Reset", "max peak (/)", "Maximum number of kinetic energy resets before the solver aborts looking for the equilibrium.", GH_ParamAccess.item, 1000);
+            pManager.AddNumberParameter("Mass Amplification", "Ampl (/)", "Amplification factor for the fictitious masses in case of convergence issue.", GH_ParamAccess.item, 1);
+            pManager.AddNumberParameter("Minimum Mass", "Min (kg)", "Minimum fictitious mass applied on the degrees of freedom where fictitious mass equals 0 (i.e. 0 tangent stiffness).", GH_ParamAccess.item, 0.005);
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -72,6 +71,7 @@ namespace Muscle.Solvers
             pManager[6].Optional = true;
             pManager[7].Optional = true;
             pManager[8].Optional = true;
+            pManager[9].Optional = true;
         }
 
         /// <summary>

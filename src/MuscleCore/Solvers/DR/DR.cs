@@ -1,0 +1,72 @@
+//PythonNETGrasshopperTemplate
+
+//Copyright <2025> <Jonas Feron>
+
+//Licensed under the Apache License, Version 2.0 (the "License");
+//you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+
+//    http://www.apache.org/licenses/LICENSE-2.0
+
+//Unless required by applicable law or agreed to in writing, software
+//distributed under the License is distributed on an "AS IS" BASIS,
+//WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//See the License for the specific language governing permissions and
+//limitations under the License.
+
+//List of the contributors to the development of PythonNETGrasshopperTemplate: see NOTICE file.
+//Description and complete License: see NOTICE file.
+
+using MuscleCore.FEModel;
+using Python.Runtime;
+
+namespace MuscleCore.Solvers
+{
+    public static class DynamicRelaxation
+    {
+        /// <summary>
+        /// Solve the nonlinear displacement method for a structure with incremental loads.
+        /// </summary>
+        /// <param name="coreInitial">Current structure state</param>
+        /// <param name="loadsIncrement">[N] - shape (3*nodes.count,) - External load increments to apply</param>
+        /// <param name="freeLengthVariation">[m] - shape (elements.count,) - free length variation to apply</param>
+        /// <returns>Updated CoreTruss with incremented state</returns>
+        public static CoreTruss? Solve(CoreTruss coreInitial, double[] loadsIncrement, double[] freeLengthVariation, CoreConfigDR config)
+        {
+            CoreTruss? coreResult = null;
+            try
+            {
+                var m_threadState = PythonEngine.BeginAllowThreads();
+                using (Py.GIL())
+                {
+                    PyObject pyInitial = coreInitial.ToPython();
+                    PyObject pyConfigDR = config.ToPython();
+
+                    dynamic musclepy = Py.Import("MusclePy");
+                    dynamic solve = musclepy.main_dynamic_relaxation;
+                    dynamic pyResult = solve(
+                        pyInitial,
+                        loadsIncrement,
+                        freeLengthVariation,
+                        pyConfigDR
+                    );
+                    coreResult = pyResult.As<CoreTruss>();
+
+                    // Check if structure is in equilibrium
+                    dynamic rtol = pyConfigDR.As<dynamic>().zero_residual_rtol;
+                    dynamic atol = pyConfigDR.As<dynamic>().zero_residual_atol;
+                    coreResult.IsInEquilibrium = pyResult.is_in_equilibrium(rtol, atol).As<bool>();
+
+                    // Update configuration with resulting number of time steps 
+                    config = pyConfigDR.As<CoreConfigDR>();
+                }
+                PythonEngine.EndAllowThreads(m_threadState);
+            }
+            catch (Exception)
+            {
+                throw; // rethrow the exception
+            }
+            return coreResult;
+        }
+    }
+}

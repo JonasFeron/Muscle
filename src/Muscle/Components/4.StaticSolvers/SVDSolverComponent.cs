@@ -2,16 +2,14 @@
 using System.IO;
 using Grasshopper.Kernel;
 
-using Muscle.Util;
-using Python.Runtime;
 using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
 using Muscle.View;
 using Muscle.Converters;
-// using MuscleCore.Solvers;
+using static Muscle.Components.GHComponentsFolders;
 
 
-namespace Muscle.Solvers
+namespace Muscle.Components.Solvers
 {
     public class SVDSolverComponent : GH_Component
     {
@@ -23,7 +21,7 @@ namespace Muscle.Solvers
           : base("Solver - Selfstress and mechanisms analysis - by Singular Value Decomposition", "SVD",
                 "Find the self-stress modes and mechanisms of the structure.\n" +
                 "ref: S. Pellegrino, Structural computations with the singular value decomposition of the equilibrium matrix, Int.J. Sol. and Struct.,30(21),1993,p3025-3035",
-              "Muscles", "Solvers")
+              GHAssemblyName, Folder4_StaticSolvers)
         {
 
         }
@@ -83,7 +81,7 @@ namespace Muscle.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            if (!AccessToAll.hasPythonStarted)
+            if (!PythonNETManager.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
                 return;
@@ -98,15 +96,32 @@ namespace Muscle.Solvers
             if (!DA.GetData(1, ref rTol)) { }
 
             Truss structure = gh_struct.Value;
-            ResultsSVD resultsSVD = SVD.Solve(structure, rTol);
+            
+             // 3) Solve using the NonlinearDM solver
+            try
+            {
+                ResultsSVD? resultsSVD = SVD.Solve(structure, rTol);
+            }
+            catch (Exception e)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to solve the Singular Value Decomposition: {e.Message}");
+                return;
+            }
 
-            // 3) Set outputs
+            // 4) Check if the solution was successful
+            if (resultsSVD == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to solve the Singular Value Decomposition.");
+                return;
+            }
+
+            // 5) Set outputs
             DA.SetData(0, gh_struct);
             DA.SetData(1, resultsSVD.r);
             DA.SetDataList(2, GH_Encoders.ToBranch(resultsSVD.Sr));
             DA.SetData(3, resultsSVD.s);
             DA.SetDataTree(4, GH_Encoders.ToTree(resultsSVD.Vs_T));
-            DA.SetDataTree(5, GH_Encoders.oTree(resultsSVD.Vr_T));
+            DA.SetDataTree(5, GH_Encoders.ToTree(resultsSVD.Vr_T));
             DA.SetData(6, resultsSVD.m);
             DA.SetDataTree(7, GH_Encoders.ToTree(resultsSVD.Ur_T));
             DA.SetDataTree(8, GH_Encoders.ToTree(resultsSVD.Um_T));

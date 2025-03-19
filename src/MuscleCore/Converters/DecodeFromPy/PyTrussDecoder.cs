@@ -47,16 +47,16 @@ namespace MuscleCore.Converters
                     dynamic py = pyObj.As<dynamic>();
 
                     // Get nodes and elements objects
-                    var femElements = py.elements.As<CoreElements>();
-                    var femNodes = femElements.Nodes;
+                    var coreElements = py.elements.As<CoreElements>();
+                    var coreNodes = coreElements.Nodes;
                     
                     // Call the is_in_equilibrium method with default parameters
                     bool isInEquilibrium = py.is_in_equilibrium().As<bool>();
 
                     // Create structure with all properties
                     var structure = new CoreTruss(
-                        nodes: femNodes,
-                        elements: femElements,
+                        nodes: coreNodes,
+                        elements: coreElements,
                         isInEquilibrium: isInEquilibrium
                     );
 
