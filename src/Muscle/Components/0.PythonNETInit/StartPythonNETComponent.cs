@@ -41,7 +41,6 @@
 using System;
 using Grasshopper.Kernel;
 using System.IO;
-using Python.Runtime;
 using MuscleCore.PythonNETInit;
 using static Muscle.Components.GHComponentsFolders;
 
