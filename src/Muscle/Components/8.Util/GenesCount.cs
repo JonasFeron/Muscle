@@ -24,6 +24,8 @@ using Rhino.DocObjects;
 using Rhino.Collections;
 using GH_IO;
 using GH_IO.Serialization;
+using static Muscle.Components.GHComponentsFolders;
+
 
 namespace Muscle.Components.Util
 {
@@ -35,7 +37,7 @@ namespace Muscle.Components.Util
         public GenesCount()
           : base("GenesCount", "GC",
               "Set the number of Genes of a Gene Pool component",
-              "Muscles", "Util")
+              GHAssemblyName, Folder8_Util)
         {
         }
 

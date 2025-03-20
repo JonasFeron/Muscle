@@ -41,7 +41,7 @@ namespace Muscle
         public override Guid Id => new Guid("f8029d34-993d-4dcb-bf79-9afcd328578d");
 
         //Return a string identifying you or your company.
-        public override string AuthorName => "Jonas FERON, Antoine DESMET";
+        public override string AuthorName => "Jonas FERON";
 
         //Return a string representing your preferred contact details.
         public override string AuthorContact => "";

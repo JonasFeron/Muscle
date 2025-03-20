@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Util
 {
@@ -16,7 +17,7 @@ namespace Muscle.Components.Util
         public BoolGateListComponent()
           : base("Gate All/Any", "All/Any",
               "Perform operations \"AND\"/\"OR\" on a list of booleans",
-              "Muscles", "Util")
+              GHAssemblyName, Folder8_Util)
         {
         }
 

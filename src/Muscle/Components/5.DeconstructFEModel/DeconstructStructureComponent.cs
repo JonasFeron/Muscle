@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 using Rhino.Geometry;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.ModelProperties
 {
-    public class DisassembleStructureComponent : GH_Component
+    public class DeconstructStructureComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public DisassembleStructureComponent()
-          : base("Structure - Disassemble", "Disassemble",
-              "Get the nodes and elements objects composing the structure",
-              "Muscles", "Model")
+        public DeconstructStructureComponent()
+          : base("Deconstruct Structure", "DeStruct",
+              "Deconstruct a structure into its nodes and elements.",
+              GHAssemblyName, Folder5_DeconstructFEM)
         {
         }
 
@@ -32,7 +33,7 @@ namespace Muscle.Components.ModelProperties
         /// </summary>
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Nodes", "N", "The structural nodes.", GH_ParamAccess.list); //0
+            pManager.AddGenericParameter("Nodes", "N", "The nodes composing the structure.", GH_ParamAccess.list); //0
             pManager.AddGenericParameter("Elements", "E", "The finite elements composing the structure.", GH_ParamAccess.list); //1
         }
 
@@ -42,12 +43,12 @@ namespace Muscle.Components.ModelProperties
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            StructureObj structure = new StructureObj();
+            Truss structure = new Truss();
 
             if (!DA.GetData(0, ref structure)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
 
-            DA.SetDataList(0, structure.StructuralNodes);
-            DA.SetDataList(1, structure.StructuralElements);
+            DA.SetDataList(0, structure.Nodes);
+            DA.SetDataList(1, structure.Elements);
         }
 
         /// <summary>

@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Grasshopper.GUI.Gradient;
 
-namespace Muscle.Components.Util
+namespace Muscle.View
 {
-    class GH_Gradient_Forces
+    public class GH_Gradient_Forces
     {
         #region Properties
         public GH_Gradient gradient;

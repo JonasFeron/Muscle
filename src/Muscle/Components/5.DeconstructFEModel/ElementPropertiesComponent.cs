@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 
 using Grasshopper.Kernel;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
+using static Muscle.Components.GHComponentsFolders;
 using Rhino.Geometry;
 
-namespace Muscle.Components.ModelProperties
+namespace Muscle.Components.DeconstructFEModel
 {
-    public class ElementPropertiesComponent : GH_Component
+    public class DeconstructElementComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public ElementPropertiesComponent()
-          : base("Element Properties", "Elem prop",
-              "Get the properties of elements.",
-              "Muscles", "Elements")
+        public DeconstructElementComponent()
+          : base("Deconstruct Element", "DeElem",
+              "Deconstruct an element.",
+              GHAssemblyName, Folder5_DeconstructFEM)
         {
         }
 
@@ -24,7 +25,7 @@ namespace Muscle.Components.ModelProperties
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Element", "E", "The finite element(s).", GH_ParamAccess.item); //0
+            pManager.AddGenericParameter("Element", "E", "Input finite element", GH_ParamAccess.item); //0
         }
 
         /// <summary>
@@ -32,18 +33,16 @@ namespace Muscle.Components.ModelProperties
         /// </summary>
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddTextParameter("Type", "type", "General, Bar, Strut or Cable.", GH_ParamAccess.item); //0
-            pManager.AddIntegerParameter("Element Index", "Ind", "The indexes of the structural elements.", GH_ParamAccess.item); //1
-            pManager.AddIntegerParameter("Nodes Indexes", "End nodes", "The indexes of the elements end nodes.", GH_ParamAccess.list); //2
-            pManager.AddLineParameter("Line", "L", "The current line geometry with the current length of the finite element.", GH_ParamAccess.item); //3
-            pManager.AddNumberParameter("Free length", "Free L (m)", "The length of the element free of any strain.", GH_ParamAccess.item); //4
-            pManager.AddGenericParameter("Main Cross Section", "Main CS", "The main cross section used for the calculation of the volume and for linear analysis.", GH_ParamAccess.item); //5
-            pManager.AddGenericParameter("Cross Sections List", "List CS", "The cross sections used in non-linear finite element analysis.\n The list contains [CS in compression, CS in Tension].", GH_ParamAccess.list); //6
-            pManager.AddGenericParameter("Main Material", "Main Mat", "The main material used for the calculation of the mass and for linear analysis.", GH_ParamAccess.item); //7
-            pManager.AddGenericParameter("Material List", "List Mat", "The materials used in non-linear finite element analysis.\n The list contains [Mat in compression, Mat in Tension].", GH_ParamAccess.list); //8
-            pManager.AddNumberParameter("Volume", "V (m³)", "Volume in m³.", GH_ParamAccess.item); //9
-            pManager.AddNumberParameter("Mass", "m (kg)", "Mass in kg.", GH_ParamAccess.item); //10
-            pManager.AddVectorParameter("Weight", "W (kN)", "Weight in kN", GH_ParamAccess.item); //11
+            pManager.AddTextParameter("Name", "name", "Element name", GH_ParamAccess.item); //0
+            pManager.AddIntegerParameter("Element Index", "Idx", "Index of the element", GH_ParamAccess.item); //1
+            pManager.AddIntegerParameter("End nodes indexes", "End nodes", "Indexes of the end nodes", GH_ParamAccess.list); //2
+            pManager.AddLineParameter("Line", "L", "Current line and current length of the element", GH_ParamAccess.item); //3
+            pManager.AddNumberParameter("Free length", "Lfree (m)", "Free length of the element", GH_ParamAccess.item); //4
+            pManager.AddGenericParameter("Cross Section", "CS", "Cross section of the element", GH_ParamAccess.item); //5
+            pManager.AddGenericParameter("Material", "M", "Bilinear Material of the element", GH_ParamAccess.item); //6
+            pManager.AddVectorParameter("Weight", "W (kN)", "Self-Weight (kN) of the element", GH_ParamAccess.item); //7
+            pManager.AddNumberParameter("Tension", "t (kN)", "Axial force (kN, tension positive, compression negative) in the element due to all applied loads and prestress", GH_ParamAccess.item); //8
+            pManager.AddIntervalParameter("Resistances", "[tmin, tmax] (kN)", "Resistance interval [(-)Buckling resistance, (+)Yielding resistance] (kN)", GH_ParamAccess.item); //9
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Util
 {
@@ -16,7 +17,8 @@ namespace Muscle.Components.Util
         public ToMatrixInput()
           : base("To Matrix Inputs", "Matrix Input",
               "Takes a tree as input and returns the 2D matrix inputs (rows, columns, values).",
-              "Muscles", "Util")
+            GHAssemblyName, Folder8_Util)
+
         {
         }
 

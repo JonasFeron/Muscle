@@ -1,13 +1,14 @@
 ﻿using System;
 using Grasshopper.Kernel;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
+using static Muscle.Components.GHComponentsFolders;
 
 
 namespace Muscle.Components.DeconstructFEModel
 {
-    public class CS_PropertiesComponent : GH_Component
+    public class DeconstructCSComponent : GH_Component
     {
-        public CS_PropertiesComponent() : base("Cross Section - Properties", "CS Prop", "Get the properties of a Cross Section", "Muscles", "Elements") { }
+        public DeconstructCSComponent() : base("Deconstruct Cross Section", "DeCS", "Get the properties of a Cross Section", GHAssemblyName, Folder5_DeconstructFEM) { }
 
         public override Guid ComponentGuid { get { return new Guid("f78a23a7-1eb7-4b2c-8b0b-e88af4e0ebea"); } }
 

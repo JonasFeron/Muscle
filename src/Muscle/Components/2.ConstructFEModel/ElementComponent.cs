@@ -59,12 +59,10 @@ namespace Muscle.Components.ConstructFEModel
             pManager[2].Optional = true;
             pManager.AddTextParameter("Element Name", "Name", "Name of the element", GH_ParamAccess.item, "Element");
             pManager[3].Optional = true;
-            pManager.AddIntegerParameter("Element Type", "Type", "Type of the element: -1 if supposed in compression, 0 both, 1 if supposed in tension.", GH_ParamAccess.item, 0); //4
+            pManager.AddIntegerParameter("Buckling Law", "B. law", "Choose a buckling law between \"Euler\", \"Rankine\", Eurocode (EN1993) curves \"a\",\"b\",\"c\",\"d\".\n \"Yielding\" law corresponds to buckling strength = yielding strength.\n \"Slack\" law cancels the strength in compression (but not the young modulus! -> for non-linear analysis of slack cables with 0 stiffness in compression, use tension only material).", GH_ParamAccess.item, 0);
             pManager[4].Optional = true;
-            pManager.AddIntegerParameter("Buckling Law", "B. law", "Choose a buckling law between \"Euler\", \"Rankine\", Eurocode (EN1993) curves \"a\",\"b\",\"c\",\"d\".\n \"Yielding\" law corresponds to buckling strength = yielding strength.\n \"Slack\" law cancels the stiffness and strength in compression (resulting in a tension only material).", GH_ParamAccess.item, 0);
-            pManager[5].Optional = true;
             pManager.AddNumberParameter("Buckling Factor", "k", "Buckling factor k defines the buckling length Lb such that Lb = k*Lfree", GH_ParamAccess.item, 1.0);
-            pManager[6].Optional = true;
+            pManager[5].Optional = true;
 
             // create a dropdown list for the user to select a supported buckling law
             var laws = pManager[5] as Grasshopper.Kernel.Parameters.Param_Integer;
@@ -87,7 +85,6 @@ namespace Muscle.Components.ConstructFEModel
             GH_CrossSection ghCS = new GH_CrossSection();
             GH_BilinearMaterial ghMat = new GH_BilinearMaterial();
             string name = " ";
-            int type = 0;
             int lawIdx = 0; // index of the selected buckling law
             double k = 1.0; // buckling factor
 
@@ -96,9 +93,8 @@ namespace Muscle.Components.ConstructFEModel
             if (!DA.GetData(1, ref ghCS)) { }
             if (!DA.GetData(2, ref ghMat)) { }
             if (!DA.GetData(3, ref name)) { }
-            if (!DA.GetData(4, ref type)) { }         
-            if (!DA.GetData(5, ref lawIdx)) { }
-            if (!DA.GetData(6, ref k)) { }
+            if (!DA.GetData(4, ref lawIdx)) { }
+            if (!DA.GetData(5, ref k)) { }
 
             int index = Array.IndexOf(_bucklingLawsIdx, lawIdx);
             if (index == -1)
@@ -110,7 +106,7 @@ namespace Muscle.Components.ConstructFEModel
             string law = _bucklingLaws[index];
 
 
-            Element e = new Element(line, ghCS.Value, ghMat.Value, name, type, law, k);
+            Element e = new Element(line, ghCS.Value, ghMat.Value, name, law, k);
             GH_Element gh_e = new GH_Element(e);
 
             DA.SetData(0, gh_e);

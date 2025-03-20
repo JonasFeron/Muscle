@@ -59,6 +59,7 @@ namespace MuscleApp.ViewModel
             {
                 if (Fyc <= 0.0 
                 && Fyt >= 0.0 
+                && !(Fyc == 0.0 && Fyt == 0.0) // strengths cannot be both 0 
                 && Ec >= 0.0 
                 && Et >= 0.0 
                 && !(Ec == 0.0 && Et == 0.0) // young moduli cannot be both 0 

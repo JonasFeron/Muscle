@@ -7,6 +7,8 @@ using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Muscle.Util;
 using Grasshopper.Kernel.Data;
+using MuscleApp;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Display
 {
@@ -20,7 +22,7 @@ namespace Muscle.Components.Display
         public DisplaySettingsComponent()
           : base("DisplaySettings", "Display",
               "Set the display of your structure",
-              "Muscles", "Display")
+              GHAssemblyName, Folder7_Display)
         {
 
         }
@@ -95,10 +97,10 @@ namespace Muscle.Components.Display
             if (!DA.GetDataTree(3, out gravity)) { }
             if (!DA.GetData(4, ref scale_dyn)) { }
 
-            AccessToAll.DisplaySupportAmpli = spt;
-            AccessToAll.DisplayLoadAmpli = load;
-            AccessToAll.DisplayDecimals = _decimal;
-            AccessToAll.DisplayDyn = scale_dyn; //Considered for the scaling of the display of the masses considered for the dynamic computation 
+            MuscleConfig.DisplaySupportAmpli = spt;
+            MuscleConfig.DisplayLoadAmpli = load;
+            MuscleConfig.DisplayDecimals = _decimal;
+            MuscleConfig.DisplayDyn = scale_dyn; //Considered for the scaling of the display of the masses considered for the dynamic computation 
             OnPingDocument().ExpirePreview(true); //it is better to only expire the solution of the GH_Support component
 
             List<GH_Vector> gravities = gravity.FlattenData();
@@ -109,91 +111,13 @@ namespace Muscle.Components.Display
             }
             if (gravities.Count == 1)
             {
-                AccessToAll.g = gravities[0].Value;
+                MuscleAppConfig.g = gravities[0].Value;
                 OnPingDocument().ExpireSolution();
             }
 
         }
 
 
-        ///// <summary>
-        ///// show on a Tag the value of the force for the line i
-        ///// </summary>
-        ///// <param name="args"></param> preview object
-        ///// <param name="i"></param> index of the line and of the force
-        //public void DrawTag(IGH_PreviewArgs args, int i)
-        //{
-        //    if (lines == null) return;
-        //    if (forces == null) return;
-        //    Point3d midpoint = lines[i].PointAt(0.5);
-
-        //    Plane plane;
-        //    args.Viewport.GetCameraFrame(out plane);
-        //    plane.Origin = midpoint;
-
-        //    double pixelsPerUnit;
-        //    args.Viewport.GetWorldToScreenScale(midpoint, out pixelsPerUnit);
-
-        //    double force_value = (double)Math.Round(forces[i], d_setting, MidpointRounding.AwayFromZero);
-        //    string force_txt = String.Format("{0}", force_value);
-        //    Color color;
-        //    if (force_value < 0) { color = Color.Red; }
-        //    else { color = Color.Blue; }
-
-        //    args.Display.Draw3dText(force_txt, color, plane, 14 / pixelsPerUnit, "Lucida Console");
-        //}
-
-        ///// <summary>
-        ///// Draw the lines with their associated colors and weights
-        ///// </summary>
-        //public override void DrawViewportWires(IGH_PreviewArgs args)
-        //{
-        //    GH_Gradient gradient = gradient_forces.gradient;
-        //    if (lines == null) return;
-        //    if (ColorParams == null) return;
-        //    if (WeightParams == null) return;
-        //    for (var i = 0; i < lines.Count; i++)
-        //    {
-        //        try
-        //        {
-        //            args.Display.DrawLine(lines[i], gradient.ColourAt(ColorParams[i]), WeightParams[i]);
-        //        }
-        //        catch
-        //        {
-        //            continue;
-        //        }
-        //    }
-        //}
-
-
-
-
-
-
-        ///// <summary>
-        ///// Draw the Tags showing the value of the forces. (0 = no value ; 1 = extremes only ; 2 = all values)
-        ///// </summary>
-        //public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        //{
-        //    if (v_setting == 0) { return; } //Abort if user decided to show no values
-
-        //    else if(v_setting == 1) //show only extreme values
-        //    {
-        //        for (int e = 0; e < ind_extremes.Count; e++)
-        //        {
-        //            int i = ind_extremes[e];
-        //            DrawTag(args, i);
-        //        }
-
-        //    }
-        //    else //show all points
-        //    {
-        //        for (int i = 0; i < lines.Count; i++)
-        //        {
-        //            DrawTag(args, i);
-        //        }
-        //    }
-        //}
 
 
         #endregion Methods 

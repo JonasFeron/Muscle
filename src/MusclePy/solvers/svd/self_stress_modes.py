@@ -166,10 +166,10 @@ def _recursively_reduce(modes : np.ndarray, elements_type : np.ndarray, zero_ato
                     # Check if more elements conform to their expected behavior
                     # (cables in tension, struts in compression)
                     # Count elements with correct sign before reduction
-                    conform_before = np.sum(np.sign(sorted_modes[j]) == elements_type)
+                    conform_before = np.sum(_is_conform(sorted_modes[j], elements_type))
                         
                     # Count elements with correct sign after reduction
-                    conform_after = np.sum(np.sign(mode_j) == elements_type)
+                    conform_after = np.sum(_is_conform(mode_j, elements_type))
                         
                     perform_reduction = conform_after > conform_before
                 
@@ -183,8 +183,8 @@ def _recursively_reduce(modes : np.ndarray, elements_type : np.ndarray, zero_ato
                     sorted_modes[j] = normalize_self_stress_mode(sorted_modes[j], zero_atol)
                     
                     # Ensure correct sign based on element types
-                    conform = np.sum(np.sign(sorted_modes[j]) == elements_type)
-                    anti_conform = np.sum(np.sign(-sorted_modes[j]) == elements_type)
+                    conform = np.sum(_is_conform(sorted_modes[j], elements_type))
+                    anti_conform = np.sum(_is_conform(-sorted_modes[j], elements_type))
                         
                     if anti_conform > conform:
                         sorted_modes[j] = -sorted_modes[j]
@@ -204,6 +204,39 @@ def _recursively_reduce(modes : np.ndarray, elements_type : np.ndarray, zero_ato
     
     return sorted_modes
 
+def _is_conform(tension, type):
+    """
+    Checks if the axial force in each element is of the correct sign for its type.
+    
+    Parameters
+    ----------
+    tension : np.ndarray
+        Axial forces in the elements (tension >0, compression <0)
+    type : np.ndarray
+        Elements' type (1 if elements withstand only tension, -1 if withstand only compression, 0 if withstand both)
+    
+    Returns
+    -------
+    np.ndarray
+        Boolean array indicating whether the element withstands the sign of the axial force or not
+    """
+    # assert the shape of tension and type
+    assert tension.shape == type.shape, "Tension and type arrays must have the same shape"
+    
+    # For elements that withstand only tension (type=1), tension should be ≥ 0
+    # For elements that withstand only compression (type=-1), tension should be ≤ 0
+    # For elements that withstand both (type=0), any tension value is acceptable
+    
+    # Elements that can only be in tension (cables)
+    tension_only_mask = (type == 1) 
+    tension_conform = np.logical_or(tension >= 0, ~tension_only_mask) # Is it in tension ? Or does it withstand compression ? 1 YES -> conform
+    
+    # Elements that can only be in compression (struts)
+    compression_only_mask = (type == -1)
+    compression_conform = np.logical_or(tension <= 0, ~compression_only_mask) # Is it in compression ? Or does it withstand tension ? 1 YES -> conform
+    
+    # Elements conform if they satisfy both conditions
+    return np.logical_and(tension_conform, compression_conform)
 
 def _sort_reduced_modes(reduced_modes, zero_tol=1e-6):
     """

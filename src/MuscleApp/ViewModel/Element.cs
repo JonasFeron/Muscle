@@ -15,7 +15,6 @@ namespace MuscleApp.ViewModel
         public int Idx { get; set; } //index of the element in the structure
         public string TypeName { get { return "Finite Element"; } }
         public string Name { get; set; }
-        public int Type { get; set; } //-1 if supposed in compression, 1 if supposed in tension. 0 if both.
         public Line Line { get; set; } // the line with a current length in the current state
         public List<int> EndNodes { get; set; } //index of the end nodes of the element
         public double FreeLength { get; set; } // [m] - the Free length of the element
@@ -42,7 +41,13 @@ namespace MuscleApp.ViewModel
         {
             get
             {
-                if (CS.IsValid && Material.IsValid && Line.IsValid && UC >= 0 && UC <= 1) return true;
+                if (CS.IsValid 
+                && Material.IsValid 
+                && Line.IsValid 
+                && Strength.T1>=0 
+                && Strength.T0 <=0
+                && !(Strength.T0 == 0.0 && Strength.T1 == 0.0)
+                ) return true;
                 else return false;
             }
         }
@@ -181,30 +186,43 @@ namespace MuscleApp.ViewModel
                 return Xsi * Fyc;
             }
         }
-        public virtual Interval AllowableStress
+        public Interval Strength
         {
             get
             {
                 return new Interval(Fyb, Material.Fyt);
             }
         }
-        public Interval AllowableTension
+        public Interval Resistance
         {
             get
             {
-                double Fyt = AllowableStress.T1;
-                double Fyb = AllowableStress.T0;
+                double Fyt = Strength.T1;
+                double Fyb = Strength.T0;
                 return new Interval(Fyb * CS.Area, Fyt * CS.Area);
             }
         }
-        public virtual double UC
+        public int Type // -1 if compression only element, 0 if withstand both, 1 if tension only element.
+        { 
+            get
+            {
+                double Fyt = Strength.T1; // strength in tension
+                double Fyb = Strength.T0; // strength in compression
+                if (Fyb < 0 && Fyt > 0) return 0; // Element withstands compression and tension -> Type = 0
+                if (Fyt <= 0) return -1; // if strength in tension is null or invalid, Element withstands compression only -> Type = -1
+                if (Fyb >= 0) return 1; // if strength in compression is null or invalid, Element withstands tension only -> Type = 1
+                else return 0; 
+            }
+        } 
+
+        public double UC
         {
             get
             {
                 try
                 {
-                    if (Tension >= 0) return Tension / AllowableTension.T1;
-                    else return Tension / AllowableTension.T0;
+                    if (Tension >= 0) return Tension / Resistance.T1;
+                    else return Tension / Resistance.T0;
                 }
                 catch (DivideByZeroException)
                 {
@@ -223,7 +241,6 @@ namespace MuscleApp.ViewModel
         {
             Idx = -1;
             Name = "General Element";
-            Type = -1;
             Line = new Line();
             FreeLength = -1.0;
             EndNodes = new List<int>();
@@ -240,7 +257,7 @@ namespace MuscleApp.ViewModel
             Init();
         }
 
-        public Element(Line aLine, ICrossSection aCS, BilinearMaterial aMat, string name, int type, string buckling_law, double buckling_factor)
+        public Element(Line aLine, ICrossSection aCS, BilinearMaterial aMat, string name, string buckling_law, double buckling_factor)
         {
             Init();
             Line = aLine;
@@ -248,18 +265,15 @@ namespace MuscleApp.ViewModel
             CS = aCS.Copy();
             Material = aMat.Copy();
             Name = name;
-            Type = type;
             BucklingLaw = buckling_law;
             kb = buckling_factor;
             if (kb <= 0) kb = 0;
-            if (BucklingLaw == "Slack") Material.Ec = 0; // cancel compression stiffness. Buckling strength will also be set to 0.
         }
 
 
         public Element(Element other) // Copy constructor. This allows to create a new Element and modify it, without alterating the original
         {
             Name = other.Name;
-            Type = other.Type;
             Line = other.Line;
             FreeLength = other.FreeLength;
             EndNodes = other.EndNodes;

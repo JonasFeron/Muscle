@@ -5,7 +5,9 @@ using Grasshopper.GUI.Gradient;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using Muscle.Components.Util;
+using Muscle.View;
+using static Muscle.Components.GHComponentsFolders;
+
 
 namespace Muscle.Components.Display
 {
@@ -19,7 +21,7 @@ namespace Muscle.Components.Display
         public ShowForces()
           : base("ShowForces", "ShowF",
               "Show the internal forces in the structures",
-              "Muscles", "Results")
+              GHAssemblyName, Folder7_Display)
         {
             gradient_forces = new GH_Gradient_Forces();
         }
@@ -87,7 +89,7 @@ namespace Muscle.Components.Display
         //tags
         private List<int> ind_extremes;
         private int v_setting; //(0 = no value ; 1 = extremes only ; 2 = all values)
-        private int d_setting = AccessToAll.DisplayDecimals;
+        private int d_setting = MuscleConfig.DisplayDecimals;
         private double text_size = 10;
 
 
@@ -261,7 +263,7 @@ namespace Muscle.Components.Display
         /// </summary>
         public override void DrawViewportMeshes(IGH_PreviewArgs args)
         {
-            d_setting = AccessToAll.DisplayDecimals; //number of decimals
+            d_setting = MuscleConfig.DisplayDecimals; //number of decimals
 
             if (v_setting == 0) { return; } //Abort if user decided to show no values
 
