@@ -1,9 +1,6 @@
 using Rhino.Geometry;
 namespace Muscle
 {
-    /// <summary>
-    /// A Class containing Properties and Methods accessible to All components
-    /// </summary>
     public static class MuscleConfig
     {
 
@@ -15,8 +12,5 @@ namespace Muscle
 
         public static double DisplayDyn = 0.005; //For the size of the masses considered in the dynamic computation
         #endregion Display
-        #region Physics
-        public static Vector3d g = new Vector3d(0, 0, -9.81);
-        #endregion Physics
     }
 }

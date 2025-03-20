@@ -6,6 +6,7 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Muscle.View;
 using MuscleApp.ViewModel;
+using static Muscle.Components.GHComponentsFolders;
 
 
 namespace Muscle.Components.StaticLoading
@@ -14,9 +15,9 @@ namespace Muscle.Components.StaticLoading
     {
 
         public PrestressScenarioComponent()
-          : base("Prestress", "Prestress",
+          : base("Prestress", "P",
               "Set the free lengths variation to apply on the elements through mechanical devices.",
-              "Muscles", "Loads")
+              GHAssemblyName, Folder3_StaticLoading)
         {
         }
 

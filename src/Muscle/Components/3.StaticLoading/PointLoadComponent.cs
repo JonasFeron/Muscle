@@ -49,42 +49,26 @@ namespace Muscle.Components.StaticLoading
             if (!DA.GetData(0, ref obj)) { return; }
             if (!DA.GetData(1, ref vector)) { return; }
 
-            if (obj.Value is IGH_Goo) //input is a GH_Goo object
+            // Scale vector to N (assuming input is in kN)
+            vector *= 1e3;
+
+            if (obj.Value is Node) //input is a node
             {
-                // Extract the underlying value from the GH_Goo<T> object using reflection
-                var ghGoo = obj.Value;
-                Type gooType = ghGoo.GetType();
-                var valueProperty = gooType.GetProperty("Value");
-                
-                if (valueProperty != null)
-                {
-                    object innerValue = valueProperty.GetValue(ghGoo, null);
-                    
-                    if (innerValue is Node)
-                    {
-                        Node node = innerValue as Node;
-                        DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(node, vector * 1e3)));
-                        return;
-                    }
-                    else if (innerValue is Point3d)
-                    {
-                        Point3d point = (Point3d)innerValue;
-                        DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(point, vector * 1e3)));
-                        return;
-                    }
-                }
+                int ind = (obj.Value as Node).Idx;
+                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
+                return;
             }
 
             if (obj.Value is GH_Point) //input is a node
             {
                 Point3d point = (obj.Value as GH_Point).Value;
-                DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(point, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
                 return;
             }
             if (obj.Value is Point3d) //input is a node
             {
                 Point3d point = (Point3d)obj.Value;
-                DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(point, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
                 return;
             }
 
@@ -92,9 +76,12 @@ namespace Muscle.Components.StaticLoading
             if (gh_ind.CastFrom(obj.Value))
             {
                 int ind = gh_ind.Value;
-                DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(ind, vector * 1e3)));
+                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
                 return;
             }
+
+            // If we get here, we couldn't handle the input
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input must be a Node, Point3d, or index");
         }
 
         #endregion Methods

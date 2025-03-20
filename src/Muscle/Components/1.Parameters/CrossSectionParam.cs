@@ -1,6 +1,6 @@
 ﻿using Grasshopper.Kernel;
-using Muscle.GHModel;
-using Rhino.Input.Custom;
+using Muscle.View;
+using MuscleApp.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;

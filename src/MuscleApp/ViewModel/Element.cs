@@ -36,7 +36,7 @@ namespace MuscleApp.ViewModel
                 return V * Material.Rho;
             }
         }
-        // public Vector3d Weight { get { return AccessToAll.g * Mass; } } //N
+        public Vector3d Weight { get { return MuscleAppConfig.g * Mass; } } //N
 
         public bool IsValid
         {
