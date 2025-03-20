@@ -1,6 +1,8 @@
 ﻿using Grasshopper.Kernel;
 using System;
 using System.Windows.Forms;
+using Muscle.View;
+using MuscleApp.ViewModel;
 
 namespace Muscle.Components.CreateModel
 {

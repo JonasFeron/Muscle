@@ -102,9 +102,9 @@ namespace Muscle.Components.ConstructFEModel
             if (!DA.GetDataTree(2, out gh_supports)) { gh_supports = null; }  //no default value can be inputted for a generic parameter
 
             // Convert Grasshopper data to MuscleApp ViewModel types
-            List<Element> elements = GH_Decoders.ToElements(gh_elements);
-            List<Point3d> points = GH_Decoders.ToPoint3ds(gh_points);
-            List<Support> supports = GH_Decoders.ToSupports(gh_supports);
+            List<Element> elements = GH_Decoders.ToElementList(gh_elements);
+            List<Point3d> points = GH_Decoders.ToPoint3dList(gh_points);
+            List<Support> supports = GH_Decoders.ToSupportList(gh_supports);
 
             // 2) Create and solve geometry object 
             Truss structure = null;

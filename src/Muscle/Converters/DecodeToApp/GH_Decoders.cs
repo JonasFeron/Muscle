@@ -131,9 +131,9 @@ namespace Muscle.Converters
         /// </summary>
         /// <param name="tree">The Grasshopper data tree containing points</param>
         /// <returns>A list of Point3d instances</returns>
-        public static List<Point3d> ToPoint3ds(GH_Structure<GH_Point> tree)
-        {
-            return FromTree<Point3d, GH_Point>(tree);
+        public static List<Point3d> ToPoint3dList(GH_Structure<GH_Point> ghPoints)
+        {   
+            return ghPoints.FlattenData().Select(ghp => ghp.Value).ToList();
         }
 
         #endregion Point Conversion

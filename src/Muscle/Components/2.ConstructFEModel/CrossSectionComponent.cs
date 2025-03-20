@@ -1,16 +1,17 @@
 ﻿using System;
 using Grasshopper.Kernel;
-using Muscle.Materials;
-using Muscle.ViewModel;
+using Muscle.View;
+using MuscleApp.ViewModel;
+using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Components.CreateModel
+namespace Muscle.Components.ConstructFEModel
 {
     public class CS_CircularComponent : GH_Component
     {
 
         #region Constructors
 
-        public CS_CircularComponent() : base("Cross Section - Circular", "Circular", "Define a (hollow) circular section", "Muscles", "Elements") { }
+        public CS_CircularComponent() : base("Cross Section - Circular", "Circular", "Define a (hollow) circular section", GHAssemblyName, Folder2_ConstructFEM) { }
 
         public override Guid ComponentGuid { get { return new Guid("f5fcd871-f31c-4a94-a249-467768a3e960"); } }
         #endregion Constructors
@@ -49,7 +50,7 @@ namespace Muscle.Components.CreateModel
 
         #region Constructors
 
-        public CS_SquareComponent() : base("Cross Section - Square", "Square", "Define a (hollow) square section", "Muscles", "Elements") { }
+        public CS_SquareComponent() : base("Cross Section - Square", "Square", "Define a (hollow) square section", GHAssemblyName, Folder2_ConstructFEM) { }
         public override Guid ComponentGuid { get { return new Guid("097eef62-fba6-4949-b39a-8d2abf8a5f6d"); } }
 
         #endregion Constructors

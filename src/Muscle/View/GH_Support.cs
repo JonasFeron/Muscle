@@ -1,11 +1,13 @@
-﻿using Grasshopper.Kernel;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using MuscleApp.ViewModel;
 using System.Collections.Generic;
 using Grasshopper.Kernel.Data;
 using System.IO;
-
+using System;
+using System.Drawing;
+using GH_IO.Serialization;
 
 namespace Muscle.View
 {
@@ -105,14 +107,14 @@ namespace Muscle.View
             return false;
         }
         #region Display
-        private static double height = 2.5 * AccessToAll.DisplaySupportAmpli;
-        private static double radius = 1.0 * AccessToAll.DisplaySupportAmpli;
+        private static double height = 2.5 * MuscleConfig.DisplaySupportAmpli;
+        private static double radius = 1.0 * MuscleConfig.DisplaySupportAmpli;
         private static double size = Math.Max(height, radius);
 
         public void DrawViewportMeshes(GH_PreviewMeshArgs args) // draw a cone for each fixed translation 
         {
-            height = 2.5 * AccessToAll.DisplaySupportAmpli;
-            radius = 1.0 * AccessToAll.DisplaySupportAmpli;
+            height = 2.5 * MuscleConfig.DisplaySupportAmpli;
+            radius = 1.0 * MuscleConfig.DisplaySupportAmpli;
             // TO Implement : size of the cones could be controlled by the user depending on the scale of the model
             if (!Value.isXFree) { args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(-1.0, 0.0, 0.0)), height, radius), Color.Blue); }
             if (!Value.isYFree) { args.Pipeline.DrawCone(new Cone(new Plane(Value.Point, new Vector3d(0.0, -1.0, 0.0)), height, radius), Color.Blue); }

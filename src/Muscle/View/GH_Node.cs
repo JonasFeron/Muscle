@@ -22,10 +22,10 @@ namespace Muscle.View
         //    get
         //    {
 
-        //        BoundingBox bBox = Value.Point.BoundingBox;
+        //        BoundingBox bBox = Value.Coordinates.BoundingBox;
         //        if (Value.IsValid)
         //        {
-        //            bBox.Inflate(Value.CS_Main.Dimension * 0.75);
+        //            bBox.Inflate(Value.CS.Dimension * 0.75);
         //        }
 
         //        return bBox;
@@ -37,7 +37,7 @@ namespace Muscle.View
 
         public override string TypeName { get { return Value.TypeName; } }
         public override bool IsValid { get { return Value.IsValid; } }
-        public override Node Value // The Geometry object is accessible from the Value property of the GH_Geometry
+        public override Node Value 
         {
             get { return base.Value; }
             set
@@ -82,7 +82,7 @@ namespace Muscle.View
             if (source is GH_Point)
             {
                 GH_Point gh_point = source as GH_Point;
-                Value.Point = gh_point.Value;
+                Value.Coordinates = gh_point.Value;
             }
             if (source is Node)
             {
@@ -97,14 +97,14 @@ namespace Muscle.View
         {
             if (typeof(Q).IsAssignableFrom(typeof(Point3d)))
             {
-                object n = Value.Point;
+                object n = Value.Coordinates;
                 target = (Q)n;
                 return true;
             }
 
             if (typeof(Q).IsAssignableFrom(typeof(GH_Point)))
             {
-                object n = Value.Point;
+                object n = Value.Coordinates;
                 target = (Q)(object)new GH_Point((Point3d)n);
                 return true;
             }

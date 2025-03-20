@@ -13,6 +13,7 @@ namespace MuscleApp.ViewModel
     {
         #region Properties
         public int Idx { get; set; } //index of the element in the structure
+        public string TypeName { get { return "Finite Element"; } }
         public string Name { get; set; }
         public int Type { get; set; } //-1 if supposed in compression, 1 if supposed in tension. 0 if both.
         public Line Line { get; set; } // the line with a current length in the current state

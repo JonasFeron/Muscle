@@ -45,7 +45,7 @@ namespace Muscle.View
 
         public void DrawViewportMeshes(GH_PreviewMeshArgs args)
         {
-            double DisplayLoadAmpli = AccessToAll.DisplayLoadAmpli;
+            double DisplayLoadAmpli = MuscleConfig.DisplayLoadAmpli;
 
             Vector3d v_display = Value.Vector * DisplayLoadAmpli / 10000.0;             //scale x [m] = x[kN]/10kN * LoadAmpliFactor
 
@@ -72,8 +72,8 @@ namespace Muscle.View
         public void DrawViewportWires(GH_PreviewWireArgs args)
         {
 
-            double DisplayLoadAmpli = AccessToAll.DisplayLoadAmpli;
-            int _decimal = AccessToAll.DisplayDecimals;
+            double DisplayLoadAmpli = MuscleConfig.DisplayLoadAmpli;
+            int _decimal = MuscleConfig.DisplayDecimals;
 
 
             Point3d node = Value.Point;

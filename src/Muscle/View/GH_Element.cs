@@ -24,7 +24,7 @@ namespace Muscle.View
                 BoundingBox bBox = Value.Line.BoundingBox;
                 if (Value.IsValid)
                 {
-                    bBox.Inflate(Value.CS_Main.Dimension * 0.75);
+                    bBox.Inflate(Value.CS.Dimension * 0.75);
                 }
 
                 return bBox;
@@ -32,7 +32,7 @@ namespace Muscle.View
         }
 
         public BoundingBox ClippingBox { get { return Boundingbox; } }
-        public override string TypeDescription { get { return "An Finite Element may be a cable, a strut, a Element or a general element."; } }
+        public override string TypeDescription { get { return "A Finite Element may be a cable, a strut, or a general element depending on the bilinear material properties."; } }
 
         public override string TypeName
         {
@@ -42,23 +42,11 @@ namespace Muscle.View
                 return Value.TypeName;
             }
         }
-        public override Element Value // The Geometry object is accessible from the Value property of the GH_Geometry
+        public override Element Value 
         {
             get { return base.Value; }
             set
             {
-                if (value is Cable)
-                {
-                    base.Value = value as Cable;
-                }
-                if (value is Strut)
-                {
-                    base.Value = value as Strut;
-                }
-                if (value is Bar)
-                {
-                    base.Value = value as Bar;
-                }
                 base.Value = value;
             }
         }
@@ -76,18 +64,6 @@ namespace Muscle.View
         {
             Value = e;
         }
-        //public GH_Element(Bar b)
-        //{
-        //    Value = b;
-        //}
-        //public GH_Element(Strut s)
-        //{
-        //    Value = s;
-        //}
-        //public GH_Element(Cable c)
-        //{
-        //    Value = c;
-        //}
         public GH_Element(GH_Goo<Element> gh_e)
         {
             Value = gh_e.Value;
@@ -118,21 +94,6 @@ namespace Muscle.View
                 GH_Line gh_line = source as GH_Line;
                 Value.Line = gh_line.Value;
             }
-            if (source is Cable)
-            {
-                Cable e = source as Cable;
-                Value = e;
-            }
-            if (source is Strut)
-            {
-                Strut e = source as Strut;
-                Value = e;
-            }
-            if (source is Bar)
-            {
-                Bar e = source as Bar;
-                Value = e;
-            }
             if (source is Element)
             {
                 Element e = source as Element;
@@ -161,24 +122,6 @@ namespace Muscle.View
             {
                 object line = Value.Line;
                 target = (Q)line;
-                return true;
-            }
-            if (typeof(Q).IsAssignableFrom(typeof(Cable)))
-            {
-                object e = Value;
-                target = (Q)e;
-                return true;
-            }
-            if (typeof(Q).IsAssignableFrom(typeof(Strut)))
-            {
-                object e = Value;
-                target = (Q)e;
-                return true;
-            }
-            if (typeof(Q).IsAssignableFrom(typeof(Bar)))
-            {
-                object e = Value;
-                target = (Q)e;
                 return true;
             }
             if (typeof(Q).IsAssignableFrom(typeof(Element)))
@@ -235,7 +178,7 @@ namespace Muscle.View
             BoundingBox bBox = xform.TransformBoundingBox(Value.Line.BoundingBox);
             if (Value.IsValid)
             {
-                bBox.Inflate(Value.CS_Main.Dimension * 0.75);
+                bBox.Inflate(Value.CS.Dimension * 0.75);
             }
 
             return bBox;

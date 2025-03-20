@@ -1,9 +1,11 @@
 ﻿using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System;
+using Muscle.View;
+using MuscleApp.ViewModel;
+using static Muscle.Components.GHComponentsFolders;
 
-
-namespace Muscle.Components.CreateModel
+namespace Muscle.Components.ConstructFEModel
 {
     public class SupportYComponent : GH_Component
     {
@@ -18,7 +20,7 @@ namespace Muscle.Components.CreateModel
 
         public SupportYComponent() : base("Support Y", "SptY",
                                                   "Set the Y support condition of a point",
-                                          "Muscles", "Model")
+                                          GHAssemblyName, Folder2_ConstructFEM)
         {
         }
 

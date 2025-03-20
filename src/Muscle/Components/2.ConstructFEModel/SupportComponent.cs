@@ -1,10 +1,12 @@
 ﻿using Grasshopper.Kernel;
-using Muscle.GHModel;
-using Muscle.ViewModel;
+using Muscle.View;
+using MuscleApp.ViewModel;
 using Rhino.Geometry;
 using System;
+using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Components.CreateModel
+
+namespace Muscle.Components.ConstructFEModel
 {
     public class SupportComponent : GH_Component
     {
@@ -19,7 +21,7 @@ namespace Muscle.Components.CreateModel
 
         #region Constructors
 
-        public SupportComponent() : base("Support", "Spt", "Set the X Y Z support conditions of a point", "Muscles", "Model")
+        public SupportComponent() : base("Support", "Spt", "Set the X Y Z support conditions of a point", GHAssemblyName, Folder2_ConstructFEM)
         {
         }
 
