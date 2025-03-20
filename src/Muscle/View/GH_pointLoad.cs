@@ -4,14 +4,7 @@ using Rhino.Geometry;
 using System.Drawing;
 using GH_IO.Serialization;
 using System;
-
-/* Modification non fusionnée à partir du projet 'Muscle (net48)'
-Ajouté :
-using Muscle;
-using Muscle.Loads;
-using Muscle.GHModel;
-*/
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 
 namespace Muscle.View
 {

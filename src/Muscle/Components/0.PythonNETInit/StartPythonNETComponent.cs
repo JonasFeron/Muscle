@@ -44,7 +44,7 @@ using System.IO;
 using MuscleCore.PythonNETInit;
 using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Components
+namespace Muscle.Components.PythonNETInit
 {
     public class StartPythonNETComponent : GH_Component
     {

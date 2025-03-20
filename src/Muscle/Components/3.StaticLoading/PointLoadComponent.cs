@@ -1,8 +1,10 @@
-﻿using Grasshopper.Kernel;
+using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
+using Muscle.View;
 using Rhino.Geometry;
 using System;
+using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.StaticLoading
 {
@@ -17,7 +19,7 @@ namespace Muscle.Components.StaticLoading
         #region Constructors
 
         public PointLoadComponent() :
-                    base("Point load", "Load", "Create a Point load by defining a vector", "Muscles", "Loads")
+                    base("Point load", "Load", "Create a Point load by defining a vector.", GHAssemblyName, Folder3_StaticLoading)
         {
         }
 
@@ -41,41 +43,56 @@ namespace Muscle.Components.StaticLoading
 
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Point3d point = new Point3d();
-            int ind = -1;
-            //Node node = new Node();
             GH_ObjectWrapper obj = new GH_ObjectWrapper();
-            if (!DA.GetData(0, ref obj)) { return; }
-
             Vector3d vector = new Vector3d();
+
+            if (!DA.GetData(0, ref obj)) { return; }
             if (!DA.GetData(1, ref vector)) { return; }
 
-
-            if (obj.Value is Node) //input is a node
+            if (obj.Value is IGH_Goo) //input is a GH_Goo object
             {
-                ind = (obj.Value as Node).Ind;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector * 1e3)));
-                return;
+                // Extract the underlying value from the GH_Goo<T> object using reflection
+                var ghGoo = obj.Value;
+                Type gooType = ghGoo.GetType();
+                var valueProperty = gooType.GetProperty("Value");
+                
+                if (valueProperty != null)
+                {
+                    object innerValue = valueProperty.GetValue(ghGoo, null);
+                    
+                    if (innerValue is Node)
+                    {
+                        Node node = innerValue as Node;
+                        DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(node, vector * 1e3)));
+                        return;
+                    }
+                    else if (innerValue is Point3d)
+                    {
+                        Point3d point = (Point3d)innerValue;
+                        DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(point, vector * 1e3)));
+                        return;
+                    }
+                }
             }
 
             if (obj.Value is GH_Point) //input is a node
             {
-                point = (obj.Value as GH_Point).Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector * 1e3)));
+                Point3d point = (obj.Value as GH_Point).Value;
+                DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(point, vector * 1e3)));
                 return;
             }
             if (obj.Value is Point3d) //input is a node
             {
-                point = (Point3d)obj.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector * 1e3)));
+                Point3d point = (Point3d)obj.Value;
+                DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(point, vector * 1e3)));
                 return;
             }
 
             GH_Integer gh_ind = new GH_Integer();
             if (gh_ind.CastFrom(obj.Value))
             {
-                ind = gh_ind.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector * 1e3)));
+                int ind = gh_ind.Value;
+                DA.SetData(0, new GH_PointLoad(new MuscleApp.ViewModel.PointLoad(ind, vector * 1e3)));
                 return;
             }
         }

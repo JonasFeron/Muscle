@@ -2,13 +2,6 @@
 using System;
 using Grasshopper.Kernel.Types;
 
-/* Modification non fusionnée à partir du projet 'Muscle (net48)'
-Ajouté :
-using Muscle;
-using Muscle.CrossSections;
-using Muscle.ViewModel;
-*/
-
 namespace MuscleApp.ViewModel
 {
     /// <summary>

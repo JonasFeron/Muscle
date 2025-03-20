@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using GH_IO.Serialization;
+﻿using GH_IO.Serialization;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using MuscleApp.ViewModel;

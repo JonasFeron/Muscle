@@ -1,7 +1,6 @@
 ﻿using GH_IO.Serialization;
 using Grasshopper.Kernel.Types;
-using Muscle.Materials;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 
 namespace Muscle.View
 {

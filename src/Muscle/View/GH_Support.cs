@@ -1,20 +1,11 @@
-﻿using System.Drawing;
-using GH_IO.Serialization;
-using Grasshopper.Kernel;
+﻿using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using System;
+using MuscleApp.ViewModel;
 using System.Collections.Generic;
 using Grasshopper.Kernel.Data;
 using System.IO;
 
-/* Modification non fusionnée à partir du projet 'Muscle (net48)'
-Ajouté :
-using Muscle;
-using Muscle.Supports;
-using Muscle.GHModel;
-*/
-using Muscle.ViewModel;
 
 namespace Muscle.View
 {

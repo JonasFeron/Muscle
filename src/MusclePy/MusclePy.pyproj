@@ -24,9 +24,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="femodel\prestress_scenario.py" />
     <Compile Include="femodel\pyelements.py" />
     <Compile Include="femodel\pynodes.py" />
     <Compile Include="femodel\pytruss.py" />
+    <Compile Include="femodel\__init__.py" />
     <Compile Include="solvers\dm\linear_dm.py" />
     <Compile Include="solvers\dm\nonlinear_dm.py" />
     <Compile Include="solvers\dm\__init__.py" />
@@ -54,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="femodel\" />
+    <Folder Include="femodel\__pycache__\" />
     <Folder Include="solvers\" />
     <Folder Include="solvers\dm\" />
     <Folder Include="solvers\dm\__pycache__\" />
@@ -67,8 +70,14 @@
     <Folder Include="solvers\__pycache__\" />
     <Folder Include="utils\" />
     <Folder Include="utils\__pycache__\" />
+    <Folder Include="__pycache__\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="femodel\__pycache__\prestress_scenario.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\pyelements.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\pynodes.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\pytruss.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\__init__.cpython-312.pyc" />
     <Content Include="solvers\dm\__pycache__\linear_dm.cpython-312.pyc" />
     <Content Include="solvers\dm\__pycache__\nonlinear_dm.cpython-312.pyc" />
     <Content Include="solvers\dm\__pycache__\__init__.cpython-312.pyc" />
@@ -94,6 +103,9 @@
     <Content Include="solvers\__pycache__\__init__.cpython-312.pyc" />
     <Content Include="utils\__pycache__\matrix_calculations.cpython-312.pyc" />
     <Content Include="utils\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="__pycache__\test_script.cpython-312-pytest-7.4.4.pyc" />
+    <Content Include="__pycache__\test_script.cpython-312.pyc" />
+    <Content Include="__pycache__\__init__.cpython-312.pyc" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

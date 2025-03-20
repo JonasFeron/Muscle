@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Drawing;
-using System.Collections.Generic;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 
 namespace Muscle.View
 {

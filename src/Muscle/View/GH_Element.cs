@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Drawing;
-using System.Collections.Generic;
-//using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-
-/* Modification non fusionnée à partir du projet 'Muscle (net48)'
-Ajouté :
-using Muscle;
-using Muscle.Elements;
-using Muscle.GHModel;
-*/
-using Muscle.ViewModel;
+using MuscleApp.ViewModel;
 
 namespace Muscle.View
 {

@@ -289,9 +289,6 @@ namespace MuscleApp.ViewModel
 
         public override string ToString()
         {
-            //if (this is Cable) return (this as Cable).ToString();
-            //if (this is Strut) return (this as Strut).ToString();
-            //if (this is Bar) return (this as Bar).ToString();
             return $"{Name} {Idx} with free length {FreeLength:F3}m and mass {Mass:F1}kg.\n    In Compression : A={CS.Area * 1e6:F0}mm^2, E={Material.Ec * 1e-6:F0}MPa.\n   In Tension : A={CS.Area * 1e6:F0}mm^2, E={Material.Et * 1e-6:F0}MPa.";
         }
 
