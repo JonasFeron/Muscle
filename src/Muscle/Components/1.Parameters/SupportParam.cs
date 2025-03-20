@@ -6,7 +6,8 @@ using Rhino.Input.Custom;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using Muscle.GHModel;
+using Muscle.View;
+using MuscleApp.ViewModel;
 using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Param

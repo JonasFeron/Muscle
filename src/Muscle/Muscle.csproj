@@ -24,18 +24,30 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <Compile Remove="Components\5.DeconstructFEModel\**" />
+    <Compile Remove="Components\6.Dynamic\**" />
+    <Compile Remove="Components\7.Display\**" />
+    <Compile Remove="Components\8.Util\**" />
     <Compile Remove="Dynamics\**" />
     <Compile Remove="GHModel\**" />
     <Compile Remove="PythonLink\**" />
     <Compile Remove="PythonNETComponents\**" />
     <Compile Remove="Resources\**" />
     <Compile Remove="Solvers\**" />
+    <EmbeddedResource Remove="Components\5.DeconstructFEModel\**" />
+    <EmbeddedResource Remove="Components\6.Dynamic\**" />
+    <EmbeddedResource Remove="Components\7.Display\**" />
+    <EmbeddedResource Remove="Components\8.Util\**" />
     <EmbeddedResource Remove="Dynamics\**" />
     <EmbeddedResource Remove="GHModel\**" />
     <EmbeddedResource Remove="PythonLink\**" />
     <EmbeddedResource Remove="PythonNETComponents\**" />
     <EmbeddedResource Remove="Resources\**" />
     <EmbeddedResource Remove="Solvers\**" />
+    <None Remove="Components\5.DeconstructFEModel\**" />
+    <None Remove="Components\6.Dynamic\**" />
+    <None Remove="Components\7.Display\**" />
+    <None Remove="Components\8.Util\**" />
     <None Remove="Dynamics\**" />
     <None Remove="GHModel\**" />
     <None Remove="PythonLink\**" />
@@ -46,6 +58,8 @@
   
   <ItemGroup>
     <Compile Remove="AccessToAll.cs" />
+    <Compile Remove="Components\3.StaticLoading\SelfStressScenario.cs" />
+    <Compile Remove="View\GH_pointMass.cs" />
   </ItemGroup>
   
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using Grasshopper.Kernel;
 using Muscle.View;
 using MuscleApp.ViewModel;
+using Rhino.Geometry;
 using System;
 using static Muscle.Components.GHComponentsFolders;
 

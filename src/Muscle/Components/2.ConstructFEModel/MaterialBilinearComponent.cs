@@ -1,4 +1,5 @@
 ﻿using Grasshopper.Kernel;
+using Rhino.Geometry;
 using Muscle.View;
 using MuscleApp.ViewModel;
 using System;
@@ -75,6 +76,7 @@ namespace Muscle.Components.ConstructFEModel
             // collect datas
             string name = "No Name";
             double youngC = 0.0; //value in MPa
+            double youngT = 0.0; //value in MPa
             Interval fy = new Interval(double.NegativeInfinity, double.PositiveInfinity); //value in MPa
             double rho = 0.0; //value in kg/m3
 

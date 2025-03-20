@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 using Grasshopper.Kernel;
-
 using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
 using Muscle.View;
 using Muscle.Converters;
+using MuscleCore.PythonNETInit;
 using static Muscle.Components.GHComponentsFolders;
 
 
@@ -98,9 +98,10 @@ namespace Muscle.Components.Solvers
             Truss structure = gh_struct.Value;
             
              // 3) Solve using the NonlinearDM solver
+            ResultsSVD resultsSVD = null;
             try
             {
-                ResultsSVD? resultsSVD = SVD.Solve(structure, rTol);
+                resultsSVD = SVD.Solve(structure, rTol);
             }
             catch (Exception e)
             {

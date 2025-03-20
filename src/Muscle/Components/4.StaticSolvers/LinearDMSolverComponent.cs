@@ -54,6 +54,7 @@ using Muscle.View;
 using Muscle.Converters;
 using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
+using MuscleCore.PythonNETInit;
 using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Solvers
@@ -123,9 +124,10 @@ namespace Muscle.Components.Solvers
             }
 
             // 3) Solve using the LinearDM solver
+            Truss result = null;
             try
             {
-                Truss? result = LinearDM.Solve(truss, pointLoads, prestress);
+                result = LinearDM.Solve(truss, pointLoads, prestress);
             }
             catch (Exception e)
             {

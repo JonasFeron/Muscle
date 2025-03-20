@@ -2,6 +2,7 @@
 using Muscle.View;
 using MuscleApp.ViewModel;
 using System;
+using Rhino.Geometry;
 using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.ConstructFEModel

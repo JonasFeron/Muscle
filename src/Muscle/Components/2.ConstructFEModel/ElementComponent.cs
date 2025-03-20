@@ -70,8 +70,8 @@ namespace Muscle.Components.ConstructFEModel
             var laws = pManager[5] as Grasshopper.Kernel.Parameters.Param_Integer;
             for (int i = 0; i < _bucklingLaws.Length; i++)
             {
-                law = _bucklingLaws[i];
-                idx = _bucklingLawsIdx[i];
+                string law = _bucklingLaws[i];
+                int idx = _bucklingLawsIdx[i];
                 laws.AddNamedValue(law, idx);
             }
         }

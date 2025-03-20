@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
+using Rhino.Geometry;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
@@ -110,7 +112,7 @@ namespace Muscle.Components.ConstructFEModel
             Truss structure = null;
             try
             {
-                structure = new StructureState(elements, points, supports); // A geometry object is created from lines, points and supports. The validity of the inputs are checked when constructing the object.
+                structure = new Truss(elements, points, supports); // A geometry object is created from lines, points and supports. The validity of the inputs are checked when constructing the object.
             }
             catch (InvalidDataException e) // error if the supports inputted by the user are not real supports
             {

@@ -1,5 +1,6 @@
-﻿using Grasshopper.Kernel;
-using Muscle.GHModel;
+using Grasshopper.Kernel;
+using Muscle.View;
+using MuscleApp.ViewModel;
 using Rhino.Input.Custom;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Param
 {
-    public class MaterialParam : GH_PersistentParam<GH_Muscles_Material>
+    public class BilinearMaterialParam : GH_PersistentParam<GH_BilinearMaterial>
     {
 
 
@@ -17,7 +18,7 @@ namespace Muscle.Components.Param
         /// <summary>
         /// This is the parameter constructor. It uses base constructor to set name, nickname, description, category and subcategory of the parameter.
         /// </summary>
-        public MaterialParam() : base("Material", "M", "Contains a collection of materials.",  GHAssemblyName, Folder1_Param) { }
+        public BilinearMaterialParam() : base("Material", "M", "Contains a collection of bilinear materials.",  GHAssemblyName, Folder1_Param) { }
 
 
         /// <summary>
@@ -35,13 +36,13 @@ namespace Muscle.Components.Param
         /// <param name="menu"></param>
         protected override void Menu_AppendManageCollection(ToolStripDropDown menu) { }
 
-        protected override GH_GetterResult Prompt_Plural(ref List<GH_Muscles_Material> values)
+        protected override GH_GetterResult Prompt_Plural(ref List<GH_BilinearMaterial> values)
         {
-            values = new List<GH_Muscles_Material>();
+            values = new List<GH_BilinearMaterial>();
 
             while (true)
             {
-                GH_Muscles_Material value = null;
+                GH_BilinearMaterial value = null;
                 switch (Prompt_Singular(ref value))
                 {
                     case GH_GetterResult.success:
@@ -58,7 +59,7 @@ namespace Muscle.Components.Param
             }
         }
 
-        protected override GH_GetterResult Prompt_Singular(ref GH_Muscles_Material value)
+        protected override GH_GetterResult Prompt_Singular(ref GH_BilinearMaterial value)
         {
             GetString go = new GetString();
 
@@ -82,7 +83,10 @@ namespace Muscle.Components.Param
                 if (get == Rhino.Input.GetResult.Nothing) { return GH_GetterResult.accept; }
                 if (get == Rhino.Input.GetResult.String)
                 {
-                    value = new GH_Muscles_Material(new Muscles_Material(go.StringResult(), toggleYoung.CurrentValue * 1e6, toggleFy.CurrentValue * 1e6, toggleRho.CurrentValue));
+                    // Use the 6-parameter constructor: name, Ec, Et, Fyc, Fyt, rho
+                    double E = toggleYoung.CurrentValue * 1e6;  // Convert from MPa to N/m²
+                    double Fy = toggleFy.CurrentValue * 1e6;    // Convert from MPa to N/m²
+                    value = new GH_BilinearMaterial(new BilinearMaterial(go.StringResult(), E, E, -Fy, Fy, toggleRho.CurrentValue));
                     return GH_GetterResult.success;
                 }
             }

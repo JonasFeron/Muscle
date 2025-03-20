@@ -54,6 +54,7 @@ using Muscle.View;
 using Muscle.Converters;
 using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
+using MuscleCore.PythonNETInit;
 using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Solvers
@@ -122,9 +123,10 @@ namespace Muscle.Components.Solvers
             }
 
             // 3) Solve using the NonlinearDM solver
+            Truss result = null;
             try
             {
-                Truss? result = NonlinearDM.Solve(truss, pointLoads, nSteps);
+                result = NonlinearDM.Solve(truss, pointLoads, nSteps);
             }
             catch (Exception e)
             {

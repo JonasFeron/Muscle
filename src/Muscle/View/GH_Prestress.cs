@@ -1,9 +1,9 @@
-﻿using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Types;
 using MuscleApp.ViewModel;
 
 namespace Muscle.View
 {
-    class GH_Prestress : GH_Goo<Prestress>
+    public class GH_Prestress : GH_Goo<Prestress>
     {
         #region Properties
 

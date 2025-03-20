@@ -3,6 +3,9 @@ using System;
 using System.Windows.Forms;
 using Muscle.View;
 using MuscleApp.ViewModel;
+using Rhino.Geometry;
+using static Muscle.Components.GHComponentsFolders;
+
 
 namespace Muscle.Components.CreateModel
 {

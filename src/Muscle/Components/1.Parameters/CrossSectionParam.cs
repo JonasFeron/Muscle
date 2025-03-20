@@ -1,6 +1,5 @@
 ﻿using Grasshopper.Kernel;
 using Muscle.View;
-using MuscleApp.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -9,7 +8,7 @@ using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.Param
 {
-    public class ElementParam : GH_PersistentParam<GH_CrossSection>
+    public class CrossSectionParam : GH_PersistentParam<GH_CrossSection>
     {
         #region Properties
 
@@ -18,7 +17,7 @@ namespace Muscle.Components.Param
 
         #region Constructors
 
-        public ElementParam() : base("Cross Section", "CS", "Contains a collection of cross sections", GHAssemblyName, Folder1_Param) { }
+        public CrossSectionParam() : base("Cross Section", "CS", "Contains a collection of cross sections", GHAssemblyName, Folder1_Param) { }
         public override Guid ComponentGuid { get { return new Guid("96b876dc-49b2-43c4-97d8-f200720e57a2"); } }
 
 

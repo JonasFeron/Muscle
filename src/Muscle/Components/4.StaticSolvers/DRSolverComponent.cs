@@ -6,6 +6,7 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using MuscleCore.Solvers;
+using MuscleCore.PythonNETInit;
 using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
 using Muscle.View;
@@ -109,7 +110,7 @@ namespace Muscle.Components.Solvers
             }
 
             //1) Collect Data
-            GH_Truss structure = new GH_Truss();
+            GH_Truss gh_truss = new GH_Truss();
             GH_Structure<IGH_Goo> gh_loads = new GH_Structure<IGH_Goo>();
             GH_Structure<IGH_Goo> gh_prestress = new GH_Structure<IGH_Goo>();
             double rtol = -1;
@@ -120,7 +121,7 @@ namespace Muscle.Components.Solvers
             double amplMass = -1;
             double minMass = -1;
 
-            if (!DA.GetData(0, ref structure)) { return; }
+            if (!DA.GetData(0, ref gh_truss)) { return; }
             if (!DA.GetDataTree(1, out gh_loads)) { }
             if (!DA.GetDataTree(2, out gh_prestress)) { }
             if (!DA.GetData(3, ref rtol)) { }
@@ -155,10 +156,11 @@ namespace Muscle.Components.Solvers
                 return;
             }
 
+            Truss result = null;
             // 3) Solve using the LinearDM solver
             try
             {
-                Truss? result = DynamicRelaxation.Solve(truss, pointLoads, prestress, user_config);
+                result = MuscleApp.Solvers.DynamicRelaxation.Solve(truss, pointLoads, prestress, user_config);
             }
             catch (Exception e)
             {
