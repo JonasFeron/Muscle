@@ -5,6 +5,7 @@ using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
+using MuscleCore.Solvers;
 using MuscleApp.ViewModel;
 using MuscleApp.Solvers;
 using Muscle.View;
@@ -15,6 +16,15 @@ namespace Muscle.Components.Solvers
 {
     public class DRSolverComponent : GH_Component
     {
+
+        private static CoreConfigDR defaultConfig = new CoreConfigDR();
+        private static double default_dt = defaultConfig.Dt;
+        private static double default_rtol = defaultConfig.ZeroResidualRTol;
+        private static double default_atol = defaultConfig.ZeroResidualATol;
+        private static int default_maxTimeStep = defaultConfig.MaxTimeStep;
+        private static int default_maxPeakReset = defaultConfig.MaxKEResets;
+        private static double default_amplMass = defaultConfig.MassAmplFactor;
+        private static double default_minMass = defaultConfig.MinMass;
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -44,7 +54,7 @@ namespace Muscle.Components.Solvers
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("8c28bde8-42b8-46a8-b2f4-d3fc8ae5a098"); }
+            get { return new Guid("c040d80e-f794-455d-8f4f-9d82c5b59913"); }
         }
 
         /// <summary>
@@ -55,13 +65,13 @@ namespace Muscle.Components.Solvers
             pManager.AddGenericParameter("Structure", "struct", "A structure on which the point loads and prestress will be applied via the dynamic relaxation method.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Point Loads", "PL (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Prestress", "P (m)", "Prestress Scenario containing the free length variations (m) to apply on the specified elements.", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Relative tolerance", "rtol (-)", "Set the relative tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, 0.0001);
-            pManager.AddNumberParameter("Absolute tolerance", "atol (N)", "Set the absolute tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, 0.000001);
-            pManager.AddNumberParameter("Delta t", "Dt (s)", "The time increment for the dynamic relaxation method.", GH_ParamAccess.item, 0.01);
-            pManager.AddIntegerParameter("Max Time Step", "max it (-)", "Maximum number of time increment before the solver aborts looking for the equilibrium", GH_ParamAccess.item, 10000);
-            pManager.AddIntegerParameter("Max Peak Reset", "max peak (/)", "Maximum number of kinetic energy resets before the solver aborts looking for the equilibrium.", GH_ParamAccess.item, 1000);
-            pManager.AddNumberParameter("Mass Amplification", "Ampl (/)", "Amplification factor for the fictitious masses in case of convergence issue.", GH_ParamAccess.item, 1);
-            pManager.AddNumberParameter("Minimum Mass", "Min (kg)", "Minimum fictitious mass applied on the degrees of freedom where fictitious mass equals 0 (i.e. 0 tangent stiffness).", GH_ParamAccess.item, 0.005);
+            pManager.AddNumberParameter("Relative tolerance", "rtol (-)", "Set the relative tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, default_rtol);
+            pManager.AddNumberParameter("Absolute tolerance", "atol (N)", "Set the absolute tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, default_atol);
+            pManager.AddNumberParameter("Delta t", "Dt (s)", "The time increment for the dynamic relaxation method.", GH_ParamAccess.item, default_dt);
+            pManager.AddIntegerParameter("Max Time Step", "max it (-)", "Maximum number of time increment before the solver aborts looking for the equilibrium", GH_ParamAccess.item, default_maxTimeStep);
+            pManager.AddIntegerParameter("Max Peak Reset", "max peak (/)", "Maximum number of kinetic energy resets before the solver aborts looking for the equilibrium.", GH_ParamAccess.item, default_maxPeakReset);
+            pManager.AddNumberParameter("Mass Amplification", "Ampl (/)", "Amplification factor for the fictitious masses in case of convergence issue.", GH_ParamAccess.item, default_amplMass);
+            pManager.AddNumberParameter("Minimum Mass", "Min (kg)", "Minimum fictitious mass applied on the degrees of freedom where fictitious mass equals 0 (i.e. 0 tangent stiffness).", GH_ParamAccess.item, default_minMass);
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
@@ -91,24 +101,19 @@ namespace Muscle.Components.Solvers
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = "MainDynamicRelaxation"; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
-
-            if (!AccessToAll.hasPythonStarted)
+            // Check if Python.NET is initialized
+            if (!PythonNETManager.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
                 return;
             }
-            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript + ".py")))
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
-                return;
-            }
 
             //1) Collect Data
-            StructureObj structure = new StructureObj();
-            GH_Structure<IGH_Goo> gh_loads_ext = new GH_Structure<IGH_Goo>();
-            GH_Structure<IGH_Goo> gh_loads_prestress = new GH_Structure<IGH_Goo>();
-            double residual0Threshold = -1;
+            GH_Truss structure = new GH_Truss();
+            GH_Structure<IGH_Goo> gh_loads = new GH_Structure<IGH_Goo>();
+            GH_Structure<IGH_Goo> gh_prestress = new GH_Structure<IGH_Goo>();
+            double rtol = -1;
+            double atol = -1;
             double dt = -1;
             int maxTimeStep = -1;
             int maxKEReset = -1;
@@ -116,143 +121,75 @@ namespace Muscle.Components.Solvers
             double minMass = -1;
 
             if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetDataTree(1, out gh_loads_ext)) { }
-            if (!DA.GetDataTree(2, out gh_loads_prestress)) { }
-            if (!DA.GetData(3, ref residual0Threshold)) { }
-            if (!DA.GetData(4, ref dt)) { }
-            if (!DA.GetData(5, ref maxTimeStep)) { }
-            if (!DA.GetData(6, ref maxKEReset)) { }
-            if (!DA.GetData(7, ref amplMass)) { }
-            if (!DA.GetData(8, ref minMass)) { }
+            if (!DA.GetDataTree(1, out gh_loads)) { }
+            if (!DA.GetDataTree(2, out gh_prestress)) { }
+            if (!DA.GetData(3, ref rtol)) { }
+            if (!DA.GetData(4, ref atol)) { }
+            if (!DA.GetData(5, ref dt)) { }
+            if (!DA.GetData(6, ref maxTimeStep)) { }
+            if (!DA.GetData(7, ref maxKEReset)) { }
+            if (!DA.GetData(8, ref amplMass)) { }
+            if (!DA.GetData(9, ref minMass)) { }
 
-            //2) Format datas before sending and solving in python
-            StructureObj new_structure = structure.Duplicate(); //a) Duplicate the structure. The elements still contains the Initial Tension forces. The nodes are in their previously equilibrated coordinates with previous load already applied on it.
-
-
-            bool success1 = RegisterPointLoads(new_structure, gh_loads_ext.FlattenData()); // new_structure.LoadsToApply was filled with the loads
-            bool success2 = RegisterPrestressLoads(new_structure, gh_loads_prestress.FlattenData()); // new_structure.LengtheningsToApply was filled with the length variations
-
-            new_structure.Residual0Threshold = residual0Threshold;
-            new_structure.DR = new DRMethod(dt, amplMass, minMass, maxTimeStep, maxKEReset);
-
-            // // even if both success 1 and 2 failed to collect data, we can still run the analysis because the LengtheningsToApply can also come from direct change of the Free lengths 
-            //if (!success1 && !success2)
-            //{
-            //    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to collect load data");
-            //    return; //abort if both failed
-            //} 
-
-            //3) Solve in python
-
-            SharedData data = new SharedData(new_structure); //Object data contains all the essential informations of structure
-            SharedSolverResult result = new SharedSolverResult();
-
-            string jsonData = JsonConvert.SerializeObject(data, Formatting.None);
-            dynamic jsonResult = null;
-
-            //2) Solve in python
-            var m_threadState = PythonEngine.BeginAllowThreads();
-
-            using (Py.GIL())
+           // 2) Transform data before solving 
+            Truss truss = gh_truss.Value;
+            List<PointLoad> pointLoads = GH_Decoders.ToPointLoadList(gh_loads);
+            List<Prestress> prestress = GH_Decoders.ToPrestressList(gh_prestress);
+            CoreConfigDR user_config = new CoreConfigDR
             {
-                // Safe to access Python here.
-                try
-                {
-                    dynamic script = PyModule.Import(pythonScript);
-                    dynamic mainFunction = script.main;
-                    jsonResult = mainFunction(jsonData);
-                    JsonConvert.PopulateObject((string)jsonResult, result);
-                }
-                catch (PythonException ex)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-                }
-                catch (Exception e)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"python result= {jsonResult}");
-                    return;
-                }
+                Dt = dt,
+                MassAmplFactor = amplMass,
+                MinMass = minMass,
+                MaxTimeStep = maxTimeStep,
+                MaxKEResets = maxKEReset,
+                ZeroResidualRTol = rtol,
+                ZeroResidualATol = atol
+            };
+
+
+            // Check if we have any loads or prestress to apply
+            if (pointLoads.Count == 0 && prestress.Count == 0)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "No loads or prestress provided. The structure will not change.");
+                DA.SetData(0, gh_truss);
+                return;
             }
 
-            PythonEngine.EndAllowThreads(m_threadState);
-          
-
-            new_structure.PopulateWithSolverResult(result); // Update the new structure, the elements and the nodes with the results of python. 
-
-            GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
-            DA.SetData(0, gh_structure);
-            DA.SetData(1, new_structure.IsInEquilibrium);
-            DA.SetData(2, new_structure.DR.nTimeStep);
-            DA.SetData(3, new_structure.DR.nKEReset);
-
-        }
-
-        private bool RegisterPointLoads(StructureObj new_structure, List<IGH_Goo> datas)
-        {
-            //return true if at least one load is added on the structure
-            bool success = false;
-            if (datas.Count == 0 || datas == null) return false; //failure and abort
-
-            //new_structure.LoadsToApply = new List<Vector3d>(); //this is already done in Duplicate
-            //foreach (var node in new_structure.StructuralNodes) new_structure.LoadsToApply.Add(new Vector3d(0.0, 0.0, 0.0)); // initialize the LoadsToApply vector with 0 load for each DOF. 
-
-
-            List<Node> nodes = new_structure.StructuralNodes; //use a shorter nickname 
-
-            PointLoad load;
-            foreach (var data in datas)
+            // 3) Solve using the LinearDM solver
+            try
             {
-                if (data is GH_PointLoad)
-                {
-                    load = ((GH_PointLoad)data).Value; //retrieve the pointload inputted by the user
-
-                    // we need to know on which point or node the load will have to be applied
-                    int ind = -1;
-                    if (load.NodeInd != -1) //PointsLoad can be defined on a point or on a node index
-                    {
-                        ind = load.NodeInd;
-                    }
-                    else // load may have been defined on a point not on a node
-                    {
-                        if (!Node.EpsilonContains(nodes, load.Point, new_structure.ZeroTol, out ind)) //try to find the point between all nodes
-                        {
-                            AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "A point Load is applied on a point which does not belong to the structure. This point load is ignored.");
-                            continue;//go to next point load
-                        }
-                    }
-                    new_structure.LoadsToApply[ind] += load.Vector; //If Point Load is applied on a node of the structure, then the load is added to all the Loads to apply on the structure. 
-                    success = true;
-                }
+                Truss? result = DynamicRelaxation.Solve(truss, pointLoads, prestress, user_config);
             }
-            return success;
-        }
-
-        private bool RegisterPrestressLoads(StructureObj new_structure, List<IGH_Goo> datas)
-        {
-            bool success = false;
-            if (datas.Count == 0 || datas == null) return false; //failure and abort
-
-            //new_structure.LengtheningsToApply = new List<double>();
-            //foreach (var elem in new_structure.StructuralElements) new_structure.LengtheningsToApply.Add(0.0); // initialize the LengtheningsToApply vector with 0m length change for each element. 
-
-            //List<Node> nodes = new_structure.StructuralNodes;
-            List<Element> elements = new_structure.StructuralElements;
-
-            ImposedLenghtenings DL;
-            foreach (var data in datas)
+            catch (Exception e)
             {
-                if (data is GH_ImposedLengthenings)
-                {
-                    DL = ((GH_ImposedLengthenings)data).Value; //the prestressload is a variation of length
-
-                    int ind_e = DL.Element.Ind;
-
-                    new_structure.LengtheningsToApply[ind_e] += DL.Value; //The variation of length is added to the force to all the lengthenings to apply on the structure. 
-                    success = true;
-                }
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to solve the dynamic relaxation method: {e.Message}");
+                return;
             }
-            return success; // if at least one lengthening will be applied on the structure
+
+            // 4) Check if the solution was successful
+            if (result == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to solve the dynamic relaxation method.");
+                return;
+            }
+
+            // 5) Check for warnings from the solver
+            if (result.warnings != null && result.warnings.Count > 0)
+            {
+                foreach (string warning in result.warnings)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
+                }
+                result.warnings.Clear();
+            }
+
+            // 6) Set output
+            GH_Truss gh_result = new GH_Truss(result);
+            DA.SetData(0, gh_result);
+            DA.SetData(1, result.IsInEquilibrium);
+            DA.SetData(2, user_config.NTimeStep);
+            DA.SetData(3, user_config.NKEReset);
+
         }
     }
 }

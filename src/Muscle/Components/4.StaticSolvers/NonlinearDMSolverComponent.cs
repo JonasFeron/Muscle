@@ -65,7 +65,7 @@ namespace Muscle.Components.Solvers
         /// </summary>
         public NonlinearDMSolverComponent()
           : base("Non-linear Displacement Method", "Non linear DM",
-              "Solve the non linear displacement method for a structure with incremental loads. This component solves an incremental (but not iterative) Newton-Raphson procedure with arc-length control method. Loads are splitted in +- nSteps increments, applied one after the other. The total number of increments may vary (in case of snap-through for instance) thanks to arc-length control.",
+              "Solve the non linear displacement method for a structure with incremental loads. This component solves an incremental (but not iterative) Newton-Raphson procedure with arc-length control method. Loads are splitted in +- nSteps increments, applied one after the other. The total number of increments may vary (in case of snap-through for instance) thanks to arc-length control. This solver does not support non-linear prestressing problems.",
               GHAssemblyName, Folder4_StaticSolvers)
         {
         }
