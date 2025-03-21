@@ -64,7 +64,7 @@ namespace Muscle.Components.Solvers
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure on which the point loads and prestress will be applied via the dynamic relaxation method.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Point Loads", "PL (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Point Loads", "Load (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Prestress", "P (m)", "Prestress Scenario containing the free length variations (m) to apply on the specified elements.", GH_ParamAccess.tree);
             pManager.AddNumberParameter("Relative tolerance", "rtol (-)", "Set the relative tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, default_rtol);
             pManager.AddNumberParameter("Absolute tolerance", "atol (N)", "Set the absolute tolerance for equilibrium. Equilibrium is achieved if each residual load is equal to 0 [N] (within tolerance : rtol * load + atol).", GH_ParamAccess.item, default_atol);

@@ -77,7 +77,7 @@ namespace Muscle.Components.Solvers
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure on which the point loads and prestress will be applied via the linear displacement method.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Point Loads", "PL (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Point Loads", "Load (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
             pManager.AddGenericParameter("Prestress", "P (m)", "Prestress Scenario containing the free length variations (m) to apply on the specified elements.", GH_ParamAccess.tree);
             pManager[1].Optional = true;
             pManager[2].Optional = true;

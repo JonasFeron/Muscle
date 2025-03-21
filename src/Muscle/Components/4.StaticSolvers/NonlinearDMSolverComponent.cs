@@ -77,7 +77,7 @@ namespace Muscle.Components.Solvers
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure on which the point loads will be applied incrementally via the non-linear displacement method.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Point Loads", "PL (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Point Loads", "Load (kN)", "The external point loads to apply on the structure.", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Number of increments", "nSteps", "Solve non-linearly the structure in +- nSteps increments", GH_ParamAccess.item, 50);
             pManager[1].Optional = true;
             pManager[2].Optional = true;

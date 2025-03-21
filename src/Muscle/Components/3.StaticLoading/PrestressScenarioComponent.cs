@@ -46,7 +46,7 @@ namespace Muscle.Components.StaticLoading
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Element", "E", "Element (General, Bar, Strut, or Cable) subjected to a prestress load.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Free length variation", "DL0 (m)", "Free length variation in m (+ lengthening, - shortening) to apply on the element.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Free length variation", "dL0 (m)", "Free length variation in m (+ lengthening, - shortening) to apply on the element.", GH_ParamAccess.item);
 
         }
 

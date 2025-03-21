@@ -37,7 +37,7 @@ namespace Muscle.Components.DeconstructFEModel
             pManager.AddIntegerParameter("Element Index", "Idx", "Index of the element", GH_ParamAccess.item); //1
             pManager.AddIntegerParameter("End nodes indexes", "End nodes", "Indexes of the end nodes", GH_ParamAccess.list); //2
             pManager.AddLineParameter("Line", "L", "Current line and current length of the element", GH_ParamAccess.item); //3
-            pManager.AddNumberParameter("Free length", "Lfree (m)", "Free length of the element", GH_ParamAccess.item); //4
+            pManager.AddNumberParameter("Free length", "L0 (m)", "Free length of the element", GH_ParamAccess.item); //4
             pManager.AddGenericParameter("Cross Section", "CS", "Cross section of the element", GH_ParamAccess.item); //5
             pManager.AddGenericParameter("Material", "M", "Bilinear Material of the element", GH_ParamAccess.item); //6
             pManager.AddVectorParameter("Weight", "W (kN)", "Self-Weight (kN) of the element", GH_ParamAccess.item); //7
