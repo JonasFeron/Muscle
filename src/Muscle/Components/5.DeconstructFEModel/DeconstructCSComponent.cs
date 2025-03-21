@@ -8,7 +8,7 @@ namespace Muscle.Components.DeconstructFEModel
 {
     public class DeconstructCSComponent : GH_Component
     {
-        public DeconstructCSComponent() : base("Deconstruct Cross Section", "DeCS", "Get the properties of a Cross Section", GHAssemblyName, Folder5_DeconstructFEM) { }
+        public DeconstructCSComponent() : base("Deconstruct Cross Section", "DeCS", "Deconstruct a Cross Section to retrieve its properties.", GHAssemblyName, Folder5_DeconstructFEM) { }
 
         public override Guid ComponentGuid { get { return new Guid("f78a23a7-1eb7-4b2c-8b0b-e88af4e0ebea"); } }
 

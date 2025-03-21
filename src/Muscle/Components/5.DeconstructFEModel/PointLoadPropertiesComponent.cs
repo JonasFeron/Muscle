@@ -1,9 +1,12 @@
 ﻿using Grasshopper.Kernel;
-using Muscle.GHModel;
+using Muscle.View;
 using Rhino.Geometry;
 using System;
 
-namespace Muscle.Components.ModelProperties
+using static Muscle.Components.GHComponentsFolders;
+
+
+namespace Muscle.Components.DeconstructFEModel
 {
     public class PointLoadPropertiesComponent : GH_Component
     {

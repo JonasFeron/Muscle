@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using MuscleApp.ViewModel;
 using Rhino.Geometry;
@@ -9,14 +8,14 @@ using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.DeconstructFEModel
 {
-    public class DeconstructStructureComponent : GH_Component
+    public class DeconstructNodeComponent : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public DeconstructStructureComponent()
-          : base("Deconstruct Structure", "DeStruct",
-              "Deconstruct a structure into its nodes and elements.",
+        public DeconstructNodeComponent()
+          : base("Deconstruct Node", "DeNode",
+              "Deconstruct a node to retrieve its properties.",
               GHAssemblyName, Folder5_DeconstructFEM)
         {
         }
@@ -26,7 +25,7 @@ namespace Muscle.Components.DeconstructFEModel
         /// </summary>
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "Struct", "A Structure is made of Nodes and Elements", GH_ParamAccess.item); //0
+            pManager.AddGenericParameter("Node", "N", "Input node", GH_ParamAccess.item); //0
         }
 
         /// <summary>
@@ -34,22 +33,31 @@ namespace Muscle.Components.DeconstructFEModel
         /// </summary>
         protected override void RegisterOutputParams(GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Nodes", "N", "The nodes composing the structure.", GH_ParamAccess.list); //0
-            pManager.AddGenericParameter("Elements", "E", "The finite elements composing the structure.", GH_ParamAccess.list); //1
+            pManager.AddPointParameter("Point", "Pt (m)", "Current node coordinates", GH_ParamAccess.item); //0
+            pManager.AddIntegerParameter("Index", "Idx", "Node index", GH_ParamAccess.item);//1)
+            pManager.AddBooleanParameter("Is Free", "DoF", "Is it free to move in [X, Y, Z] directions ? Degrees of Freedom are: True if free, False if fixed by a support.", GH_ParamAccess.list); //2
+            pManager.AddVectorParameter("Load", "L (kN)", "Total loads applied on the node", GH_ParamAccess.item); //3
+            pManager.AddVectorParameter("Unbalanced Load", "U (kN)", "Unbalanced loads or residuals from the equilibrium with the internal axial forces", GH_ParamAccess.item); //4
+            pManager.AddVectorParameter("Reactions", "R (kN)", "Reaction forces at the supports", GH_ParamAccess.item); //5
         }
 
         /// <summary>
-        /// This is the method that actually does the work.
+        ///
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Truss structure = new Truss();
+            Node n = new Node();
 
-            if (!DA.GetData(0, ref structure)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
+            if (!DA.GetData(0, ref n)) { return; } 
 
-            DA.SetDataList(0, structure.Nodes);
-            DA.SetDataList(1, structure.Elements);
+            DA.SetData(0, n.Coordinates);
+            DA.SetData(1, n.Idx);
+            List<bool> IsFree = new List<bool> { n.isXFree, n.isYFree, n.isZFree };
+            DA.SetDataList(2, IsFree);
+            DA.SetData(3, n.Loads / 1000);
+            DA.SetData(4, n.Residuals / 1000);
+            DA.SetData(5, n.Reactions / 1000);
         }
 
         /// <summary>
@@ -70,7 +78,7 @@ namespace Muscle.Components.DeconstructFEModel
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("928c1595-ef2e-4f5b-a6ed-8f5283e83420"); }
+            get { return new Guid("fdfb5faf-64ac-436b-ab95-f437685aadc1"); }
         }
     }
 }

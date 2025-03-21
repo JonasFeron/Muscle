@@ -15,7 +15,7 @@ namespace Muscle.Components.DeconstructFEModel
         /// </summary>
         public DeconstructElementComponent()
           : base("Deconstruct Element", "DeElem",
-              "Deconstruct an element.",
+              "Deconstruct an element to retrieve its properties.",
               GHAssemblyName, Folder5_DeconstructFEM)
         {
         }
@@ -55,25 +55,19 @@ namespace Muscle.Components.DeconstructFEModel
 
             if (!DA.GetData(0, ref e)) { return; } // si j'arrive à collectionner des elements, je les stocke dans elements, sinon je termine et je renvoie rien.
 
-            DA.SetData(0, e.TypeName);
-            DA.SetData(1, e.Ind);
+            DA.SetData(0, e.Name);
+            DA.SetData(1, e.Idx);
             DA.SetDataList(2, e.EndNodes);
             DA.SetData(3, e.Line);
-            DA.SetData(4, e.LFree);
+            DA.SetData(4, e.FreeLength);
+            DA.SetData(5, e.CS);
+            DA.SetData(6, e.Material);
+            DA.SetData(7, e.Weight / 1000);
+            DA.SetData(8, e.Tension / 1000);
 
-            DA.SetData(5, e.CS_Main);
-
-            List<ICrossSection> CS = new List<ICrossSection> { e.CS_Comp, e.CS_Tens };
-            DA.SetDataList(6, CS);
-
-            DA.SetData(7, e.Mat_Main);
-
-            List<Muscles_Material> Mat = new List<Muscles_Material> { e.Mat_Comp, e.Mat_Tens };
-            DA.SetDataList(8, Mat);
-
-            DA.SetData(9, e.V);
-            DA.SetData(10, e.Mass);
-            DA.SetData(11, e.Weight / 1000);
+            double Ryb = e.Resistance.T0 /1000; //kN
+            double Ryt = e.Resistance.T1 /1000;
+            DA.SetData(9, new Interval(Ryb, Ryt));
         }
 
         /// <summary>
@@ -94,7 +88,7 @@ namespace Muscle.Components.DeconstructFEModel
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("83c5746d-d54d-4f88-b553-0d4cbe86bac8"); }
+            get { return new Guid("ac280579-ab96-4422-8c3c-00b88a4b6c2c"); }
         }
     }
 }
