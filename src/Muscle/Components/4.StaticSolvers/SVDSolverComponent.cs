@@ -18,9 +18,9 @@ namespace Muscle.Components.Solvers
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public SVDSolverComponent()
-          : base("Solver - Selfstress and mechanisms analysis - by Singular Value Decomposition", "SVD",
-                "Find the self-stress modes and mechanisms of the structure.\n" +
-                "ref: S. Pellegrino, Structural computations with the singular value decomposition of the equilibrium matrix, Int.J. Sol. and Struct.,30(21),1993,p3025-3035",
+          : base("Singular Value Decomposition", "SVD",
+                "Find the extensional, inextensional, and self-stress modes of the structure.\n" +
+                "ref: Pellegrino S., Structural computations with the singular value decomposition of the equilibrium matrix, Int.J. Sol. and Struct.,30(21),1993,p3025-3035",
               GHAssemblyName, Folder4_StaticSolvers)
         {
 
@@ -124,8 +124,8 @@ namespace Muscle.Components.Solvers
             DA.SetDataTree(4, GH_Encoders.ToTree(resultsSVD.Vs_T));
             DA.SetDataTree(5, GH_Encoders.ToTree(resultsSVD.Vr_T));
             DA.SetData(6, resultsSVD.m);
-            DA.SetDataTree(7, GH_Encoders.ToTree(resultsSVD.Ur_T));
-            DA.SetDataTree(8, GH_Encoders.ToTree(resultsSVD.Um_T));
+            DA.SetDataTree(7, GH_Encoders.ToTree(resultsSVD.Um_T));
+            DA.SetDataTree(8, GH_Encoders.ToTree(resultsSVD.Ur_T));
 
         }
 

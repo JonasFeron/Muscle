@@ -123,6 +123,7 @@ namespace Muscle.Components.ConstructFEModel
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
             }
+            structure.warnings.Clear();
 
             // 3) Set outputs 
             DA.SetData(0, new GH_Truss(structure));

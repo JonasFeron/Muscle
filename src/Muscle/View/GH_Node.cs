@@ -11,7 +11,7 @@ namespace Muscle.View
 
         #region Fields
 
-        bool displayInMeshes = true;
+        // bool displayInMeshes = true;
 
         #endregion Fields
 

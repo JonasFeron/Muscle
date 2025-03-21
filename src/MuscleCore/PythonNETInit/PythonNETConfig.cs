@@ -55,7 +55,7 @@ namespace MuscleCore.PythonNETInit
         #region Properties
 
 
-        private static string _anacondaPath = null;
+        private static string? _anacondaPath = null;
 
         /// <summary>
         /// Gets the path to the Anaconda installation directory.
@@ -66,7 +66,7 @@ namespace MuscleCore.PythonNETInit
         /// 2. The ProgramData directory (e.g., "C:\ProgramData\Anaconda3")
         /// If Anaconda is found in either location, the path is returned. Otherwise, null is returned.
         /// </remarks>
-        public static string anacondaPath
+        public static string? anacondaPath
         {
             get
             {
@@ -92,7 +92,7 @@ namespace MuscleCore.PythonNETInit
             }
             set
             {
-                if (File.Exists(Path.Combine(value, "python.exe")))
+                if (value != null && File.Exists(Path.Combine(value, "python.exe")))
                 {
                     _anacondaPath = value;
                 }
@@ -122,7 +122,7 @@ namespace MuscleCore.PythonNETInit
                 {
                     _condaEnvName = value;
                 }
-                else if (File.Exists(Path.Combine(anacondaPath, "envs", value, "python.exe")))
+                else if (anacondaPath != null && File.Exists(Path.Combine(anacondaPath, "envs", value, "python.exe")))
                 {
                     _condaEnvName = value;
                 }
@@ -146,17 +146,17 @@ namespace MuscleCore.PythonNETInit
             {
                 if (condaEnvName == "base")
                 {
-                    return anacondaPath;
+                    return anacondaPath ?? string.Empty;
                 }
                 else
                 {
-                    return Path.Combine(anacondaPath, "envs", condaEnvName);
+                    return Path.Combine(anacondaPath ?? string.Empty, "envs", condaEnvName);
                 }
             }
         }
 
-        private static string _pythonDllName = null;
-        public static string pythonDllName
+        private static string? _pythonDllName = null;
+        public static string? pythonDllName
         {
             get
             {
@@ -165,7 +165,7 @@ namespace MuscleCore.PythonNETInit
                     string[] possibleNames = { "python319.dll", "python318.dll", "python317.dll", "python316.dll", "python315.dll", "python314.dll", "python313.dll", "python312.dll", "python311.dll", "python310.dll", "python39.dll", "python38.dll", "python37.dll", "python36.dll", "python35.dll", "python34.dll", "python33.dll", "python32.dll", "python31.dll" };
                     foreach (var name in possibleNames)
                     {
-                        if (File.Exists(Path.Combine(condaEnvPath, name)))
+                        if (anacondaPath != null && File.Exists(Path.Combine(condaEnvPath, name)))
                         {
                             return name;
                         }
@@ -179,7 +179,7 @@ namespace MuscleCore.PythonNETInit
             }
             set
             {
-                if (File.Exists(Path.Combine(condaEnvPath, value)))
+                if (value != null && anacondaPath != null && File.Exists(Path.Combine(condaEnvPath, value)))
                 {
                     _pythonDllName = value;
                 }
@@ -194,4 +194,3 @@ namespace MuscleCore.PythonNETInit
         #endregion Properties
     }
 }
-

@@ -13,11 +13,14 @@ namespace Muscle.Components.ConstructFEModel
     {
         public bool displayIn3d { get; set; }
 
-        private static readonly String[] _bucklingLaws= {"Yielding", "Euler", "Rankine", "a", "b", "c", "d", "Slack"};
-        private static readonly int[] _bucklingLawsIdx = { 0, -1, -2, 1, 2, 3, 4, 10};
+        public static readonly string[] _bucklingLaws= {"Yielding", "Euler", "Rankine", "a", "b", "c", "d", "Slack"};
+        public static readonly int[] _bucklingLawsIdx = { 0, -1, -2, 1, 2, 3, 4, 10};
 
 
-        public ElementComponent() : base("Element", "E", "A finite element is constructed from a line, a cross-section and a material.", GHAssemblyName, Folder2_ConstructFEM) { displayIn3d = true; }
+        public ElementComponent() : base("Element", "E", "A finite element is constructed from a line, a cross-section and a material.", GHAssemblyName, Folder2_ConstructFEM) 
+        {
+            displayIn3d = true; 
+        }
         #region Properties
 
         public override Guid ComponentGuid { get { return new Guid("6ed9ee2a-591e-42bb-973a-d239316c60fa"); } }
@@ -65,7 +68,7 @@ namespace Muscle.Components.ConstructFEModel
             pManager[5].Optional = true;
 
             // create a dropdown list for the user to select a supported buckling law
-            var laws = pManager[5] as Grasshopper.Kernel.Parameters.Param_Integer;
+            var laws = pManager[4] as Grasshopper.Kernel.Parameters.Param_Integer;
             for (int i = 0; i < _bucklingLaws.Length; i++)
             {
                 string law = _bucklingLaws[i];

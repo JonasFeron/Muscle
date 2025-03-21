@@ -14,12 +14,12 @@ namespace MuscleApp.ViewModel
         #region Properties
         public int Idx { get; set; } //index of the element in the structure
         public string TypeName { get { return "Finite Element"; } }
-        public string Name { get; set; }
-        public Line Line { get; set; } // the line with a current length in the current state
-        public List<int> EndNodes { get; set; } //index of the end nodes of the element
-        public double FreeLength { get; set; } // [m] - the Free length of the element
-        public virtual ICrossSection CS { get; set; } //used for calculating volume and displaying the Element in GH. 
-        public virtual BilinearMaterial Material { get; set; } //used for calculating mass and strength
+        public string Name { get; set; } = "General Element";
+        public Line Line { get; set; } = new Line(); // the line with a current length in the current state
+        public List<int> EndNodes { get; set; } = new List<int>(); //index of the end nodes of the element
+        public double FreeLength { get; set; } = -1.0; // [m] - the Free length of the element
+        public virtual ICrossSection CS { get; set; } = new CS_Circular(); //used for calculating volume and displaying the Element in GH. 
+        public virtual BilinearMaterial Material { get; set; } = new BilinearMaterial(); //used for calculating mass and strength
 
         public double V //m3
         {
@@ -58,8 +58,8 @@ namespace MuscleApp.ViewModel
 
         ///// Strength /////
 
-        public string BucklingLaw { get; set; }
-        public double kb { get; set; } //buckling factor
+        public string BucklingLaw { get; set; } = "Yielding";
+        public double kb { get; set; } = 1.0; //buckling factor
         public double Lambda
         {
             get

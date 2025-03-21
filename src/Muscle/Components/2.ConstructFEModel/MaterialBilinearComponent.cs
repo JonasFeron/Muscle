@@ -19,7 +19,7 @@ namespace Muscle.Components.ConstructFEModel
         /// <summary>
         /// This is the MaterialComponent Constructor. It uses base constructor to set name, nickname, description, category and subcategory of the component.
         /// </summary>
-        public MaterialBilinearComponent() : base("Bilinear Material", "M", "Define a material with bilinear properties", GHAssemblyName, Folder2_ConstructFEM) { }
+        public MaterialBilinearComponent() : base("Material - Bilinear", "M", "Define a material with bilinear properties", GHAssemblyName, Folder2_ConstructFEM) { }
 
         /// <summary>
         /// This is the Global Unique IDentifier (GUID) of the component. It's a unique value that allow to identify the component as itself. DO NOT change it.

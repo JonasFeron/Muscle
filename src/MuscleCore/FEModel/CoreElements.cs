@@ -34,22 +34,22 @@ namespace MuscleCore.FEModel
         /// <summary>
         /// [MPa] - shape (elements_count, 2) - Young's moduli in compression and tension
         /// </summary>
-        public double[,] Youngs { get; set; }
+        public double[,]? Youngs { get; set; }
 
         /// <summary>
         /// [mm²] - shape (elements_count,) - Cross-sectional area of the elements
         /// </summary>
-        public double[] Area { get; set; }
+        public double[]? Area { get; set; }
 
         /// <summary>
         /// [m] - shape (elements_count,) - Free length of the elements
         /// </summary>
-        public double[] FreeLength { get; set; }
+        public double[]? FreeLength { get; set; }
 
         /// <summary>
         /// [N] - shape (elements_count,) - Axial force (positive in tension)
         /// </summary>
-        public double[] Tension { get; set; }
+        public double[]? Tension { get; set; }
 
         #endregion
 
@@ -66,8 +66,8 @@ namespace MuscleCore.FEModel
         /// <param name="youngs">[MPa] - shape (elements_count, 2) - Young's moduli for compression and tension</param>
         /// <param name="freeLength">[m] - shape (elements_count,) - Free length of the elements</param>
         /// <param name="tension">[N] - shape (elements_count,) - Axial force (positive in tension)</param>
-        public CoreElements(CoreNodes nodes, int[] type = null, int[,] endNodes = null, double[] area = null, 
-                          double[,] youngs = null, double[] freeLength = null, double[] tension = null)
+        public CoreElements(CoreNodes nodes, int[]? type = null, int[,]? endNodes = null, double[]? area = null, 
+                          double[,]? youngs = null, double[]? freeLength = null, double[]? tension = null)
         {
             Nodes = nodes ?? throw new ArgumentNullException(nameof(nodes));
             Type = type ?? throw new ArgumentNullException(nameof(type));

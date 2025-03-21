@@ -67,8 +67,8 @@ namespace MuscleCore.FEModel
         /// <param name="displacements">[m] - shape (nodes_count, 3) - Nodal displacements</param>
         /// <param name="reactions">[N] - shape (nodes_count, 3) - Support reactions</param>
         /// <param name="resistingForces">[N] - shape (nodes_count, 3) - Internal resisting forces at nodes</param>
-        public CoreNodes(double[,] initialCoordinates, bool[,] dof, double[,] loads = null, 
-                        double[,] displacements = null, double[,] reactions = null, double[,] resistingForces = null)
+        public CoreNodes(double[,] initialCoordinates, bool[,] dof, double[,]? loads = null, 
+                        double[,]? displacements = null, double[,]? reactions = null, double[,]? resistingForces = null)
         {
             // Initialize properties
             InitialCoordinates = initialCoordinates ?? throw new ArgumentNullException(nameof(initialCoordinates));

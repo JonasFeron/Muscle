@@ -49,7 +49,7 @@ namespace MuscleCore.Solvers
                     );
                     svdResults = pysvdResults.As<CoreResultsSVD>();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw;
                 }

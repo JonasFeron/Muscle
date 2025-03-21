@@ -19,7 +19,7 @@ namespace Muscle.Components.ConstructFEModel
         /// <summary>
         /// This is the MaterialComponent Constructor. It uses base constructor to set name, nickname, description, category and subcategory of the component.
         /// </summary>
-        public MaterialTensionOnlyComponent() : base("Tension Only Material", "M", "Define a material with linear properties in tension, and null stiffness and strength in compression.", GHAssemblyName, Folder2_ConstructFEM) { }
+        public MaterialTensionOnlyComponent() : base("Material - Tension Only", "M", "Define a material with linear properties in tension, and null stiffness and strength in compression.", GHAssemblyName, Folder2_ConstructFEM) { }
 
         /// <summary>
         /// This is the Global Unique IDentifier (GUID) of the component. It's a unique value that allow to identify the component as itself. DO NOT change it.

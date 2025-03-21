@@ -33,7 +33,7 @@ namespace MuscleApp.Solvers
         /// <returns>ResultsSVD object containing the SVD results</returns>
         public static ResultsSVD? Solve(Truss structure, double rtol)
         {
-            CoreResultsSVD coreResults = MuscleCore.Solvers.SVD.Solve(ToCore(structure), rtol);
+            CoreResultsSVD? coreResults = MuscleCore.Solvers.SVD.Solve(ToCore(structure), rtol);
 
             return new ResultsSVD(coreResults);
         }

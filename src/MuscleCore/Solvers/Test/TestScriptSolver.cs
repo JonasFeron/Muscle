@@ -40,7 +40,7 @@ namespace MuscleCore.Solvers
                     dynamic pyResult = mainFunction(str0, str1);
                     result = (string)pyResult;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     throw;
                 }

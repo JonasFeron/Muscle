@@ -216,7 +216,7 @@ namespace MuscleCore.PythonNETInit
 
             try
             {
-                string result = TestScriptSolver.Solve(str0, str1);
+                string? result = TestScriptSolver.Solve(str0, str1);
 
                 // Validate
                 if (result == null)

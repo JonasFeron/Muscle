@@ -10,9 +10,9 @@ namespace MuscleCore.Converters
             return type == typeof(CoreTruss);
         }
 
-        public PyObject TryEncode(object? obj)
+        public PyObject? TryEncode(object? obj)
         {
-            if (!CanEncode(obj.GetType()))
+            if (obj == null || !CanEncode(obj.GetType()))
                 return null;
 
             var structure = (CoreTruss)obj;

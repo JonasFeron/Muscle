@@ -49,8 +49,15 @@ namespace MuscleApp.Converters
                 updatedElement.Line = new Line(p0, p1);
                 
                 // Update free length and tension
-                updatedElement.FreeLength = coreElementsResults.FreeLength[i];
-                updatedElement.Tension = coreElementsResults.Tension[i];
+                if (coreElementsResults.FreeLength != null)
+                {
+                    updatedElement.FreeLength = coreElementsResults.FreeLength[i];
+                }
+                
+                if (coreElementsResults.Tension != null)
+                {
+                    updatedElement.Tension = coreElementsResults.Tension[i];
+                }
                 
                 // Add the updated element to the list
                 updatedElements.Add(updatedElement);

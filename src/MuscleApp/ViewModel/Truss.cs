@@ -20,14 +20,14 @@ namespace MuscleApp.ViewModel
         /// <summary>
         /// List of warnings generated during structure initialization.
         /// </summary>
-        public List<string> warnings { get; private set; }
+        public List<string> warnings { get; private set; } = new List<string>();
 
         /// <summary>
         /// Absolute Tolerance for geometric comparisons in [m]. Two points are considered equal if they are closer than ZeroGeometricATol.
         /// This value is calculated based on the maximum structure's dimension/100,000.
         /// A 1m span structure has a ZeroGeometricATol of 0.01mm.
         /// </summary>
-        public double ZeroGeometricATol { get; private set; }
+        public double ZeroGeometricATol { get; private set; } = 1e-5f;
 
         public bool IsValid
         {
@@ -35,8 +35,8 @@ namespace MuscleApp.ViewModel
         }
 
         ///// Structure informations /////
-        public List<Element> Elements { get; set; }
-        public List<Node> Nodes { get; set; }
+        public List<Element> Elements { get; set; } = new List<Element>();
+        public List<Node> Nodes { get; set; } = new List<Node>();
         public int FixationsCount { get { return Nodes.Select(n => n.FixationsCount).Sum(); } }
 
         ///// Results coming from Python /////
@@ -269,6 +269,11 @@ namespace MuscleApp.ViewModel
         /// <param name="points_from_lines">List of points representing element endpoints</param>
         private void SpanXYZ(List<Point3d> points_from_lines)
         {
+            if (points_from_lines.Count == 0) 
+            { 
+                ZeroGeometricATol = 1e-5f; //atol = 0.01mm 
+                return; 
+            }
             double minX = points_from_lines[0].X;
             double maxX = points_from_lines[0].X;
             double minY = points_from_lines[0].Y;

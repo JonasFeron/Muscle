@@ -79,9 +79,16 @@ namespace MuscleApp.Solvers
         /// Initialize a ResultsSVD object that stores the results of the Singular Value Decomposition
         /// </summary>
         /// <param name="coreResults">Core SVDResults object</param>
-        public ResultsSVD(CoreResultsSVD coreResults)
+        public ResultsSVD(CoreResultsSVD? coreResults)
         {
-            _coreResults = coreResults ?? throw new ArgumentNullException(nameof(coreResults));
+            if (coreResults == null)
+            {
+                _coreResults = new CoreResultsSVD();
+                Ur_T = new Vector3d[0, 0];
+                Um_T = new Vector3d[0, 0];
+                return;
+            }
+            _coreResults = coreResults;
             
             // Convert Ur_T to Vector3d[,]
             Ur_T = ToVectors3d(coreResults.Ur_T);
@@ -89,9 +96,5 @@ namespace MuscleApp.Solvers
             // Convert Um_T to Vector3d[,]
             Um_T = ToVectors3d(coreResults.Um_T);
         }
-
-
-
-
     }
 }
