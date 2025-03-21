@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Collections.Generic;
 using Grasshopper.GUI.Gradient;
@@ -54,7 +54,8 @@ namespace Muscle.Components.Display
         {
             pManager.AddLineParameter("Lines", "L", "Lines", GH_ParamAccess.list);
             pManager.AddNumberParameter("Forces", "F", "Forces in the lines", GH_ParamAccess.list);
-            pManager.AddIntegerParameter("Thickness", "t", "Maximum thickness of the lines. All lines have the same thickness if t=0.", GH_ParamAccess.item, 2);
+            pManager.AddIntegerParameter("Tension Thickness", "tT", "Maximum thickness of the lines in tension. All lines have the same thickness if tT=0.", GH_ParamAccess.item, 2);
+            pManager.AddIntegerParameter("Compression Thickness", "tC", "Maximum thickness of the lines in compression. All lines have the same thickness if tC=0.", GH_ParamAccess.item, 2);
             pManager.AddIntegerParameter("Value Settings", "v", "values to show (0 = no value ; 1 = extremes only ; 2 = all values)  ", GH_ParamAccess.item, 2);
             pManager.AddNumberParameter("Text Size", "size", "Size of the text", GH_ParamAccess.item, 0.1);
         }
@@ -82,7 +83,8 @@ namespace Muscle.Components.Display
 
         //thickness
         private List<int> WeightParams;
-        private int user_thick_max; //fix the maximum thickness of the lines
+        private int user_thick_max_tension; //fix the maximum thickness of the lines in tension
+        private int user_thick_max_compression; //fix the maximum thickness of the lines in compression
         private int thick_max; //= thick_min + user_thick_max
         private int thick_min = 3; //fix the minimum thickness of the lines
 
@@ -108,13 +110,15 @@ namespace Muscle.Components.Display
             //collect inputs
             if (!DA.GetDataList(0, lines)) { return; }
             if (!DA.GetDataList(1, GH_forces)) { return; }
-            if (!DA.GetData(2, ref user_thick_max)) { }
-            if (!DA.GetData(3, ref v_setting)) { }
-            if (!DA.GetData(4, ref text_size)) { }
+            if (!DA.GetData(2, ref user_thick_max_tension)) { }
+            if (!DA.GetData(3, ref user_thick_max_compression)) { }
+            if (!DA.GetData(4, ref v_setting)) { }
+            if (!DA.GetData(5, ref text_size)) { }
 
             //control of input thickness
-            if (user_thick_max < 0) { user_thick_max = 0; }
-            thick_max = user_thick_max + thick_min;
+            if (user_thick_max_tension < 0) { user_thick_max_tension = 0; }
+            if (user_thick_max_compression < 0) { user_thick_max_compression = 0; }
+            thick_max = Math.Max(user_thick_max_tension, user_thick_max_compression) + thick_min;
 
             //control of input value_setting 
             if (v_setting < 0) { v_setting = 0; }
@@ -196,7 +200,11 @@ namespace Muscle.Components.Display
 
             double absMax = Math.Max(Math.Abs(forceMin), Math.Abs(forceMax));
             double param = Math.Abs(aForce) / absMax; // param is between 0 and 1
-            double amplified_param = thick_min + param * user_thick_max; // param is between thick_min and thick_max (=thick_min+user_thick_max)
+            
+            // Use different thickness parameters based on whether the force is tension or compression
+            int user_thick_max = (aForce >= 0) ? user_thick_max_tension : user_thick_max_compression;
+            
+            double amplified_param = thick_min + param * user_thick_max; // param is between thick_min and thick_max
             int ceil = (int)Math.Ceiling(amplified_param); // param is rounded up to the nearest int
             int floor = (int)Math.Floor(amplified_param); // param is rounded down to the nearest int
 
