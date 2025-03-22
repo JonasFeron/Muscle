@@ -34,7 +34,7 @@ namespace Muscle.Components.CreateModel
         /// <summary>
         /// This is the MaterialComponent Constructor. It uses base constructor to set name, nickname, description, category and subcategory of the component.
         /// </summary>
-        public MaterialListComponent() : base("Material - list", "M", "Choose one of the multiple default materials via the right click menu.", GHAssemblyName, Folder2_ConstructFEM) { }
+        public MaterialListComponent() : base("Construct Material from list", "M", "Choose one of the multiple default materials via the right click menu.", GHAssemblyName, Folder2_ConstructFEM) { }
 
         /// <summary>
         /// This is the Global Unique IDentifier (GUID) of the component. It's a unique value that allow to identify the component as itself. DO NOT change it.

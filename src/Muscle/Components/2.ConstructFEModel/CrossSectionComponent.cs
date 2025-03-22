@@ -11,7 +11,7 @@ namespace Muscle.Components.ConstructFEModel
 
         #region Constructors
 
-        public CS_CircularComponent() : base("Cross Section - Circular", "Circular", "Define a (hollow) circular section", GHAssemblyName, Folder2_ConstructFEM) { }
+        public CS_CircularComponent() : base("Construct Cross Section - Circular", "Circular CS", "Define a (hollow) circular cross-section", GHAssemblyName, Folder2_ConstructFEM) { }
 
         public override Guid ComponentGuid { get { return new Guid("f5fcd871-f31c-4a94-a249-467768a3e960"); } }
         #endregion Constructors
@@ -50,7 +50,7 @@ namespace Muscle.Components.ConstructFEModel
 
         #region Constructors
 
-        public CS_SquareComponent() : base("Cross Section - Square", "Square", "Define a (hollow) square section", GHAssemblyName, Folder2_ConstructFEM) { }
+        public CS_SquareComponent() : base("Construct Cross Section - Square", "Square CS", "Define a (hollow) square cross-section", GHAssemblyName, Folder2_ConstructFEM) { }
         public override Guid ComponentGuid { get { return new Guid("097eef62-fba6-4949-b39a-8d2abf8a5f6d"); } }
 
         #endregion Constructors

@@ -57,12 +57,14 @@ namespace Muscle.Components.Display
             pManager[0].Optional = true;
             pManager.AddNumberParameter("Loads Size", "Load", "Set the amplification factor on the size of loads", GH_ParamAccess.item, 1.0);
             pManager[1].Optional = true;
-            pManager.AddIntegerParameter("Decimal", "Decimal", "Set the amount of decimal to display", GH_ParamAccess.item, 1);
+            pManager.AddNumberParameter("Prestress Size", "Prestress", "Set the amplification factor on the size of prestress", GH_ParamAccess.item, 1.0);
             pManager[2].Optional = true;
-            pManager.AddVectorParameter("Gravity", "g (m/s²)", "Vector representing the acceleration due to gravity in m/s²", GH_ParamAccess.tree, new Vector3d(0, 0, -9.81));
+            pManager.AddIntegerParameter("Decimal", "Decimal", "Set the amount of decimal to display", GH_ParamAccess.item, 1);
             pManager[3].Optional = true;
-            pManager.AddNumberParameter("Dynamic Mass scale", "Dyn. Mass scale", "Set the amplification factor on the size of supports", GH_ParamAccess.item, 1.0);
+            pManager.AddVectorParameter("Gravity", "g (m/s²)", "Vector representing the acceleration due to gravity in m/s²", GH_ParamAccess.tree, new Vector3d(0, 0, -9.81));
             pManager[4].Optional = true;
+            pManager.AddNumberParameter("Dynamic Mass scale", "Dyn. Mass scale", "Set the amplification factor on the size of supports", GH_ParamAccess.item, 1.0);
+            pManager[5].Optional = true;
         }
 
         /// <summary>
@@ -86,6 +88,7 @@ namespace Muscle.Components.Display
         {
             double spt = 1.0;
             double load = 1.0;
+            double prestress = 1.0;
             int _decimal = 1;
             double scale_dyn = 1.0;
             GH_Structure<GH_Vector> gravity = new GH_Structure<GH_Vector>();
@@ -93,12 +96,14 @@ namespace Muscle.Components.Display
             //collect inputs
             if (!DA.GetData(0, ref spt)) { }
             if (!DA.GetData(1, ref load)) { }
-            if (!DA.GetData(2, ref _decimal)) { }
-            if (!DA.GetDataTree(3, out gravity)) { }
-            if (!DA.GetData(4, ref scale_dyn)) { }
+            if (!DA.GetData(2, ref prestress)) { }
+            if (!DA.GetData(3, ref _decimal)) { }
+            if (!DA.GetDataTree(4, out gravity)) { }
+            if (!DA.GetData(5, ref scale_dyn)) { }
 
             MuscleConfig.DisplaySupportAmpli = spt;
             MuscleConfig.DisplayLoadAmpli = load;
+            MuscleConfig.DisplayPrestressAmpli = prestress;
             MuscleConfig.DisplayDecimals = _decimal;
             MuscleConfig.DisplayDyn = scale_dyn; //Considered for the scaling of the display of the masses considered for the dynamic computation 
             OnPingDocument().ExpirePreview(true); //it is better to only expire the solution of the GH_Support component

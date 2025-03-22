@@ -19,7 +19,7 @@ namespace Muscle.Components.ConstructFEModel
 
         #region Constructors
 
-        public SupportXComponent() : base("Support X", "SptX",
+        public SupportXComponent() : base("Construct Support X", "SptX",
                                                   "Set the X support condition of a point",
                                           GHAssemblyName, Folder2_ConstructFEM)
         {

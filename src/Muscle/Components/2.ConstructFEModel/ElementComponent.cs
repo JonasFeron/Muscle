@@ -17,7 +17,7 @@ namespace Muscle.Components.ConstructFEModel
         public static readonly int[] _bucklingLawsIdx = { 0, -1, -2, 1, 2, 3, 4, 10};
 
 
-        public ElementComponent() : base("Element", "E", "A finite element is constructed from a line, a cross-section and a material.", GHAssemblyName, Folder2_ConstructFEM) 
+        public ElementComponent() : base("Construct Element", "E", "A finite element is constructed from a line, a cross-section and a material.", GHAssemblyName, Folder2_ConstructFEM) 
         {
             displayIn3d = true; 
         }

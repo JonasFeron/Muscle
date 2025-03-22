@@ -15,7 +15,7 @@ namespace Muscle.Components.StaticLoading
     {
 
         public PrestressScenarioComponent()
-          : base("Prestress", "P",
+          : base("Construct Prestress", "P",
               "Set the free lengths variation to apply on the elements through mechanical devices.",
               GHAssemblyName, Folder3_StaticLoading)
         {

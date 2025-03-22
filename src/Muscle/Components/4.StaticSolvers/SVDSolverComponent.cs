@@ -66,7 +66,7 @@ namespace Muscle.Components.Solvers
         {
             pManager.AddGenericParameter("Structure", "struct", "Unchanged structure.", GH_ParamAccess.item);//0
             pManager.AddIntegerParameter("Rank", "r", "Rank of equilibrium matrix", GH_ParamAccess.item); //1
-            pManager.AddNumberParameter("S", "S", "Eigen values of equilibrium matrix", GH_ParamAccess.list); //2
+            pManager.AddNumberParameter("S", "S", "Singular values of equilibrium matrix", GH_ParamAccess.list); //2
             pManager.AddIntegerParameter("StaticDeg", "s", "Degree of static indeterminacy", GH_ParamAccess.item); //3
             pManager.AddNumberParameter("Self-Stress", "Vs_T", "Self-stress modes of the structure", GH_ParamAccess.tree); //4
             pManager.AddNumberParameter("Extensional Modes", "Vr_T", "Extensional modes of the structure", GH_ParamAccess.tree); //5
