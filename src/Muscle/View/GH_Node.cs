@@ -89,6 +89,12 @@ namespace Muscle.View
                 Node n = source as Node;
                 Value = n;
             }
+            // Handle the case when a Node is wrapped in a GH_ObjectWrapper
+            if (source is GH_ObjectWrapper wrapper && wrapper.Value is Node)
+            {
+                Value = (Node)wrapper.Value;
+                return true;
+            }
 
             return base.CastFrom(source);
         }

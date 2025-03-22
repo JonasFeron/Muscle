@@ -57,6 +57,13 @@ namespace Muscle.View
             {
                 ICrossSection cs = source as ICrossSection;
                 Value = cs;
+                return true;
+            }
+            // Handle the case when an ICrossSection is wrapped in a GH_ObjectWrapper
+            if (source is GH_ObjectWrapper wrapper && wrapper.Value is ICrossSection)
+            {
+                Value = (ICrossSection)wrapper.Value;
+                return true;
             }
 
             return base.CastFrom(source);

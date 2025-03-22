@@ -94,6 +94,18 @@ namespace Muscle.View
         public override bool CastFrom(object source)
         {
             if (source is null) { return false; }
+            // Handle the case when a BilinearMaterial is wrapped in a GH_ObjectWrapper
+            if (source is GH_ObjectWrapper wrapper && wrapper.Value is BilinearMaterial)
+            {
+                Value = (BilinearMaterial)wrapper.Value;
+                return true;
+            }
+            if (source is BilinearMaterial)
+            {
+                Value = (BilinearMaterial)source;
+                return true;
+            }
+
             if (source is string)
             {
                 string text = (string)source;

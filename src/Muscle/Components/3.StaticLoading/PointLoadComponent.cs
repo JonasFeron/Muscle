@@ -29,7 +29,7 @@ namespace Muscle.Components.StaticLoading
 
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Point", "P", "Point or Node or Index of the node where the load is applied. Component work in the 3 cases but the preview only work if input is a point.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point", "P", "Point or Node or Index of the node where the load is applied. If input is an index, the load preview will not work, but the load will be added on the structure through a solver component.", GH_ParamAccess.item);
             pManager.HideParameter(0);
             pManager.AddVectorParameter("Vector", "V (kN)", "Vector representing the load in kN.", GH_ParamAccess.item);
         }
@@ -52,36 +52,43 @@ namespace Muscle.Components.StaticLoading
             // Scale vector to N (assuming input is in kN)
             vector *= 1e3;
 
+            PointLoad load = null;
+
             if (obj.Value is Node) //input is a node
             {
-                int ind = (obj.Value as Node).Idx;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
-                return;
+                Node node = obj.Value as Node;
+                load = new PointLoad(node, vector);
             }
 
-            if (obj.Value is GH_Point) //input is a node
+            if (obj.Value is GH_Point) //input is a point
             {
                 Point3d point = (obj.Value as GH_Point).Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
-                return;
+                load = new PointLoad(point, vector);
             }
-            if (obj.Value is Point3d) //input is a node
+            if (obj.Value is Point3d) //input is a point
             {
                 Point3d point = (Point3d)obj.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(point, vector)));
-                return;
+                load = new PointLoad(point, vector);
             }
 
             GH_Integer gh_ind = new GH_Integer();
             if (gh_ind.CastFrom(obj.Value))
             {
                 int ind = gh_ind.Value;
-                DA.SetData(0, new GH_PointLoad(new PointLoad(ind, vector)));
-                return;
+                load = new PointLoad(ind, vector);
             }
 
-            // If we get here, we couldn't handle the input
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input must be a Node, Point3d, or index");
+            if (load == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Input must be a Node, Point3d, or index");
+                return;
+            }
+            if (!load.IsValid)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid load");
+                return;
+            }
+            DA.SetData(0, new GH_PointLoad(load));
         }
 
         #endregion Methods

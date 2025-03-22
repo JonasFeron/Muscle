@@ -34,20 +34,22 @@ namespace MuscleApp.Converters
             foreach (PointLoad load in pointLoads)
             {
                 if (load == null || !load.IsValid)
+                {
                     continue;
+                }
                     
-                int nodeIndex = -1;
+                int nodeIdx = -1;
                 
                 // Check if the load is defined by a node index
-                if (load.NodeInd >= 0)
+                if (load.NodeIdx >= 0)
                 {
-                    nodeIndex = load.NodeInd;
-                    if (nodeIndex >= nodeCount)
+                    nodeIdx = load.NodeIdx;
+                    if (nodeIdx >= nodeCount)
                     {
                         // Node index out of range
                         if (warnings != null)
                         {
-                            warnings.Add($"A point load is applied on node index {nodeIndex} which does not exist in the structure. This point load is ignored.");
+                            warnings.Add($"A point load is applied on node index {nodeIdx} which does not exist in the structure. This point load is ignored.");
                         }
                         continue;
                     }
@@ -55,7 +57,7 @@ namespace MuscleApp.Converters
                 // If not defined by node index, try to find a node at the same location as the load point
                 else
                 {
-                    if (!Node.EpsilonContains(nodes, load.Point, zeroTolerance, out nodeIndex))
+                    if (!Node.EpsilonContains(nodes, load.Point, zeroTolerance, out nodeIdx))
                     {
                         // No node found at the load point within tolerance
                         if (warnings != null)
@@ -68,9 +70,9 @@ namespace MuscleApp.Converters
                 
                 // Add the load components to the existing values
                 // (in case multiple loads affect the same node)
-                loadsArray[3*nodeIndex]     += load.Vector.X; // X component
-                loadsArray[3*nodeIndex + 1] += load.Vector.Y; // Y component
-                loadsArray[3*nodeIndex + 2] += load.Vector.Z; // Z component
+                loadsArray[3*nodeIdx]     += load.Vector.X; // X component
+                loadsArray[3*nodeIdx + 1] += load.Vector.Y; // Y component
+                loadsArray[3*nodeIdx + 2] += load.Vector.Z; // Z component
             }
             
             return loadsArray;

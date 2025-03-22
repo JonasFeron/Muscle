@@ -93,11 +93,19 @@ namespace Muscle.View
             {
                 GH_Line gh_line = source as GH_Line;
                 Value.Line = gh_line.Value;
+                return true;
             }
             if (source is Element)
             {
                 Element e = source as Element;
                 Value = e;
+                return true;
+            }
+            // Handle the case when an Element is wrapped in a GH_ObjectWrapper
+            if (source is GH_ObjectWrapper wrapper && wrapper.Value is Element)
+            {
+                Value = (Element)wrapper.Value;
+                return true;
             }
 
             return base.CastFrom(source);

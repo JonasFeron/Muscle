@@ -1,4 +1,4 @@
-﻿using Grasshopper.Kernel.Types;
+using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using System.Collections.Generic;
 
@@ -11,7 +11,7 @@ namespace MuscleApp.ViewModel
 
         //there are 3 ways to input a point Load. On a point, on a NodeIndex or on the Node. 
         public Point3d Point { set; get; }
-        public int NodeInd { set; get; }
+        public int NodeIdx { set; get; }
 
         public Vector3d Vector { set; get; }
 
@@ -19,8 +19,10 @@ namespace MuscleApp.ViewModel
         {
             get
             {
-                if (Point.IsValid && Vector.IsValid && NodeInd >= 0) return true;
-                else return false;
+                // A point load is valid if it has a valid vector AND either:
+                // 1. A valid point (for point-based loads) OR
+                // 2. A valid node index (for node-based loads)
+                return Vector.IsValid && (Point.IsValid || NodeIdx >= 0);
             }
         }
 
@@ -39,16 +41,17 @@ namespace MuscleApp.ViewModel
         {
             Point = aPoint;
             Vector = aVector;
-            NodeInd = -1;
+            NodeIdx = -1;
         }
         public PointLoad(Node aNode, Vector3d aVector)
         {
-            NodeInd = aNode.Idx;
+            NodeIdx = aNode.Idx;
+            Point = aNode.Coordinates;
             Vector = aVector;
         }
         public PointLoad(int ind, Vector3d aVector)
         {
-            NodeInd = ind;
+            NodeIdx = ind;
             Vector = aVector;
         }
 
@@ -90,8 +93,8 @@ namespace MuscleApp.ViewModel
 
         public override string ToString()
         {
-            if (NodeInd == -1) return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node [{Point.ToString()}].";
-            else return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node {NodeInd}.";
+            if (NodeIdx == -1) return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node [{Point.ToString()}].";
+            else return $"Point Load of {Vector3d.Multiply(1e-3, Vector).ToString()}kN applied on node {NodeIdx}.";
 
         }
 

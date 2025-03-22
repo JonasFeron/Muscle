@@ -51,9 +51,15 @@ namespace Muscle.View
         {
             if (source == null) { return false; }
 
-            if (source is Element)
+            if (source is Prestress)
             {
-                Value.Element = (Element)source;
+                Value = (Prestress)source;
+                return true;
+            }
+            // Handle the case when a Prestress is wrapped in a GH_ObjectWrapper
+            if (source is GH_ObjectWrapper wrapper && wrapper.Value is Prestress)
+            {
+                Value = (Prestress)wrapper.Value;
                 return true;
             }
 

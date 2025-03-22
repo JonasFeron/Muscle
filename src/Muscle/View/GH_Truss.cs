@@ -82,6 +82,12 @@ namespace Muscle.View
                 Truss s = source as Truss;
                 Value = s;
             }
+            // Handle the case when a Truss is wrapped in a GH_ObjectWrapper
+            if (source is GH_ObjectWrapper wrapper && wrapper.Value is Truss)
+            {
+                Value = (Truss)wrapper.Value;
+                return true;
+            }
 
             return base.CastFrom(source);
         }
