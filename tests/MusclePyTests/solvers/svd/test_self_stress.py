@@ -4,7 +4,7 @@ from MusclePy.femodel.pynodes import PyNodes
 from MusclePy.femodel.pyelements import PyElements
 from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.solvers.svd.main import main_singular_value_decomposition
-from MusclePy.solvers.svd.self_stress_modes import localize_self_stress_modes
+from MusclePy.solvers.selfstress.modes import localize_self_stress_modes
 
 class TestSelfStressModes(unittest.TestCase):
     """Test cases for the SelfStressModes class with a 2X Snelson structure.

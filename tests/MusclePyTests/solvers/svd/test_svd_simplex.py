@@ -4,7 +4,7 @@ from MusclePy.femodel.pynodes import PyNodes
 from MusclePy.femodel.pyelements import PyElements
 from MusclePy.femodel.pytruss import PyTruss
 from MusclePy.solvers.svd.main import main_singular_value_decomposition
-from MusclePy.solvers.svd.self_stress_modes import normalize_self_stress_mode
+from MusclePy.solvers.selfstress.modes import normalize_self_stress_mode
 
 
 

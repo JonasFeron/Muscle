@@ -16,7 +16,7 @@ from .solvers.dr.py_config_dr import PyConfigDR
 
 # Expose solver functions
 from .solvers.svd.main import main_singular_value_decomposition
-from .solvers.svd.self_stress_modes import localize_self_stress_modes
+from .solvers.self_stress.modes import localize_self_stress_modes
 from .solvers.dm.linear_dm import main_linear_displacement_method
 from .solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
 from .solvers.dr.main import main_dynamic_relaxation

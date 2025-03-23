@@ -10,7 +10,7 @@ from . import dynamic
 # Expose key solver functions
 from .svd.main import main_singular_value_decomposition
 from .svd.py_results_svd import PyResultsSVD
-from .svd.self_stress_modes import localize_self_stress_modes
+from .selfstress.self_stress_modes import localize_self_stress_modes
 from .dm.linear_dm import main_linear_displacement_method
 from .dm.nonlinear_dm import main_nonlinear_displacement_method
 from .dr.main import main_dynamic_relaxation

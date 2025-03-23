@@ -41,6 +41,42 @@ namespace Muscle.Converters
         {
             return branch.Select(n => n.Value).ToArray();
         }
+
+        /// <summary>
+        /// Converts a GH_Structure of GH_Number to a 2D double array.
+        /// Each branch in the data tree becomes a row in the resulting array.
+        /// </summary>
+        /// <param name="dataTree">The Grasshopper data tree to convert</param>
+        /// <returns>A 2D array where each row corresponds to a branch in the data tree</returns>
+        public static double[,] To2dArray(GH_Structure<GH_Number> dataTree)
+        {
+            if (dataTree == null || dataTree.DataCount == 0)
+                return new double[0, 0];
+
+            // Get all branches
+            var branches = dataTree.Branches;
+            int rows = branches.Count;
+            
+            // Determine the number of columns (use the longest branch)
+            int cols = branches.Max(branch => branch.Count);
+            
+            // Create the 2D array
+            double[,] result = new double[rows, cols];
+            
+            // Fill the array
+            for (int i = 0; i < rows; i++)
+            {
+                var branch = branches[i];
+                for (int j = 0; j < branch.Count; j++)
+                {
+                    result[i, j] = branch[j].Value;
+                }
+                
+                // If a branch is shorter than the longest branch, the remaining values stay as 0
+            }
+            
+            return result;
+        }
         #endregion Number Conversion
 
         #region Support Conversion
