@@ -104,7 +104,7 @@ namespace Muscle.View
             }
             if (typeof(Q).IsAssignableFrom(typeof(double)))
             {
-                object force = Value.Value;
+                object force = Value.FreeLengthVariation;
                 target = (Q)force;
                 return true;
             }
@@ -179,7 +179,7 @@ namespace Muscle.View
             Vector3d v_display1 = load1.Vector * displayAmpli / 10000.0;
             
             // Draw force vectors and labels
-            double freeLengthVariation = Value.Value; // (m)
+            double freeLengthVariation = Value.FreeLengthVariation; // (m)
             DrawForceVectors(args, load0.Point, v_display0, freeLengthVariation, _decimal, false);
             DrawForceVectors(args, load1.Point, v_display1, freeLengthVariation, _decimal, true); // show text "free length variation = x mm" at only one end
         }

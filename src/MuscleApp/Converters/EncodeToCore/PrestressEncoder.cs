@@ -32,7 +32,7 @@ namespace MuscleApp.Converters
                     if (elementIndex >= 0 && elementIndex < freeLengthVariation.Length)
                     {
                         // Add the value to the existing value (in case multiple scenarios affect the same element)
-                        freeLengthVariation[elementIndex] += p.Value;
+                        freeLengthVariation[elementIndex] += p.FreeLengthVariation;
                     }
                 }
             }
