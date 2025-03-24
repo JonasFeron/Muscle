@@ -93,6 +93,13 @@ namespace Muscle.Converters
             return array.Select(n => new GH_Point(n)).ToList();
         }
         #endregion Point3d Conversion
+
+        #region Prestress Conversion
+        public static List<GH_Prestress> ToBranch(List<Prestress> prestresses)
+        {
+            return prestresses.Select(p => new GH_Prestress(p)).ToList();
+        }
+        #endregion Prestress Conversion
     }
 }
 

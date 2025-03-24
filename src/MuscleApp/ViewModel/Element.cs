@@ -307,7 +307,62 @@ namespace MuscleApp.ViewModel
             return $"{Name} {Idx} with free length {FreeLength:F3}m and mass {Mass:F1}kg.\n    In Compression : A={CS.Area * 1e6:F0}mm^2, E={Material.Ec * 1e-6:F0}MPa.\n   In Tension : A={CS.Area * 1e6:F0}mm^2, E={Material.Et * 1e-6:F0}MPa.";
         }
 
+        /// <summary>
+        /// Determines the appropriate Young's modulus to use based on the current state of elastic elongation.
+        /// </summary>
+        /// <param name="elasticElongation">The elastic elongation to evaluate.</param>
+        /// <returns>The Young's modulus [N/m²] based on whether the element is in tension, compression, or near zero tension.</returns>
+        public double CurrentYoungModulus(double elasticElongation)
+        {         
+            if (Math.Abs(elasticElongation) < 1e-10) // If tension is close to zero
+                return Math.Max(Material.Ec, Material.Et); // Use the maximum of Ec and Et
+            else if (elasticElongation < 0) // if Element is in compression
+                return Material.Ec; // [N/m²]
+            else // if Element is in tension
+                return Material.Et; // [N/m²]
+        }
+        
+        /// <summary>
+        /// Calculates the modified axial stiffness of the element given the prestress variation.
+        /// The modified axial stiffness is the product of the Young's modulus and the cross-sectional area divided by the modified free length.
+        /// </summary>
+        /// <returns>The modified axial stiffness [N/m] of the element.</returns>
+        public double ModifiedAxialStiffness(double FreeLengthVariation)
+        {         
+                // Get the element's properties
+                double area = CS.Area; // [m²]
+                double young = CurrentYoungModulus(Line.Length - FreeLength); //Young's modulus [N/m²], based on current elastic elongation
+                
+                // Calculate the new free length (original + variation)
+                double newFreeLength = FreeLength + FreeLengthVariation; // [m]
 
+                if (Math.Abs(newFreeLength) < 1e-10) // newFreeLength = 0 
+                    return double.PositiveInfinity;
+                
+                double modifiedAxialStiffness = young * area / newFreeLength; // [N/m]
+                return modifiedAxialStiffness;
+        }
+
+        /// <summary>
+        /// Calculates the axial stiffness of the element.
+        /// The axial stiffness is the product of the Young's modulus and the cross-sectional area divided by the free length.
+        /// </summary>
+        /// <returns>The axial stiffness [N/m] of the element.</returns>
+        public double AxialStiffness
+        {        
+            get
+            {
+                // Get the element's properties
+                double area = CS.Area; // [m²]
+                double young = CurrentYoungModulus(Line.Length - FreeLength); //Young's modulus [N/m²], based on current elastic elongation
+                
+                if (Math.Abs(FreeLength) < 1e-10)
+                    return double.PositiveInfinity;
+                
+                double axialStiffness = young * area / FreeLength; // [N/m]
+                return axialStiffness;
+            }
+        }
 
 
         #endregion Methods

@@ -44,9 +44,10 @@
     <Compile Include="solvers\dynamic\example_modal_analysis.py" />
     <Compile Include="solvers\dynamic\main.py" />
     <Compile Include="solvers\dynamic\main.py" />
+    <Compile Include="solvers\selfstress\modes.py" />
+    <Compile Include="solvers\selfstress\__init__.py" />
     <Compile Include="solvers\svd\main.py" />
     <Compile Include="solvers\svd\py_results_svd.py" />
-    <Compile Include="solvers\svd\self_stress_modes.py" />
     <Compile Include="solvers\svd\__init__.py" />
     <Compile Include="solvers\__init__.py" />
     <Compile Include="test_script.py" />
@@ -65,6 +66,8 @@
     <Folder Include="solvers\dynamic\" />
     <Folder Include="solvers\dynamic\__pycache__\" />
     <Folder Include="solvers\dynamic\__pycache__\" />
+    <Folder Include="solvers\selfstress\" />
+    <Folder Include="solvers\selfstress\__pycache__\" />
     <Folder Include="solvers\svd\" />
     <Folder Include="solvers\svd\__pycache__\" />
     <Folder Include="solvers\__pycache__\" />
@@ -95,6 +98,8 @@
     <Content Include="solvers\dynamic\__pycache__\dynamic_results.cpython-312.pyc" />
     <Content Include="solvers\dynamic\__pycache__\main.cpython-312.pyc" />
     <Content Include="solvers\dynamic\__pycache__\main.cpython-312.pyc" />
+    <Content Include="solvers\selfstress\__pycache__\modes.cpython-312.pyc" />
+    <Content Include="solvers\selfstress\__pycache__\__init__.cpython-312.pyc" />
     <Content Include="solvers\svd\__pycache__\main.cpython-312.pyc" />
     <Content Include="solvers\svd\__pycache__\py_results_svd.cpython-312.pyc" />
     <Content Include="solvers\svd\__pycache__\self_stress_modes.cpython-312.pyc" />

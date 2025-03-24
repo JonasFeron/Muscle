@@ -36,6 +36,9 @@ def localize_self_stress_modes(structure : PyTruss, Vs_T : np.ndarray, zero_atol
         raise ValueError("Structure must have elements defined")
     
     # Validate Vs_T shape
+    if not isinstance(Vs_T, np.ndarray):  # if Vs_T is a C# array
+        Vs_T = np.array(Vs_T, dtype=float, copy=True)
+    
     if Vs_T.shape[1] != structure.elements.count:
         raise ValueError("The self-stress modes length must match the number of elements")
     

@@ -76,6 +76,10 @@ namespace MuscleApp.Solvers
                 totalResistingForces[node0] += load0.Vector;
                 totalResistingForces[node1] += load1.Vector;
             }
+
+            double maxAxialForce = prestressList.Max(p => Math.Abs(p.EquivalentTension));
+            double rtol = 1e-6;
+            double zero = rtol * maxAxialForce;
             
             // Check if the sum of resisting forces is zero for each node, except for fixed degrees of freedom
             foreach (Node node in structure.Nodes)
@@ -83,19 +87,19 @@ namespace MuscleApp.Solvers
                 Vector3d residual = totalResistingForces[node.Idx];
                 
                 // Check each component (X, Y, Z) of the load sum
-                if (node.isXFree && Math.Abs(residual.X) > 1e-6)
+                if (node.isXFree && Math.Abs(residual.X) > zero)
                 {
-                    structure.warnings.Add($"Node {node.Idx}: X-component of resisting force sum is not zero ({residual.X:F6})");
+                    structure.warnings.Add($"Node {node.Idx} is not in self-equilibrium: residual in X-direction is not zero ({residual.X:F6})");
                 }
                 
-                if (node.isYFree && Math.Abs(residual.Y) > 1e-6)
+                if (node.isYFree && Math.Abs(residual.Y) > zero)
                 {
-                    structure.warnings.Add($"Node {node.Idx}: Y-component of resisting force sum is not zero ({residual.Y:F6})");
+                    structure.warnings.Add($"Node {node.Idx} is not in self-equilibrium: residual in Y-direction is not zero ({residual.Y:F6})");
                 }
                 
-                if (node.isZFree && Math.Abs(residual.Z) > 1e-6)
+                if (node.isZFree && Math.Abs(residual.Z) > zero)
                 {
-                    structure.warnings.Add($"Node {node.Idx}: Z-component of resisting force sum is not zero ({residual.Z:F6})");
+                    structure.warnings.Add($"Node {node.Idx} is not in self-equilibrium: residual in Z-direction is not zero ({residual.Z:F6})");
                 }
             }
         }

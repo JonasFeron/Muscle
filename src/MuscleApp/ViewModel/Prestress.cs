@@ -21,9 +21,10 @@ namespace MuscleApp.ViewModel
                 if (Element == null)
                     return 0.0;
                 
-                double k_modified = ModifiedAxialStiffness(); // [N/m]
+                // double k_modified = ModifiedAxialStiffness(); // [N/m]
+                double k = Element.AxialStiffness;
                 
-                double equivalentTension = k_modified * (-FreeLengthVariation); // [N] A lengthening (+) creates a compression force (-)
+                double equivalentTension = k * (-FreeLengthVariation); // [N] A lengthening (+) creates a compression force (-)
                 
                 return equivalentTension;
             }
@@ -103,54 +104,35 @@ namespace MuscleApp.ViewModel
                 return $"Shortening of {FreeLengthVariation * 1e3:F3}mm in Element {Element.Name}{Element.Idx} whose initial free length is {Element.FreeLength * 1e3:F3}mm.";
         }
 
-        /// <summary>
-        /// Determines the appropriate Young's modulus to use based on the current state of elastic elongation.
-        /// </summary>
-        /// <param name="element">The element to evaluate</param>
-        /// <param name="elasticElongation">The elastic elongation to evaluate.</param>
-        /// <returns>The Young's modulus [N/m²] based on whether the element is in tension, compression, or near zero tension.</returns>
-        private static double CurrentYoungModulus(Element element, double elasticElongation)
-        {         
-            if (Math.Abs(elasticElongation) < 1e-10) // If tension is close to zero
-                return Math.Max(element.Material.Ec, element.Material.Et); // Use the maximum of Ec and Et
-            else if (elasticElongation < 0) // if Element is in compression
-                return element.Material.Ec; // [N/m²]
-            else // if Element is in tension
-                return element.Material.Et; // [N/m²]
-        }
 
-        /// <summary>
-        /// Determines the appropriate Young's modulus to use based on the current state of elastic elongation.
-        /// </summary>
-        /// <param name="elasticElongation">The elastic elongation to evaluate.</param>
-        /// <returns>The Young's modulus [N/m²] based on whether the element is in tension, compression, or near zero tension.</returns>
-        private double CurrentYoungModulus(double elasticElongation)
-        {         
-            return CurrentYoungModulus(Element, elasticElongation);
-        }
-        
-        /// <summary>
-        /// Calculates the modified axial stiffness of the element given the prestress variation.
-        /// The modified axial stiffness is the product of the Young's modulus and the cross-sectional area divided by the modified free length.
-        /// </summary>
-        /// <returns>The modified axial stiffness [N/m] of the element.</returns>
-        private double ModifiedAxialStiffness()
-        {         
-                // Get the element's properties
-                double area = Element.CS.Area; // [m²]
-                double young = CurrentYoungModulus(Element.Line.Length - Element.FreeLength); //Young's modulus [N/m²], based on current elastic elongation
-                
-                // Calculate the new free length (original + variation)
-                double newFreeLength = Element.FreeLength + FreeLengthVariation; // [m]
 
-                if (Math.Abs(newFreeLength) < 1e-10) // newFreeLength = 0 
-                    return double.PositiveInfinity;
-                
-                double modifiedAxialStiffness = young * area / newFreeLength; // [N/m]
-                return modifiedAxialStiffness;
-        }
         #endregion Methods
 
+        // /// <summary>
+        // /// Creates a prestress object based on desired tension.
+        // /// Calculates the required free length variation (dl0) to achieve a specified tension.
+        // /// </summary>
+        // /// <param name="e">The element to apply prestress to</param>
+        // /// <param name="targetTension">The desired tension force [N]</param>
+        // /// <returns>A new Prestress object with the calculated free length variation</returns>
+        // /// <remarks>
+        // /// Uses the relationship: tension = EA/(l0 + dl0) * -dl0
+        // /// Solving for dl0: dl0 = l0 / (1 - EA/tension)
+        // /// </remarks>
+        // public static Prestress FromTension(Element e, double targetTension)
+        // {
+        //     // Get element properties
+        //     double A = e.CS.Area; // [m²]
+        //     double currentLength = e.Line.Length; // [m]
+        //     double freeLength = e.FreeLength; // [m]
+        //     double E = CurrentYoungModulus(e, currentLength - freeLength); // [N/m²]
+            
+        //     // Calculate free length variation using optimized formula
+        //     double freeLengthVariation = freeLength / (1 - E * A / targetTension);
+            
+        //     return new Prestress(e, freeLengthVariation);
+        // }
+                
         /// <summary>
         /// Creates a prestress object based on desired tension.
         /// Calculates the required free length variation (dl0) to achieve a specified tension.
@@ -159,19 +141,11 @@ namespace MuscleApp.ViewModel
         /// <param name="targetTension">The desired tension force [N]</param>
         /// <returns>A new Prestress object with the calculated free length variation</returns>
         /// <remarks>
-        /// Uses the relationship: tension = EA/(l0 + dl0) * dl0
-        /// Solving for dl0: dl0 = l0 / (EA/tension - 1)
+        /// Uses the relationship: tension = EA/l0 * -dl0
         /// </remarks>
         public static Prestress FromTension(Element e, double targetTension)
         {
-            // Get element properties
-            double A = e.CS.Area; // [m²]
-            double currentLength = e.Line.Length; // [m]
-            double freeLength = e.FreeLength; // [m]
-            double E = CurrentYoungModulus(e, currentLength - freeLength); // [N/m²]
-            
-            // Calculate free length variation using optimized formula
-            double freeLengthVariation = freeLength / (E * A / targetTension - 1);
+            double freeLengthVariation = -targetTension / e.AxialStiffness;
             
             return new Prestress(e, freeLengthVariation);
         }

@@ -6,7 +6,8 @@ using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using MuscleApp.Solvers;
 using MuscleApp.ViewModel;
-using Muscle.View
+using Muscle.View;
+using Muscle.Converters;
 using Rhino.Geometry;
 using static Muscle.Components.GHComponentsFolders;
 
@@ -34,7 +35,7 @@ namespace Muscle.Components.StaticLoading
         protected override void RegisterInputParams(GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "Structure to apply self-stress to", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Target Tensions", "t", "Targeted self-stress state [kN] with one axial force value per element", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Target Tensions", "t (kN)", "Targeted self-stress state (kN) with one axial force value per element", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -57,13 +58,13 @@ namespace Muscle.Components.StaticLoading
 
             // Retrieve inputs
             if (!DA.GetData(0, ref ghTruss)) return;
-            if (!DA.GetDataList(1, tensions)) return;
+            if (!DA.GetDataList(1, tensions)) return; //kN
 
             // Get the structure from the GH_Truss wrapper
             Truss structure = ghTruss.Value;
             
             // Apply the self-stress scenario
-            List<Prestress> prestressList = SelfStressScenario.ComputeFreeLengthVariation(structure, tensions);
+            List<Prestress> prestressList = SelfStressScenario.ComputeFreeLengthVariation(structure, tensions.Select(t => t * 1000).ToList()); // Convert kN to N
             
             // Check for warnings and display them
             if (structure.warnings.Count > 0)
@@ -76,7 +77,7 @@ namespace Muscle.Components.StaticLoading
             }
             
             // Set output
-            DA.SetDataList(0, prestressList);
+            DA.SetDataList(0, GH_Encoders.ToBranch(prestressList));
         }
 
         /// <summary>

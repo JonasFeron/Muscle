@@ -37,7 +37,7 @@ namespace Muscle.Components.Util
         {
             pManager.AddIntegerParameter("Rows", "R", "Number of rows of the 2D matrix", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Columns", "C", "Number of columns of the 2D matrix", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Rows", "R", "Number of rows of the 2D matrix", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Values", "V", "Matrix values", GH_ParamAccess.list);
         }
 
         /// <summary>
