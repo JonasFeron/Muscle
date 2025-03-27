@@ -39,6 +39,21 @@ namespace Muscle.Converters
         {
             return array.Select(n => new GH_Number(n)).ToList();
         }
+
+        public static GH_Structure<GH_Number> ToTree(double[] array)
+        {
+            GH_Structure<GH_Number> tree = new GH_Structure<GH_Number>();
+            GH_Path path = new GH_Path(0);
+            List<GH_Number> branch = new List<GH_Number>(array.Length);
+            
+            for (int i = 0; i < array.Length; i++)
+            {
+                branch.Add(new GH_Number(array[i]));
+            }
+            
+            tree.AppendRange(branch, path);
+            return tree;
+        }
         #endregion Number Conversion
 
         #region Vector3d Conversion
@@ -65,6 +80,7 @@ namespace Muscle.Converters
         {
             return array.Select(n => new GH_Vector(n)).ToList();
         }
+
         #endregion Vector3d Conversion
 
         #region Point3d Conversion
@@ -102,4 +118,3 @@ namespace Muscle.Converters
         #endregion Prestress Conversion
     }
 }
-

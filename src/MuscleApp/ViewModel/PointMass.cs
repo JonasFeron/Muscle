@@ -10,13 +10,10 @@ namespace MuscleApp.ViewModel
 
         #region Properties
 
-        //there is 1 ways to input a point mass:  on a NodeIndex 
-        //During the dynamic computation, this point mass is linked to a node with his coordinates 'Poind3d Point'
+        public Point3d Point { set; get; } = new Point3d();
+        public int NodeInd { set; get; } = -1;
 
-        public Point3d Point { set; get; }
-        public int NodeInd { set; get; }
-
-        public Vector3d Vector { set; get; } //Will contain in the z direction the mass in [kg]
+        public Vector3d Vector { set; get; } = new Vector3d(); 
 
         #endregion Properties
 
@@ -25,8 +22,6 @@ namespace MuscleApp.ViewModel
         //Different way to initialize a point mass
         public PointMass() //Contain a mass in kg 
         {
-            Point = new Point3d();
-            Vector = new Vector3d();
         }
 
         public PointMass(Point3d aPoint, Vector3d aVector)
@@ -38,6 +33,7 @@ namespace MuscleApp.ViewModel
         public PointMass(Node aNode, Vector3d aVector)
         {
             NodeInd = aNode.Idx;
+            Point = aNode.Coordinates;
             Vector = aVector;
         }
         public PointMass(int ind, Vector3d aVector)
@@ -45,12 +41,22 @@ namespace MuscleApp.ViewModel
             NodeInd = ind;
             Vector = aVector;
         }
-
-        public PointMass(int ind, Point3d point, Vector3d aVector)
+        public PointMass(Point3d aPoint, double mass)
+        {
+            Point = aPoint;
+            Vector = new Vector3d(mass, mass, mass);
+            NodeInd = -1;
+        }
+        public PointMass(Node aNode, double mass)
+        {
+            NodeInd = aNode.Idx;
+            Point = aNode.Coordinates;
+            Vector = new Vector3d(mass, mass, mass);
+        }
+        public PointMass(int ind, double mass)
         {
             NodeInd = ind;
-            Point = point;
-            Vector = aVector;
+            Vector = new Vector3d(mass, mass, mass);
         }
 
         public PointMass(PointMass aPointMass)
@@ -64,23 +70,23 @@ namespace MuscleApp.ViewModel
 
 
         #region Methods
-        public static PointMass operator *(PointMass load, double factor)
+        public static PointMass operator *(PointMass mass, double factor)
         {
             return new PointMass()
             {
-                Point = load.Point,
-                Vector = load.Vector * factor
+                Point = mass.Point,
+                Vector = mass.Vector * factor
             };
         }
 
-        public static PointMass operator +(PointMass load1, PointMass load2)
+        public static PointMass operator +(PointMass mass1, PointMass mass2)
         {
-            if (load1.Point.EpsilonEquals(load2.Point, 1e-5)) { throw new System.Exception("Mass must have the same application point"); }
+            if (mass1.Point.EpsilonEquals(mass2.Point, 1e-5)) { throw new System.Exception("Mass must have the same application point"); }
 
             return new PointMass()
             {
-                Point = load1.Point,
-                Vector = load1.Vector + load2.Vector,
+                Point = mass1.Point,
+                Vector = mass1.Vector + mass2.Vector,
             };
         }
 

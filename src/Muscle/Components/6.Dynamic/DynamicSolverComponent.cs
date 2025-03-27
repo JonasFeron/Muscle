@@ -1,32 +1,30 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
-using Muscle.Elements;
-using Muscle.Loads;
-using Muscle.PythonLink;
-using Muscle.Dynamics;
-using Newtonsoft.Json;
+using Grasshopper.Kernel.Parameters;
 using Rhino.Geometry;
 using System.IO;
-using Python.Runtime;
-using Muscle.ViewModel;
-using Muscle.GHModel;
+using MuscleApp.ViewModel;
+using MuscleApp.Solvers;
+using Muscle.View;
+using Muscle.Converters;
+using MuscleCore.PythonNETInit;
+using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Dynamics
+namespace Muscle.Components.Dynamic
 {
     public class DynamicSolverComponent : GH_Component
     {
+        public static readonly string[] _massMatrixOptions= {"0. Neglect element masses", "1. Lumped Mass Matrix", "2. Consistent Mass Matrix"};
+        public static readonly int[] _optionsIdx = {0, 1, 2};
 
-        /// <summary>
-        /// Initializes a new instance of the MyComponent1 class.
-        /// </summary>
         public DynamicSolverComponent()
-          : base("Dynamics Solver LUMPED", "DS-L",
-                "Compute the frequency(ies) and the mode(s) of the struture having a certain mass on each node. The computation is done on the state of the structure. Consistent Mass matrix is used.",
-              "Muscles", "Dynamics")
+          : base("Dynamic Modal Analysis", "Dynamic",
+                "Compute the natural vibration modes of the structure and their frequencies. This component solves the eigenvalue problem with the mass matrix and the tangent stiffness matrix (= material + geometric stiffnesses in the current state).",
+              GHAssemblyName, Folder6_Dynamic)
         {
         }
 
@@ -47,7 +45,7 @@ namespace Muscle.Dynamics
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("14e22534-7087-42cf-8de2-1d9044065502"); }
+            get { return new Guid("7d6853e4-ea1b-43e6-b66e-9ef122987812"); }
         }
 
         /// <summary>
@@ -55,11 +53,24 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "Struct.", "A structure which may already be subjected to some loads or prestress from previous calculations.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Point mass (kg/node)", "Point Mass (kg/node)", "The mass who is considered at each node for the dynamic computation. 1 [kg] is considered for all nodes if no input is given or if less/more than the number of nodes. All values will be used as absolute values.", GH_ParamAccess.tree);
-            pManager.AddIntegerParameter("Number of frequencies wanted", "Num. Freq. Wanted", "To define the number of frequencies and modes that need to be computed. For the value 0, all the frequencies will be computed.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Structure", "struct", "A structure which may preloaded or self-stressed from previous calculations. The tangent stiffness matrix will be computed in the current structure's state.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Point Mass", "point M (kg)", "List of point masses [kg] added up on the diagonal of the mass matrix (shape (3n,3n), n being the number of nodes, 3 being the X, Y, Z directions).", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Element Mass", "elem M (kg)", "List of element masses [kg]. If null input, the element's masses are automatically computed from their free length, cross-sectional area and material specific mass.", GH_ParamAccess.tree);
+            pManager.AddIntegerParameter("Element Mass Matrix", "elem Matrix (-)", "The lumped mass option computes a diagonal matrix (as above point masses) where half of the element mass is added up to each of both end nodes. \nLast option computes the so-called consistent mass matrix which is not diagonal.", GH_ParamAccess.item,0);
+            pManager.AddIntegerParameter("nModes", "nModes", "Number of natural modes to compute. nModes=0 will compute all the natural modes.", GH_ParamAccess.item,0);
+            pManager[1].Optional = true;
             pManager[2].Optional = true;
-
+            pManager[3].Optional = true;
+            pManager[4].Optional = true;
+            
+            // create a dropdown list for the user to select a supported element mass matrix option
+            var option = pManager[3] as Param_Integer;
+            for (int i = 0; i < _massMatrixOptions.Length; i++)
+            {
+                string optionName = _massMatrixOptions[i];
+                int optionIdx = _optionsIdx[i];
+                option.AddNamedValue(optionName, optionIdx);
+            }
         }
 
         /// <summary>
@@ -67,8 +78,10 @@ namespace Muscle.Dynamics
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Structure", "struct", "A structure containing the total results.", GH_ParamAccess.item);
-
+            pManager.AddGenericParameter("Structure", "struct", "Unchanged structure", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Natural Frequencies", "freq", "Natural frequencies (Hz) associated with the natural modes", GH_ParamAccess.list);
+            pManager.AddVectorParameter("Natural Modes", "modes", "Natural mode shapes (-) of vibration computed from the mass and tangent stiffness matrices", GH_ParamAccess.tree);
+            pManager.AddVectorParameter("Point Mass", "point m (kg)", "Total point masses [kg] resulting from the addition of the input Point Masses and Element Masses. \nNo difference can be seen here between the lumped mass and the constistent mass options, but a different mass matrix (diagonal or not) was well used for the dynamic modal analysis.", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -77,184 +90,58 @@ namespace Muscle.Dynamics
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            string pythonScript = "MainModuleDynamics"; // ensure that the python script is located in AccessToAll.pythonProjectDirectory, or provide the relative path to the script.
-            if (!AccessToAll.hasPythonStarted)
+            // Check if Python.NET is initialized
+            if (!PythonNETManager.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python has not been started. Please start the 'StartPython.NET' component first.");
                 return;
             }
-            if (!File.Exists(Path.Combine(AccessToAll.pythonProjectDirectory, pythonScript)))
+
+            // 1) Collect Data
+            GH_Truss gh_truss = new GH_Truss();
+            GH_Structure<IGH_Goo> gh_pointMass = new GH_Structure<IGH_Goo>();
+            GH_Structure<GH_Number> gh_elemMass = new GH_Structure<GH_Number>();
+            int massMatrixOption = 0;
+            int nModes = 0;
+
+            if (!DA.GetData(0, ref gh_truss)) { return; }
+            if (!DA.GetDataTree(1, out gh_pointMass)) { }
+            if (!DA.GetDataTree(2, out gh_elemMass)) { }
+            if (!DA.GetData(3, ref massMatrixOption)) { }
+            if (!DA.GetData(4, ref nModes)) { }
+
+            // 2) Transform data before solving 
+            Truss truss = gh_truss.Value;
+            
+            // Extract point and element masses from the data tree
+            List<PointMass> pointMasses = GH_Decoders.ToPointMassList(gh_pointMass);
+            List<double> elementMasses = GH_Decoders.ToDoubleList(gh_elemMass);
+
+
+            // 3) Solve using the DynamicModalAnalysis solver
+            ResultsDynamic resultsDynamic = null;
+            try
             {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please ensure that \"{pythonScript}\" is located in: {AccessToAll.pythonProjectDirectory}");
-                DA.SetData(0, null);
+                resultsDynamic = DynamicModalAnalysis.Solve(truss, pointMasses, elementMasses, massMatrixOption, nModes);
+            }
+            catch (Exception e)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Failed to solve the dynamic modal analysis: {e.Message}");
                 return;
             }
-            //1) Collect Data
-            StructureObj structure = new StructureObj();
-            List<double> DynMassIN = new List<double>();
-            int MaxFreqWtd = 0; //Default value
-            GH_Structure<IGH_Goo> gh_mass = new GH_Structure<IGH_Goo>();
-            
-            //Obtain the data if the component is connected
-            if (!DA.GetData(0, ref structure)) { return; }
-            if (!DA.GetDataTree(1, out gh_mass)) { }
-            if (!DA.GetData(2, ref MaxFreqWtd)) { } //Number of frequencies/mode that the user want to compute
 
-
-            //2) Format data before sending and solving in python
-            StructureObj new_structure = structure.Duplicate(); //Duplicate the structure. Use the function Duplicate from StructureObj
-
-            //Create a list with a length = Number of nodes
-            for (int i = 0; i < structure.NodesCount; i++)
+            // 4) Check if the solution was successful
+            if (resultsDynamic == null)
             {
-                DynMassIN.Add(0.0);
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Failed to solve the dynamic modal analysis.");
+                return;
             }
 
-            structure.DynMass = DynMassIN;
-
-            //Save the data from the list of Point Mass object inside the list DynMass of the 'Structure' variable 
-            bool success1 = RegisterPointMass(structure, gh_mass.FlattenData()); // structure.DynMass filled with the loads
-
-
-
-            //3) Solve in python
-
-
-
-
-            //4) Create the variable data & result to transfer data from c# to python thanks to JSON
-            SharedData data = new SharedData(structure, DynMassIN, MaxFreqWtd); //Object data contains all the essential informations of structure + the dynMass considered
-            SharedSolverResult result = new SharedSolverResult(); //create the file with the results
-
-            string jsonData = JsonConvert.SerializeObject(data, Formatting.None);
-            dynamic jsonResult = null;
-
-            //2) Solve in python
-            var m_threadState = PythonEngine.BeginAllowThreads();
-
-            // following code is inspired by https://github.com/pythonnet/pythonnet/wiki/Threading
-            using (Py.GIL())
-            {
-                try
-                {
-                    dynamic script = PyModule.Import(pythonScript);
-                    dynamic mainFunction = script.main;
-                    jsonResult = mainFunction(jsonData);
-                    JsonConvert.PopulateObject((string)jsonResult, result);
-                }
-                catch (PythonException ex)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-                }
-                catch (Exception e)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"python result= {jsonResult}");
-                    return;
-                }
-            }
-            PythonEngine.EndAllowThreads(m_threadState);
-
-            new_structure.PopulateWithSolverResult_dyn(result); // Set all result from the dynamic computation inside the new_structure
-
-
-
-            //5) Create the variable ModeUsedVector
-            List<Vector3d> ModeUsedVector = new List<Vector3d>(); //Create the list of mode with a vector shape (dx,dy,dz) with a length equal to the number of nodes.
-            //ModeUsedVector has a special format more readable for the user
-            int NumberOfNodes = structure.NodesCount;
-            List<List<Vector3d>> ModeVect_construction = new List<List<Vector3d>>();
-            for (int i = 0; i < new_structure.NumberOfFrequency; i++)
-            {
-                List<Vector3d> ModeIteration3D = new List<Vector3d>();
-                for (int j = 0; j < NumberOfNodes; j++)
-                {
-                    Vector3d ToAdd = new Vector3d();
-                    ToAdd.X = new_structure.Mode[i][j * 3];
-                    ToAdd.Y = new_structure.Mode[i][j * 3 + 1];
-                    ToAdd.Z = new_structure.Mode[i][j * 3 + 2];
-                    ModeIteration3D.Add(ToAdd);
-                }
-                ModeVect_construction.Add(ModeIteration3D);
-            }
-            new_structure.ModeVector = ModeVect_construction;
-
-
-            //6) Create list of object 'point masses'
-            List<Node> NodesCoord = structure.StructuralNodes;
-            List<GH_PointMass> selfmass = new List<GH_PointMass>();
-            for (int i = 0; i < NumberOfNodes; i++)
-            {
-                
-                //Masses
-                Vector3d Mass = new Vector3d();
-                Point3d Coord = new Point3d();
-                Mass.Z = structure.DynMass[i];
-                Coord = NodesCoord[i].Point;
-                PointMass Display = new PointMass(i, Coord, Mass);
-
-                GH_PointMass p0 = new GH_PointMass(Display); //Because the weight is in N
-                selfmass.Add(p0);
-            }
-
-
-
-            //Send a message error concerning the frequency
-            if ((MaxFreqWtd != 0) && (MaxFreqWtd != new_structure.NumberOfFrequency))
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "The number of asked frequencies is too high.");
-            }
-
-
-            //Insert the data inside the new_structure
-            new_structure.PointMasses = selfmass;
-
-            //Send the data
-            GH_StructureObj gh_structure = new GH_StructureObj(new_structure);
-            DA.SetData(0, gh_structure);
-
-
-            
-        }
-
-
-
-        private bool RegisterPointMass(StructureObj structure, List<IGH_Goo> datas)
-        {
-            //return true if at least one point mass is added on the structure
-            bool success = false;
-            if (datas.Count == 0 || datas == null) return false; //failure and abort
-
-            PointMass load;
-            foreach (var data in datas) //Go trough the data
-            {
-                if (data is GH_PointMass)
-                {
-                    load = ((GH_PointMass)data).Value; //retrieve the pointload (=point mass in this case) inputted by the user
-                    // we need to know on which point or node the load will have to be applied
-                    int ind = -1;
-                    if (load.NodeInd > -1) //PointsLoad is defined on a node index
-                    {
-                        if (load.NodeInd < structure.NodesCount) //The index need to b part of the structure
-                        {
-                            ind = load.NodeInd;
-                            structure.DynMass[ind] += load.Vector.Z; //If Point mass is applied on a node of the structure. 
-                            //Take the value of the mass who is stored in the Z direction of the load vector
-                        }
-                        else
-                        {
-                            AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please check the node index of the point masses. The index {load.NodeInd} is too big. ");
-                        }
-                    }
-                    else
-                    {
-                        AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Please check the node index of the point masses. The index {load.NodeInd} is negative.");
-                    }
-        
-                    success = true;
-                }
-            }
-            return success;
+            // 5) Set outputs
+            DA.SetData(0, gh_truss);
+            DA.SetDataList(2, GH_Encoders.ToBranch(resultsDynamic.Frequencies));
+            DA.SetDataTree(1, GH_Encoders.ToTree(resultsDynamic.ModeShapes));
+            DA.SetDataList(3, GH_Encoders.ToBranch(resultsDynamic.Masses));
         }
     }
 }

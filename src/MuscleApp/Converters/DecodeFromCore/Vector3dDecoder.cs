@@ -42,5 +42,29 @@ namespace MuscleApp.Converters
 
             return modeVectors;
         }
+                /// <summary>
+        /// Converts a matrix of mode vectors to a 2D array of Vector3d.
+        /// </summary>
+        /// <param name="input">Matrix of mode vectors with shape (numModes, 3*nodesCount)</param>
+        /// <returns>2D array of Vector3d with shape (numModes, nodesCount)</returns>
+        public static Vector3d[] ToArrayVector3d(double[] input)
+        {
+            // Get dimensions of the modes matrix
+            int nodesCount = input.GetLength(0)/3;
+            
+            // Create 1D array to store the converted modes
+            Vector3d[] result = new Vector3d[nodesCount];
+
+            for (int nodeIdx = 0; nodeIdx < nodesCount; nodeIdx++)
+            {
+                    // Create a Vector3d from the x, y, z components
+                    result[nodeIdx] = new Vector3d(
+                        input[3 * nodeIdx],     // X component
+                        input[3 * nodeIdx + 1], // Y component
+                        input[3 * nodeIdx + 2]  // Z component
+                    );
+            }
+            return result;
+        }
     }
 }

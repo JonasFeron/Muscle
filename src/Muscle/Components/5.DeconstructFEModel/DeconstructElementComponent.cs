@@ -40,7 +40,7 @@ namespace Muscle.Components.DeconstructFEModel
             pManager.AddNumberParameter("Free length", "L0 (m)", "Free length of the element", GH_ParamAccess.item); //4
             pManager.AddGenericParameter("Cross Section", "CS", "Cross section of the element", GH_ParamAccess.item); //5
             pManager.AddGenericParameter("Material", "M", "Bilinear Material of the element", GH_ParamAccess.item); //6
-            pManager.AddVectorParameter("Weight", "W (kN)", "Self-Weight (kN) of the element", GH_ParamAccess.item); //7
+            pManager.AddNumberParameter("Mass", "m (kg)", "Mass (kg) of the element", GH_ParamAccess.item); //7
             pManager.AddNumberParameter("Tension", "t (kN)", "Axial force (kN, tension positive, compression negative) in the element due to all applied loads and prestress", GH_ParamAccess.item); //8
             pManager.AddIntervalParameter("Resistances", "[tmin, tmax] (kN)", "Resistance interval [(-)Buckling resistance, (+)Yielding resistance] (kN)", GH_ParamAccess.item); //9
         }
@@ -62,7 +62,7 @@ namespace Muscle.Components.DeconstructFEModel
             DA.SetData(4, e.FreeLength);
             DA.SetData(5, e.CS);
             DA.SetData(6, e.Material);
-            DA.SetData(7, e.Weight / 1000);
+            DA.SetData(7, e.Mass );
             DA.SetData(8, e.Tension / 1000);
 
             double Ryb = e.Resistance.T0 /1000; //kN

@@ -201,7 +201,7 @@ def local_to_global_matrix(local_matrices, elements_end_nodes, nodes_count):
     return K
 
 
-def compute_local_lumped_mass_matrices(elements_mass: np.ndarray) -> list:
+def compute_local_lumped_mass_matrices(element_masses: np.ndarray) -> list:
         """Compute local lumped mass matrices for each element.
         
         Args:
@@ -211,14 +211,14 @@ def compute_local_lumped_mass_matrices(elements_mass: np.ndarray) -> list:
             List of local lumped mass matrices, each of shape (6,6)
         """
         # Get element count from mass array
-        elements_count = len(elements_mass)
+        elements_count = len(element_masses)
         
         local_mass_matrices = []
         
         # Compute the lumped mass matrix for each element
         for i in range(elements_count):
-            m1 = elements_mass[i] /2 # Mass of the element's half length, associated with the first node
-            m2 = elements_mass[i] /2 # Mass of the element's half length, associated with the second node
+            m1 = element_masses[i] /2 # Mass of the element's half length, associated with the first node
+            m2 = element_masses[i] /2 # Mass of the element's half length, associated with the second node
 
             # Compute the lumped mass matrix
             M = np.array([[m1, 0, 0, 0, 0, 0],  # node 1 X
@@ -231,7 +231,7 @@ def compute_local_lumped_mass_matrices(elements_mass: np.ndarray) -> list:
             
         return local_mass_matrices
 
-def compute_local_consistent_mass_matrices(elements_mass: np.ndarray) -> list:
+def compute_local_consistent_mass_matrices(element_masses: np.ndarray) -> list:
         """Compute local consistent mass matrices for each element.
         
         Args:
@@ -241,14 +241,14 @@ def compute_local_consistent_mass_matrices(elements_mass: np.ndarray) -> list:
             List of local consistent mass matrices, each of shape (6,6)
         """
         # Get element count from mass array
-        elements_count = len(elements_mass)
+        elements_count = len(element_masses)
         
         local_mass_matrices = []
         
         # Compute the consistent mass matrix for each element
         for i in range(elements_count):
-            m1 = elements_mass[i] /2 # Mass of the element's half length, associated with the first node
-            m2 = elements_mass[i] /2 # Mass of the element's half length, associated with the second node
+            m1 = element_masses[i] /2 # Mass of the element's half length, associated with the first node
+            m2 = element_masses[i] /2 # Mass of the element's half length, associated with the second node
 
             # Compute the consistent mass matrix
             M = (1/3) * np.array([[2*m1, 0, 0, m2, 0, 0],  # node 1 X

@@ -238,6 +238,80 @@ namespace Muscle.Converters
         }
         #endregion Prestress Conversion
 
+        #region PointMass Conversion
+        /// <summary>
+        /// Converts a GH_PointMass to a MuscleApp.ViewModel.PointMass
+        /// </summary>
+        /// <param name="ghPointMass">The Grasshopper point mass to convert</param>
+        /// <returns>A MuscleApp.ViewModel.PointMass</returns>
+        public static PointMass ToPointMass(GH_PointMass ghPointMass)
+        {
+            return ghPointMass.Value;
+        }
+
+        /// <summary>
+        /// Converts a list of GH_PointMass objects to a list of MuscleApp.ViewModel.PointMass objects
+        /// </summary>
+        /// <param name="ghPointMasses">The list of Grasshopper point masses to convert</param>
+        /// <returns>A list of MuscleApp.ViewModel.PointMass objects</returns>
+        public static List<PointMass> ToPointMassList(List<GH_PointMass> ghPointMasses)
+        {
+            return ghPointMasses.Select(pm => pm.Value).ToList();
+        }
+
+        /// <summary>
+        /// Extracts PointMass objects from a Grasshopper data tree
+        /// </summary>
+        /// <param name="tree">The Grasshopper data tree containing point masses</param>
+        /// <returns>A list of MuscleApp.ViewModel.PointMass objects</returns>
+        public static List<PointMass> ToPointMassList(GH_Structure<IGH_Goo> tree)
+        {
+            List<PointMass> result = new List<PointMass>();
+            
+            foreach (var branch in tree.Branches)
+            {
+                foreach (var item in branch)
+                {
+                    if (item is GH_PointMass ghPointMass)
+                    {
+                        result.Add(ghPointMass.Value);
+                    }
+                }
+            }
+            
+            return result;
+        }
+        #endregion PointMass Conversion
+
+        #region Double Conversion
+        /// <summary>
+        /// Converts a list of GH_Number objects to a list of double values
+        /// </summary>
+        /// <param name="ghNumbers">The list of Grasshopper numbers to convert</param>
+        /// <returns>A list of double values</returns>
+        public static List<double> ToDoubleList(List<GH_Number> ghNumbers)
+        {
+            return ghNumbers.Select(n => n.Value).ToList();
+        }
+
+        /// <summary>
+        /// Extracts double values from a Grasshopper data tree
+        /// </summary>
+        /// <param name="tree">The Grasshopper data tree containing numbers</param>
+        /// <returns>A list of double values</returns>
+        public static List<double> ToDoubleList(GH_Structure<GH_Number> tree)
+        {
+            List<double> result = new List<double>();
+            
+            foreach (var branch in tree.Branches)
+            {
+                result.AddRange(branch.Select(n => n.Value));
+            }
+            
+            return result;
+        }
+        #endregion Double Conversion
+
         #region Generic Conversion Methods
         /// <summary>
         /// Generic method to extract objects of type T from a Grasshopper data tree containing objects of type TGH

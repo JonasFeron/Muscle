@@ -7,7 +7,7 @@ including natural frequencies and mode shapes.
 
 import numpy as np
 
-class DynamicResults:
+class PyResultsDynamic:
     """
     This class stores the results of the dynamic modal analysis of a structure.
     
@@ -15,18 +15,18 @@ class DynamicResults:
     with a given mass distribution and stiffness.
     """
 
-    def __init__(self, frequencies, mode_shapes, total_mode_shapes=None, max_frequencies=None):
+    def __init__(self, frequencies, mode_shapes, mass_matrix):
         """
-        Initialize a DynamicResults object that stores the results of modal analysis.
+        Initialize a PyResultsDynamic object that stores the results of modal analysis.
         
         Args:
-            frequencies: np.ndarray: Natural frequencies in Hz
-            mode_shapes: np.ndarray: Mode shapes corresponding to the natural frequencies (only free DOFs)
-            total_mode_shapes: np.ndarray: Mode shapes including zeros for fixed DOFs (optional)
-            max_frequencies: int: Maximum number of frequencies computed (optional)
+            frequencies: np.ndarray - shape (n_modes,): Natural frequencies in Hz
+            mode_shapes: np.ndarray - shape (n_modes, 3*nodes_count): Mode shapes corresponding to the natural frequencies
+            mass_matrix: np.ndarray - shape (3*nodes_count, 3*nodes_count): Mass matrix of the structure
         """
         self.frequencies = frequencies  # Natural frequencies in Hz
         self.mode_shapes = mode_shapes  # Mode shapes corresponding to the natural frequencies 
+        self.mass_matrix = mass_matrix  # Mass matrix of the structure
         
     @property
     def angular_frequencies(self):
@@ -52,18 +52,13 @@ class DynamicResults:
         """
         return len(self.frequencies)
     
-    def get_mode(self, index):
+    @property
+    def masses(self):
         """
-        Get a specific mode shape.
-        
-        Args:
-            index: int: Index of the mode (0-based)
-            
+        Transforms the Mass matrix (3n,3n) into a column vector (3n,), by adding up the entries for each row. 
         Returns:
-            np.ndarray: Mode shape corresponding to the requested index
+            np.ndarray: shape(3n,) -  a simplified version of the Mass matrix for visualisation purpose. 
         """
-        if index < 0 or index >= self.mode_count:
-            raise IndexError(f"Mode index {index} out of range (0-{self.mode_count-1})")
-        
-        return self.mode_shapes[:, index]
+        return np.sum(self.mass_matrix,axis=1) 
+    
     

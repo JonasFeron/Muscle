@@ -11,7 +11,7 @@ from .femodel.pynodes import PyNodes
 from .femodel.pyelements import PyElements
 from .femodel.pytruss import PyTruss
 from .solvers.svd.py_results_svd import PyResultsSVD
-from .solvers.dynamic.dynamic_results import DynamicResults
+from .solvers.dynamic.py_results_dynamic import PyResultsDynamic
 from .solvers.dr.py_config_dr import PyConfigDR
 
 # Expose solver functions
@@ -38,5 +38,5 @@ __all__ = [
     'main_dynamic_relaxation',
     'PyConfigDR',
     'main_dynamic_modal_analysis',
-    'DynamicResults'
+    'PyResultsDynamic'
 ]

@@ -4,15 +4,13 @@ using Rhino.Geometry;
 using System.Drawing;
 using GH_IO.Serialization;
 using System;
-using Muscle.Loads;
 
 
 namespace Muscle.View
 {   
-
-
-    //Create a GH element for the masses used for the dynamic computation
-    public class GH_PointMass : GH_GeometricGoo<PointMass>, IGH_PreviewData 
+    //GH_PointMass is not a PreviewData for consistency reasons with Element mass. 
+    //To preview the masses, use the output of the Dynamic Solver Component. 
+    public class GH_PointMass : GH_Goo<PointMass> //: GH_GeometricGoo<PointMass>, IGH_PreviewData 
     {
         public GH_PointMass() : base()
         {
@@ -29,90 +27,93 @@ namespace Muscle.View
             Value = other.Value.Duplicate();
         }
         
-        public override BoundingBox Boundingbox
-        {
-            get
-            {
-                BoundingBox bBox = new Line(Value.Point, -10.0 * Value.Vector / Value.Vector.Length, 10.0).BoundingBox;
-                bBox.Inflate(1.0);
-                return bBox;
+        // public override BoundingBox Boundingbox
+        // {
+        //     get
+        //     {
+        //         BoundingBox bBox = new Line(Value.Point, -10.0 * Value.Vector / Value.Vector.Length, 10.0).BoundingBox;
+        //         bBox.Inflate(1.0);
+        //         return bBox;
                
                 
-            }
-        }
+        //     }
+        // }
         
         public override string TypeName { get { return "Point mass"; } }
 
         public override string TypeDescription { get { return "Point mass to apply on the node of a structure."; } }
 
-        private Color red = Color.Red;
+        // private Color red = Color.Red;
 
-        public BoundingBox ClippingBox { get { return Boundingbox; } }
+        // public BoundingBox ClippingBox { get { return Boundingbox; } }
 
-        public void DrawViewportMeshes(GH_PreviewMeshArgs args)
-        {
-            //Take the value of 'DisplayDyn' in the AccessToAll file to adapt the size of the displayed masses (sphere)
-            double DisplayMassAmpli = AccessToAll.DisplayDyn;
+        // public void DrawViewportMeshes(GH_PreviewMeshArgs args)
+        // {
+        //     //Take the value of 'DisplayMassAmpli' in the MuscleConfig file to adapt the size of the displayed masses (sphere)
+        //     double DisplayMassAmpli = MuscleConfig.DisplayMassAmpli;
 
-            Vector3d v_display = Value.Vector * DisplayMassAmpli; //scale x [m] = x[kg]/10kg * LoadAmpliFactor
-
-            if (Math.Abs(v_display.Z / v_display.Length) >= 0.001)
-            {
-                //Sphere to display at each node
-                double radius = Math.Abs(v_display.Z / 10);
-                Sphere sph = new Sphere(Value.Point,radius);
-                args.Pipeline.DrawSphere(sph, red);
-
-            }
-        }
+        //     double mass_size = Math.Abs(Value.Vector.Length / 10 * DisplayMassAmpli); //scale x [m] = x[kg]/10kg * MassAmpliFactor
+        //     Point3d point = Value.Point;
+        //     if (mass_size >= 0.001)
+        //     {
+        //         //Sphere to display at each node
+        //         Sphere sph = new Sphere(point, mass_size);
+        //         args.Pipeline.DrawSphere(sph, red);
+        //     }
+        // }
         
-        public void DrawViewportWires(GH_PreviewWireArgs args)
-        {
+        // public void DrawViewportWires(GH_PreviewWireArgs args)
+        // {
 
-            double DisplayMassAmpli = AccessToAll.DisplayDyn;
-            int _decimal = AccessToAll.DisplayDecimals;
+        //     double DisplayMassAmpli = MuscleConfig.DisplayMassAmpli;
+        //     int _decimal = MuscleConfig.DisplayDecimals;
 
 
-            Point3d node = Value.Point;
+        //     Point3d point = Value.Point;
 
-            Plane plane;
-            args.Viewport.GetCameraFrame(out plane);
+        //     Plane plane;
+        //     args.Viewport.GetCameraFrame(out plane);
 
-            double pixelsPerUnit;
-            args.Viewport.GetWorldToScreenScale(node, out pixelsPerUnit);
-        }
+        //     double pixelsPerUnit;
+        //     args.Viewport.GetWorldToScreenScale(point, out pixelsPerUnit);
+        // }
 
-        public override IGH_GeometricGoo DuplicateGeometry()
+        // public override IGH_GeometricGoo DuplicateGeometry()
+        // {
+        //     return new GH_PointMass(this);
+        // }
+        
+        public override IGH_Goo Duplicate()
         {
             return new GH_PointMass(this);
         }
 
-        public override BoundingBox GetBoundingBox(Transform xform)
-        {
-            return xform.TransformBoundingBox(Boundingbox);
-        }
+        // public override BoundingBox GetBoundingBox(Transform xform)
+        // {
+        //     return xform.TransformBoundingBox(Boundingbox);
+        // }
 
-        public override IGH_GeometricGoo Morph(SpaceMorph xmorph)
-        {
-            GH_PointMass nGHPointMass = new GH_PointMass(this);
-            nGHPointMass.Value.Point = xmorph.MorphPoint(Value.Point);
-            nGHPointMass.Value.Vector = new Vector3d(xmorph.MorphPoint(new Point3d(Value.Vector)));
+        // public override IGH_GeometricGoo Morph(SpaceMorph xmorph)
+        // {
+        //     GH_PointMass nGHPointMass = new GH_PointMass(this);
+        //     nGHPointMass.Value.Point = xmorph.MorphPoint(Value.Point);
+        //     nGHPointMass.Value.Vector = new Vector3d(xmorph.MorphPoint(new Point3d(Value.Vector)));
 
-            return nGHPointMass;
-        }
+        //     return nGHPointMass;
+        // }
 
         public override string ToString()
         {
             return Value.ToString();
         }
 
-        public override IGH_GeometricGoo Transform(Transform xform)
-        {
-            GH_PointMass nGHPointMass = new GH_PointMass(this);
-            nGHPointMass.Value.Point.Transform(xform);
-            nGHPointMass.Value.Vector.Transform(xform);
+        // public override IGH_GeometricGoo Transform(Transform xform)
+        // {
+        //     GH_PointMass nGHPointMass = new GH_PointMass(this);
+        //     nGHPointMass.Value.Point.Transform(xform);
+        //     nGHPointMass.Value.Vector.Transform(xform);
 
-            return nGHPointMass;
-        }
+        //     return nGHPointMass;
+        // }
     }
 }
