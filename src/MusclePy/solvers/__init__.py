@@ -15,7 +15,7 @@ from .dm.linear_dm import main_linear_displacement_method
 from .dm.nonlinear_dm import main_nonlinear_displacement_method
 from .dr.main import main_dynamic_relaxation
 from .dynamic.main import main_dynamic_modal_analysis
-from .dynamic.dynamic_results import DynamicResults
+from .dynamic.py_results_dynamic import PyResultsDynamic
 
 __all__ = [
     'dm', 'dr', 'svd', 'dynamic',
@@ -26,5 +26,5 @@ __all__ = [
     'main_nonlinear_displacement_method',
     'main_dynamic_relaxation',
     'main_dynamic_modal_analysis',
-    'DynamicResults'
+    'PyResultsDynamic'
 ]

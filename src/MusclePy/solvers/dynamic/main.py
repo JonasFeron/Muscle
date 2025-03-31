@@ -2,6 +2,7 @@ from ctypes import ArgumentError
 from MusclePy.solvers.dynamic.py_results_dynamic import PyResultsDynamic
 from MusclePy.femodel.pytruss import PyTruss
 import numpy as np
+import scipy as sp
         
 
 def main_dynamic_modal_analysis(structure: PyTruss, point_masses: np.ndarray = None, 
@@ -45,7 +46,7 @@ def main_dynamic_modal_analysis(structure: PyTruss, point_masses: np.ndarray = N
     
     # Get structure information   
     nodes_count = structure.nodes.count
-    dof = structure.nodes.dof  # Degrees of Freedom are either True = free, or False = fixed by a support
+    dof = structure.nodes.dof.reshape((-1,))  # Degrees of Freedom are either True = free, or False = fixed by a support
     n_dof = np.sum(dof)  # Number of free DOFs 
 
     # Determine how many eigenvalues/eigenvectors to compute 
@@ -57,37 +58,13 @@ def main_dynamic_modal_analysis(structure: PyTruss, point_masses: np.ndarray = N
     M_3n = _compute_mass_matrix(structure, point_masses, element_masses, element_masses_option)
 
     # Extract stiffness and mass matrices of size (n_dof, n_dof) relative to free DOFs only
-    K = K_3n[dof][:, dof]
-    M = M_3n[dof][:, dof]
-    
-    # Solve the generalized eigenvalue problem: K·φ = ω²·M·φ
-    try:        
-        if n_dof < 100:  # For small problems, use the dense solver 
-            from scipy import linalg
-            eigenvalues, eigenvectors = linalg.eigh(K, M)
-            
-            # Sort frequencies and eigenvectors
-            sort_indices = np.argsort(eigenvalues)
-            eigenvalues = eigenvalues[sort_indices]
-            eigenvectors = eigenvectors[:, sort_indices]
-            
-            # Limit the number of frequencies if requested (only needed for dense solver)
-            if n_modes < n_dof:
-                eigenvalues = eigenvalues[:n_modes]
-                eigenvectors = eigenvectors[:, :n_modes]
+    K = K_3n[np.ix_(dof,dof)]
+    M = M_3n[np.ix_(dof,dof)]
 
-        else:  # For large problems, use the sparse solver which is more efficient
-            from scipy.sparse import linalg as sparse_linalg
+    try:
+        # Solve the generalized eigenvalue problem: K·φ = ω²·M·φ
+        eigenvalues, eigenvectors = sp.linalg.eigh(K, M, type=1, subset_by_index=[0,n_modes-1], driver="gvx")
 
-            # Compute only the smallest eigenvalues (which correspond to the lowest frequencies)
-            eigenvalues, eigenvectors = sparse_linalg.eigsh(
-                K, 
-                k=min(n_modes, n_dof - 1),  # Ensure the number of eigenvalues to compute is valid for the sparse solver
-                M=M,
-                sigma=0.0,  # Target eigenvalues near zero
-                which='SM'   # Get smallest magnitude eigenvalues
-            )
-            
         # Convert eigenvalues (=ω²) to frequencies
         angular_frequencies = np.sqrt(np.abs(eigenvalues))  
         frequencies = angular_frequencies / (2 * np.pi)  # Convert to Hz
@@ -97,7 +74,7 @@ def main_dynamic_modal_analysis(structure: PyTruss, point_masses: np.ndarray = N
         mode_shapes[dof] = eigenvectors
         
         # Create and return results object
-        return PyResultsDynamic(frequencies, mode_shapes, M_3n)
+        return PyResultsDynamic(frequencies, mode_shapes.T, M_3n)
         
     except Exception as e:
         raise RuntimeError(f"Eigenvalue computation failed: {e}")
@@ -185,12 +162,12 @@ def _compute_mass_matrix(structure: PyTruss, point_masses: np.ndarray = None,
     elements_count = structure.elements.count
 
     # Validate point masses
-    point_masses = structure.nodes._check_and_reshape_array(point_masses)
+    point_masses = structure.nodes._check_and_reshape_array(point_masses,'point_masses')
     if np.any(point_masses < 0):
         raise ValueError("All point masses must be positive")
     
     # Validate element masses
-    element_masses = structure.elements._check_and_reshape_array(element_masses)
+    element_masses = structure.elements._check_and_reshape_array(element_masses,'element_masses')
     if np.any(element_masses < 0):
         raise ValueError("All element masses must be positive")
     
