@@ -19,7 +19,7 @@ namespace Muscle.Components.Dynamic
         #region Constructors
 
         public PointMassComponent() :
-                    base("Construct Point mass", "Mass", "Construct a Point Mass by defining a mass and its point of application.", GHAssemblyName, Folder6_Dynamic)
+                    base("Construct Point Mass", "Mass", "Construct a Point Mass by defining a mass and its point of application.", GHAssemblyName, Folder6_Dynamic)
         {
         }
 

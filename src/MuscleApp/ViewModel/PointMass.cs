@@ -101,6 +101,17 @@ namespace MuscleApp.ViewModel
             else return $"Point mass of {Vector.Z.ToString()}kg applied on node {NodeInd}.";
 
         }
+
+        public bool IsValid
+        {
+            get
+            {
+                if (Point.IsValid
+                && Vector.IsValid
+                ) return true;
+                else return false;
+            }
+        }
         #endregion Methods
     }
 }

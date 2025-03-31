@@ -4,6 +4,7 @@ using Rhino.Geometry;
 using System.Drawing;
 using GH_IO.Serialization;
 using System;
+using MuscleApp.ViewModel;
 
 
 namespace Muscle.View
@@ -26,7 +27,8 @@ namespace Muscle.View
         {
             Value = other.Value.Duplicate();
         }
-        
+        public override bool IsValid { get { return Value.IsValid; } }
+
         // public override BoundingBox Boundingbox
         // {
         //     get
@@ -34,11 +36,11 @@ namespace Muscle.View
         //         BoundingBox bBox = new Line(Value.Point, -10.0 * Value.Vector / Value.Vector.Length, 10.0).BoundingBox;
         //         bBox.Inflate(1.0);
         //         return bBox;
-               
-                
+
+
         //     }
         // }
-        
+
         public override string TypeName { get { return "Point mass"; } }
 
         public override string TypeDescription { get { return "Point mass to apply on the node of a structure."; } }

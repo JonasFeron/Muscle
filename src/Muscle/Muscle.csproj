@@ -48,6 +48,7 @@
     <Compile Remove="AccessToAll.cs" />
     <Compile Remove="Components\3.StaticLoading\SelfStressScenario.cs" />
     <Compile Remove="Components\5.DeconstructFEModel\PointLoadPropertiesComponent.cs" />
+    <Compile Remove="Components\6.Dynamic\DynDisplayComponent.cs" />
   </ItemGroup>
   
   <ItemGroup>

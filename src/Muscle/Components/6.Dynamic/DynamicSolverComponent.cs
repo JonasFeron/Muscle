@@ -54,8 +54,8 @@ namespace Muscle.Components.Dynamic
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Structure", "struct", "A structure which may preloaded or self-stressed from previous calculations. The tangent stiffness matrix will be computed in the current structure's state.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Point Mass", "point M (kg)", "List of point masses [kg] added up on the diagonal of the mass matrix (shape (3n,3n), n being the number of nodes, 3 being the X, Y, Z directions).", GH_ParamAccess.tree);
-            pManager.AddNumberParameter("Element Mass", "elem M (kg)", "List of element masses [kg]. If null input, the element's masses are automatically computed from their free length, cross-sectional area and material specific mass.", GH_ParamAccess.tree);
+            pManager.AddGenericParameter("Point Mass", "point m (kg)", "List of point masses [kg] added up on the diagonal of the mass matrix (shape (3n,3n), n being the number of nodes, 3 being the X, Y, Z directions).", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Element Mass", "elem m (kg)", "List of element masses [kg]. If null input, the element's masses are automatically computed from their free length, cross-sectional area and material specific mass.", GH_ParamAccess.tree);
             pManager.AddIntegerParameter("Element Mass Matrix", "elem Matrix (-)", "The lumped mass option computes a diagonal matrix (as above point masses) where half of the element mass is added up to each of both end nodes. \nLast option computes the so-called consistent mass matrix which is not diagonal.", GH_ParamAccess.item,0);
             pManager.AddIntegerParameter("nModes", "nModes", "Number of natural modes to compute. nModes=0 will compute all the natural modes.", GH_ParamAccess.item,0);
             pManager[1].Optional = true;

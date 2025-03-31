@@ -5,19 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Muscle.Dynamics;
 using Rhino.Geometry;
-using Newtonsoft.Json;
-using Muscle.PythonLink;
-using Muscle.ViewModel;
-using Muscle.GHModel;
+using MuscleApp.ViewModel;
+using Muscle.View;
+using static Muscle.Components.GHComponentsFolders;
 
-namespace Muscle.Dynamics
+namespace Muscle.Components.Dynamic
 {
     public class DynDisplayComponent : GH_Component
     {
 
-        //private static readonly log4net.ILog log = LogHelper.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #region Properties
 
         protected override System.Drawing.Bitmap Icon
