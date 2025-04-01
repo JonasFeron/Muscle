@@ -7,8 +7,8 @@
         Rhino 8 Windows: net48, net7.0, net7.0-windows, net7.0-windows10.0.22000.0, etc
         Rhino 8 Mac: net7.0, net7.0-macos, net7.0-macos12.0, etc
     -->
-    <!-- <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks> -->
-    <TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
+	 <!-- <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks> -->
+     <TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <TargetExt>.gha</TargetExt>
     <NoWarn>NU1701;NETSDK1086</NoWarn>
@@ -24,38 +24,13 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Compile Remove="Dynamics\**" />
-    <Compile Remove="GHModel\**" />
-    <Compile Remove="PythonLink\**" />
-    <Compile Remove="PythonNETComponents\**" />
-    <Compile Remove="Resources\**" />
-    <Compile Remove="Solvers\**" />
-    <EmbeddedResource Remove="Dynamics\**" />
-    <EmbeddedResource Remove="GHModel\**" />
-    <EmbeddedResource Remove="PythonLink\**" />
-    <EmbeddedResource Remove="PythonNETComponents\**" />
-    <EmbeddedResource Remove="Resources\**" />
-    <EmbeddedResource Remove="Solvers\**" />
-    <None Remove="Dynamics\**" />
-    <None Remove="GHModel\**" />
-    <None Remove="PythonLink\**" />
-    <None Remove="PythonNETComponents\**" />
-    <None Remove="Resources\**" />
-    <None Remove="Solvers\**" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Remove="AccessToAll.cs" />
-    <Compile Remove="Components\3.StaticLoading\SelfStressScenario.cs" />
-    <Compile Remove="Components\5.DeconstructFEModel\PointLoadPropertiesComponent.cs" />
     <Compile Remove="Components\6.Dynamic\DynDisplayComponent.cs" />
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Grasshopper" Version="7.35.23346.11001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
-    <PackageReference Include="Grasshopper" Version="8.10.24228.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="pythonnet" Version="3.0.5" />
+    <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
+    <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
+  <!--    <PackageReference Include="pythonnet" Version="3.0.5" /> -->
   </ItemGroup>
 
   <!-- For Windows only builds -->
