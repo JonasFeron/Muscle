@@ -266,20 +266,7 @@ namespace Muscle.Converters
         /// <returns>A list of MuscleApp.ViewModel.PointMass objects</returns>
         public static List<PointMass> ToPointMassList(GH_Structure<IGH_Goo> tree)
         {
-            List<PointMass> result = new List<PointMass>();
-            
-            foreach (var branch in tree.Branches)
-            {
-                foreach (var item in branch)
-                {
-                    if (item is GH_PointMass ghPointMass)
-                    {
-                        result.Add(ghPointMass.Value);
-                    }
-                }
-            }
-            
-            return result;
+            return FromTree<PointMass, GH_PointMass>(tree);
         }
         #endregion PointMass Conversion
 
@@ -306,6 +293,29 @@ namespace Muscle.Converters
             foreach (var branch in tree.Branches)
             {
                 result.AddRange(branch.Select(n => n.Value));
+            }
+            
+            return result;
+        }
+
+        /// <summary>
+        /// Extracts double values from a Grasshopper data tree with IGH_Goo items
+        /// </summary>
+        /// <param name="tree">The Grasshopper data tree containing numbers</param>
+        /// <returns>A list of double values</returns>
+        public static List<double> ToDoubleList(GH_Structure<IGH_Goo> tree)
+        {
+            List<double> result = new List<double>();
+            
+            foreach (var branch in tree.Branches)
+            {
+                foreach (var item in branch)
+                {
+                    if (item is GH_Number ghNumber)
+                    {
+                        result.Add(ghNumber.Value);
+                    }
+                }
             }
             
             return result;
