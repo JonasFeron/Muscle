@@ -19,11 +19,11 @@
 
 import unittest
 import numpy as np
-from MusclePy.solvers.dm.linear_dm import main_linear_displacement_method
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.femodel.prestress_scenario import PrestressScenario
+from musclepy.solvers.dm.linear_dm import main_linear_displacement_method
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.femodel.pyelements import PyElements
+from musclepy.femodel.prestress_scenario import PrestressScenario
 
 class TestLinearDM_3PrestressedCables(unittest.TestCase):
     def setUp(self):

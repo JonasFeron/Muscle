@@ -19,10 +19,10 @@
 
 import unittest
 import numpy as np
-from MusclePy.solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.femodel.pyelements import PyElements
+from musclepy.solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.femodel.pyelements import PyElements
 
 
 class TestNonlinearDM_2BarsTruss(unittest.TestCase):

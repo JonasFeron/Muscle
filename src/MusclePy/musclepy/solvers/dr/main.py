@@ -27,9 +27,9 @@ References:
 [2] Barnes MR., "Form Finding and Analysis of Tension Structures by Dynamic Relaxation". International Journal of Space Structures. 1999;14(2):89-104. doi:10.1260/0266351991494722
 """
 
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
-from MusclePy.solvers.dr.py_config_dr import PyConfigDR
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.solvers.dr.py_truss_dr import PyTrussDR
+from musclepy.solvers.dr.py_config_dr import PyConfigDR
 import numpy as np
 
 

@@ -590,3 +590,4 @@ desktop.ini
 .private/
 .idea/
 
+src/MusclePy/setup.py

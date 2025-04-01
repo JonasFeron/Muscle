@@ -34,7 +34,7 @@ references:
   des systèmes de tenségrité," Université Montpellier II, 2005, p. 49
 """
 
-from MusclePy.femodel.pytruss import PyTruss
+from musclepy.femodel.pytruss import PyTruss
 import numpy as np
 
 

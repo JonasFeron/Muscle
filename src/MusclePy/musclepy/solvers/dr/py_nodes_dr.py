@@ -18,7 +18,7 @@
 # Description and complete License: see NOTICE file.
 
 import numpy as np
-from MusclePy.femodel.pynodes import PyNodes
+from musclepy.femodel.pynodes import PyNodes
 
 class PyNodesDR(PyNodes):
     """

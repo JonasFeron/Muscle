@@ -62,7 +62,7 @@ namespace MuscleCore.Solvers
                 {
                     PyObject pyInitial = coreInitial.ToPython();
 
-                    dynamic musclepy = Py.Import("MusclePy");
+                    dynamic musclepy = Py.Import("musclepy");
                     dynamic solve = musclepy.main_linear_displacement_method;
                     dynamic pyResult = solve(
                         pyInitial,

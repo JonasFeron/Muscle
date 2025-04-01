@@ -56,7 +56,7 @@ namespace MuscleCore.Solvers
         /// <returns>2D double array containing the localized modes</returns>
         public static double[,]? Localize(CoreTruss structure, double[,] Vs_T, double atol)
         {
-            string pythonPackage = "MusclePy"; 
+            string pythonPackage = "musclepy"; 
             double[,]? localModes = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();

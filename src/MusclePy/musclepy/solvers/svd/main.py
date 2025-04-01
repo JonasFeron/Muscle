@@ -17,9 +17,9 @@
 # List of the contributors to the development of Muscle: see NOTICE file.
 # Description and complete License: see NOTICE file.
 
-from MusclePy.solvers.svd.py_results_svd import PyResultsSVD
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix
+from musclepy.solvers.svd.py_results_svd import PyResultsSVD
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.utils.matrix_calculations import compute_equilibrium_matrix
 import numpy as np
 
 

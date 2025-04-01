@@ -46,7 +46,7 @@ namespace MuscleCore.Solvers
     {
         public static string? Solve(string str0, string str1)
         {
-            string pythonPackage = "MusclePy";
+            string pythonPackage = "musclepy";
 
             string result = "";
 

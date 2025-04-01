@@ -60,7 +60,7 @@ namespace MuscleCore.Converters
             {
                 try
                 {
-                    dynamic musclepy = Py.Import("MusclePy");
+                    dynamic musclepy = Py.Import("musclepy");
                     dynamic pyElements = structure.Elements.ToPython();
                     dynamic pyNodes = pyElements.nodes;
 

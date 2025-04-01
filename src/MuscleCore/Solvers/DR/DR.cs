@@ -63,7 +63,7 @@ namespace MuscleCore.Solvers
                     PyObject pyInitial = coreInitial.ToPython();
                     PyObject pyConfig = config.ToPython();
                     
-                    dynamic musclepy = Py.Import("MusclePy");
+                    dynamic musclepy = Py.Import("musclepy");
                     dynamic solve = musclepy.main_dynamic_relaxation;
                     dynamic pyResult = solve(
                         pyInitial,

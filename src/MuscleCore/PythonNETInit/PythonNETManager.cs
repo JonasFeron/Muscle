@@ -86,7 +86,7 @@ namespace MuscleCore.PythonNETInit
                 Environment.SetEnvironmentVariable("PYTHONHOME", condaEnvPath, EnvironmentVariableTarget.Process);
                 Environment.SetEnvironmentVariable("PYTHONPATH", $"{site_packages};{Lib};{DLLs};{srcDirectory}", EnvironmentVariableTarget.Process);
                 //in development mode, MusclePy will be accessible from the srcDirectory
-                //in user mode, MusclePy will be accessible from site_packages, supposing the user will first "pip install MusclePy"
+                //in user mode, MusclePy will be accessible from site_packages, supposing the user will first "pip install musclepy"
 
                 //Runtime.PythonDLL = pythonDllPath;
                 Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", pythonDllName);
@@ -190,20 +190,20 @@ namespace MuscleCore.PythonNETInit
                         // Try to import MusclePy
                         try
                         {
-                            dynamic musclePy = Py.Import("MusclePy");
+                            dynamic musclePy = Py.Import("musclepy");
                             musclePyFound = true;
                         }
                         catch (PythonException)
                         {
                             // Check if MusclePy directory exists in srcDirectory
-                            string srcMusclePyPath = Path.Combine(srcDirectory, "MusclePy");
+                            string srcMusclePyPath = Path.Combine(srcDirectory, "musclepy");
                             if (Directory.Exists(srcMusclePyPath))
                             {
                                 musclePyFound = true;
                             }
                             
                             // Check if MusclePy directory exists in site_packages
-                            string sitePackagesMusclePyPath = Path.Combine(site_packages, "MusclePy");
+                            string sitePackagesMusclePyPath = Path.Combine(site_packages, "musclepy");
                             if (Directory.Exists(sitePackagesMusclePyPath))
                             {
                                 musclePyFound = true;
@@ -214,7 +214,7 @@ namespace MuscleCore.PythonNETInit
                         {
                             throw new InvalidOperationException(
                                 "MusclePy is not correctly installed. " +
-                                "In user mode, please run 'pip install MusclePy' in your conda environment first.");
+                                "In user mode, please run 'pip install musclepy' in your conda environment first.");
                         }
                     }
                 }
@@ -225,7 +225,7 @@ namespace MuscleCore.PythonNETInit
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to validate MusclePy installation", ex);
+                throw new InvalidOperationException("Impossible to find a valid MusclePy installation", ex);
             }
         }
         private static void TestMusclePy()

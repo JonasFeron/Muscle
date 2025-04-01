@@ -18,7 +18,7 @@
 # Description and complete License: see NOTICE file.
 
 """
-MusclePy.femodel - Finite Element Model components
+musclepy.femodel - Finite Element Model components
 """
 
 from .pynodes import PyNodes

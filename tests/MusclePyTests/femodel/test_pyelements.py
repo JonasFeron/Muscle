@@ -18,10 +18,8 @@
 # Description and complete License: see NOTICE file.
 
 import unittest
-import os
-import sys
 import numpy as np
-from MusclePy import femodel
+from musclepy import femodel
 
 class TestPyElements(unittest.TestCase):
     def setUp(self):

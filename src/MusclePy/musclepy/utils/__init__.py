@@ -18,10 +18,7 @@
 # Description and complete License: see NOTICE file.
 
 """
-MusclePy.solvers.svd - Singular Value Decomposition solver
+Utility modules for the musclepy package.
+
+This package contains utility functions and classes that are used across multiple modules.
 """
-
-from .main import main_singular_value_decomposition
-from .py_results_svd import PyResultsSVD
-
-__all__ = ['main_singular_value_decomposition', 'PyResultsSVD']

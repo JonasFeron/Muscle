@@ -19,14 +19,14 @@
 
 import unittest
 import numpy as np
-from MusclePy.solvers.dr.main import main_dynamic_relaxation
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.solvers.dr.py_elements_dr import PyElementsDR
-from MusclePy.solvers.dr.py_truss_dr import PyTrussDR
-from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
-from MusclePy.solvers.dr.py_config_dr import PyConfigDR
+from musclepy.solvers.dr.main import main_dynamic_relaxation
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.femodel.pyelements import PyElements
+from musclepy.solvers.dr.py_elements_dr import PyElementsDR
+from musclepy.solvers.dr.py_truss_dr import PyTrussDR
+from musclepy.solvers.dr.py_nodes_dr import PyNodesDR
+from musclepy.solvers.dr.py_config_dr import PyConfigDR
 
 
 class TestDR_3SimpleCables(unittest.TestCase):

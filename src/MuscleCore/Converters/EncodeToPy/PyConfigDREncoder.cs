@@ -60,7 +60,7 @@ namespace MuscleCore.Converters
             {
                 try
                 {
-                    dynamic musclepy = Py.Import("MusclePy");
+                    dynamic musclepy = Py.Import("musclepy");
                     
                     // Create a PyConfigDR instance from the module
                     return musclepy.PyConfigDR(

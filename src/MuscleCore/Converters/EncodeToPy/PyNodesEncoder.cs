@@ -58,7 +58,7 @@ namespace MuscleCore.Converters
             var nodes = (CoreNodes)obj;
             using (Py.GIL())
             {
-                dynamic musclepy = Py.Import("MusclePy");
+                dynamic musclepy = Py.Import("musclepy");
 
                 return musclepy.PyNodes(
                         initial_coordinates: nodes.InitialCoordinates,

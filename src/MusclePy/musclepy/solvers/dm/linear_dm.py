@@ -17,9 +17,9 @@
 # List of the contributors to the development of Muscle: see NOTICE file.
 # Description and complete License: see NOTICE file.
 
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.femodel.prestress_scenario import PrestressScenario
+from musclepy.femodel.pyelements import PyElements
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.femodel.prestress_scenario import PrestressScenario
 import numpy as np
 
 
@@ -108,7 +108,7 @@ def core_linear_displacement_method(current: PyTruss, loads_increment: np.ndarra
 
 
     # 1) Compute tangent stiffness matrix
-    from MusclePy.utils.matrix_calculations import local_to_global_matrix, compute_local_material_stiffness_matrices, compute_local_geometric_stiffness_matrices
+    from musclepy.utils.matrix_calculations import local_to_global_matrix, compute_local_material_stiffness_matrices, compute_local_geometric_stiffness_matrices
         
     # 1.1) local element stiffnesses : [N/m] - List(elements.count) of shape (6,6) matrices
     local_material_stiffness_matrices = compute_local_material_stiffness_matrices(

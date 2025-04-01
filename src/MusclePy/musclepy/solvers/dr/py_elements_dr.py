@@ -18,9 +18,9 @@
 # Description and complete License: see NOTICE file.
 
 import numpy as np
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
+from musclepy.femodel.pyelements import PyElements
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.solvers.dr.py_nodes_dr import PyNodesDR
 
 
 class PyElementsDR(PyElements):
@@ -102,7 +102,7 @@ class PyElementsDR(PyElements):
     
     def _compute_stiffness_matrices(self):
         """Update all local stiffness matrices of the elements based on the current state."""
-        from MusclePy.utils.matrix_calculations import compute_local_geometric_stiffness_matrices
+        from musclepy.utils.matrix_calculations import compute_local_geometric_stiffness_matrices
         
         # Not used in DR
         # # local material stiffnesses : [N/m] - List(elements.count) of shape (6,6) matrices

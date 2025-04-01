@@ -18,11 +18,11 @@
 # Description and complete License: see NOTICE file.
 
 import numpy as np
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.solvers.dr.py_nodes_dr import PyNodesDR
-from MusclePy.solvers.dr.py_elements_dr import PyElementsDR
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.femodel.pyelements import PyElements
+from musclepy.solvers.dr.py_nodes_dr import PyNodesDR
+from musclepy.solvers.dr.py_elements_dr import PyElementsDR
 
 
 class PyTrussDR(PyTruss):
@@ -168,7 +168,7 @@ class PyTrussDR(PyTruss):
 
     def _compute_matrices(self):
         """Compute all matrices based on the current state."""
-        from MusclePy.utils.matrix_calculations import (
+        from musclepy.utils.matrix_calculations import (
             compute_equilibrium_matrix,
             compute_global_material_stiffness_matrix,
             local_to_global_matrix

@@ -53,7 +53,7 @@ namespace MuscleCore.Solvers
         /// <returns>SVDresults object containing the SVD results</returns>
         public static CoreResultsSVD? Solve(CoreTruss structure, double rtol)
         {
-            string pythonPackage = "MusclePy"; 
+            string pythonPackage = "musclepy"; 
             CoreResultsSVD? svdResults = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();

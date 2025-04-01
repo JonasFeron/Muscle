@@ -22,7 +22,7 @@
 # The author wishes to express his sincere appreciation to Professor L. Rhode-Barbarigos (University of Miami) for his substantial guidance in the implementation of the Dynamic Relaxation method in 2021.
 
 """
-MusclePy.solvers.dr - Dynamic Relaxation solver
+musclepy.solvers.dr - Dynamic Relaxation solver
 
 This module implements the Dynamic Relaxation method for structural analysis.
 

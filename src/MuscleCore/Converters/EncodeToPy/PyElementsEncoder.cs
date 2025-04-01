@@ -59,7 +59,7 @@ namespace MuscleCore.Converters
             var elements = (CoreElements)obj;
             using (Py.GIL())
             {
-                dynamic musclepy = Py.Import("MusclePy");
+                dynamic musclepy = Py.Import("musclepy");
 
                 return musclepy.PyElements(
                     nodes: elements.Nodes.ToPython(),

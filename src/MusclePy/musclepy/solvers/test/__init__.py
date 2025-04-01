@@ -18,9 +18,9 @@
 # Description and complete License: see NOTICE file.
 
 """
-MusclePy.solvers.selfstress - Self-stress solver
+musclepy.solvers.test - test solver
 """
 
-from .modes import localize_self_stress_modes
+from .test_script import main as test_script_main
 
-__all__ = ['localize_self_stress_modes']
+__all__ = ['test_script_main']

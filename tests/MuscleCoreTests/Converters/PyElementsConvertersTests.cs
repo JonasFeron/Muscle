@@ -64,11 +64,17 @@ namespace MuscleCoreTests.Converters
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            condaEnvPath = PythonNETConfig.condaEnvPath;
             pythonDllName = PythonNETConfig.pythonDllName;
 
+            //         // developer mode (import musclepy from src directory)
+            //         condaEnvPath = PythonNETConfig.condaEnvPath; //base environment
+            //         srcDir = Path.GetFullPath(Path.Combine(
+            // Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src","MusclePy"));
+
+            // user mode (import musclepy from a virtual environment with a valid musclepy installation)
+            condaEnvPath = @"C:\Users\Jonas\anaconda3\envs\muscledebug";
             srcDir = Path.GetFullPath(Path.Combine(
-            Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src"));
+    Directory.GetCurrentDirectory(), "..", "..", "..", "..", "..", "src")); //incorrect dir
 
             PythonNETManager.Initialize(condaEnvPath, pythonDllName, srcDir);
 

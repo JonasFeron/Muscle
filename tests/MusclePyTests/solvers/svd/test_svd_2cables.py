@@ -19,11 +19,11 @@
 
 import unittest
 import numpy as np
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.solvers.svd.main import main_singular_value_decomposition
-from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.femodel.pyelements import PyElements
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.solvers.svd.main import main_singular_value_decomposition
+from musclepy.utils.matrix_calculations import compute_equilibrium_matrix
 
 
 class TestSVD2Cables(unittest.TestCase):

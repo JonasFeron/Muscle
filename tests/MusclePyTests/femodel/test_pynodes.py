@@ -19,7 +19,7 @@
 
 import unittest
 import numpy as np
-from MusclePy.femodel.pynodes import PyNodes
+from musclepy.femodel.pynodes import PyNodes
 
 
 class TestPyNodes(unittest.TestCase):

@@ -18,7 +18,7 @@
 # Description and complete License: see NOTICE file.
 
 import numpy as np
-from MusclePy.femodel.pyelements import PyElements
+from musclepy.femodel.pyelements import PyElements
 
 
 class PrestressScenario:

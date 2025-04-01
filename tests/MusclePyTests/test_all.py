@@ -21,8 +21,8 @@ import unittest
 import os
 import sys
 
-# Add source directory to Python path
-src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src'))
+# Add MusclePy source directory to Python path
+src_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src/MusclePy'))
 sys.path.append(src_dir)
 
 # Add tests directory to Python path

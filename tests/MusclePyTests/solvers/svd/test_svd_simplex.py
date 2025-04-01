@@ -19,11 +19,11 @@
 
 import unittest
 import numpy as np
-from MusclePy.femodel.pynodes import PyNodes
-from MusclePy.femodel.pyelements import PyElements
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.solvers.svd.main import main_singular_value_decomposition
-from MusclePy.solvers.selfstress.modes import normalize_self_stress_mode
+from musclepy.femodel.pynodes import PyNodes
+from musclepy.femodel.pyelements import PyElements
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.solvers.svd.main import main_singular_value_decomposition
+from musclepy.solvers.selfstress.modes import normalize_self_stress_mode
 
 
 
@@ -169,10 +169,10 @@ class TestSVDSimplex(unittest.TestCase):
     def test_global_material_stiffness(self):
         """Test the global material stiffness from two methods"""
         #method 1 - based on the equilibrium matrix
-        from MusclePy.utils.matrix_calculations import compute_equilibrium_matrix,compute_global_material_stiffness_matrix
+        from musclepy.utils.matrix_calculations import compute_equilibrium_matrix,compute_global_material_stiffness_matrix
         
         #method 2 - based on the local stiffness matrix of each element
-        from MusclePy.utils.matrix_calculations import compute_local_material_stiffness_matrices, local_to_global_matrix
+        from musclepy.utils.matrix_calculations import compute_local_material_stiffness_matrices, local_to_global_matrix
 
 
         # 1) Compute the global material stiffness based on the equilibrium matrix

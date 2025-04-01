@@ -21,8 +21,8 @@
 # The author wishes to express his sincere appreciation to Professor V. Denoël (Université de Liège, Belgium) for his guidance in the implementation of the non-linear displacement method in 2016.
 
 
-from MusclePy.femodel.pytruss import PyTruss
-from MusclePy.solvers.dm.linear_dm import core_linear_displacement_method, perturb
+from musclepy.femodel.pytruss import PyTruss
+from musclepy.solvers.dm.linear_dm import core_linear_displacement_method, perturb
 import numpy as np
 
 

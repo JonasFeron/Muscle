@@ -57,7 +57,7 @@ namespace Muscle
         public override Bitmap Icon => null;
 
         //Return a short string describing the purpose of this GHA library.
-        public override string Description => "Muscle for Grasshopper is devoted to the design, the analysis and the optimization of tensegrity, tension-based and truss-like structures with element forces only in tension (muscles) or in compression (bones).";
+        public override string Description => "Muscle is a Grasshopper package devoted to the design, the analysis and the optimization of tensegrity, tension-based and truss-like structures.";
 
         public override Guid Id => new Guid("f8029d34-993d-4dcb-bf79-9afcd328578d");
 
@@ -65,7 +65,7 @@ namespace Muscle
         public override string AuthorName => "Jonas FERON - Université catholique de Louvain (UCLouvain)";
 
         //Return a string representing your preferred contact details.
-        public override string AuthorContact => "";
+        public override string AuthorContact => "pierre.latteur@uclouvain.be";
 
         //Return a string representing the version.  This returns the same version as the assembly.
         public override string AssemblyVersion => GetType().Assembly.GetName().Version.ToString();
