@@ -5,7 +5,6 @@ using Grasshopper.GUI.Gradient;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using Muscle.Util;
 using Grasshopper.Kernel.Data;
 using MuscleApp;
 using static Muscle.Components.GHComponentsFolders;

@@ -35,7 +35,6 @@ namespace MuscleCore.Converters
             PyObjectConversions.RegisterDecoder(new PyNodesDecoder());
             PyObjectConversions.RegisterDecoder(new PyElementsDecoder());
             PyObjectConversions.RegisterDecoder(new PyResultsSVDDecoder());
-            PyObjectConversions.RegisterDecoder(new PyResultsDynamicDecoder());
 
 
         }
