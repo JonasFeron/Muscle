@@ -1,3 +1,22 @@
+# Muscle
+
+# Copyright <2015-2025> <Université catholique de Louvain (UCLouvain)>
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# List of the contributors to the development of Muscle: see NOTICE file.
+# Description and complete License: see NOTICE file.
+
 """
 Matrix calculation utilities for structural analysis.
 
@@ -6,14 +25,10 @@ in the MusclePy package, including equilibrium matrices, stiffness matrices, and
 structural analysis matrices.
 
 References:
-    [1] Feron J., Latteur P., Almeida J., 2024, Static Modal Analysis, Arch Comp Meth Eng.
-    [2] Zhang, Ohsaki, 2015, Tensegrity structures: Form, Stability, and Symmetry
-    [3] Bel Adj Ali et al, 2011, Analysis of clustered tensegrity structures using a modified dynamic relaxation algorithm
+    [1] Feron J., Latteur P. & Pacheco de Almeida J. "Static Modal Analysis: A Review of Static Structural Analysis Methods Through a New Modal Paradigm". Arch Computat Methods Eng 31, 3409–3440 (2024). https://doi.org/10.1007/s11831-024-10082-x
 """
 
 import numpy as np
-from ..femodel.pyelements import PyElements
-
 
 def compute_equilibrium_matrix(connectivity_matrix, current_coordinates):
     """
