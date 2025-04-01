@@ -27,7 +27,8 @@ from MusclePyTests.solvers.dr.test_dr_2cables import TestDR_2Cables
 from MusclePyTests.solvers.dr.test_dr_3simplecables import TestDR_3SimpleCables
 from MusclePyTests.solvers.dr.test_dr_3complexcables import TestDR_3ComplexCables
 from MusclePyTests.solvers.dr.test_dr_simplex import TestDR_Simplex
-
+# Import Dynamic Modal Analysis test module
+from MusclePyTests.solvers.dynamic.test_dynamic_simplex import TestDynamicSimplex
 
 def create_test_suite():
     """Create a test suite containing all tests."""
@@ -51,7 +52,8 @@ def create_test_suite():
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_3SimpleCables))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_3ComplexCables))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDR_Simplex))
-
+    # Add Dynamic Modal Analysis test classes
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestDynamicSimplex))
     
     return suite
 

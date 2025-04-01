@@ -51,9 +51,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\6.Dynamic\" />
-  </ItemGroup>
 
 
   <Target Name="CopyPdbForMonoDebugging" AfterTargets="AfterBuild">

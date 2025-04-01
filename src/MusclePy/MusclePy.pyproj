@@ -39,7 +39,10 @@
     <Compile Include="solvers\dr\py_truss_dr.py" />
     <Compile Include="solvers\dr\__init__.py" />
     <Compile Include="solvers\dynamic\dynamic_results.py" />
+    <Compile Include="solvers\dynamic\dynamic_results.py" />
     <Compile Include="solvers\dynamic\example_modal_analysis.py" />
+    <Compile Include="solvers\dynamic\example_modal_analysis.py" />
+    <Compile Include="solvers\dynamic\main.py" />
     <Compile Include="solvers\dynamic\main.py" />
     <Compile Include="solvers\selfstress\modes.py" />
     <Compile Include="solvers\selfstress\__init__.py" />
@@ -61,6 +64,7 @@
     <Folder Include="solvers\dr\" />
     <Folder Include="solvers\dr\__pycache__\" />
     <Folder Include="solvers\dynamic\" />
+    <Folder Include="solvers\dynamic\__pycache__\" />
     <Folder Include="solvers\dynamic\__pycache__\" />
     <Folder Include="solvers\selfstress\" />
     <Folder Include="solvers\selfstress\__pycache__\" />
@@ -91,6 +95,8 @@
     <Content Include="solvers\dr\__pycache__\py_truss_dr.cpython-312.pyc" />
     <Content Include="solvers\dr\__pycache__\__init__.cpython-312.pyc" />
     <Content Include="solvers\dynamic\__pycache__\dynamic_results.cpython-312.pyc" />
+    <Content Include="solvers\dynamic\__pycache__\dynamic_results.cpython-312.pyc" />
+    <Content Include="solvers\dynamic\__pycache__\main.cpython-312.pyc" />
     <Content Include="solvers\dynamic\__pycache__\main.cpython-312.pyc" />
     <Content Include="solvers\selfstress\__pycache__\modes.cpython-312.pyc" />
     <Content Include="solvers\selfstress\__pycache__\__init__.cpython-312.pyc" />

@@ -20,7 +20,4 @@
       <Name>MuscleCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Solvers\Dynamic\" />
-  </ItemGroup>
 </Project>

@@ -238,6 +238,38 @@ namespace Muscle.Converters
         }
         #endregion Prestress Conversion
 
+        #region PointMass Conversion
+        /// <summary>
+        /// Converts a GH_PointMass to a MuscleApp.ViewModel.PointMass
+        /// </summary>
+        /// <param name="ghPointMass">The Grasshopper point mass to convert</param>
+        /// <returns>A MuscleApp.ViewModel.PointMass</returns>
+        public static PointMass ToPointMass(GH_PointMass ghPointMass)
+        {
+            return ghPointMass.Value;
+        }
+
+        /// <summary>
+        /// Converts a list of GH_PointMass objects to a list of MuscleApp.ViewModel.PointMass objects
+        /// </summary>
+        /// <param name="ghPointMasses">The list of Grasshopper point masses to convert</param>
+        /// <returns>A list of MuscleApp.ViewModel.PointMass objects</returns>
+        public static List<PointMass> ToPointMassList(List<GH_PointMass> ghPointMasses)
+        {
+            return ghPointMasses.Select(pm => pm.Value).ToList();
+        }
+
+        /// <summary>
+        /// Extracts PointMass objects from a Grasshopper data tree
+        /// </summary>
+        /// <param name="tree">The Grasshopper data tree containing point masses</param>
+        /// <returns>A list of MuscleApp.ViewModel.PointMass objects</returns>
+        public static List<PointMass> ToPointMassList(GH_Structure<IGH_Goo> tree)
+        {
+            return FromTree<PointMass, GH_PointMass>(tree);
+        }
+        #endregion PointMass Conversion
+
         #region Double Conversion
         /// <summary>
         /// Converts a list of GH_Number objects to a list of double values
