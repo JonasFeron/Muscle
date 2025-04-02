@@ -61,60 +61,18 @@
 using System;
 using Grasshopper.Kernel;
 using System.IO;
-using MuscleCore.PythonNETInit;
+// using MuscleCore.PythonNETInit;
+using MuscleApp.PythonNETInit;
+
 using static Muscle.Components.GHComponentsFolders;
 
 namespace Muscle.Components.PythonNETInit
 {
     public class StartPythonNETComponent : GH_Component
     {
-        private static string default_anacondaPath
-        {
-            get
-            {
-                if (PythonNETConfig.anacondaPath != null)
-                {
-                    return PythonNETConfig.anacondaPath;
-                }
-                else
-                {
-                    return @"C:\Users\Me\Anaconda3";
-                }
-            }
-        }
-        private static readonly string default_condaEnvName = "base";
-        private static string default_pythonDllName
-        {
-            get
-            {
-                if (PythonNETConfig.pythonDllName != null)
-                {
-                    return PythonNETConfig.pythonDllName;
-                }
-                else
-                {
-                    return @"python3xx.dll";
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the full path to the source directory by navigating four levels up from the current directory.
-        /// In Developer mode, the current directory of "Muscle.gha"is expected to be within the build output path (e.g., .../src/Muscle/bin/Debug/net48/).
-        /// This allows to find //.../src/MusclePy for Python.NET initialization.
-        /// In User mode, MusclePy is expected to be installed in the conda environment. -> srcDirectory is useless. 
-        /// </summary>
-        private static string _srcDirectory
-        {
-            get
-            {
-                var currentDirectory = Directory.GetCurrentDirectory(); //.../src/Muscle/bin/Debug/net48/
-                var src = Path.GetFullPath(Path.Combine(currentDirectory, "..", "..", "..",".."));
-                return src;
-            }
-        }
-
-
+        private string _defaultAnacondaPath = PythonNET.DefaultAnacondaPath;
+        private string _defaultCondaEnvName = PythonNET.DefaultCondaEnvName;
+        private string _defaultPythonDllName = PythonNET.DefaultPythonDllName;
         public StartPythonNETComponent()
           : base("StartPython.NET", "StartPy",
               "Initialize Python.NET before running any calculation", GHAssemblyName, Folder0_PythonInit)
@@ -130,11 +88,11 @@ namespace Muscle.Components.PythonNETInit
         {
             pManager.AddBooleanParameter("Start Python", "Start", "Connect here a toggle. If true, Python/Anaconda starts and can calculate.", GH_ParamAccess.item);
 
-            pManager.AddTextParameter("Anaconda Directory", "condaPath", "Path to the directory where Anaconda3 is installed.", GH_ParamAccess.item, default_anacondaPath);
+            pManager.AddTextParameter("Anaconda Path", "conda", "Path to the directory where Anaconda3 is installed.", GH_ParamAccess.item, _defaultAnacondaPath);
             pManager[1].Optional = true;
-            pManager.AddTextParameter("conda Environment Name", "condaEnv", "Name of the conda environment to activate.", GH_ParamAccess.item, default_condaEnvName);
+            pManager.AddTextParameter("conda Environment Name", "condaEnv", "Name of the conda environment to activate, where musclepy is installed.", GH_ParamAccess.item, _defaultCondaEnvName);
             pManager[2].Optional = true;
-            pManager.AddTextParameter("python3xx.dll file", ".dll", "Name of the \"python3xx.dll\" file contained in the specified conda environment", GH_ParamAccess.item, default_pythonDllName);
+            pManager.AddTextParameter("python3xx.dll", ".dll", "Name of the \"python3xx.dll\" file contained in the specified conda environment", GH_ParamAccess.item, _defaultPythonDllName);
             pManager[3].Optional = true;
 
         }
@@ -154,51 +112,85 @@ namespace Muscle.Components.PythonNETInit
         {
             //1) Initialize and Collect Data
             bool start = false;
-            string _anacondaPath = default_anacondaPath;
-            string _condaEnvName = default_condaEnvName;
-            string _pythonDllName = default_pythonDllName;
+            string anacondaPath = _defaultAnacondaPath;
+            string condaEnvName = _defaultCondaEnvName;
+            string pythonDllName = _defaultPythonDllName;
 
             if (!DA.GetData(0, ref start)) return;
-            if (!DA.GetData(1, ref _anacondaPath)) return;
-            if (!DA.GetData(2, ref _condaEnvName)) return;
-            if (!DA.GetData(3, ref _pythonDllName)) return;
+            if (!DA.GetData(1, ref anacondaPath)) return;
+            if (!DA.GetData(2, ref condaEnvName)) return;
+            if (!DA.GetData(3, ref pythonDllName)) return;
 
-            //2) Check validity of user input ?
-            ConfigurePythonNET(_anacondaPath, _condaEnvName, _pythonDllName);
+
+            //2) Check validity of user input and configure Python.NET
+
+            try
+            {
+                PythonNET.TryConfiguring(anacondaPath, condaEnvName, pythonDllName);
+            }
+            catch (Exception ex)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+            }
+            finally
+            {
+                var userConfig = PythonNET.UserConfig;
+                if (userConfig == null)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python.NET configuration failed.");
+                    return;
+                }
+                if (!userConfig.HasValidAnacondaPath)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid Anaconda path.");
+                }
+                if (!userConfig.HasValidCondaEnvPath)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid conda environment name.");
+                }
+                if (!userConfig.HasValidPythonDllName)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid python3xx.dll name.");
+                }
+            }
+            
+
 
             //3) Initialize Python.NET, following https://github.com/pythonnet/pythonnet/wiki/Using-Python.NET-with-Virtual-Environments
 
-            if (start && PythonNETManager.IsInitialized)
+            if (start && PythonNET.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python.NET is already started.");
                 return;
             }
-            if (start && !PythonNETManager.IsInitialized) 
+            if (start && !PythonNET.IsInitialized) 
             {
                 try
                 {
-                    PythonNETManager.Initialize(PythonNETConfig.condaEnvPath, PythonNETConfig.pythonDllName, _srcDirectory);
+                    PythonNET.Initialize(PythonNETConfig.condaEnvPath, PythonNETConfig.pythonDllName, musclepySrcDirectory);
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Python.NET setup completed successfully.");
                     // AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "NumPy test passed: cos(2*pi) = 1");
                     // AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "MusclePy package found and validated.");
                     // AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "MusclePy test_script.py successfull.");
                 }
-                catch (InvalidOperationException ex)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-                }
                 catch (Exception ex)
                 {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python.NET initialization failed with an unexpected error.");
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
                 }
             }
 
             if (!start)
             {
-                PythonNETManager.ShutDown();
+                try
+                {
+                    PythonNET.ShutDown();
+                }
+                catch (Exception ex)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
+                }
             }
-            if (!PythonNETManager.IsInitialized)
+            if (!PythonNET.IsInitialized)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, $"Python.NET is closed. Please restart Python.NET.");
             }
@@ -212,7 +204,7 @@ namespace Muscle.Components.PythonNETInit
         /// <param name="doc"></param>
         private void DocumentClose(GH_DocumentServer sender, GH_Document doc)
         {
-            PythonNETManager.ShutDown();
+            PythonNET.ShutDown();
         }
 
 
@@ -255,7 +247,7 @@ namespace Muscle.Components.PythonNETInit
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
                 return;
             }
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"\"{PythonNETConfig.condaEnvName}\" is a valid anaconda environment");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"The anaconda environment \"{PythonNETConfig.condaEnvName}\" contains a valid python installation");
 
             //pythonDllName
             try

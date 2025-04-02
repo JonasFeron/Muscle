@@ -48,14 +48,37 @@ namespace MuscleCore.PythonNETInit
 {
     public static class PythonNETManager
     {
-        public static bool IsInitialized { get; set; } = false;
+        public static readonly string MusclePy = "musclepy";
+        public static bool IsInitialized { get; private set; } = false;
+
+        private static bool UserMode { get; set; } = false;
+
+
+        #region Launch
+
+
+        public static void Launch(PythonNETConfig config)
+        {
+            if (!config.IsValid)
+            {
+                throw new ArgumentException("The provided configuration is not valid.");
+            }
+
+            // in user mode, the user is supposed to have run "pip install musclepy"
+            // which means that musclepy will be found from the conda environment.
+            // hence, the source directory of musclepy is null in user mode.
+            // in developer mode, the source directory of musclepy is the path to "musclepy" source code.
+            UserMode = string.IsNullOrEmpty(config.SrcDirectory);
+
+            IsInitialized = Initialize(config.CondaEnvPath, config.PythonDllName, config.SrcDirectory);
+        }
 
         /// <summary>
         /// Initializes the Python engine. This method must be called before using any methods from the Python.Runtime namespace.
         /// </summary>
         /// <param name="condaEnvPath">The path to the conda environment where Python is installed.</param>
         /// <param name="pythonDllName">The Name of the python3xx.dll file contained in the conda environment.</param>
-        /// <param name="srcDirectory">The path to the directory containing the python package.</param>
+        /// <param name="srcDirectory">The path to the directory containing the python package (developer mode), or null (user mode).</param>
         /// <remarks>
         /// This method sets the following environment variables:
         /// PATH: adds condaEnvPath to PATH
@@ -63,11 +86,11 @@ namespace MuscleCore.PythonNETInit
         /// PYTHONPATH: sets to the concat of site_packages, Lib, DLLs and srcDirectory
         /// PYTHONNET_PYDLL: sets to pythonDllPath
         /// </remarks>
-        public static void Initialize(string condaEnvPath, string pythonDllName, string srcDirectory)
+        private static bool Initialize(string condaEnvPath, string pythonDllName, string srcDirectory = null)
         {
             if (IsInitialized)
             {
-                return; //nothing to do
+                return true; //nothing to do
             }
             try
             {
@@ -84,10 +107,19 @@ namespace MuscleCore.PythonNETInit
 
                 Environment.SetEnvironmentVariable("PATH", path, EnvironmentVariableTarget.Process);
                 Environment.SetEnvironmentVariable("PYTHONHOME", condaEnvPath, EnvironmentVariableTarget.Process);
-                Environment.SetEnvironmentVariable("PYTHONPATH", $"{site_packages};{Lib};{DLLs};{srcDirectory}", EnvironmentVariableTarget.Process);
-                //in development mode, MusclePy will be accessible from the srcDirectory
-                //in user mode, MusclePy will be accessible from site_packages, supposing the user will first "pip install musclepy"
+                
+                if (UserMode)//user mode
+                {
+                    //in user mode, musclepy will be accessible from site_packages, supposing the user has already run "pip install musclepy"
+                    Environment.SetEnvironmentVariable("PYTHONPATH", $"{site_packages};{Lib};{DLLs}", EnvironmentVariableTarget.Process);
 
+                }
+                else  //developer mode
+                {
+                    //in developer mode, musclepy will be accessible from the srcDirectory
+                    Environment.SetEnvironmentVariable("PYTHONPATH", $"{site_packages};{Lib};{DLLs};{srcDirectory}", EnvironmentVariableTarget.Process);
+                }
+                
                 //Runtime.PythonDLL = pythonDllPath;
                 Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", pythonDllName);
 
@@ -96,25 +128,19 @@ namespace MuscleCore.PythonNETInit
 
                 PythonEngine.Initialize();
                 Main.RegisterConverters();
+
+                TryPythonEngine(srcDirectory, site_packages);
                 
-                // Validate Python.NET initialization by testing cos(pi*2) == 1
-                TestPythonEngine();
-                
-                // Validate MusclePy installation
-                ValidateMusclePyInstallation(srcDirectory, site_packages);
-                
-                // Test MusclePy functionality
-                TestMusclePy();
-                
-                IsInitialized = true;
-                return;
+                return true;
             }
             catch (Exception)
             {
                 throw;
             }
         }
+        #endregion Launch
 
+        #region ShutDown
         /// <summary>
         /// Shuts down the Python engine if it is initialized.
         /// </summary>
@@ -127,14 +153,92 @@ namespace MuscleCore.PythonNETInit
             //else Python is initialized and must be closed
             try
             {
-                PythonEngine.Shutdown();
-                IsInitialized = false;
+                IsInitialized = !KillInitialization();
             }
             catch (Exception)
             {
                 throw;
             }
         }
+        private static bool KillInitialization()
+        {
+            PythonEngine.Shutdown();
+            Environment.SetEnvironmentVariable("PYTHONHOME", string.Empty, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PYTHONPATH", string.Empty, EnvironmentVariableTarget.Process);
+            Environment.SetEnvironmentVariable("PYTHONNET_PYDLL", string.Empty, EnvironmentVariableTarget.Process);
+            return true;
+        }
+        #endregion ShutDown
+
+
+
+
+        #region Test
+        private static void TryPythonEngine(string srcDirectory, string site_packages)
+        {
+            // Validate MusclePy installation
+            TryFindingMusclePyInstallation(srcDirectory, site_packages);
+
+            // Validate Python.NET initialization by testing cos(pi*2) == 1
+            TestPythonEngine();
+                                
+            // Test MusclePy test script
+            TestMusclePy();
+        }
+                
+
+
+        /// <summary>
+        /// Validates that MusclePy is properly installed either in the source directory or site-packages.
+        /// </summary>
+        /// <param name="srcDirectory">The source directory path.</param>
+        /// <param name="site_packages">The site-packages directory path.</param>
+        /// <exception cref="InvalidOperationException">Thrown when MusclePy is not found.</exception>
+        private static void TryFindingMusclePyInstallation(string srcDirectory, string site_packages)
+        {
+            bool musclepyFound = false;
+
+            if (string.IsNullOrEmpty(srcDirectory)) //user mode
+            {
+                // Check if MusclePy directory exists in site-packages
+                string musclepyPath = Path.Combine(site_packages, MusclePy);
+                if (Directory.Exists(musclepyPath))
+                {
+                    musclepyFound = true;
+                }
+            }
+            else //developer mode
+            {
+                string srcMusclePyPath = Path.Combine(srcDirectory, MusclePy);
+                if (Directory.Exists(srcMusclePyPath))
+                {
+                    musclepyFound = true;
+                }
+            }
+            if (!musclepyFound)
+            {
+                throw new InvalidOperationException("musclepy is not installed in this anaconda environment. Please choose a valid anaconda environment or run the command 'pip install musclepy' in the anaconda prompt.");
+            }
+
+            // Check if MusclePy can be imported from C#
+            var m_threadState = PythonEngine.BeginAllowThreads();
+            try
+            {
+                using (Py.GIL())
+                {
+                    dynamic musclepy = Py.Import(MusclePy);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Failed to import musclepy from C#", ex);
+            }
+            finally
+            {
+                PythonEngine.EndAllowThreads(m_threadState);
+            }
+        }
+
 
         /// <summary>
         /// Tests if Python.NET is correctly initialized by verifying that cos(pi*2) equals 1.
@@ -159,6 +263,10 @@ namespace MuscleCore.PythonNETInit
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("Failed to import numpy from Python", ex);
+                }
                 finally
                 {
                     PythonEngine.EndAllowThreads(m_threadState);
@@ -170,64 +278,7 @@ namespace MuscleCore.PythonNETInit
             }
         }
 
-        /// <summary>
-        /// Validates that MusclePy is properly installed either in the source directory or site-packages.
-        /// </summary>
-        /// <param name="srcDirectory">The source directory path.</param>
-        /// <param name="site_packages">The site-packages directory path.</param>
-        /// <exception cref="InvalidOperationException">Thrown when MusclePy is not found.</exception>
-        private static void ValidateMusclePyInstallation(string srcDirectory, string site_packages)
-        {
-            try
-            {
-                var m_threadState = PythonEngine.BeginAllowThreads();
-                try
-                {
-                    using (Py.GIL())
-                    {
-                        bool musclePyFound = false;
-                        
-                        // Try to import MusclePy
-                        try
-                        {
-                            dynamic musclePy = Py.Import("musclepy");
-                            musclePyFound = true;
-                        }
-                        catch (PythonException)
-                        {
-                            // Check if MusclePy directory exists in srcDirectory
-                            string srcMusclePyPath = Path.Combine(srcDirectory, "musclepy");
-                            if (Directory.Exists(srcMusclePyPath))
-                            {
-                                musclePyFound = true;
-                            }
-                            
-                            // Check if MusclePy directory exists in site_packages
-                            string sitePackagesMusclePyPath = Path.Combine(site_packages, "musclepy");
-                            if (Directory.Exists(sitePackagesMusclePyPath))
-                            {
-                                musclePyFound = true;
-                            }
-                        }
-                        
-                        if (!musclePyFound)
-                        {
-                            throw new InvalidOperationException(
-                                "MusclePy is not correctly installed. " +
-                                "In user mode, please run 'pip install musclepy' in your conda environment first.");
-                        }
-                    }
-                }
-                finally
-                {
-                    PythonEngine.EndAllowThreads(m_threadState);
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("Impossible to find a valid MusclePy installation", ex);
-            }
-        }
+
         private static void TestMusclePy()
         {
             // Arrange
@@ -254,6 +305,6 @@ namespace MuscleCore.PythonNETInit
                 throw new InvalidOperationException("Failed to validate MusclePy installation", ex);
             }
         }
-
+        #endregion Test
     }
 }
