@@ -8,7 +8,7 @@
         Rhino 8 Mac: net7.0, net7.0-macos, net7.0-macos12.0, etc
     -->
 	 <!-- <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks> -->
-     <TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
+     <TargetFrameworks>net48</TargetFrameworks>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <TargetExt>.gha</TargetExt>
     <NoWarn>NU1701;NETSDK1086</NoWarn>
@@ -17,10 +17,14 @@
   
   <PropertyGroup>
     <!-- Specifies information for Assembly and Yak -->
-    <Version>1.0</Version>
+    <Version>1.0.0.0</Version>
     <Title>Muscle</Title>
     <Company>Université catholique de Louvain (UCLouvain)</Company>
-    <Description>Description of MyGrasshopperPlugin</Description>
+    <Description>Muscle is a Grasshopper plugin for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.</Description>
+    <ApplicationManifest>C:\Users\Jonas\Documents\GitHub\Muscle\manifest.yml</ApplicationManifest>
+    <RepositoryUrl>https://github.com/JonasFeron/Muscle</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright (C) &lt;2015-2025&gt; &lt;Université catholique de Louvain (UCLouvain)&gt;</Copyright>
   </PropertyGroup>
   
   <ItemGroup>
@@ -30,7 +34,6 @@
   <ItemGroup>
     <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
     <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
-  <!--    <PackageReference Include="pythonnet" Version="3.0.5" /> -->
   </ItemGroup>
 
   <!-- For Windows only builds -->
@@ -53,6 +56,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Components\6.Dynamic\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 

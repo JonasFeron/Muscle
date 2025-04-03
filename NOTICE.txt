@@ -9,7 +9,7 @@ Muscle performs different analysis including: 1) non-linear static analysis unde
 Copyright (C) <2015-2025> <Université catholique de Louvain (UCLouvain)>
 
 The development of Muscle has been done by Jonas FERON (Université catholique de Louvain, UCLouvain, Belgium), hereafter the AUTHOR.
-The AUTHOR are indebted to 
+The AUTHOR is indebted to 
 			Prof. Pierre LATTEUR (Supervisor UCLouvain), 
 			BESIX (Dr. Ir. Thomas VANDENBERGH, Ir. Pierre MENGEOT), 
 			Brussels Capital Region - Innoviris,

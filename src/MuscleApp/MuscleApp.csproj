@@ -2,22 +2,37 @@
 
   <PropertyGroup>
 	<!-- <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks> -->
-	<TargetFrameworks>net7.0-windows;net48</TargetFrameworks>
+	<TargetFrameworks>net48</TargetFrameworks>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
+	  <LangVersion>latest</LangVersion>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <BaseOutputPath>bin\</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="PythonNETInit\PythonNETConfig.cs" />
+    <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
+    <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
-    <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="$(TargetFramework) == 'net7.0-windows'" ExcludeAssets="runtime" />
+    <!-- For Windows only builds -->
+  <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <!-- Reference WinForms for .NET 7.0 on macOS -->
+  <ItemGroup Condition="!($(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4')))">
+    <!-- Rhino 8.11 and later you can use this -->
+    <!-- <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" /> -->
+    
+    <!-- Rhino 8.10 and earlier -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" ExcludeAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\MuscleCore\MuscleCore.csproj">
       <Project>{fa523f56-aa22-416d-b68e-63ce60efda62}</Project>

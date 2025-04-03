@@ -57,7 +57,7 @@ namespace Muscle
         public override Bitmap Icon => null;
 
         //Return a short string describing the purpose of this GHA library.
-        public override string Description => "Muscle is a Grasshopper package devoted to the design, the analysis and the optimization of tensegrity, tension-based and truss-like structures.";
+        public override string Description => "Muscle is a Grasshopper plugin for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.";
 
         public override Guid Id => new Guid("f8029d34-993d-4dcb-bf79-9afcd328578d");
 
