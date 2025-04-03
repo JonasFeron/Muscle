@@ -14,10 +14,10 @@ namespace MuscleApp.PythonNETInit
 
         #region Default Configuration
         public static bool ValidDefaultAnacondaPath { get; private set;} = false;
-        public static readonly string DefaultAnacondaPath { 
+        public static string DefaultAnacondaPath { 
             get
             {
-                string foundAnacondaInstallation = PythonNETConfig.TryFindingAnacondaPath();
+                string foundAnacondaInstallation = PythonNETConfig.TryFindingAnaconda();
                 if (!string.IsNullOrEmpty(foundAnacondaInstallation))
                 {
                     ValidDefaultAnacondaPath = true;
@@ -32,7 +32,7 @@ namespace MuscleApp.PythonNETInit
         }
         private static readonly string _usualCondaEnvName = "muscle"; // conda environment where musclepy should have been 'pip install musclepy'
 
-        public static readonly string DefaultCondaEnvName{
+        public static string DefaultCondaEnvName{
             get
             {
                 // if default anaconda path is invalid, return "muscle" eventhough it may not exist
@@ -50,7 +50,7 @@ namespace MuscleApp.PythonNETInit
             }
         }
 
-        public static readonly string DefaultPythonDllName { 
+        public static string DefaultPythonDllName { 
             get
             {
                 // if default anaconda path is invalid, return "python3xx.dll" eventhough it does not exist
@@ -60,7 +60,7 @@ namespace MuscleApp.PythonNETInit
                 }
                 // try to find the Python DLL file for the default conda environment
                 string? condaEnvPath = PythonNETConfig.BuildCondaEnvPath(DefaultAnacondaPath, DefaultCondaEnvName);
-                string? pythonDllName = PythonNETConfig.TryFindingPythonDllName(condaEnvPath);
+                string? pythonDllName = PythonNETConfig.TryFindingPythonDll(condaEnvPath);
 
                 if (string.IsNullOrEmpty(pythonDllName))
                 {
@@ -81,7 +81,7 @@ namespace MuscleApp.PythonNETInit
         /// Navigating four levels up from the current directory allows to find //.../src/musclepy for Python.NET initialization.
         /// In User mode, MusclePy is expected to be installed in the conda environment. -> srcDirectory is useless. 
         /// </summary>
-        private static readonly string srcDirectory
+        private static string srcDirectory
         {
             get
             {
@@ -131,10 +131,7 @@ namespace MuscleApp.PythonNETInit
             {
                 throw;
             }
-            finally
-            {
-                return success;
-            }
+            return success;   
         }
         #endregion User Configuration
 
@@ -151,7 +148,7 @@ namespace MuscleApp.PythonNETInit
                 throw;
             }
         }
-        public static readonly bool IsInitialized { get { return PythonNETManager.IsInitialized; } }
+        public static bool IsInitialized { get { return PythonNETManager.IsInitialized; } }
 
         public static void ShutDown()
         {

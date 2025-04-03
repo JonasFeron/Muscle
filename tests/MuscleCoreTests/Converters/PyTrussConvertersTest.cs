@@ -51,9 +51,6 @@ namespace MuscleCoreTests.Converters
     [TestClass]
     public class PyTrussConvertersTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
         private static PyTrussEncoder _encoder;
         private static PyTrussDecoder _decoder;
         private static CoreElements _elements;

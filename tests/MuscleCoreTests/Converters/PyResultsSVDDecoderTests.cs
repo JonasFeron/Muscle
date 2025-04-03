@@ -50,9 +50,7 @@ namespace MuscleCoreTests.Converters
     [TestClass]
     public class PyResultsSVDDecoderTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
+
         private PyResultsSVDDecoder _decoder;
         private dynamic _pyResultsSVD;
 

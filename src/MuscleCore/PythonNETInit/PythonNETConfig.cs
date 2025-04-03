@@ -131,19 +131,19 @@ namespace MuscleCore.PythonNETInit
         /// <param name="pythonDllName">The name of the Python DLL file, specifying the version of Python to use. Defaults to <see cref="InvalidPythonDllName"/>.</param>
         public PythonNETConfig(string anacondaPath, string condaEnvName, string pythonDllName, string srcDir)
         {
-            if (IsValidAnacondaPath(anacondaPath))
+            try
             {
                 AnacondaPath = anacondaPath; 
             }
-            else
+            catch (Exception e1)
             {
                 try
                 {
                     AnacondaPath = TryFindingAnaconda();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    throw new Exception($"{e.Message} Please check that Anaconda is installed and provide a valid path.");
+                    throw new ArgumentException($"{e1.Message} Please check that Anaconda is installed and provide a valid path.");
                 }
             }
 
@@ -198,7 +198,7 @@ namespace MuscleCore.PythonNETInit
             {
                 if (!IsValidAnacondaPath(value))
                 {
-                    throw new ArgumentException("The specified path does not contain a valid Anaconda3 installation.");
+                    throw new ArgumentException($"{value} is not a valid Anaconda3 installation.");
                 }
                 else
                 {
@@ -273,7 +273,7 @@ namespace MuscleCore.PythonNETInit
             {
                 if (!IsValidCondaEnvName(this.AnacondaPath, value))
                 {
-                    throw new ArgumentException($"The specified conda environment do not contain a valid python.exe. Please provide a valid conda environment name.");
+                    throw new ArgumentException($"{value} is not a valid conda environment name. Please provide a conda environment name containing a valid python.exe.");
                 }
                 _condaEnvName = value;
                 _condaEnvPath = BuildCondaEnvPath(this.AnacondaPath, value) ?? string.Empty;
@@ -285,7 +285,7 @@ namespace MuscleCore.PythonNETInit
             {
                 return false;
             }
-            string condaEnvPath = BuildCondaEnvPath(anacondaPath,condaEnvName);            
+            string? condaEnvPath = BuildCondaEnvPath(anacondaPath,condaEnvName);            
             if (string.IsNullOrEmpty(condaEnvPath) || !File.Exists(Path.Combine(condaEnvPath, "python.exe")))
             {
                 return false;
@@ -371,7 +371,7 @@ namespace MuscleCore.PythonNETInit
                 string condaEnvPath = this.CondaEnvPath;
                 if (string.IsNullOrEmpty(value) || !IsValidPythonDllName(condaEnvPath, value))
                 {
-                    throw new ArgumentException($"The specified \"python3xx.dll\" does not exist in the specified Anaconda environment.\n Please check that {value} file exists in {CondaEnvPath}.");
+                    throw new ArgumentException($"{value} does not exist in the specified Anaconda environment. Please check that a \"python3xx.dll\" file exists in {CondaEnvPath}.");
                 }
                 _pythonDllName = value ?? string.Empty;
             }

@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="PythonNETInit\PythonNETConfig.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
     <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="$(TargetFramework) == 'net7.0-windows'" ExcludeAssets="runtime" />
   </ItemGroup>

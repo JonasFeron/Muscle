@@ -121,39 +121,46 @@ namespace Muscle.Components.PythonNETInit
             if (!DA.GetData(2, ref condaEnvName)) return;
             if (!DA.GetData(3, ref pythonDllName)) return;
 
-
             //2) Check validity of user input and configure Python.NET
-
+            bool success = false;
             try
             {
-                PythonNET.TryConfiguring(anacondaPath, condaEnvName, pythonDllName);
+                success = PythonNET.TryConfiguring(anacondaPath, condaEnvName, pythonDllName);
             }
             catch (Exception ex)
             {
                 AddRuntimeMessage(GH_RuntimeMessageLevel.Error, ex.Message);
-            }
-            finally
-            {
-                var userConfig = PythonNET.UserConfig;
-                if (userConfig == null)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python.NET configuration failed.");
-                    return;
-                }
-                if (!userConfig.HasValidAnacondaPath)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid Anaconda path.");
-                }
-                if (!userConfig.HasValidCondaEnvPath)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid conda environment name.");
-                }
-                if (!userConfig.HasValidPythonDllName)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid python3xx.dll name.");
-                }
+                return;
             }
             
+            var userConfig = PythonNET.UserConfig;
+            if (!success || userConfig == null || !userConfig.IsValid)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Python.NET configuration failed.");
+                return;
+            }
+
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"A valid Anaconda3 installation was found: {userConfig.AnacondaPath}");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"\"{userConfig.CondaEnvName}\" environment has a valid python.exe");
+            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{userConfig.PythonDllName} is a valid .dll file");
+
+            // finally
+            // {
+
+            //     if (!userConfig.HasValidAnacondaPath)
+            //     {
+            //         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid Anaconda path.");
+            //     }
+            //     if (!userConfig.HasValidCondaEnvPath)
+            //     {
+            //         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid conda environment name.");
+            //     }
+            //     if (!userConfig.HasValidPythonDllName)
+            //     {
+            //         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Invalid python3xx.dll name.");
+            //     }
+            // }
+
 
 
             //3) Initialize Python.NET, following https://github.com/pythonnet/pythonnet/wiki/Using-Python.NET-with-Virtual-Environments
@@ -167,7 +174,7 @@ namespace Muscle.Components.PythonNETInit
             {
                 try
                 {
-                    PythonNET.Initialize(PythonNETConfig.condaEnvPath, PythonNETConfig.pythonDllName, musclepySrcDirectory);
+                    PythonNET.Launch(userConfig);
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "Python.NET setup completed successfully.");
                     // AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "NumPy test passed: cos(2*pi) = 1");
                     // AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, "MusclePy package found and validated.");
@@ -208,59 +215,56 @@ namespace Muscle.Components.PythonNETInit
         }
 
 
-        /// <summary>
-        /// Checks the user input for validity and sets the configuration accordingly.
-        /// </summary>
-        /// <param name="anacondaPath">The path to the Anaconda installation directory.</param>
-        /// <param name="condaEnvName">The name of the conda environment to activate.</param>
-        /// <param name="pythonDllName">The name of the python DLL file.</param>
-        private void ConfigurePythonNET(string anacondaPath, string condaEnvName, string pythonDllName)
-        {
-            //anacondaPath
-            try
-            {
-                PythonNETConfig.anacondaPath = anacondaPath;
-            }
-            catch (ArgumentException e)
-            {
-                string default_msg = $"Please provide a valid path, similar to: {default_anacondaPath}";
-                if (anacondaPath == default_anacondaPath)
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Impossible to find a valid Anaconda3 Installation. " + default_msg);
-                    return;
-                }
-                else
-                {
-                    AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message + default_msg);
-                    return;
-                }
-            }
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"A valid Anaconda3 installation was found here: {PythonNETConfig.anacondaPath}");
+        // /// <summary>
+        // /// Checks the user input for validity and sets the configuration accordingly.
+        // /// </summary>
+        // /// <param name="anacondaPath">The path to the Anaconda installation directory.</param>
+        // /// <param name="condaEnvName">The name of the conda environment to activate.</param>
+        // /// <param name="pythonDllName">The name of the python DLL file.</param>
+        // private void ConfigurePythonNET(string anacondaPath, string condaEnvName, string pythonDllName)
+        // {
+        //     //anacondaPath
+        //     try
+        //     {
+        //         PythonNETConfig.anacondaPath = anacondaPath;
+        //     }
+        //     catch (ArgumentException e)
+        //     {
+        //         string default_msg = $"Please provide a valid path, similar to: {default_anacondaPath}";
+        //         if (anacondaPath == default_anacondaPath)
+        //         {
+        //             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, $"Impossible to find a valid Anaconda3 Installation. " + default_msg);
+        //             return;
+        //         }
+        //         else
+        //         {
+        //             AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message + default_msg);
+        //             return;
+        //         }
+        //     }
 
-            //condaEnvName
-            try
-            {
-                PythonNETConfig.condaEnvName = condaEnvName;
-            }
-            catch (ArgumentException e)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-                return;
-            }
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"The anaconda environment \"{PythonNETConfig.condaEnvName}\" contains a valid python installation");
+        //     //condaEnvName
+        //     try
+        //     {
+        //         PythonNETConfig.condaEnvName = condaEnvName;
+        //     }
+        //     catch (ArgumentException e)
+        //     {
+        //         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+        //         return;
+        //     }
 
-            //pythonDllName
-            try
-            {
-                PythonNETConfig.pythonDllName = pythonDllName;
-            }
-            catch (ArgumentException e)
-            {
-                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
-                return;
-            }
-            AddRuntimeMessage(GH_RuntimeMessageLevel.Remark, $"{PythonNETConfig.pythonDllName} is a valid .dll file");
-        }
+        //     //pythonDllName
+        //     try
+        //     {
+        //         PythonNETConfig.pythonDllName = pythonDllName;
+        //     }
+        //     catch (ArgumentException e)
+        //     {
+        //         AddRuntimeMessage(GH_RuntimeMessageLevel.Error, e.Message);
+        //         return;
+        //     }
+        // }
 
 
         /// <summary>

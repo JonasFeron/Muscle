@@ -51,9 +51,6 @@ namespace MuscleCoreTests.Solvers
     [TestClass]
     public class SelfStressModesTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
         private CoreTruss _structure;
 
         [TestInitialize]

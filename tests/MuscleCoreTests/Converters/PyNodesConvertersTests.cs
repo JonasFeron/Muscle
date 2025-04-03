@@ -50,9 +50,6 @@ namespace MuscleCoreTests.Converters
     [TestClass]
     public class PyNodesConvertersTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
         private CoreNodes _testNodes;
         private PyNodesEncoder _encoder;
         private PyNodesDecoder _decoder;

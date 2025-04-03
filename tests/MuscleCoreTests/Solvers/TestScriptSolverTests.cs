@@ -48,10 +48,6 @@ namespace MuscleCoreTests.Solvers
     [TestClass]
     public class TestScriptSolverTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
-
 
         [TestInitialize]
         public void Initialize()

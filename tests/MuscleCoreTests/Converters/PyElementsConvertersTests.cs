@@ -51,9 +51,6 @@ namespace MuscleCoreTests.Converters
     [TestClass]
     public class PyElementsConvertersTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
         private static PyElementsEncoder _encoder;
         private static PyElementsDecoder _decoder;
         private static CoreElements _elements;

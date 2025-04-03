@@ -50,9 +50,6 @@ namespace MuscleCoreTests.Converters
     [TestClass]
     public class PyConfigDRConvertersTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
         private CoreConfigDR _testConfig;
         private PyConfigDREncoder _encoder;
 
@@ -60,10 +57,10 @@ namespace MuscleCoreTests.Converters
         public static void ClassInitialize(TestContext testContext)
         {
             // See CoreTestsConfig.cs for more details (choose between tests in developer mode or user mode)
-            PythonNETConfig testConfig = CoreTestsConfig.testConfig;
-            Assert.IsTrue(testConfig.IsValid);
+            PythonNETConfig testConfigNET = CoreTestsConfig.testConfig;
+            Assert.IsTrue(testConfigNET.IsValid);
 
-            PythonNETManager.Launch(testConfig);
+            PythonNETManager.Launch(testConfigNET);
             Assert.IsTrue(PythonNETManager.IsInitialized);
         }
 

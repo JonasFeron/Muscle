@@ -86,8 +86,12 @@ namespace MuscleCore.PythonNETInit
         /// PYTHONPATH: sets to the concat of site_packages, Lib, DLLs and srcDirectory
         /// PYTHONNET_PYDLL: sets to pythonDllPath
         /// </remarks>
-        private static bool Initialize(string condaEnvPath, string pythonDllName, string srcDirectory = null)
+        private static bool Initialize(string? condaEnvPath, string? pythonDllName, string? srcDirectory = null)
         {
+            if (string.IsNullOrEmpty(condaEnvPath) || string.IsNullOrEmpty(pythonDllName))
+            {
+                return false;
+            }
             if (IsInitialized)
             {
                 return true; //nothing to do
@@ -174,7 +178,7 @@ namespace MuscleCore.PythonNETInit
 
 
         #region Test
-        private static void TryPythonEngine(string srcDirectory, string site_packages)
+        private static void TryPythonEngine(string? srcDirectory, string site_packages)
         {
             // Validate MusclePy installation
             TryFindingMusclePyInstallation(srcDirectory, site_packages);
@@ -194,7 +198,7 @@ namespace MuscleCore.PythonNETInit
         /// <param name="srcDirectory">The source directory path.</param>
         /// <param name="site_packages">The site-packages directory path.</param>
         /// <exception cref="InvalidOperationException">Thrown when MusclePy is not found.</exception>
-        private static void TryFindingMusclePyInstallation(string srcDirectory, string site_packages)
+        private static void TryFindingMusclePyInstallation(string? srcDirectory, string site_packages)
         {
             bool musclepyFound = false;
 

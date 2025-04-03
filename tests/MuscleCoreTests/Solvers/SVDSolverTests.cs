@@ -51,9 +51,7 @@ namespace MuscleCoreTests.Solvers
     [TestClass]
     public class SVDSolverTests
     {
-        private static string condaEnvPath;
-        private static string pythonDllName;
-        private static string srcDir;
+
         private CoreTruss _structure;
 
         [TestInitialize]
