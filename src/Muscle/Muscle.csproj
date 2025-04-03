@@ -1,0 +1,102 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	
+  <PropertyGroup>
+    <!-- Select the framework(s) you wish to target.
+        Rhino 6: net45
+        Rhino 7: net48
+        Rhino 8 Windows: net48, net7.0, net7.0-windows, net7.0-windows10.0.22000.0, etc
+        Rhino 8 Mac: net7.0, net7.0-macos, net7.0-macos12.0, etc
+    -->
+	 <!-- <TargetFrameworks>net7.0-windows;net7.0;net48</TargetFrameworks> -->
+     <TargetFrameworks>net48</TargetFrameworks>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <TargetExt>.gha</TargetExt>
+    <NoWarn>NU1701;NETSDK1086</NoWarn>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <!-- Specifies information for Assembly and Yak -->
+    <Version>1.0.0.0</Version>
+    <Title>Muscle</Title>
+    <Company>Université catholique de Louvain (UCLouvain)</Company>
+    <Description>Muscle is a Grasshopper plugin for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.</Description>
+    <ApplicationManifest>C:\Users\Jonas\Documents\GitHub\Muscle\manifest.yml</ApplicationManifest>
+    <RepositoryUrl>https://github.com/JonasFeron/Muscle</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Copyright>Copyright (C) &lt;2015-2025&gt; &lt;Université catholique de Louvain (UCLouvain)&gt;</Copyright>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Components\6.Dynamic\DynDisplayComponent.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
+    <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- For Windows only builds -->
+  <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <!-- Reference WinForms for .NET 7.0 on macOS -->
+  <ItemGroup Condition="!($(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4')))">
+    <!-- Rhino 8.11 and later you can use this -->
+    <!-- <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" /> -->
+    
+    <!-- Rhino 8.10 and earlier -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" ExcludeAssets="all" GeneratePathProperty="true" />
+    <Reference Include="$(PkgMicrosoft_NETFramework_ReferenceAssemblies_net48)\build\.NETFramework\v4.8\System.Windows.Forms.dll" Private="False" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MuscleApp\MuscleApp.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Components\6.Dynamic\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+
+  <Target Name="CopyPdbForMonoDebugging" AfterTargets="AfterBuild">
+    <!-- Enable debugging in Rhino 6/7 on Mac -->
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFiles="$(TargetDir)$(TargetName).gha.pdb" Condition="$([MSBuild]::IsOSPlatform(OSX)) and $(TargetFramework.StartsWith('net4')) and Exists('$(TargetDir)$(TargetName).pdb')" />
+  </Target>
+
+  <Target Name="BuildYakPackage" AfterTargets="DispatchToInnerBuilds">
+    <PropertyGroup>
+      <YakExecutable Condition="$(YakExecutable) == '' and $([MSBuild]::IsOSPlatform(windows)) and Exists('C:\Program Files\Rhino 8\System\Yak.exe')">C:\Program Files\Rhino 8\System\Yak.exe</YakExecutable>
+      <YakExecutable Condition="$(YakExecutable) == '' and $([MSBuild]::IsOSPlatform(macos)) and Exists('/Applications/Rhino 8.app/Contents/Resources/bin/yak')">/Applications/Rhino 8.app/Contents/Resources/bin/yak</YakExecutable>
+      
+      <BuildYakPackage Condition="$(BuildYakPackage) == '' and $(YakExecutable) != '' and Exists($(YakExecutable))">True</BuildYakPackage>
+    </PropertyGroup>
+    
+    <Warning Text="Could not find Yak executable" Condition="$(YakExecutable) == ''" />
+
+    <ItemGroup>
+      <YakPackagesToDelete Include="$(OutputPath)\*.yak;$(OutputPath)\**\manifest.yml" />
+    </ItemGroup>
+    
+    <Delete Files="@(YakPackagesToDelete)" />
+
+    <Exec Command="&quot;$(YakExecutable)&quot; spec" WorkingDirectory="$(OutputPath)" Condition="$(BuildYakPackage) == 'True'" />
+    <Exec Command="&quot;$(YakExecutable)&quot; build" WorkingDirectory="$(OutputPath)" Condition="$(BuildYakPackage) == 'True'" />
+
+    <!-- Rhino 7 -->
+    <Exec Command="&quot;$(YakExecutable)&quot; spec" WorkingDirectory="$(OutputPath)net48\" Condition="$(BuildYakPackage) == 'True'" />
+    <Exec Command="&quot;$(YakExecutable)&quot; build" WorkingDirectory="$(OutputPath)net48\" Condition="$(BuildYakPackage) == 'True'" />
+    
+    <ItemGroup>
+      <YakPackageToMove Include="$(BaseOutputPath)$(Configuration)\net48\*.yak" />
+    </ItemGroup>
+    <Move SourceFiles="@(YakPackageToMove)" DestinationFolder="$(BaseOutputPath)$(Configuration)\" Condition="$(BuildYakPackage) == 'True'" />
+  </Target>
+
+</Project>

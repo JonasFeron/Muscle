@@ -1,0 +1,118 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>a23289b8-bd98-4335-94f7-9cc74112bfe6</ProjectGuid>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>
+    </StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>MusclePy</Name>
+    <RootNamespace>PythonApplication1</RootNamespace>
+    <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="femodel\prestress_scenario.py" />
+    <Compile Include="femodel\pyelements.py" />
+    <Compile Include="femodel\pynodes.py" />
+    <Compile Include="femodel\pytruss.py" />
+    <Compile Include="femodel\__init__.py" />
+    <Compile Include="solvers\dm\linear_dm.py" />
+    <Compile Include="solvers\dm\nonlinear_dm.py" />
+    <Compile Include="solvers\dm\__init__.py" />
+    <Compile Include="solvers\dr\main.py" />
+    <Compile Include="solvers\dr\py_config_dr.py" />
+    <Compile Include="solvers\dr\py_elements_dr.py" />
+    <Compile Include="solvers\dr\py_nodes_dr.py" />
+    <Compile Include="solvers\dr\py_truss_dr.py" />
+    <Compile Include="solvers\dr\__init__.py" />
+    <Compile Include="solvers\dynamic\dynamic_results.py" />
+    <Compile Include="solvers\dynamic\example_modal_analysis.py" />
+    <Compile Include="solvers\dynamic\main.py" />
+    <Compile Include="solvers\selfstress\modes.py" />
+    <Compile Include="solvers\selfstress\__init__.py" />
+    <Compile Include="solvers\svd\main.py" />
+    <Compile Include="solvers\svd\py_results_svd.py" />
+    <Compile Include="solvers\svd\__init__.py" />
+    <Compile Include="solvers\__init__.py" />
+    <Compile Include="test_script.py" />
+    <Compile Include="utils\matrix_calculations.py" />
+    <Compile Include="utils\__init__.py" />
+    <Compile Include="__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="femodel\" />
+    <Folder Include="femodel\__pycache__\" />
+    <Folder Include="solvers\" />
+    <Folder Include="solvers\dm\" />
+    <Folder Include="solvers\dm\__pycache__\" />
+    <Folder Include="solvers\dr\" />
+    <Folder Include="solvers\dr\__pycache__\" />
+    <Folder Include="solvers\dynamic\" />
+    <Folder Include="solvers\dynamic\__pycache__\" />
+    <Folder Include="solvers\selfstress\" />
+    <Folder Include="solvers\selfstress\__pycache__\" />
+    <Folder Include="solvers\svd\" />
+    <Folder Include="solvers\svd\__pycache__\" />
+    <Folder Include="solvers\__pycache__\" />
+    <Folder Include="utils\" />
+    <Folder Include="utils\__pycache__\" />
+    <Folder Include="__pycache__\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="femodel\__pycache__\prestress_scenario.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\pyelements.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\pynodes.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\pytruss.cpython-312.pyc" />
+    <Content Include="femodel\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="solvers\dm\__pycache__\linear_dm.cpython-312.pyc" />
+    <Content Include="solvers\dm\__pycache__\nonlinear_dm.cpython-312.pyc" />
+    <Content Include="solvers\dm\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\dr_config.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\dr_elements.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\dr_nodes.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\dr_structure.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\main.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\py_config_dr.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\py_elements_dr.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\py_nodes_dr.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\py_truss_dr.cpython-312.pyc" />
+    <Content Include="solvers\dr\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="solvers\dynamic\__pycache__\dynamic_results.cpython-312.pyc" />
+    <Content Include="solvers\dynamic\__pycache__\main.cpython-312.pyc" />
+    <Content Include="solvers\selfstress\__pycache__\modes.cpython-312.pyc" />
+    <Content Include="solvers\selfstress\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="solvers\svd\__pycache__\main.cpython-312.pyc" />
+    <Content Include="solvers\svd\__pycache__\py_results_svd.cpython-312.pyc" />
+    <Content Include="solvers\svd\__pycache__\self_stress_modes.cpython-312.pyc" />
+    <Content Include="solvers\svd\__pycache__\svd_results.cpython-312.pyc" />
+    <Content Include="solvers\svd\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="solvers\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="utils\__pycache__\matrix_calculations.cpython-312.pyc" />
+    <Content Include="utils\__pycache__\__init__.cpython-312.pyc" />
+    <Content Include="__pycache__\test_script.cpython-312-pytest-7.4.4.pyc" />
+    <Content Include="__pycache__\test_script.cpython-312.pyc" />
+    <Content Include="__pycache__\__init__.cpython-312.pyc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

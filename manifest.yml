@@ -1,0 +1,10 @@
+---
+name: Muscle
+version: 1.0.0
+authors:
+- Jonas FERON - Université catholique de Louvain (UCLouvain)
+description: Muscle is a Grasshopper plugin for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.
+url: https://github.com/JonasFeron/Muscle
+keywords:
+- structural analysis
+- tensegrity
