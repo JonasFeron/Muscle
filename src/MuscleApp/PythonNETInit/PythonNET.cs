@@ -73,7 +73,7 @@ namespace MuscleApp.PythonNETInit
 
         #region Developer mode
         public static bool DeveloperMode {get; private set; } = false;  // will be set to true in the CheckIfDeveloperMode Method if userConfig.CondaEnvName == "muscle4developers"
-        public static readonly string CondaEnvName4Developers = "muscle4developers"; // Signal to switch from user mode to developer mode
+        public static readonly string CondaEnvName4Developers = "muscle4developers"; // Password to switch from user mode to developer mode from Rhino
 
         /// <summary>
         /// In Developer mode, gets the full path to the source directory where musclepy is located.
@@ -86,7 +86,7 @@ namespace MuscleApp.PythonNETInit
             get
             {
                 var currentDirectory = Directory.GetCurrentDirectory(); //.../src/Muscle/bin/Debug/net48/
-                var src = Path.GetFullPath(Path.Combine(currentDirectory, "..", "..", "..",".."));
+                var src = Path.GetFullPath(Path.Combine(currentDirectory, "..", "..", "..","..","MusclePy")); //.../src/MusclePy/
                 return src;
             }
         }

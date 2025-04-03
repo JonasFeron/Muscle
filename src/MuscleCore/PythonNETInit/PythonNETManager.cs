@@ -53,6 +53,8 @@ namespace MuscleCore.PythonNETInit
 
         private static bool UserMode { get; set; } = false;
 
+        private static PythonNETConfig _config = null;
+
 
         #region Launch
 
@@ -63,6 +65,7 @@ namespace MuscleCore.PythonNETInit
             {
                 throw new ArgumentException("The provided configuration is not valid.");
             }
+            _config = config;
 
             // in user mode, the user is supposed to have run "pip install musclepy"
             // which means that musclepy will be found from the conda environment.
@@ -221,7 +224,7 @@ namespace MuscleCore.PythonNETInit
             }
             if (!musclepyFound)
             {
-                throw new InvalidOperationException("musclepy is not installed in this anaconda environment. Please choose a valid anaconda environment or run the command 'pip install musclepy' in the anaconda prompt.");
+                throw new InvalidOperationException($"{MusclePy} is not installed in {_config.CondaEnvName} environment. Please provide a valid anaconda environment or run the command 'pip install {MusclePy}' in the anaconda prompt.");
             }
 
             // Check if MusclePy can be imported from C#
@@ -235,7 +238,7 @@ namespace MuscleCore.PythonNETInit
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to import musclepy from C#", ex);
+                throw new InvalidOperationException($"Failed to import {MusclePy} from C#", ex);
             }
             finally
             {
