@@ -1,7 +1,7 @@
 # MusclePy
 
 ## Overview
-MusclePy is a Python package for structural analysis developed by Université catholique de Louvain (UCLouvain). It focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.
+MusclePy is a Python package for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.
 
 ## Features
 - **Finite Element Modeling**: Create and manipulate structural models with `PyNodes`, `PyElements`, and `PyTruss`
@@ -40,10 +40,8 @@ Licensed under the Apache License, Version 2.0
 ## Citation
 If you use MusclePy in your research, please cite:
 ```
-Feron J., Payen B., Pacheco De Almeida J., Latteur P. MUSCLE:
-a new open-source Grasshopper plug-in for the interactive design of tensegrity structures.International
-Association for Shell and Spatial Structures (IASS) 2024 (Zurich, du 26/08/2024 au 29/08/2024).
+Feron J., Payen B., Pacheco De Almeida J., Latteur P. MUSCLE: a new open-source Grasshopper plug-in for the interactive design of tensegrity structures.International Association for Shell and Spatial Structures (IASS) 2024 (Zurich, du 26/08/2024 au 29/08/2024).
 ```
 
 ## Contact
-Research supervisor: Professor Pierre LATTEUR (pierre.latteur@uclouvain.be)
+Professor Pierre LATTEUR - pierre.latteur@uclouvain.be - supervisor of the research project.

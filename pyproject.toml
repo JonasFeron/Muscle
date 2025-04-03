@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling >= 1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "musclepy"
+version = "1.0.0"
+description = "MusclePy is a Python package for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures."
+readme = "src/MusclePy/README.md"
+authors = [
+    {name = "Jonas FERON - Université catholique de Louvain (UCLouvain)", email = "pierre.latteur@uclouvain.be"}  
+]
+license = "Apache-2.0"
+license-files = ["COPYING.txt"]
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    'numpy>=1.26.4',
+    'scipy>=1.13.1'
+]
+
+[project.urls]
+"source" = "https://github.com/JonasFeron/Muscle"
+"issues" = "https://github.com/JonasFeron/Muscle/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/MusclePy/musclepy"]
+
+[tool.hatch.build]
+include = [
+  "src/MusclePy/musclepy/**/*.py"]
