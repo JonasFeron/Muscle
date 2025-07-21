@@ -22,7 +22,7 @@ MusclePy is a Python package for structural analysis developed by Université ca
 """
 
 # Define version first
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 # Import subpackages 
 from . import femodel
@@ -44,6 +44,10 @@ from .solvers.dm.nonlinear_dm import main_nonlinear_displacement_method
 from .solvers.dr.main import main_dynamic_relaxation
 from .solvers.svd.py_results_svd import PyResultsSVD
 from .solvers.dr.py_config_dr import PyConfigDR
+from .solvers.dynamic.py_results_dynamic import PyResultsDynamic
+from .solvers.dynamic.main import main_dynamic_modal_analysis
+
+
 
 __all__ = [
     'femodel',
@@ -58,5 +62,7 @@ __all__ = [
     'localize_self_stress_modes',
     'main_linear_displacement_method',
     'main_nonlinear_displacement_method',
-    'main_dynamic_relaxation'
+    'main_dynamic_relaxation',
+    'main_dynamic_modal_analysis',
+    'PyResultsDynamic'
 ]

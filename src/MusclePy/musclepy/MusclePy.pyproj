@@ -38,9 +38,9 @@
     <Compile Include="solvers\dr\py_nodes_dr.py" />
     <Compile Include="solvers\dr\py_truss_dr.py" />
     <Compile Include="solvers\dr\__init__.py" />
-    <Compile Include="solvers\dynamic\dynamic_results.py" />
-    <Compile Include="solvers\dynamic\example_modal_analysis.py" />
     <Compile Include="solvers\dynamic\main.py" />
+    <Compile Include="solvers\dynamic\py_results_dynamic.py" />
+    <Compile Include="solvers\dynamic\__init__.py" />
     <Compile Include="solvers\selfstress\modes.py" />
     <Compile Include="solvers\selfstress\__init__.py" />
     <Compile Include="solvers\svd\main.py" />

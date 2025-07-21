@@ -25,10 +25,11 @@ in the MusclePy package, including equilibrium matrices, stiffness matrices, and
 structural analysis matrices.
 
 References:
-    [1] Feron J., Latteur P. & Pacheco de Almeida J. "Static Modal Analysis: A Review of Static Structural Analysis Methods Through a New Modal Paradigm". Arch Computat Methods Eng 31, 3409–3440 (2024). https://doi.org/10.1007/s11831-024-10082-x
 """
 
 import numpy as np
+from ..femodel.pyelements import PyElements
+
 
 def compute_equilibrium_matrix(connectivity_matrix, current_coordinates):
     """
@@ -215,3 +216,63 @@ def local_to_global_matrix(local_matrices, elements_end_nodes, nodes_count):
                 
     return K
 
+
+def compute_local_lumped_mass_matrices(element_masses: np.ndarray) -> list:
+        """Compute local lumped mass matrices for each element.
+        
+        Args:
+            elements_mass: [Kg] - shape (elements_count,) - Mass of each element
+            
+        Returns:
+            List of local lumped mass matrices, each of shape (6,6)
+        """
+        # Get element count from mass array
+        elements_count = len(element_masses)
+        
+        local_mass_matrices = []
+        
+        # Compute the lumped mass matrix for each element
+        for i in range(elements_count):
+            m1 = element_masses[i] /2 # Mass of the element's half length, associated with the first node
+            m2 = element_masses[i] /2 # Mass of the element's half length, associated with the second node
+
+            # Compute the lumped mass matrix
+            M = np.array([[m1, 0, 0, 0, 0, 0],  # node 1 X
+                          [0, m1, 0, 0, 0, 0],  # node 1 Y
+                          [0, 0, m1, 0, 0, 0],  # node 1 Z
+                          [0, 0, 0, m2, 0, 0],  # node 2 X
+                          [0, 0, 0, 0, m2, 0],  # node 2 Y
+                          [0, 0, 0, 0, 0, m2]]) # node 2 Z
+            local_mass_matrices.append(M)
+            
+        return local_mass_matrices
+
+def compute_local_consistent_mass_matrices(element_masses: np.ndarray) -> list:
+        """Compute local consistent mass matrices for each element.
+        
+        Args:
+            elements_mass: [Kg] - shape (elements_count,) - Mass of each element
+            
+        Returns:
+            List of local consistent mass matrices, each of shape (6,6)
+        """
+        # Get element count from mass array
+        elements_count = len(element_masses)
+        
+        local_mass_matrices = []
+        
+        # Compute the consistent mass matrix for each element
+        for i in range(elements_count):
+            m1 = element_masses[i] /2 # Mass of the element's half length, associated with the first node
+            m2 = element_masses[i] /2 # Mass of the element's half length, associated with the second node
+
+            # Compute the consistent mass matrix
+            M = (1/3) * np.array([[2*m1, 0, 0, m2, 0, 0],  # node 1 X
+                                  [0, 2*m1, 0, 0, m2, 0],  # node 1 Y
+                                  [0, 0, 2*m1, 0, 0, m2],  # node 1 Z
+                                  [m1, 0, 0, 2*m2, 0, 0],  # node 2 X
+                                  [0, m1, 0, 0, 2*m2, 0],  # node 2 Y
+                                  [0, 0, m1, 0, 0, 2*m2]]) # node 2 Z
+            local_mass_matrices.append(M)
+            
+        return local_mass_matrices

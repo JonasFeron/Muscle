@@ -27,6 +27,8 @@ from . import dr
 from . import svd
 from . import selfstress
 from . import test
+from . import dynamic
+
 
 # Expose key solver functions
 from .svd.main import main_singular_value_decomposition
@@ -36,6 +38,8 @@ from .dm.linear_dm import main_linear_displacement_method
 from .dm.nonlinear_dm import main_nonlinear_displacement_method
 from .dr.main import main_dynamic_relaxation
 from .test.test_script import main as test_script_main
+from .dynamic.main import main_dynamic_modal_analysis
+from .dynamic.py_results_dynamic import PyResultsDynamic
 
 # Define __all__ 
 __all__ = [
@@ -46,6 +50,8 @@ __all__ = [
     'main_linear_displacement_method',
     'main_nonlinear_displacement_method',
     'main_dynamic_relaxation',
-    'test_script_main'
+    'test_script_main',
+    'main_dynamic_modal_analysis',
+    'PyResultsDynamic'
 ]
 
