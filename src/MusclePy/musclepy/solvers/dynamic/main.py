@@ -1,6 +1,6 @@
 from ctypes import ArgumentError
-from MusclePy.solvers.dynamic.py_results_dynamic import PyResultsDynamic
-from MusclePy.femodel.pytruss import PyTruss
+from musclepy.solvers.dynamic.py_results_dynamic import PyResultsDynamic
+from musclepy.femodel.pytruss import PyTruss
 import numpy as np
 import scipy as sp
         
@@ -96,7 +96,7 @@ def _compute_tangent_stiffness_matrix(structure: PyTruss):
         np.ndarray
             The global tangent stiffness matrix of shape (3*nodes_count, 3*nodes_count)
     """
-    from MusclePy.utils.matrix_calculations import (
+    from musclepy.utils.matrix_calculations import (
         compute_equilibrium_matrix,
         compute_global_material_stiffness_matrix,
         compute_local_geometric_stiffness_matrices,
@@ -151,7 +151,7 @@ def _compute_mass_matrix(structure: PyTruss, point_masses: np.ndarray = None,
         ValueError: If any mass is negative or no mass is defined
         ArgumentError: If an invalid element_masses_option is provided
     """
-    from MusclePy.utils.matrix_calculations import (
+    from musclepy.utils.matrix_calculations import (
         compute_local_lumped_mass_matrices,
         compute_local_consistent_mass_matrices,
         local_to_global_matrix

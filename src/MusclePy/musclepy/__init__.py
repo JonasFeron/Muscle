@@ -58,11 +58,11 @@ __all__ = [
     'PyTruss',
     'PyResultsSVD',
     'PyConfigDR',
+    'PyResultsDynamic',
     'main_singular_value_decomposition',
     'localize_self_stress_modes',
     'main_linear_displacement_method',
     'main_nonlinear_displacement_method',
     'main_dynamic_relaxation',
-    'main_dynamic_modal_analysis',
-    'PyResultsDynamic'
+    'main_dynamic_modal_analysis'
 ]
