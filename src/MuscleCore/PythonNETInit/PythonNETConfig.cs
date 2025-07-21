@@ -243,7 +243,10 @@ namespace MuscleCore.PythonNETInit
         { 
             string[] possiblePaths = {
                     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Anaconda3"), // "C:\Users\Me\Anaconda3"
-                    @"C:\ProgramData\Anaconda3"
+                    @"C:\ProgramData\Anaconda3", 
+                    // AppData locations (most common for non-admin installs)
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Anaconda3"), // "C:\Users\Me\AppData\Local\Anaconda3"
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anaconda3") // "C:\Users\Me\AppData\Roaming\Anaconda3"
             };
             
             foreach (var path in possiblePaths)
