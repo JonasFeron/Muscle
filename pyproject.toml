@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "musclepy"
-version = "1.0.0"
+version = "1.1.0"
 description = "MusclePy is a Python package for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures."
 readme = "src/MusclePy/README.md"
 authors = [

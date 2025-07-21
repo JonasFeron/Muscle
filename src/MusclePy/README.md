@@ -9,6 +9,7 @@ MusclePy is a Python package for structural analysis that focuses on the design,
 - **Self-stress Modes**: Localize and sort self-stress modes in tensegrity structures
 - **Displacement Methods**: Solve structural problems using linear and nonlinear displacement methods
 - **Dynamic Relaxation**: Form-finding and analysis using dynamic relaxation techniques
+- **Dynamic Modal Analysis**: Compute natural frequencies and mode shapes of vibrations of structures 
 
 ## Installation
 ```bash
