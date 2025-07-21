@@ -9,6 +9,7 @@ Muscle is an open-source Grasshopper plugin for the interactive design, analysis
 - **Self-stress Modes**: Localize and sort self-stress modes in tensegrity structures
 - **Displacement Methods**: Solve structural problems using linear and nonlinear displacement methods
 - **Dynamic Relaxation**: Form-finding, deployment and nonlinear analysis using dynamic relaxation techniques
+- **Dynamic Modal Analysis**: Analyze the dynamic mode shapes of vibrations and natural frequencies of prestressed structures 
 - **Interactive Design**: Seamless integration with Grasshopper's parametric modeling environment
 
 ## Installation Instructions
@@ -36,8 +37,8 @@ This single command will create a new Python environment named "muscle" and inst
 
 Note: The structural analysis functionality in "musclepy" is also available as a standalone [Python package](https://pypi.org/project/musclepy/), independent of the Grasshopper plugin.
 
-### 3. Install the plugin "Muscle" for Grasshopper (Rhino 7)
-1. Open Rhino 7 (not Grasshopper) 
+### 3. Install the plugin "Muscle" for Grasshopper (Rhino 7 or 8)
+1. Open Rhino 7 or 8 (not Grasshopper) 
 2. Run the command `_PackageManager`
 3. Search for "Muscle" in the package manager and Install.
 4. Restart Rhino
@@ -84,10 +85,10 @@ Feron J., Payen B., Pacheco De Almeida J., Latteur P. MUSCLE: a new open-source 
 The author is indebted to 
 - Prof. Pierre LATTEUR (Supervisor UCLouvain), 
 - BESIX (Dr. Ir. Thomas VANDENBERGH, Ir. Pierre MENGEOT), 
-- Brussels Capital Region - Innoviris,
+- Brussels Capital Region - Innoviris, 
 - Prof. Landolf RHODE-BARBARIGOS (University of Miami), 
-- Prof. João PACHECO DE ALMEIDA and Prof. Jean-Francois REMACLE (UCLouvain),
-- Prof. Vincent DENOËL (ULiège)
+- Prof. João PACHECO DE ALMEIDA and Prof. Jean-Francois REMACLE (UCLouvain), 
+- Prof. Vincent DENOËL (ULiège)  
 for their guidance.
 
 ## Funding
