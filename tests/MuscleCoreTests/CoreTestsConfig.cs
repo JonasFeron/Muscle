@@ -33,9 +33,9 @@ namespace MuscleCoreTests
     {
 
 
-        private static bool _developerMode = false; //choose whether Testing in developer mode or user mode
+        private static bool _developerMode = true; //choose whether Testing in developer mode or user mode
 
-        private static string _condaEnvName = "muscledebug"; // for testing as a user, set the name of the conda environment where you have 'pip install musclepy'
+        private static string _condaEnvName = "muscle"; // for testing as a user, set the name of the conda environment where you have 'pip install musclepy'
 
         private static string _anacondaPath = PythonNETConfig.TryFindingAnaconda(); // path to Anaconda if found
 

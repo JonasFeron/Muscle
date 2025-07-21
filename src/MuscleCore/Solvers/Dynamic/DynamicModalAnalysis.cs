@@ -44,7 +44,6 @@ namespace MuscleCore.Solvers
         /// <returns>CoreResultsDynamic object containing natural frequencies, mode shapes, and masses</returns>
         public static CoreResultsDynamic? Solve(CoreTruss structure, double[] pointMasses, double[] elementMasses, int elementMassesOption, int nModes)
         {
-            string pythonPackage = "MusclePy"; 
             CoreResultsDynamic? dynamicResults = null;
 
             var m_threadState = PythonEngine.BeginAllowThreads();
@@ -53,7 +52,7 @@ namespace MuscleCore.Solvers
                 try
                 {
                     PyObject pyStructure = structure.ToPython();
-                    dynamic musclepy = Py.Import(pythonPackage);
+                    dynamic musclepy = Py.Import("musclepy");
                     dynamic solve = musclepy.main_dynamic_modal_analysis;
                     dynamic pydynamicResults = solve(
                         pyStructure,
