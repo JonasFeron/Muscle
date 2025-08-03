@@ -160,14 +160,15 @@ namespace Muscle.Components.Solvers
             }
 
             // 5) Check for warnings from the solver
-            if (result.warnings != null && result.warnings.Count > 0)
+            if (truss.warnings != null && truss.warnings.Count > 0)
             {
-                foreach (string warning in result.warnings)
+                foreach (string warning in truss.warnings)
                 {
                     AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
                 }
-                result.warnings.Clear();
+                truss.warnings.Clear();
             }
+
 
             // 6) Set output
             GH_Truss gh_result = new GH_Truss(result);

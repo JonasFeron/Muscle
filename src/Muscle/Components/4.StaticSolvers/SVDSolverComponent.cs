@@ -176,6 +176,16 @@ namespace Muscle.Components.Solvers
                 return;
             }
 
+            // 5) Check for warnings from the solver
+            if (structure.warnings != null && structure.warnings.Count > 0)
+            {
+                foreach (string warning in structure.warnings)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
+                }
+                structure.warnings.Clear();
+            }
+
             // 5) Set outputs
             DA.SetData(0, gh_struct);
             DA.SetData(1, resultsSVD.r);

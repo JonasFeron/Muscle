@@ -137,10 +137,20 @@ namespace Muscle.Components.Dynamic
                 return;
             }
 
+            // 4.1) Display any warnings from the analysis (e.g., point masses not on structure)
+            if (truss.warnings != null && truss.warnings.Count > 0)
+            {
+                foreach (string warning in truss.warnings)
+                {
+                    AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, warning);
+                }
+                truss.warnings.Clear();
+            }
+
             // 5) Set outputs
             DA.SetData(0, gh_truss);
-            DA.SetDataList(2, GH_Encoders.ToBranch(resultsDynamic.Frequencies));
-            DA.SetDataTree(1, GH_Encoders.ToTree(resultsDynamic.ModeShapes));
+            DA.SetDataList(1, GH_Encoders.ToBranch(resultsDynamic.Frequencies));
+            DA.SetDataTree(2, GH_Encoders.ToTree(resultsDynamic.ModeShapes));
             DA.SetDataList(3, GH_Encoders.ToBranch(resultsDynamic.Masses));
         }
     }
