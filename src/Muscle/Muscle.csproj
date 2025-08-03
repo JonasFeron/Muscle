@@ -17,7 +17,7 @@
   
   <PropertyGroup>
     <!-- Specifies information for Assembly and Yak -->
-    <Version>1.0.0.0</Version>
+    <Version>1.1.0.0</Version>
     <Title>Muscle</Title>
     <Company>Université catholique de Louvain (UCLouvain)</Company>
     <Description>Muscle is a Grasshopper plugin for structural analysis that focuses on the design, analysis, and optimization of tensegrity, tension-based, and truss-like structures.</Description>
@@ -39,6 +39,9 @@
   <!-- For Windows only builds -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-windows')) or $(TargetFramework.StartsWith('net4'))">
     <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
+    <Optimize>False</Optimize>
   </PropertyGroup>
 
   <!-- Reference WinForms for .NET 7.0 on macOS -->
