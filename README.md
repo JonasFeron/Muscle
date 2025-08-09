@@ -30,10 +30,10 @@ Anaconda3 is a free and open-source distribution of Python programming languages
 2. Run the following 'one-line' command:
 
 ```bash
-conda create -n muscle python=3.12.7 -y && conda activate muscle && pip install musclepy
+conda create -n muscle python=3.12.7 -y & conda activate muscle & pip install --upgrade musclepy
 ```
 
-This single command will create a new Python environment named "muscle" and install the "musclepy" library along with its dependencies, "numpy" and "scipy".
+This single command will create a new Python environment named "muscle" and install the "musclepy" library along with its dependencies, "numpy" and "scipy". If you are performing an update rather than a first install, this single command works as well.
 
 Note: The structural analysis functionality in "musclepy" is also available as a standalone [Python package](https://pypi.org/project/musclepy/), independent of the Grasshopper plugin.
 
@@ -43,6 +43,8 @@ Note: The structural analysis functionality in "musclepy" is also available as a
 3. Search for "Muscle" in the package manager and Install.
 4. Restart Rhino
 5. The Muscle components will be available in Grasshopper under the "Muscle" tab
+
+Important note: If you are updating Muscle plugin from the package manager, make sure to update the python library "musclepy" as well, using the same 'one-line' command as in step 2.
 
 Congratulations! You have successfully installed the Muscle plugin.
 
@@ -89,6 +91,7 @@ The author is indebted to
 - Prof. Landolf RHODE-BARBARIGOS (University of Miami), 
 - Prof. João PACHECO DE ALMEIDA and Prof. Jean-Francois REMACLE (UCLouvain), 
 - Prof. Vincent DENOËL (ULiège)  
+
 for their guidance.
 
 ## Funding
