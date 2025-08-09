@@ -11,3 +11,7 @@
 
   Feron J., Bertholet A. & Latteur P. 2022, Replication Data for: Experimental testing of a tensegrity simplex: self-stress implementation and static loading, 
   https://doi.org/10.14428/DVN/CDLVFV, Open Data @ UCLouvain
+
+
+- For the dynamic tests, refer to Antoine Desmet's master thesis, which is in open-access at: https://hdl.handle.net/2078.2/27967
+
