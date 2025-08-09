@@ -27,10 +27,7 @@
     <Copyright>Copyright (C) &lt;2015-2025&gt; &lt;Université catholique de Louvain (UCLouvain)&gt;</Copyright>
   </PropertyGroup>
   
-  <ItemGroup>
-    <Compile Remove="Components\6.Dynamic\DynDisplayComponent.cs" />
-  </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Grasshopper" Version="7.37.24107.15001" Condition="$(TargetFramework) == 'net48'" ExcludeAssets="runtime" />
     <PackageReference Include="Grasshopper" Version="8.16.25042.13001" Condition="!$(TargetFramework.StartsWith('net4'))" ExcludeAssets="runtime" />
